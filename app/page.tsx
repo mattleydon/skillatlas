@@ -1,32 +1,94 @@
+"use client";
+
 import Image from "next/image";
+import { useEffect, useState } from "react";
 
 const games = ["CS2", "League of Legends", "Valorant", "Fortnite", "Rocket League", "Chess"];
 
 const leaderboard = [
-  { rank: 1, country: "Denmark", game: "CS2", score: 98, change: "+4.2%", reason: "Elite team systems and tactical culture" },
-  { rank: 2, country: "South Korea", game: "League of Legends", score: 96, change: "+3.8%", reason: "Training infrastructure and esports discipline" },
-  { rank: 3, country: "China", game: "Dota 2", score: 94, change: "+2.1%", reason: "Huge player base and professional investment" },
-  { rank: 4, country: "Sweden", game: "CS2", score: 91, change: "+1.7%", reason: "Long history of FPS excellence" },
-  { rank: 5, country: "USA", game: "Fortnite", score: 89, change: "-0.6%", reason: "Large talent pool and creator-driven scene" },
+  {
+    rank: 1,
+    country: "Denmark",
+    score: 98,
+    change: "+2",
+    changeDirection: "up",
+    trend: "M 0 40 C 20 35, 30 38, 45 28 S 70 14, 90 18 S 120 8, 150 6",
+    reason: "Elite team systems and tactical culture",
+  },
+  {
+    rank: 2,
+    country: "South Korea",
+    score: 96,
+    change: "+1",
+    changeDirection: "up",
+    trend: "M 0 42 C 25 36, 35 30, 55 32 S 85 20, 105 18 S 130 10, 150 12",
+    reason: "Training infrastructure and esports discipline",
+  },
+  {
+    rank: 3,
+    country: "China",
+    score: 94,
+    change: "-1",
+    changeDirection: "down",
+    trend: "M 0 18 C 20 15, 40 22, 55 20 S 85 30, 105 28 S 130 38, 150 35",
+    reason: "Huge player base and professional investment",
+  },
+  {
+    rank: 4,
+    country: "Sweden",
+    score: 91,
+    change: "+3",
+    changeDirection: "up",
+    trend: "M 0 44 C 20 38, 40 40, 55 34 S 85 24, 110 16 S 135 12, 150 8",
+    reason: "Long history of FPS excellence",
+  },
+  {
+    rank: 5,
+    country: "USA",
+    score: 89,
+    change: "-2",
+    changeDirection: "down",
+    trend: "M 0 16 C 25 22, 35 18, 55 25 S 80 30, 105 36 S 130 34, 150 42",
+    reason: "Large talent pool and creator-driven scene",
+  },
 ];
 
 export default function Home() {
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 40);
+    onScroll();
+    window.addEventListener("scroll", onScroll);
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
   return (
     <main className="min-h-screen bg-[#F8FAFC] text-[#111827]">
-      <header className="sticky top-0 z-50 border-b border-[#ff2fa8]/25 bg-white">
-        <div className="mx-auto flex max-w-7xl items-center px-8 py-2">
-          <div className="mr-8 flex h-36 w-72 shrink-0 items-center justify-center overflow-hidden">
+      <header className="sticky top-0 z-50 border-b border-[#ff2fa8]/25 bg-white transition-all duration-300">
+        <div
+          className={`mx-auto flex max-w-7xl items-center px-8 transition-all duration-300 ${
+            scrolled ? "py-1" : "py-3"
+          }`}
+        >
+          <div
+            className={`mr-10 flex shrink-0 items-center justify-center overflow-hidden transition-all duration-300 ${
+              scrolled ? "h-20 w-56" : "h-32 w-64"
+            }`}
+          >
             <Image
               src="/skillatlas-logo.png"
               alt="SkillAtlas logo"
-              width={300}
-              height={300}
-              className="scale-125 object-contain"
+              width={260}
+              height={260}
+              className={`object-contain transition-all duration-300 ${
+                scrolled ? "scale-110" : "scale-125"
+              }`}
               priority
             />
           </div>
 
-          <nav className="hidden flex-1 items-center justify-around text-base font-semibold text-gray-700 md:flex">
+          <nav className="hidden flex-1 items-center justify-around text-sm font-semibold text-gray-700 md:flex">
             <a className="hover:text-[#19d3cf]" href="/">Rankings</a>
             <a className="hover:text-[#19d3cf]" href="/world-map">World Map</a>
             <a className="hover:text-[#19d3cf]" href="/countries">Countries</a>
@@ -36,17 +98,17 @@ export default function Home() {
         </div>
       </header>
 
-      <section className="mx-auto max-w-7xl px-8 py-10">
-        <div className="mb-8 rounded-3xl border border-[#ff2fa8]/45 bg-white p-8 shadow-sm">
-          <p className="mb-3 text-sm font-bold uppercase tracking-[0.25em] text-[#19d3cf]">
+      <section className="mx-auto max-w-7xl px-8 py-8">
+        <div className="mb-6 rounded-3xl border border-[#ff2fa8]/45 bg-white p-7 shadow-sm">
+          <p className="mb-2 text-xs font-bold uppercase tracking-[0.25em] text-[#19d3cf]">
             Global Gaming Rankings
           </p>
 
-          <h1 className="mb-3 text-xl font-black tracking-tight md:text-2xl">
+          <h1 className="mb-2 text-lg font-black tracking-tight md:text-xl">
             Which country is actually the best at gaming?
           </h1>
 
-          <p className="whitespace-nowrap text-base text-gray-600">
+          <p className="text-sm text-gray-600 md:whitespace-nowrap">
             Track which countries dominate each game, why they win, and how skill changes across the world.
           </p>
         </div>
@@ -55,7 +117,7 @@ export default function Home() {
           {games.map((game, index) => (
             <button
               key={game}
-              className={`whitespace-nowrap rounded-full px-5 py-3 text-sm font-bold ${
+              className={`whitespace-nowrap rounded-full px-5 py-2.5 text-sm font-bold ${
                 index === 0
                   ? "bg-[#19d3cf] text-white"
                   : "border border-gray-200 bg-white text-gray-700 hover:border-[#ff2fa8]"
@@ -67,53 +129,65 @@ export default function Home() {
         </div>
 
         <section className="overflow-hidden rounded-3xl border border-[#ff2fa8]/45 bg-white shadow-sm">
-          <div className="grid grid-cols-12 border-b border-[#ff2fa8]/20 bg-gray-50 px-6 py-4 text-sm font-bold uppercase tracking-wide text-gray-500">
+          <div className="grid grid-cols-12 border-b border-[#ff2fa8]/20 bg-gray-50 px-6 py-4 text-xs font-bold uppercase tracking-wide text-gray-500">
             <div className="col-span-1">#</div>
             <div className="col-span-3">Country</div>
-            <div className="col-span-2">Game</div>
             <div className="col-span-2">Score</div>
-            <div className="col-span-1">7d</div>
+            <div className="col-span-2">1Y Score</div>
+            <div className="col-span-1">7D</div>
             <div className="col-span-3">Why they win</div>
           </div>
 
-          {leaderboard.map((item) => (
-            <div
-              key={item.rank}
-              className="grid grid-cols-12 items-center border-b border-gray-100 px-6 py-6 last:border-b-0 hover:bg-gray-50"
-            >
-              <div className="col-span-1 text-xl font-normal text-[#ff2fa8]">
-                {item.rank}
-              </div>
+          {leaderboard.map((item) => {
+            const isUp = item.changeDirection === "up";
 
-              <div className="col-span-3 text-lg font-bold">
-                {item.country}
-              </div>
-
-              <div className="col-span-2 text-gray-600">
-                {item.game}
-              </div>
-
-              <div className="col-span-2">
-                <span className="rounded-full bg-[#19d3cf]/10 px-4 py-2 font-black text-[#19d3cf]">
-                  {item.score}
-                </span>
-              </div>
-
+            return (
               <div
-                className={`col-span-1 font-bold ${
-                  item.change.startsWith("+")
-                    ? "text-[#19d3cf]"
-                    : "text-[#ff2fa8]"
-                }`}
+                key={item.rank}
+                className="grid grid-cols-12 items-center border-b border-gray-100 px-6 py-4 text-sm last:border-b-0 hover:bg-gray-50"
               >
-                {item.change}
-              </div>
+                <div className="col-span-1 text-base font-normal text-[#ff2fa8]">
+                  {item.rank}
+                </div>
 
-              <div className="col-span-3 text-gray-600">
-                {item.reason}
+                <div className="col-span-3 text-base font-semibold">
+                  {item.country}
+                </div>
+
+                <div className="col-span-2">
+                  <span className="rounded-full bg-[#19d3cf]/10 px-4 py-2 text-sm font-black text-[#19d3cf]">
+                    {item.score}
+                  </span>
+                </div>
+
+                <div className="col-span-2">
+                  <svg viewBox="0 0 150 50" className="h-10 w-32">
+                    <path
+                      d={item.trend}
+                      fill="none"
+                      stroke={isUp ? "#19d3cf" : "#ff2fa8"}
+                      strokeWidth="4"
+                      strokeLinecap="round"
+                    />
+                  </svg>
+                </div>
+
+                <div className="col-span-1">
+                  <span
+                    className={`inline-flex items-center gap-1 font-bold ${
+                      isUp ? "text-[#19d3cf]" : "text-[#ff2fa8]"
+                    }`}
+                  >
+                    {isUp ? "▲" : "▼"} {item.change}
+                  </span>
+                </div>
+
+                <div className="col-span-3 leading-6 text-gray-600">
+                  {item.reason}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </section>
       </section>
     </main>
