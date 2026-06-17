@@ -12,7 +12,7 @@ const players = ["AtlasPilot", "PixelWarden", "RankGoblin", "GlobeRunner", "Skil
 const PLAY_LEFT = 23;
 const PLAY_RIGHT = 77;
 const PLAYER_Y = 86;
-const ALIEN_PATTERN = [0, 1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1, 0];
+const ALIEN_PATTERN = [0,1,0,1,0,1,1,1,1,1,1,0,1,0,1,1,1,1,1,1,0,1,0,1,0];
 
 function createAlienLine(startId: number, y = 10): Enemy[] {
   return Array.from({ length: 7 }, (_, i) => ({
@@ -24,7 +24,7 @@ function createAlienLine(startId: number, y = 10): Enemy[] {
 }
 
 function createInitialWave(): Enemy[] {
-  return [...createAlienLine(0, 9), ...createAlienLine(100, 19)];
+  return [...createAlienLine(0, 9), ...createAlienLine(100, 21)];
 }
 
 export default function SpaceInvaders() {
@@ -36,8 +36,8 @@ export default function SpaceInvaders() {
   const [gameOver, setGameOver] = useState(false);
 
   const nextId = useRef(1000);
-  const speed = useRef(0.006);
-  const spawnRate = useRef(55000);
+  const speed = useRef(0.015);
+  const spawnRate = useRef(82500);
   const lastSpawn = useRef(Date.now());
 
   function restartGame() {
@@ -46,8 +46,8 @@ export default function SpaceInvaders() {
     setEnemies(createInitialWave());
     setScore(0);
     setGameOver(false);
-    speed.current = 0.006;
-    spawnRate.current = 55000;
+    speed.current = 0.015;
+    spawnRate.current = 82500;
     lastSpawn.current = Date.now();
     nextId.current = 1000;
   }
@@ -81,15 +81,15 @@ export default function SpaceInvaders() {
     if (intro || gameOver) return;
 
     const loop = window.setInterval(() => {
-      speed.current = Math.min(0.075, speed.current + 0.000025);
-      spawnRate.current = Math.max(16000, spawnRate.current - 3);
+      speed.current = Math.min(0.085, speed.current + 0.000025);
+      spawnRate.current = Math.max(24000, spawnRate.current - 2);
 
       setEnemies((enemyState) => {
         let nextEnemies = enemyState.map((enemy) => ({ ...enemy, y: enemy.y + speed.current }));
 
         setBullets((bulletState) => {
           const movedBullets = bulletState
-            .map((bullet) => ({ ...bullet, y: bullet.y - 3.2 }))
+            .map((bullet) => ({ ...bullet, y: bullet.y - 2.4 }))
             .filter((bullet) => bullet.y > 0);
 
           const remainingBullets: Bullet[] = [];
@@ -107,10 +107,11 @@ export default function SpaceInvaders() {
 
                 const col = i % 5;
                 const row = Math.floor(i / 5);
-                const dotX = enemy.x + col * 0.72;
-                const dotY = enemy.y + row * 1.15;
 
-                if (Math.abs(dotX - bullet.x) < 0.65 && Math.abs(dotY - bullet.y) < 1.1) {
+                const dotX = enemy.x + col * 1.05;
+                const dotY = enemy.y + row * 1.35;
+
+                if (Math.abs(dotX - bullet.x) < 1.4 && Math.abs(dotY - bullet.y) < 1.7) {
                   newCells[i] -= 1;
                   bulletUsed = true;
                   setScore((current) => current + 10);
@@ -126,7 +127,7 @@ export default function SpaceInvaders() {
 
           nextEnemies = nextEnemies.filter((enemy) => {
             const alive = enemy.cells.some((cell) => cell > 0);
-            if (!alive) setScore((current) => current + 50);
+            if (!alive) setScore((current) => current + 75);
             return alive;
           });
 
@@ -137,7 +138,7 @@ export default function SpaceInvaders() {
           enemy.cells.some((cell, i) => {
             if (cell <= 0) return false;
             const row = Math.floor(i / 5);
-            return enemy.y + row * 1.15 >= PLAYER_Y - 2;
+            return enemy.y + row * 1.35 >= PLAYER_Y - 2;
           })
         );
 
@@ -191,16 +192,10 @@ export default function SpaceInvaders() {
         </div>
 
         <div className="absolute inset-y-0" style={{ left: `${PLAY_LEFT}%`, right: `${100 - PLAY_RIGHT}%` }}>
-          {enemies.map((enemy) => (
-            <Alien key={enemy.id} enemy={enemy} />
-          ))}
+          {enemies.map((enemy) => <Alien key={enemy.id} enemy={enemy} />)}
 
           {bullets.map((bullet) => (
-            <div
-              key={bullet.id}
-              className="absolute h-5 w-1 rounded-full bg-[#19d3cf]"
-              style={{ left: `${bullet.x}%`, top: `${bullet.y}%` }}
-            />
+            <div key={bullet.id} className="absolute h-5 w-1 rounded-full bg-[#19d3cf]" style={{ left: `${bullet.x}%`, top: `${bullet.y}%` }} />
           ))}
 
           <div className="absolute bottom-8 h-16 w-16 -translate-x-1/2" style={{ left: `${shipX}%` }}>
@@ -228,7 +223,7 @@ function Alien({ enemy }: { enemy: Enemy }) {
           <div
             key={index}
             className={`h-2 w-2 rounded-sm ${health > 0 ? "bg-[#ff2fa8]" : "bg-transparent"}`}
-            style={{ opacity: health === 3 ? 1 : health === 2 ? 0.62 : health === 1 ? 0.32 : 0 }}
+            style={{ opacity: health === 3 ? 1 : health === 2 ? 0.6 : health === 1 ? 0.3 : 0 }}
           />
         ))}
       </div>
@@ -239,9 +234,7 @@ function Alien({ enemy }: { enemy: Enemy }) {
 function Leaderboard({ title, items }: { title: string; items: string[] }) {
   return (
     <div className="w-64 rounded-2xl border border-[#ff2fa8]/35 bg-white p-3.5 shadow-sm">
-      <p className="mb-2 text-[11px] font-black uppercase tracking-[0.22em] text-[#19d3cf]">
-        {title}
-      </p>
+      <p className="mb-2 text-[11px] font-black uppercase tracking-[0.22em] text-[#19d3cf]">{title}</p>
 
       <div className="space-y-1.5">
         {items.map((item, index) => (
