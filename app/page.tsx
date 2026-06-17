@@ -78,23 +78,11 @@ export default function Home() {
         >
           <div className="mr-14 flex shrink-0 items-center gap-5">
             <div className={`relative transition-all duration-300 ${scrolled ? "h-16 w-16" : "h-24 w-24"}`}>
-              <Image
-                src="/skillatlas-logo.png"
-                alt="SkillAtlas logo"
-                fill
-                className="object-contain"
-                priority
-              />
+              <Image src="/skillatlas-logo.png" alt="SkillAtlas logo" fill className="object-contain" priority />
             </div>
 
             <div className={`relative transition-all duration-300 ${scrolled ? "h-10 w-56" : "h-14 w-80"}`}>
-              <Image
-                src="/skillatlas-title.png"
-                alt="SkillAtlas title"
-                fill
-                className="object-contain object-left"
-                priority
-              />
+              <Image src="/skillatlas-title.png" alt="SkillAtlas title" fill className="object-contain object-left" priority />
             </div>
           </div>
 
@@ -113,31 +101,7 @@ export default function Home() {
       </header>
 
       <section className="mx-auto max-w-7xl px-8 py-8">
-        <div className="mb-5 grid gap-4 md:grid-cols-4">
-          <StatCard label="Top Game" value="CS2" valueColor="text-[#19d3cf]" />
-
-          <div className="rounded-2xl border border-[#ff2fa8]/35 bg-white p-5 shadow-sm md:col-span-2">
-            <div className="grid h-full grid-cols-2 items-start gap-6">
-              <div>
-                <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-gray-500">
-                  Leading Nation
-                </p>
-                <p className="mt-4 text-3xl font-black leading-none">Denmark</p>
-              </div>
-
-              <div className="text-right">
-                <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-gray-500">
-                  Dominance Score
-                </p>
-                <p className="mt-4 text-3xl font-black leading-none text-[#19d3cf]">98</p>
-              </div>
-            </div>
-          </div>
-
-          <StatCard label="Biggest Mover" value="Sweden ▲3" valueColor="text-[#19d3cf]" />
-        </div>
-
-        <div className="mb-6 rounded-3xl border border-[#ff2fa8]/45 bg-white p-6 shadow-sm">
+        <div className="mb-5 rounded-3xl border border-[#ff2fa8]/45 bg-white p-6 shadow-sm">
           <p className="mb-2 text-xs font-bold uppercase tracking-[0.25em] text-[#19d3cf]">
             Global Gaming Rankings
           </p>
@@ -149,6 +113,26 @@ export default function Home() {
           <p className="text-sm text-gray-600 md:whitespace-nowrap">
             Track which countries dominate each game, why they win, and how skill changes across the world.
           </p>
+        </div>
+
+        <div className="mb-5 grid gap-4 md:grid-cols-4">
+          <StatCard label="Top Game" value="CS2" valueColor="text-[#19d3cf]" />
+
+          <div className="rounded-2xl border border-[#ff2fa8]/35 bg-white p-5 shadow-sm md:col-span-2">
+            <div className="grid h-full grid-cols-2 items-start gap-6">
+              <div>
+                <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-gray-500">Leading Nation</p>
+                <p className="mt-4 text-lg font-black leading-none">Denmark</p>
+              </div>
+
+              <div className="text-right">
+                <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-gray-500">Dominance Score</p>
+                <p className="mt-4 text-lg font-black leading-none text-[#19d3cf]">98</p>
+              </div>
+            </div>
+          </div>
+
+          <StatCard label="Biggest Mover" value="Sweden ▲3" valueColor="text-[#19d3cf]" />
         </div>
 
         <div className="mb-6 flex gap-3 overflow-x-auto rounded-3xl border border-[#ff2fa8]/45 bg-white p-4 shadow-sm">
@@ -167,13 +151,14 @@ export default function Home() {
         </div>
 
         <section className="overflow-hidden rounded-3xl border border-[#ff2fa8]/45 bg-white shadow-sm">
-          <div className="grid grid-cols-12 border-b border-[#ff2fa8]/20 bg-gray-50 px-6 py-4 text-xs font-bold uppercase tracking-wide text-gray-500">
+          <div className="grid grid-cols-13 border-b border-[#ff2fa8]/20 bg-gray-50 px-6 py-4 text-xs font-bold uppercase tracking-wide text-gray-500">
             <div className="col-span-1">#</div>
             <div className="col-span-2">Country</div>
             <div className="col-span-2">Score</div>
             <div className="col-span-2">1Y Score</div>
-            <div className="col-span-2">7D</div>
-            <div className="col-span-3">Why they win</div>
+            <div className="col-span-1">7D Rank</div>
+            <div className="col-span-1">7D %</div>
+            <div className="col-span-4">Why they win</div>
           </div>
 
           {leaderboard.map((item) => {
@@ -182,11 +167,9 @@ export default function Home() {
             return (
               <div
                 key={item.rank}
-                className="grid grid-cols-12 items-center border-b border-gray-100 px-6 py-4 text-sm last:border-b-0 hover:bg-gray-50"
+                className="grid grid-cols-13 items-center border-b border-gray-100 px-6 py-4 text-sm last:border-b-0 hover:bg-gray-50"
               >
-                <div className="col-span-1 text-base font-normal text-[#ff2fa8]">
-                  {item.rank}
-                </div>
+                <div className="col-span-1 text-base font-normal text-[#ff2fa8]">{item.rank}</div>
 
                 <div className="col-span-2 text-base font-semibold">{item.country}</div>
 
@@ -208,18 +191,15 @@ export default function Home() {
                   </svg>
                 </div>
 
-                <div className="col-span-2">
-                  <span
-                    className={`inline-flex items-center gap-2 font-bold ${
-                      isUp ? "text-[#19d3cf]" : "text-[#ff2fa8]"
-                    }`}
-                  >
-                    {isUp ? "▲" : "▼"} {item.rankChange}
-                    <span>{item.percentChange}</span>
-                  </span>
+                <div className={`col-span-1 font-bold ${isUp ? "text-[#19d3cf]" : "text-[#ff2fa8]"}`}>
+                  {isUp ? "▲" : "▼"} {item.rankChange}
                 </div>
 
-                <div className="col-span-3">
+                <div className={`col-span-1 font-bold ${isUp ? "text-[#19d3cf]" : "text-[#ff2fa8]"}`}>
+                  {item.percentChange}
+                </div>
+
+                <div className="col-span-4">
                   <div className="flex flex-wrap gap-2">
                     {item.reasons.map((reason) => (
                       <span
@@ -251,10 +231,8 @@ function StatCard({
 }) {
   return (
     <div className="rounded-2xl border border-[#ff2fa8]/35 bg-white p-5 shadow-sm">
-      <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-gray-500">
-        {label}
-      </p>
-      <p className={`mt-4 text-3xl font-black leading-none ${valueColor}`}>{value}</p>
+      <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-gray-500">{label}</p>
+      <p className={`mt-4 text-lg font-black leading-none ${valueColor}`}>{value}</p>
     </div>
   );
 }
