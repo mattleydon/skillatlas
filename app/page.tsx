@@ -1,89 +1,129 @@
 import Image from "next/image";
 
+const games = ["CS2", "League of Legends", "Valorant", "Fortnite", "Rocket League", "Chess"];
+
 const leaderboard = [
-  { rank: 1, country: "Denmark", game: "CS2", score: 98, reason: "Elite team systems and tactical culture" },
-  { rank: 2, country: "South Korea", game: "League of Legends", score: 96, reason: "Training infrastructure and esports discipline" },
-  { rank: 3, country: "China", game: "Dota 2", score: 94, reason: "Huge player base and professional investment" },
-  { rank: 4, country: "Sweden", game: "CS2", score: 91, reason: "Long history of FPS excellence" },
-  { rank: 5, country: "USA", game: "Fortnite", score: 89, reason: "Large talent pool and creator-driven scene" },
+  {
+    rank: 1,
+    country: "Denmark",
+    game: "CS2",
+    score: 98,
+    change: "+4.2%",
+    reason: "Elite team systems and tactical culture",
+  },
+  {
+    rank: 2,
+    country: "South Korea",
+    game: "League of Legends",
+    score: 96,
+    change: "+3.8%",
+    reason: "Training infrastructure and esports discipline",
+  },
+  {
+    rank: 3,
+    country: "China",
+    game: "Dota 2",
+    score: 94,
+    change: "+2.1%",
+    reason: "Huge player base and professional investment",
+  },
+  {
+    rank: 4,
+    country: "Sweden",
+    game: "CS2",
+    score: 91,
+    change: "+1.7%",
+    reason: "Long history of FPS excellence",
+  },
+  {
+    rank: 5,
+    country: "USA",
+    game: "Fortnite",
+    score: 89,
+    change: "-0.6%",
+    reason: "Large talent pool and creator-driven scene",
+  },
 ];
 
 export default function Home() {
   return (
-    <main className="min-h-screen bg-white text-black">
-      <header className="sticky top-0 z-50 border-b border-gray-100 bg-white/90 backdrop-blur">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-8 py-4">
-          <div className="flex items-center gap-3">
+    <main className="min-h-screen bg-[#F8FAFC] text-[#111827]">
+      <header className="sticky top-0 z-50 border-b border-gray-200 bg-white">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-8 py-6">
+          <div className="flex items-center gap-4">
             <Image
               src="/skillatlas-logo.png"
               alt="SkillAtlas logo"
-              width={44}
-              height={44}
-              className="rounded-xl"
+              width={80}
+              height={80}
+              className="rounded-2xl"
             />
-            <span className="text-2xl font-bold tracking-tight">SkillAtlas</span>
+            <span className="text-xl font-semibold tracking-tight">
+              SkillAtlas
+            </span>
           </div>
 
-          <nav className="hidden gap-8 text-sm font-semibold text-gray-700 md:flex">
-            <a href="/">Rankings</a>
-            <a href="/world-map">World Map</a>
-            <a href="/countries">Countries</a>
-            <a href="/profiles">Profiles</a>
-            <a href="/about">About</a>
+          <nav className="hidden items-center gap-8 text-sm font-semibold text-gray-700 md:flex">
+            <a className="hover:text-[#11B8D9]" href="/">Rankings</a>
+            <a className="hover:text-[#11B8D9]" href="/world-map">World Map</a>
+            <a className="hover:text-[#11B8D9]" href="/countries">Countries</a>
+            <a className="hover:text-[#11B8D9]" href="/profiles">Profiles</a>
+            <a className="hover:text-[#11B8D9]" href="/about">About</a>
           </nav>
         </div>
       </header>
 
-      <section className="mx-auto max-w-7xl px-8 py-20">
-        <div className="mb-12 max-w-3xl">
-          <p className="mb-4 text-sm font-bold uppercase tracking-[0.3em] text-cyan-500">
-            Global Gaming Intelligence
+      <section className="mx-auto max-w-7xl px-8 py-10">
+        <div className="mb-8 rounded-3xl border border-gray-200 bg-white p-8 shadow-sm">
+          <p className="mb-3 text-sm font-bold uppercase tracking-[0.25em] text-[#11B8D9]">
+            Global Gaming Rankings
           </p>
 
-          <h1 className="mb-6 text-5xl font-black leading-tight md:text-7xl">
+          <h1 className="mb-4 text-4xl font-black tracking-tight md:text-5xl">
             Which country is actually the best at gaming?
           </h1>
 
-          <p className="text-xl leading-8 text-gray-600">
-            SkillAtlas ranks countries by dominance, efficiency, and the deeper
-            technical, mental, and cultural reasons behind elite performance.
+          <p className="max-w-3xl text-lg leading-8 text-gray-600">
+            Track which countries dominate each game, why they win, and how skill
+            changes across the world.
           </p>
         </div>
 
-        <div className="mb-10 flex flex-wrap gap-4">
-          <button className="rounded-full bg-cyan-500 px-7 py-4 font-bold text-white shadow-sm">
-            CS2
-          </button>
-          <button className="rounded-full border border-pink-400 px-7 py-4 font-bold">
-            League of Legends
-          </button>
-          <button className="rounded-full border border-gray-200 px-7 py-4 font-bold">
-            Fortnite
-          </button>
-          <button className="rounded-full border border-gray-200 px-7 py-4 font-bold">
-            Valorant
-          </button>
+        <div className="mb-6 flex gap-3 overflow-x-auto rounded-3xl border border-gray-200 bg-white p-4 shadow-sm">
+          {games.map((game, index) => (
+            <button
+              key={game}
+              className={`whitespace-nowrap rounded-full px-5 py-3 text-sm font-bold ${
+                index === 0
+                  ? "bg-[#11B8D9] text-white"
+                  : "border border-gray-200 bg-white text-gray-700 hover:border-[#FF4FB5]"
+              }`}
+            >
+              {game}
+            </button>
+          ))}
         </div>
 
-        <section className="overflow-hidden rounded-[2rem] border border-gray-200 bg-white shadow-sm">
+        <section className="overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-sm">
           <div className="grid grid-cols-12 border-b border-gray-100 bg-gray-50 px-6 py-4 text-sm font-bold uppercase tracking-wide text-gray-500">
             <div className="col-span-1">#</div>
             <div className="col-span-3">Country</div>
             <div className="col-span-2">Game</div>
             <div className="col-span-2">Score</div>
-            <div className="col-span-4">Why they win</div>
+            <div className="col-span-1">7d</div>
+            <div className="col-span-3">Why they win</div>
           </div>
 
           {leaderboard.map((item) => (
             <div
               key={item.rank}
-              className="grid grid-cols-12 items-center border-b border-gray-100 px-6 py-6 last:border-b-0"
+              className="grid grid-cols-12 items-center border-b border-gray-100 px-6 py-6 last:border-b-0 hover:bg-gray-50"
             >
-              <div className="col-span-1 text-2xl font-black text-pink-500">
+              <div className="col-span-1 text-xl font-black text-[#FF4FB5]">
                 {item.rank}
               </div>
 
-              <div className="col-span-3 text-xl font-bold">
+              <div className="col-span-3 text-lg font-bold">
                 {item.country}
               </div>
 
@@ -92,12 +132,22 @@ export default function Home() {
               </div>
 
               <div className="col-span-2">
-                <span className="rounded-full bg-cyan-50 px-4 py-2 font-black text-cyan-600">
+                <span className="rounded-full bg-cyan-50 px-4 py-2 font-black text-[#11B8D9]">
                   {item.score}
                 </span>
               </div>
 
-              <div className="col-span-4 text-gray-600">
+              <div
+                className={`col-span-1 font-bold ${
+                  item.change.startsWith("+")
+                    ? "text-emerald-500"
+                    : "text-red-500"
+                }`}
+              >
+                {item.change}
+              </div>
+
+              <div className="col-span-3 text-gray-600">
                 {item.reason}
               </div>
             </div>
