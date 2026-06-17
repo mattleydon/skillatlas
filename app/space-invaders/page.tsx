@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from "react";
 type Enemy = { id: number; x: number; y: number; cells: number[] };
 type Bullet = { id: number; x: number; y: number };
 type EnemyBullet = { id: number; x: number; y: number };
+type Popup = { id: number; text: string };
 
 const countries = ["Denmark", "South Korea", "China", "Sweden", "USA"];
 const players = ["AtlasPilot", "PixelWarden", "RankGoblin", "GlobeRunner", "SkillGhost"];
@@ -14,6 +15,7 @@ const PLAY_LEFT = 23;
 const PLAY_RIGHT = 77;
 const PLAYER_Y = 86;
 const START_SPEED = 0.01875;
+const PLAYER_STEP = 1.25;
 
 const DOT_X_GAP = 1.05;
 const DOT_Y_GAP = 1.45;
@@ -50,6 +52,7 @@ export default function SpaceInvaders() {
   const [score, setScore] = useState(0);
   const [combo, setCombo] = useState(0);
   const [multiplier, setMultiplier] = useState(1);
+  const [popup, setPopup] = useState<Popup | null>(null);
   const [gameOver, setGameOver] = useState(false);
 
   const nextId = useRef(1000);
@@ -57,6 +60,39 @@ export default function SpaceInvaders() {
   const spawnRate = useRef(82500);
   const lastSpawn = useRef(Date.now());
   const enemyFireChance = useRef(0.012);
+  const comboRef = useRef(0);
+  const multiplierRef = useRef(1);
+
+  function showPopup(text: string) {
+    const id = Date.now();
+    setPopup({ id, text });
+    window.setTimeout(() => {
+      setPopup((current) => (current?.id === id ? null : current));
+    }, 900);
+  }
+
+  function resetCombo() {
+    comboRef.current = 0;
+    multiplierRef.current = 1;
+    setCombo(0);
+    setMultiplier(1);
+  }
+
+  function registerHit() {
+    const nextCombo = comboRef.current + 1;
+    const nextMultiplier = nextCombo >= 10 ? 3 : nextCombo >= 5 ? 2 : 1;
+
+    comboRef.current = nextCombo;
+    setCombo(nextCombo);
+
+    if (nextMultiplier !== multiplierRef.current) {
+      multiplierRef.current = nextMultiplier;
+      setMultiplier(nextMultiplier);
+      showPopup(`COMBO x${nextMultiplier}`);
+    }
+
+    setScore((current) => current + 10 * nextMultiplier);
+  }
 
   function restartGame() {
     setShipX(50);
@@ -64,8 +100,8 @@ export default function SpaceInvaders() {
     setEnemyBullets([]);
     setEnemies(createInitialWave());
     setScore(0);
-    setCombo(0);
-    setMultiplier(1);
+    resetCombo();
+    setPopup(null);
     setGameOver(false);
     speed.current = START_SPEED;
     spawnRate.current = 82500;
@@ -86,8 +122,8 @@ export default function SpaceInvaders() {
         return;
       }
 
-      if (event.key === "ArrowLeft") setShipX((x) => Math.max(3, x - 1.25));
-      if (event.key === "ArrowRight") setShipX((x) => Math.min(97, x + 1.25));
+      if (event.key === "ArrowLeft") setShipX((x) => Math.max(3, x - PLAYER_STEP));
+      if (event.key === "ArrowRight") setShipX((x) => Math.min(97, x + PLAYER_STEP));
 
       if (event.key === " ") {
         event.preventDefault();
@@ -118,13 +154,16 @@ export default function SpaceInvaders() {
         }));
 
         setBullets((bulletState) => {
-          const movedBullets = bulletState
-            .map((bullet) => ({ ...bullet, y: bullet.y - 3.2 }))
-            .filter((bullet) => bullet.y > 0);
-
           const remainingBullets: Bullet[] = [];
 
-          for (const bullet of movedBullets) {
+          for (const oldBullet of bulletState) {
+            const bullet = { ...oldBullet, y: oldBullet.y - 3.2 };
+
+            if (bullet.y <= 0) {
+              resetCombo();
+              continue;
+            }
+
             let bulletUsed = false;
 
             for (let enemyIndex = 0; enemyIndex < nextEnemies.length; enemyIndex++) {
@@ -144,19 +183,7 @@ export default function SpaceInvaders() {
                 if (Math.abs(dotX - bullet.x) <= HIT_X && Math.abs(dotY - bullet.y) <= HIT_Y) {
                   newCells[cellIndex] -= 1;
                   bulletUsed = true;
-                  setCombo((current) => {
-                    const next = current + 1;
-
-                    if (next >= 10) {
-                      setMultiplier(3);
-                    } else if (next >= 5) {
-                      setMultiplier(2);
-                    }
-
-                    return next;
-                  });
-
-                  setScore((current) => current + 10 * multiplier);
+                  registerHit();
 
                   nextEnemies[enemyIndex] = { ...enemy, cells: newCells };
                   break;
@@ -164,12 +191,7 @@ export default function SpaceInvaders() {
               }
             }
 
-            if (!bulletUsed) {
-              remainingBullets.push(bullet);
-
-              setCombo(0);
-              setMultiplier(1);
-            }
+            if (!bulletUsed) remainingBullets.push(bullet);
           }
 
           return remainingBullets;
@@ -177,7 +199,7 @@ export default function SpaceInvaders() {
 
         nextEnemies = nextEnemies.filter((enemy) => {
           const alive = enemy.cells.some((cell) => cell > 0);
-          if (!alive) setScore((current) => current + 75);
+          if (!alive) setScore((current) => current + 75 * multiplierRef.current);
           return alive;
         });
 
@@ -222,14 +244,10 @@ export default function SpaceInvaders() {
           .filter((bullet) => bullet.y < 96);
 
         const playerHit = moved.some(
-          (bullet) =>
-            Math.abs(bullet.x - shipX) < 2.5 &&
-            Math.abs(bullet.y - PLAYER_Y) < 3.5
+          (bullet) => Math.abs(bullet.x - shipX) < 2.5 && Math.abs(bullet.y - PLAYER_Y) < 3.5
         );
 
-        if (playerHit) {
-          setGameOver(true);
-        }
+        if (playerHit) setGameOver(true);
 
         return moved;
       });
@@ -260,17 +278,10 @@ export default function SpaceInvaders() {
           <a href="/" className="text-sm font-bold text-[#ff2fa8]">← Rankings</a>
           <h1 className="mt-3 text-3xl font-black">SkillInvaders</h1>
           <p className="mt-1 text-sm text-gray-500">Move with ← → and shoot with Space.</p>
-          <p className="mt-4 text-2xl font-black text-[#19d3cf]">
-            Score: {score}
-          </p>
 
-          <p className="mt-2 text-sm font-bold text-[#ff2fa8]">
-            Combo: {combo}
-          </p>
-
-          <p className="text-sm font-bold text-[#19d3cf]">
-            Multiplier: {multiplier}x
-          </p>
+          <p className="mt-4 text-2xl font-black text-[#19d3cf]">Score: {score}</p>
+          <p className="mt-2 text-sm font-bold text-[#ff2fa8]">Combo: {combo}</p>
+          <p className="text-sm font-bold text-[#19d3cf]">Multiplier: {multiplier}x</p>
 
           {gameOver && (
             <div className="mt-4 rounded-xl border border-[#ff2fa8]/35 bg-[#ff2fa8]/5 p-3">
@@ -279,6 +290,15 @@ export default function SpaceInvaders() {
             </div>
           )}
         </div>
+
+        {popup && (
+          <div
+            key={popup.id}
+            className="pointer-events-none absolute left-1/2 top-28 z-30 -translate-x-1/2 animate-[comboPop_900ms_ease-out_forwards] rounded-2xl border border-[#ff2fa8]/35 bg-white px-8 py-4 text-3xl font-black text-[#ff2fa8] shadow-sm"
+          >
+            {popup.text}
+          </div>
+        )}
 
         <div className="absolute right-5 top-5 z-20 grid max-h-[90vh] gap-3 overflow-hidden">
           <Leaderboard title="Top Countries" items={countries} />
@@ -321,6 +341,12 @@ export default function SpaceInvaders() {
           0% { opacity: 1; transform: translateY(0) scale(1); }
           65% { opacity: 1; transform: translateY(-120px) scale(1.2); }
           100% { opacity: 0; transform: translateY(-520px) scale(0.35); }
+        }
+
+        @keyframes comboPop {
+          0% { opacity: 0; transform: translate(-50%, 12px) scale(0.8); }
+          25% { opacity: 1; transform: translate(-50%, 0) scale(1.08); }
+          100% { opacity: 0; transform: translate(-50%, -28px) scale(1); }
         }
       `}</style>
     </main>
