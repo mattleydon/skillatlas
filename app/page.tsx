@@ -73,47 +73,49 @@ export default function Home() {
       <header className="sticky top-0 z-50 border-b border-[#ff2fa8]/25 bg-white transition-all duration-300">
         <div
           className={`mx-auto flex max-w-7xl items-center px-8 transition-all duration-300 ${
-            scrolled ? "py-1" : "py-2"
+            scrolled ? "py-2" : "py-3"
           }`}
         >
-          <div className="mr-16 flex shrink-0 items-center gap-5">
+          <div className="mr-14 flex shrink-0 items-center gap-5">
+            {/* Cropped logo mark only */}
             <div
               className={`relative shrink-0 overflow-hidden transition-all duration-300 ${
-                scrolled ? "h-20 w-28" : "h-28 w-40"
+                scrolled ? "h-20 w-24" : "h-28 w-32"
               }`}
             >
               <Image
                 src="/skillatlas-logo.png"
-                alt="SkillAtlas logo"
-                width={420}
-                height={420}
+                alt="SkillAtlas logo mark"
+                width={360}
+                height={360}
                 className={`absolute left-1/2 max-w-none -translate-x-1/2 object-contain transition-all duration-300 ${
-                  scrolled ? "-top-7 w-36" : "-top-10 w-52"
+                  scrolled ? "-top-3 w-32" : "-top-5 w-44"
                 }`}
                 priority
               />
             </div>
 
+            {/* Rebuilt wordmark to the right */}
             <div className="hidden md:block">
               <div
-                className={`font-black leading-none tracking-[0.42em] transition-all duration-300 ${
-                  scrolled ? "text-xl" : "text-2xl"
+                className={`leading-none transition-all duration-300 ${
+                  scrolled ? "text-2xl" : "text-3xl"
                 }`}
               >
-                <span className="text-black">SKILL</span>
-                <span className="text-[#19d3cf]">A</span>
-                <span className="text-black">T</span>
-                <span className="text-[#ff2fa8]">LAS</span>
+                <span className="font-black tracking-[0.42em] text-black">SKILL</span>
+                <span className="font-black tracking-[0.42em] text-[#19d3cf]">A</span>
+                <span className="font-black tracking-[0.42em] text-black">T</span>
+                <span className="font-black tracking-[0.42em] text-[#ff2fa8]">LAS</span>
               </div>
 
               <div
-                className={`mt-2 flex items-center gap-3 uppercase tracking-[0.28em] text-gray-500 transition-all duration-300 ${
+                className={`mt-3 flex items-center gap-3 uppercase tracking-[0.26em] text-gray-500 transition-all duration-300 ${
                   scrolled ? "text-[7px]" : "text-[8px]"
                 }`}
               >
-                <span className="h-[1px] w-5 bg-[#19d3cf]" />
+                <span className="h-[1px] w-7 bg-[#19d3cf]" />
                 <span>Map Your Skill. Know Your Edge.</span>
-                <span className="h-[1px] w-5 bg-[#ff2fa8]" />
+                <span className="h-[1px] w-7 bg-[#ff2fa8]" />
               </div>
             </div>
           </div>
@@ -134,35 +136,35 @@ export default function Home() {
 
       <section className="mx-auto max-w-7xl px-8 py-8">
         <div className="mb-5 grid gap-4 md:grid-cols-4">
-          <div className="rounded-2xl border border-[#ff2fa8]/35 bg-white p-5 shadow-sm">
+          <div className="flex min-h-32 flex-col justify-center rounded-2xl border border-[#ff2fa8]/35 bg-white p-6 shadow-sm">
             <p className="text-xs font-bold uppercase tracking-[0.18em] text-gray-500">
               Top Game
             </p>
-            <p className="mt-2 text-2xl font-black text-[#19d3cf]">CS2</p>
+            <p className="mt-2 text-3xl font-black text-[#19d3cf]">CS2</p>
           </div>
 
-          <div className="rounded-2xl border border-[#ff2fa8]/35 bg-white p-5 shadow-sm md:col-span-2">
+          <div className="flex min-h-32 flex-col justify-center rounded-2xl border border-[#ff2fa8]/35 bg-white p-6 shadow-sm md:col-span-2">
             <p className="text-xs font-bold uppercase tracking-[0.18em] text-gray-500">
               Leading Nation
             </p>
 
             <div className="mt-2 flex items-end justify-between gap-6">
-              <p className="text-3xl font-black">Denmark</p>
+              <p className="text-4xl font-black">Denmark</p>
 
               <div className="text-right">
                 <p className="text-xs font-bold uppercase tracking-[0.18em] text-gray-500">
                   Dominance Score
                 </p>
-                <p className="text-3xl font-black text-[#19d3cf]">98</p>
+                <p className="text-4xl font-black text-[#19d3cf]">98</p>
               </div>
             </div>
           </div>
 
-          <div className="rounded-2xl border border-[#ff2fa8]/35 bg-white p-5 shadow-sm">
+          <div className="flex min-h-32 flex-col justify-center rounded-2xl border border-[#ff2fa8]/35 bg-white p-6 shadow-sm">
             <p className="text-xs font-bold uppercase tracking-[0.18em] text-gray-500">
               Biggest Mover
             </p>
-            <p className="mt-2 text-2xl font-black text-[#19d3cf]">Sweden ▲3</p>
+            <p className="mt-2 text-3xl font-black text-[#19d3cf]">Sweden ▲3</p>
           </div>
         </div>
 
