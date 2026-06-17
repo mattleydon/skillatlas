@@ -77,46 +77,24 @@ export default function Home() {
           }`}
         >
           <div className="mr-14 flex shrink-0 items-center gap-5">
-            {/* Cropped logo mark only */}
-            <div
-              className={`relative shrink-0 overflow-hidden transition-all duration-300 ${
-                scrolled ? "h-20 w-24" : "h-28 w-32"
-              }`}
-            >
+            <div className={`relative transition-all duration-300 ${scrolled ? "h-16 w-16" : "h-24 w-24"}`}>
               <Image
                 src="/skillatlas-logo.png"
-                alt="SkillAtlas logo mark"
-                width={360}
-                height={360}
-                className={`absolute left-1/2 max-w-none -translate-x-1/2 object-contain transition-all duration-300 ${
-                  scrolled ? "-top-3 w-32" : "-top-5 w-44"
-                }`}
+                alt="SkillAtlas logo"
+                fill
+                className="object-contain"
                 priority
               />
             </div>
 
-            {/* Rebuilt wordmark to the right */}
-            <div className="hidden md:block">
-              <div
-                className={`leading-none transition-all duration-300 ${
-                  scrolled ? "text-2xl" : "text-3xl"
-                }`}
-              >
-                <span className="font-black tracking-[0.42em] text-black">SKILL</span>
-                <span className="font-black tracking-[0.42em] text-[#19d3cf]">A</span>
-                <span className="font-black tracking-[0.42em] text-black">T</span>
-                <span className="font-black tracking-[0.42em] text-[#ff2fa8]">LAS</span>
-              </div>
-
-              <div
-                className={`mt-3 flex items-center gap-3 uppercase tracking-[0.26em] text-gray-500 transition-all duration-300 ${
-                  scrolled ? "text-[7px]" : "text-[8px]"
-                }`}
-              >
-                <span className="h-[1px] w-7 bg-[#19d3cf]" />
-                <span>Map Your Skill. Know Your Edge.</span>
-                <span className="h-[1px] w-7 bg-[#ff2fa8]" />
-              </div>
+            <div className={`relative transition-all duration-300 ${scrolled ? "h-10 w-56" : "h-14 w-80"}`}>
+              <Image
+                src="/skillatlas-title.png"
+                alt="SkillAtlas title"
+                fill
+                className="object-contain object-left"
+                priority
+              />
             </div>
           </div>
 
@@ -136,36 +114,27 @@ export default function Home() {
 
       <section className="mx-auto max-w-7xl px-8 py-8">
         <div className="mb-5 grid gap-4 md:grid-cols-4">
-          <div className="flex min-h-32 flex-col justify-center rounded-2xl border border-[#ff2fa8]/35 bg-white p-6 shadow-sm">
-            <p className="text-xs font-bold uppercase tracking-[0.18em] text-gray-500">
-              Top Game
-            </p>
-            <p className="mt-2 text-3xl font-black text-[#19d3cf]">CS2</p>
-          </div>
+          <StatCard label="Top Game" value="CS2" valueColor="text-[#19d3cf]" />
 
-          <div className="flex min-h-32 flex-col justify-center rounded-2xl border border-[#ff2fa8]/35 bg-white p-6 shadow-sm md:col-span-2">
-            <p className="text-xs font-bold uppercase tracking-[0.18em] text-gray-500">
-              Leading Nation
-            </p>
-
-            <div className="mt-2 flex items-end justify-between gap-6">
-              <p className="text-4xl font-black">Denmark</p>
+          <div className="rounded-2xl border border-[#ff2fa8]/35 bg-white p-5 shadow-sm md:col-span-2">
+            <div className="grid h-full grid-cols-2 items-start gap-6">
+              <div>
+                <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-gray-500">
+                  Leading Nation
+                </p>
+                <p className="mt-4 text-3xl font-black leading-none">Denmark</p>
+              </div>
 
               <div className="text-right">
-                <p className="text-xs font-bold uppercase tracking-[0.18em] text-gray-500">
+                <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-gray-500">
                   Dominance Score
                 </p>
-                <p className="text-4xl font-black text-[#19d3cf]">98</p>
+                <p className="mt-4 text-3xl font-black leading-none text-[#19d3cf]">98</p>
               </div>
             </div>
           </div>
 
-          <div className="flex min-h-32 flex-col justify-center rounded-2xl border border-[#ff2fa8]/35 bg-white p-6 shadow-sm">
-            <p className="text-xs font-bold uppercase tracking-[0.18em] text-gray-500">
-              Biggest Mover
-            </p>
-            <p className="mt-2 text-3xl font-black text-[#19d3cf]">Sweden ▲3</p>
-          </div>
+          <StatCard label="Biggest Mover" value="Sweden ▲3" valueColor="text-[#19d3cf]" />
         </div>
 
         <div className="mb-6 rounded-3xl border border-[#ff2fa8]/45 bg-white p-6 shadow-sm">
@@ -268,5 +237,24 @@ export default function Home() {
         </section>
       </section>
     </main>
+  );
+}
+
+function StatCard({
+  label,
+  value,
+  valueColor,
+}: {
+  label: string;
+  value: string;
+  valueColor: string;
+}) {
+  return (
+    <div className="rounded-2xl border border-[#ff2fa8]/35 bg-white p-5 shadow-sm">
+      <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-gray-500">
+        {label}
+      </p>
+      <p className={`mt-4 text-3xl font-black leading-none ${valueColor}`}>{value}</p>
+    </div>
   );
 }
