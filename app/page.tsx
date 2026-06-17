@@ -21,6 +21,18 @@ type RankingRow = {
   improvements: string[];
 };
 
+function row(
+  country: string,
+  score: number,
+  rankChange: string,
+  percentChange: string,
+  direction: Direction,
+  reasons: string[],
+  improvements: string[]
+): RankingRow {
+  return { country, score, rankChange, percentChange, direction, reasons, improvements };
+}
+
 const statGames = [
   { name: "CS2", nation: "Denmark", score: 98, mover: "Sweden", moverChange: "+3", loser: "USA", loserChange: "-2", trend: "M 0 42 C 20 38, 38 39, 54 30 S 82 16, 105 18 S 130 8, 150 6" },
   { name: "League of Legends", nation: "South Korea", score: 99, mover: "India", moverChange: "+4", loser: "USA", loserChange: "-2", trend: "M 0 40 C 22 34, 38 36, 55 28 S 82 20, 105 13 S 130 9, 150 10" },
@@ -80,26 +92,27 @@ const countryPool = ["Germany", "France", "UK", "Canada", "Australia", "Netherla
 const trendUp = "M 0 42 C 20 38, 40 36, 58 30 S 88 20, 112 14 S 135 9, 150 7";
 const trendDown = "M 0 16 C 22 19, 42 20, 62 26 S 92 31, 114 38 S 134 39, 150 44";
 
-function row(country: string, score: number, rankChange: string, percentChange: string, direction: Direction, reasons: string[], improvements: string[]): RankingRow {
-  return { country, score, rankChange, percentChange, direction, reasons, improvements };
-}
-
 function buildTop100(game: Game): RankingRow[] {
   const existing = topCountriesByGame[game];
   const used = new Set(existing.map((item) => item.country));
-  const extras = countryPool.filter((country) => !used.has(country)).slice(0, 95).map((country, index) => {
-    const score = Math.max(42, 84 - Math.floor(index * 0.45));
-    const isUp = index % 4 !== 2;
-    return row(
-      country,
-      score,
-      isUp ? `+${(index % 5) + 1}` : `-${(index % 3) + 1}`,
-      isUp ? `+${(0.4 + (index % 9) * 0.3).toFixed(1)}%` : `-${(0.3 + (index % 6) * 0.2).toFixed(1)}%`,
-      isUp ? "up" : "down",
-      ["Growing talent", "Online access", "Competitive base"],
-      ["Elite infrastructure", "International exposure"]
-    );
-  });
+
+  const extras = countryPool
+    .filter((country) => !used.has(country))
+    .slice(0, 95)
+    .map((country, index) => {
+      const score = Math.max(42, 84 - Math.floor(index * 0.45));
+      const isUp = index % 4 !== 2;
+
+      return row(
+        country,
+        score,
+        isUp ? `+${(index % 5) + 1}` : `-${(index % 3) + 1}`,
+        isUp ? `+${(0.4 + (index % 9) * 0.3).toFixed(1)}%` : `-${(0.3 + (index % 6) * 0.2).toFixed(1)}%`,
+        isUp ? "up" : "down",
+        ["Growing talent", "Online access", "Competitive base"],
+        ["Elite infrastructure", "International exposure"]
+      );
+    });
 
   return [...existing, ...extras];
 }
@@ -144,14 +157,19 @@ export default function Home() {
             <div className={`relative transition-all duration-300 ${scrolled ? "h-16 w-16" : "h-24 w-24"}`}>
               <Image src="/skillatlas-logo.png" alt="SkillAtlas logo" fill className="object-contain" priority />
             </div>
-            <div className={`relative transition-all duration-300 ${scrolled ? "h-10 w-56" : "h-14 w-80"}`}>
+
+            <a href="/" className={`relative transition-all duration-300 ${scrolled ? "h-10 w-56" : "h-14 w-80"}`}>
               <Image src="/skillatlas-title.png" alt="SkillAtlas title" fill className="object-contain object-left" priority />
-            </div>
+            </a>
           </div>
 
           <nav className="hidden flex-1 items-center justify-around md:flex">
             {["Rankings", "World Map", "Countries", "Profiles", "User Rankings", "About"].map((item) => (
-              <a key={item} className="text-[1rem] font-semibold text-gray-700 transition-colors hover:text-[#19d3cf]" href={item === "Rankings" ? "/" : `/${item.toLowerCase().replace(" ", "-")}`}>
+              <a
+                key={item}
+                className="text-[1rem] font-semibold text-gray-700 transition-colors hover:text-[#19d3cf]"
+                href={item === "Rankings" ? "/" : `/${item.toLowerCase().replace(" ", "-")}`}
+              >
                 {item}
               </a>
             ))}
@@ -214,30 +232,23 @@ export default function Home() {
 
         <section className="overflow-hidden rounded-3xl border border-[#ff2fa8]/45 bg-white shadow-sm">
           <div className="grid grid-cols-[0.6fr_1.4fr_1fr_1.4fr_1fr_1fr_2.2fr_2.2fr] border-b border-[#ff2fa8]/20 bg-gray-50 px-6 py-4 text-[11px] font-bold uppercase tracking-wide text-gray-500">
-            <div>Rank</div><div>Country</div><div>Score</div><div>{selectedPeriod} Score</div><div>{selectedPeriod} Rank</div><div>{selectedPeriod} %</div><div>Why they win</div><div>Room for improvement</div>
+            <div>Rank</div>
+            <div>Country</div>
+            <div>Score</div>
+            <div>{selectedPeriod} Score</div>
+            <div>{selectedPeriod} Rank</div>
+            <div>{selectedPeriod} %</div>
+            <div>Why they win</div>
+            <div>Room for improvement</div>
           </div>
 
           {leaderboard.map((item, index) => {
             const isUp = item.direction === "up";
-            const rankStyle =
-              index === 0
-                ? "border border-[#19d3cf]/30 bg-[#19d3cf]/15 text-[#19d3cf]"
-                : index === 1
-                ? "border border-[#ff2fa8]/30 bg-[#ff2fa8]/10 text-[#ff2fa8]"
-                : index === 2
-                ? "border border-purple-200 bg-gradient-to-r from-[#19d3cf]/10 to-[#ff2fa8]/10 text-purple-500"
-                : "text-[#ff2fa8]";
 
             return (
               <div key={`${selectedGame}-${item.country}`} className="grid grid-cols-[0.6fr_1.4fr_1fr_1.4fr_1fr_1fr_2.2fr_2.2fr] items-center border-b border-gray-100 px-6 py-4 text-sm last:border-b-0 hover:bg-gray-50">
-                <div>
-                  <div className={`flex h-10 w-10 items-center justify-center rounded-xl font-black ${rankStyle}`}>
-                    {index + 1}
-                  </div>
-                </div>
-
-                <div className={`text-sm ${index <= 2 ? "font-black" : "font-semibold"}`}>{item.country}</div>
-
+                <div className="text-base font-normal text-[#ff2fa8]">{index + 1}</div>
+                <div className="text-sm font-semibold">{item.country}</div>
                 <div><span className="rounded-full bg-[#19d3cf]/10 px-4 py-2 text-sm font-black text-[#19d3cf]">{item.score}</span></div>
                 <div><svg viewBox="0 0 150 50" className="h-10 w-28"><path d={isUp ? trendUp : trendDown} fill="none" stroke={isUp ? "#19d3cf" : "#ff2fa8"} strokeWidth="1.5" strokeLinecap="round" /></svg></div>
                 <div className={`font-bold ${isUp ? "text-[#19d3cf]" : "text-[#ff2fa8]"}`}>{isUp ? "▲" : "▼"} {item.rankChange}</div>
