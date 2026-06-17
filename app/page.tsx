@@ -44,7 +44,7 @@ const leaderboard = [
     percentChange: "+1.7%",
     direction: "up",
     trend: "M 0 44 C 20 38, 40 40, 55 34 S 85 24, 110 16 S 135 12, 150 8",
-    reasons: ["FPS history", "Strong grassroots scene", "High mechanical skill"],
+    reasons: ["FPS history", "Grassroots scene", "Mechanical skill"],
   },
   {
     rank: 5,
@@ -54,7 +54,7 @@ const leaderboard = [
     percentChange: "-0.6%",
     direction: "down",
     trend: "M 0 16 C 25 22, 35 18, 55 25 S 80 30, 105 36 S 130 34, 150 42",
-    reasons: ["Large talent pool", "Creator-driven scene", "High prize exposure"],
+    reasons: ["Large talent pool", "Creator scene", "Prize exposure"],
   },
 ];
 
@@ -76,42 +76,83 @@ export default function Home() {
             scrolled ? "py-1" : "py-2"
           }`}
         >
-          <div
-            className={`mr-12 flex shrink-0 items-center justify-center transition-all duration-300 ${
-              scrolled ? "h-20 w-48" : "h-32 w-60"
-            }`}
-          >
-            <Image
-              src="/skillatlas-logo.png"
-              alt="SkillAtlas logo"
-              width={240}
-              height={240}
-              className={`h-full w-auto object-contain transition-all duration-300 ${
-                scrolled ? "scale-100" : "scale-110"
-              }`}
-              priority
-            />
+          <div className="mr-16 flex shrink-0 items-center gap-4">
+            <div className={`transition-all duration-300 ${scrolled ? "w-24" : "w-32"}`}>
+              <Image
+                src="/skillatlas-logo.png"
+                alt="SkillAtlas logo"
+                width={260}
+                height={260}
+                className="h-auto w-full object-contain"
+                priority
+              />
+            </div>
+
+            <div className="hidden md:block">
+              <h1
+                className={`font-black leading-none tracking-wider transition-all duration-300 ${
+                  scrolled ? "text-2xl" : "text-3xl"
+                }`}
+              >
+                <span className="text-[#19d3cf]">SKILL</span>
+                <span className="text-[#ff2fa8]">ATLAS</span>
+              </h1>
+
+              <p
+                className={`uppercase tracking-[0.22em] text-gray-500 transition-all duration-300 ${
+                  scrolled ? "text-[8px]" : "text-[9px]"
+                }`}
+              >
+                Map Your Skill. Know Your Edge.
+              </p>
+            </div>
           </div>
 
-          <nav className="hidden flex-1 items-center justify-around text-xl font-semibold text-gray-700 md:flex">
-            <a className="hover:text-[#19d3cf]" href="/">Rankings</a>
-            <a className="hover:text-[#19d3cf]" href="/world-map">World Map</a>
-            <a className="hover:text-[#19d3cf]" href="/countries">Countries</a>
-            <a className="hover:text-[#19d3cf]" href="/profiles">Profiles</a>
-            <a className="hover:text-[#19d3cf]" href="/about">About</a>
+          <nav className="hidden flex-1 items-center justify-around md:flex">
+            {["Rankings", "World Map", "Countries", "Profiles", "About"].map((item) => (
+              <a
+                key={item}
+                className="text-[1.05rem] font-semibold text-gray-700 transition-colors hover:text-[#19d3cf]"
+                href={item === "Rankings" ? "/" : `/${item.toLowerCase().replace(" ", "-")}`}
+              >
+                {item}
+              </a>
+            ))}
           </nav>
         </div>
       </header>
 
       <section className="mx-auto max-w-7xl px-8 py-8">
-        <div className="mb-6 rounded-3xl border border-[#ff2fa8]/45 bg-white p-7 shadow-sm">
+        <div className="mb-5 grid gap-4 md:grid-cols-4">
+          <div className="rounded-2xl border border-[#ff2fa8]/35 bg-white p-5 shadow-sm">
+            <p className="text-xs font-bold uppercase tracking-[0.18em] text-gray-500">Top Game</p>
+            <p className="mt-2 text-2xl font-black text-[#19d3cf]">CS2</p>
+          </div>
+
+          <div className="rounded-2xl border border-[#ff2fa8]/35 bg-white p-5 shadow-sm">
+            <p className="text-xs font-bold uppercase tracking-[0.18em] text-gray-500">Leading Nation</p>
+            <p className="mt-2 text-2xl font-black">Denmark</p>
+          </div>
+
+          <div className="rounded-2xl border border-[#ff2fa8]/35 bg-white p-5 shadow-sm">
+            <p className="text-xs font-bold uppercase tracking-[0.18em] text-gray-500">Dominance Score</p>
+            <p className="mt-2 text-2xl font-black text-[#19d3cf]">98</p>
+          </div>
+
+          <div className="rounded-2xl border border-[#ff2fa8]/35 bg-white p-5 shadow-sm">
+            <p className="text-xs font-bold uppercase tracking-[0.18em] text-gray-500">Biggest Mover</p>
+            <p className="mt-2 text-2xl font-black text-[#ff2fa8]">Sweden ▲3</p>
+          </div>
+        </div>
+
+        <div className="mb-6 rounded-3xl border border-[#ff2fa8]/45 bg-white p-6 shadow-sm">
           <p className="mb-2 text-xs font-bold uppercase tracking-[0.25em] text-[#19d3cf]">
             Global Gaming Rankings
           </p>
 
-          <h1 className="mb-2 text-lg font-black tracking-tight md:text-xl">
+          <h2 className="mb-2 text-lg font-black tracking-tight">
             Which country is actually the best at gaming?
-          </h1>
+          </h2>
 
           <p className="text-sm text-gray-600 md:whitespace-nowrap">
             Track which countries dominate each game, why they win, and how skill changes across the world.
@@ -155,9 +196,7 @@ export default function Home() {
                   {item.rank}
                 </div>
 
-                <div className="col-span-2 text-base font-semibold">
-                  {item.country}
-                </div>
+                <div className="col-span-2 text-base font-semibold">{item.country}</div>
 
                 <div className="col-span-2">
                   <span className="rounded-full bg-[#19d3cf]/10 px-4 py-2 text-sm font-black text-[#19d3cf]">
@@ -171,7 +210,7 @@ export default function Home() {
                       d={item.trend}
                       fill="none"
                       stroke={isUp ? "#19d3cf" : "#ff2fa8"}
-                      strokeWidth="2"
+                      strokeWidth="1.6"
                       strokeLinecap="round"
                     />
                   </svg>
@@ -189,11 +228,16 @@ export default function Home() {
                 </div>
 
                 <div className="col-span-3">
-                  <ul className="space-y-1 text-gray-600">
+                  <div className="flex flex-wrap gap-2">
                     {item.reasons.map((reason) => (
-                      <li key={reason}>• {reason}</li>
+                      <span
+                        key={reason}
+                        className="rounded-full border border-gray-200 bg-white px-3 py-1 text-xs font-semibold text-gray-600"
+                      >
+                        {reason}
+                      </span>
                     ))}
-                  </ul>
+                  </div>
                 </div>
               </div>
             );
