@@ -82,8 +82,8 @@ export default function SpaceInvaders() {
         return;
       }
 
-      if (event.key === "ArrowLeft") setShipX((x) => Math.max(3, x - 0.75));
-      if (event.key === "ArrowRight") setShipX((x) => Math.min(97, x + 0.75));
+      if (event.key === "ArrowLeft") setShipX((x) => Math.max(3, x - 1.0));
+      if (event.key === "ArrowRight") setShipX((x) => Math.min(97, x + 1.0));
 
       if (event.key === " ") {
         event.preventDefault();
