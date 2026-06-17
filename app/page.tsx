@@ -14,43 +14,39 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-[#F8FAFC] text-[#111827]">
       <header className="sticky top-0 z-50 border-b border-[#ff2fa8]/25 bg-white">
-        <div className="mx-auto flex max-w-7xl items-center px-8 py-7">
-          <div className="mr-16 flex shrink-0 items-center gap-5">
+        <div className="mx-auto flex max-w-7xl items-center px-8 py-6">
+          <div className="mr-20 flex shrink-0 items-center">
             <Image
               src="/skillatlas-logo.png"
               alt="SkillAtlas logo"
-              width={104}
-              height={104}
+              width={230}
+              height={230}
               className="rounded-2xl"
             />
-            <span className="font-serif text-4xl font-bold tracking-tight">
-              SkillAtlas
-            </span>
           </div>
 
           <nav className="hidden flex-1 items-center justify-evenly text-base font-semibold text-gray-700 md:flex">
-            <a className="hover:text-[#12cfc0]" href="/">Rankings</a>
-            <a className="hover:text-[#12cfc0]" href="/world-map">World Map</a>
-            <a className="hover:text-[#12cfc0]" href="/countries">Countries</a>
-            <a className="hover:text-[#12cfc0]" href="/profiles">Profiles</a>
-            <a className="hover:text-[#12cfc0]" href="/about">About</a>
+            <a className="hover:text-[#19d3cf]" href="/">Rankings</a>
+            <a className="hover:text-[#19d3cf]" href="/world-map">World Map</a>
+            <a className="hover:text-[#19d3cf]" href="/countries">Countries</a>
+            <a className="hover:text-[#19d3cf]" href="/profiles">Profiles</a>
+            <a className="hover:text-[#19d3cf]" href="/about">About</a>
           </nav>
         </div>
       </header>
 
       <section className="mx-auto max-w-7xl px-8 py-10">
         <div className="mb-8 rounded-3xl border border-[#ff2fa8]/45 bg-white p-8 shadow-sm">
-          <p className="mb-3 text-sm font-bold uppercase tracking-[0.25em] text-[#12cfc0]">
+          <p className="mb-3 text-sm font-bold uppercase tracking-[0.25em] text-[#19d3cf]">
             Global Gaming Rankings
           </p>
 
-          <h1 className="mb-4 text-3xl font-black tracking-tight md:text-4xl">
+          <h1 className="mb-3 text-xl font-black tracking-tight md:text-2xl">
             Which country is actually the best at gaming?
           </h1>
 
-          <p className="max-w-3xl text-lg leading-8 text-gray-600">
-            Track which countries dominate each game, why they win, and how skill
-            changes across the world.
+          <p className="whitespace-nowrap text-base text-gray-600">
+            Track which countries dominate each game, why they win, and how skill changes across the world.
           </p>
         </div>
 
@@ -60,7 +56,7 @@ export default function Home() {
               key={game}
               className={`whitespace-nowrap rounded-full px-5 py-3 text-sm font-bold ${
                 index === 0
-                  ? "bg-[#12cfc0] text-white"
+                  ? "bg-[#19d3cf] text-white"
                   : "border border-gray-200 bg-white text-gray-700 hover:border-[#ff2fa8]"
               }`}
             >
@@ -97,7 +93,7 @@ export default function Home() {
               </div>
 
               <div className="col-span-2">
-                <span className="rounded-full bg-[#12cfc0]/10 px-4 py-2 font-black text-[#12cfc0]">
+                <span className="rounded-full bg-[#19d3cf]/10 px-4 py-2 font-black text-[#19d3cf]">
                   {item.score}
                 </span>
               </div>
@@ -105,8 +101,8 @@ export default function Home() {
               <div
                 className={`col-span-1 font-bold ${
                   item.change.startsWith("+")
-                    ? "text-[#079b91]"
-                    : "text-[#c71575]"
+                    ? "text-[#19d3cf]"
+                    : "text-[#ff2fa8]"
                 }`}
               >
                 {item.change}
