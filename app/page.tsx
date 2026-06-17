@@ -10,46 +10,51 @@ const leaderboard = [
     rank: 1,
     country: "Denmark",
     score: 98,
-    change: "+2",
-    changeDirection: "up",
+    rankChange: "+2",
+    percentChange: "+4.2%",
+    direction: "up",
     trend: "M 0 40 C 20 35, 30 38, 45 28 S 70 14, 90 18 S 120 8, 150 6",
-    reason: "Elite team systems and tactical culture",
+    reasons: ["Team cohesion", "Tactical culture", "Elite CS systems"],
   },
   {
     rank: 2,
     country: "South Korea",
     score: 96,
-    change: "+1",
-    changeDirection: "up",
+    rankChange: "+1",
+    percentChange: "+3.8%",
+    direction: "up",
     trend: "M 0 42 C 25 36, 35 30, 55 32 S 85 20, 105 18 S 130 10, 150 12",
-    reason: "Training infrastructure and esports discipline",
+    reasons: ["Esports academies", "Training discipline", "Low-latency infrastructure"],
   },
   {
     rank: 3,
     country: "China",
     score: 94,
-    change: "-1",
-    changeDirection: "down",
+    rankChange: "-1",
+    percentChange: "-1.1%",
+    direction: "down",
     trend: "M 0 18 C 20 15, 40 22, 55 20 S 85 30, 105 28 S 130 38, 150 35",
-    reason: "Huge player base and professional investment",
+    reasons: ["Huge player base", "Professional investment", "MOBA depth"],
   },
   {
     rank: 4,
     country: "Sweden",
     score: 91,
-    change: "+3",
-    changeDirection: "up",
+    rankChange: "+3",
+    percentChange: "+1.7%",
+    direction: "up",
     trend: "M 0 44 C 20 38, 40 40, 55 34 S 85 24, 110 16 S 135 12, 150 8",
-    reason: "Long history of FPS excellence",
+    reasons: ["FPS history", "Strong grassroots scene", "High mechanical skill"],
   },
   {
     rank: 5,
     country: "USA",
     score: 89,
-    change: "-2",
-    changeDirection: "down",
+    rankChange: "-2",
+    percentChange: "-0.6%",
+    direction: "down",
     trend: "M 0 16 C 25 22, 35 18, 55 25 S 80 30, 105 36 S 130 34, 150 42",
-    reason: "Large talent pool and creator-driven scene",
+    reasons: ["Large talent pool", "Creator-driven scene", "High prize exposure"],
   },
 ];
 
@@ -68,27 +73,27 @@ export default function Home() {
       <header className="sticky top-0 z-50 border-b border-[#ff2fa8]/25 bg-white transition-all duration-300">
         <div
           className={`mx-auto flex max-w-7xl items-center px-8 transition-all duration-300 ${
-            scrolled ? "py-1" : "py-3"
+            scrolled ? "py-1" : "py-2"
           }`}
         >
           <div
-            className={`mr-10 flex shrink-0 items-center justify-center overflow-hidden transition-all duration-300 ${
-              scrolled ? "h-20 w-56" : "h-32 w-64"
+            className={`mr-12 flex shrink-0 items-center justify-center transition-all duration-300 ${
+              scrolled ? "h-20 w-48" : "h-32 w-60"
             }`}
           >
             <Image
               src="/skillatlas-logo.png"
               alt="SkillAtlas logo"
-              width={260}
-              height={260}
-              className={`object-contain transition-all duration-300 ${
-                scrolled ? "scale-110" : "scale-125"
+              width={240}
+              height={240}
+              className={`h-full w-auto object-contain transition-all duration-300 ${
+                scrolled ? "scale-100" : "scale-110"
               }`}
               priority
             />
           </div>
 
-          <nav className="hidden flex-1 items-center justify-around text-sm font-semibold text-gray-700 md:flex">
+          <nav className="hidden flex-1 items-center justify-around text-xl font-semibold text-gray-700 md:flex">
             <a className="hover:text-[#19d3cf]" href="/">Rankings</a>
             <a className="hover:text-[#19d3cf]" href="/world-map">World Map</a>
             <a className="hover:text-[#19d3cf]" href="/countries">Countries</a>
@@ -131,15 +136,15 @@ export default function Home() {
         <section className="overflow-hidden rounded-3xl border border-[#ff2fa8]/45 bg-white shadow-sm">
           <div className="grid grid-cols-12 border-b border-[#ff2fa8]/20 bg-gray-50 px-6 py-4 text-xs font-bold uppercase tracking-wide text-gray-500">
             <div className="col-span-1">#</div>
-            <div className="col-span-3">Country</div>
+            <div className="col-span-2">Country</div>
             <div className="col-span-2">Score</div>
             <div className="col-span-2">1Y Score</div>
-            <div className="col-span-1">7D</div>
+            <div className="col-span-2">7D</div>
             <div className="col-span-3">Why they win</div>
           </div>
 
           {leaderboard.map((item) => {
-            const isUp = item.changeDirection === "up";
+            const isUp = item.direction === "up";
 
             return (
               <div
@@ -150,7 +155,7 @@ export default function Home() {
                   {item.rank}
                 </div>
 
-                <div className="col-span-3 text-base font-semibold">
+                <div className="col-span-2 text-base font-semibold">
                   {item.country}
                 </div>
 
@@ -166,24 +171,29 @@ export default function Home() {
                       d={item.trend}
                       fill="none"
                       stroke={isUp ? "#19d3cf" : "#ff2fa8"}
-                      strokeWidth="4"
+                      strokeWidth="2"
                       strokeLinecap="round"
                     />
                   </svg>
                 </div>
 
-                <div className="col-span-1">
+                <div className="col-span-2">
                   <span
-                    className={`inline-flex items-center gap-1 font-bold ${
+                    className={`inline-flex items-center gap-2 font-bold ${
                       isUp ? "text-[#19d3cf]" : "text-[#ff2fa8]"
                     }`}
                   >
-                    {isUp ? "▲" : "▼"} {item.change}
+                    {isUp ? "▲" : "▼"} {item.rankChange}
+                    <span>{item.percentChange}</span>
                   </span>
                 </div>
 
-                <div className="col-span-3 leading-6 text-gray-600">
-                  {item.reason}
+                <div className="col-span-3">
+                  <ul className="space-y-1 text-gray-600">
+                    {item.reasons.map((reason) => (
+                      <li key={reason}>• {reason}</li>
+                    ))}
+                  </ul>
                 </div>
               </div>
             );
