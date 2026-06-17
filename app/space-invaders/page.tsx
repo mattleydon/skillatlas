@@ -13,7 +13,19 @@ const PLAY_LEFT = 23;
 const PLAY_RIGHT = 77;
 const PLAYER_Y = 86;
 const START_SPEED = 0.01875;
-const ALIEN_PATTERN = [0, 1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1, 0];
+
+const DOT_X_GAP = 1.05;
+const DOT_Y_GAP = 1.45;
+const HIT_X = 0.9;
+const HIT_Y = 1.15;
+
+const ALIEN_PATTERN = [
+  0, 1, 0, 1, 0,
+  1, 1, 1, 1, 1,
+  1, 0, 1, 0, 1,
+  1, 1, 1, 1, 1,
+  0, 1, 0, 1, 0,
+];
 
 function createAlienLine(startId: number, y = 10): Enemy[] {
   return Array.from({ length: 7 }, (_, i) => ({
@@ -70,7 +82,10 @@ export default function SpaceInvaders() {
 
       if (event.key === " ") {
         event.preventDefault();
-        setBullets((current) => [...current, { id: Date.now(), x: shipX, y: PLAYER_Y }]);
+        setBullets((current) => [
+          ...current,
+          { id: Date.now() + Math.random(), x: shipX, y: PLAYER_Y },
+        ]);
       }
     };
 
@@ -86,7 +101,11 @@ export default function SpaceInvaders() {
       spawnRate.current = Math.max(24000, spawnRate.current - 2);
 
       setEnemies((enemyState) => {
-        let nextEnemies = enemyState.map((enemy) => ({ ...enemy, y: enemy.y + speed.current }));
+        let nextEnemies = enemyState.map((enemy) => ({
+          ...enemy,
+          y: enemy.y + speed.current,
+          cells: [...enemy.cells],
+        }));
 
         setBullets((bulletState) => {
           const movedBullets = bulletState
@@ -98,51 +117,56 @@ export default function SpaceInvaders() {
           for (const bullet of movedBullets) {
             let bulletUsed = false;
 
-            nextEnemies = nextEnemies.map((enemy) => {
-              if (bulletUsed) return enemy;
+            for (let enemyIndex = 0; enemyIndex < nextEnemies.length; enemyIndex++) {
+              if (bulletUsed) break;
 
+              const enemy = nextEnemies[enemyIndex];
               const newCells = [...enemy.cells];
 
-              for (let i = 0; i < newCells.length; i++) {
-                if (newCells[i] <= 0) continue;
+              for (let cellIndex = 0; cellIndex < newCells.length; cellIndex++) {
+                if (newCells[cellIndex] <= 0) continue;
 
-                const col = i % 5;
-                const row = Math.floor(i / 5);
+                const col = cellIndex % 5;
+                const row = Math.floor(cellIndex / 5);
 
-                const dotX = enemy.x + col * 1.15;
-                const dotY = enemy.y + row * 1.65;
+                const dotX = enemy.x + col * DOT_X_GAP;
+                const dotY = enemy.y + row * DOT_Y_GAP;
 
-                const hitX = Math.abs(dotX - bullet.x) < 1.25;
-                const hitY = Math.abs(dotY - bullet.y) < 1.85;
-
-                if (hitX && hitY) {
-                  newCells[i] -= 1;
+                if (
+                  Math.abs(dotX - bullet.x) <= HIT_X &&
+                  Math.abs(dotY - bullet.y) <= HIT_Y
+                ) {
+                  newCells[cellIndex] -= 1;
                   bulletUsed = true;
                   setScore((current) => current + 10);
+
+                  nextEnemies[enemyIndex] = {
+                    ...enemy,
+                    cells: newCells,
+                  };
+
                   break;
                 }
               }
-
-              return { ...enemy, cells: newCells };
-            });
+            }
 
             if (!bulletUsed) remainingBullets.push(bullet);
           }
 
-          nextEnemies = nextEnemies.filter((enemy) => {
-            const alive = enemy.cells.some((cell) => cell > 0);
-            if (!alive) setScore((current) => current + 75);
-            return alive;
-          });
-
           return remainingBullets;
         });
 
+        nextEnemies = nextEnemies.filter((enemy) => {
+          const alive = enemy.cells.some((cell) => cell > 0);
+          if (!alive) setScore((current) => current + 75);
+          return alive;
+        });
+
         const touchingPlayer = nextEnemies.some((enemy) =>
-          enemy.cells.some((cell, i) => {
+          enemy.cells.some((cell, cellIndex) => {
             if (cell <= 0) return false;
-            const row = Math.floor(i / 5);
-            return enemy.y + row * 1.65 >= PLAYER_Y - 2;
+            const row = Math.floor(cellIndex / 5);
+            return enemy.y + row * DOT_Y_GAP >= PLAYER_Y - 2;
           })
         );
 
@@ -170,7 +194,14 @@ export default function SpaceInvaders() {
       {intro && (
         <div className="absolute inset-0 z-50 flex items-center justify-center bg-white">
           <div className="animate-[launch_1.6s_ease-in-out_forwards]">
-            <Image src="/skillatlas-logo.png" alt="SkillAtlas launch" width={130} height={130} priority className="mix-blend-multiply" />
+            <Image
+              src="/skillatlas-logo.png"
+              alt="SkillAtlas launch"
+              width={130}
+              height={130}
+              priority
+              className="mix-blend-multiply"
+            />
           </div>
         </div>
       )}
@@ -199,11 +230,21 @@ export default function SpaceInvaders() {
           {enemies.map((enemy) => <Alien key={enemy.id} enemy={enemy} />)}
 
           {bullets.map((bullet) => (
-            <div key={bullet.id} className="absolute h-6 w-1 rounded-full bg-[#19d3cf]" style={{ left: `${bullet.x}%`, top: `${bullet.y}%` }} />
+            <div
+              key={bullet.id}
+              className="absolute h-6 w-1 rounded-full bg-[#19d3cf]"
+              style={{ left: `${bullet.x}%`, top: `${bullet.y}%` }}
+            />
           ))}
 
           <div className="absolute bottom-8 h-16 w-16 -translate-x-1/2" style={{ left: `${shipX}%` }}>
-            <Image src="/skillatlas-logo.png" alt="Player ship" fill className="object-contain mix-blend-multiply" priority />
+            <Image
+              src="/skillatlas-logo.png"
+              alt="Player ship"
+              fill
+              className="object-contain mix-blend-multiply"
+              priority
+            />
           </div>
         </div>
       </section>
@@ -221,17 +262,26 @@ export default function SpaceInvaders() {
 
 function Alien({ enemy }: { enemy: Enemy }) {
   return (
-    <div className="absolute h-10 w-12" style={{ left: `${enemy.x}%`, top: `${enemy.y}%` }}>
-      <div className="grid grid-cols-5 gap-[3px]">
-        {enemy.cells.map((health, index) => (
+    <>
+      {enemy.cells.map((health, index) => {
+        if (health <= 0) return null;
+
+        const col = index % 5;
+        const row = Math.floor(index / 5);
+
+        return (
           <div
-            key={index}
-            className={`h-2.5 w-2.5 rounded-sm ${health > 0 ? "bg-[#ff2fa8]" : "bg-transparent"}`}
-            style={{ opacity: health === 3 ? 1 : health === 2 ? 0.6 : health === 1 ? 0.3 : 0 }}
+            key={`${enemy.id}-${index}`}
+            className="absolute h-2.5 w-2.5 rounded-sm bg-[#ff2fa8]"
+            style={{
+              left: `${enemy.x + col * DOT_X_GAP}%`,
+              top: `${enemy.y + row * DOT_Y_GAP}%`,
+              opacity: health === 3 ? 1 : health === 2 ? 0.6 : 0.3,
+            }}
           />
-        ))}
-      </div>
-    </div>
+        );
+      })}
+    </>
   );
 }
 
