@@ -22,66 +22,12 @@ type RankingRow = {
 };
 
 const statGames = [
-  {
-    name: "CS2",
-    nation: "Denmark",
-    score: 98,
-    mover: "Sweden",
-    moverChange: "+3",
-    loser: "USA",
-    loserChange: "-2",
-    trend: "M 0 42 C 20 38, 38 39, 54 30 S 82 16, 105 18 S 130 8, 150 6",
-  },
-  {
-    name: "League of Legends",
-    nation: "South Korea",
-    score: 99,
-    mover: "India",
-    moverChange: "+4",
-    loser: "USA",
-    loserChange: "-2",
-    trend: "M 0 40 C 22 34, 38 36, 55 28 S 82 20, 105 13 S 130 9, 150 10",
-  },
-  {
-    name: "Valorant",
-    nation: "Brazil",
-    score: 93,
-    mover: "Turkey",
-    moverChange: "+4",
-    loser: "Japan",
-    loserChange: "-2",
-    trend: "M 0 44 C 20 36, 42 40, 60 32 S 88 24, 110 14 S 132 12, 150 7",
-  },
-  {
-    name: "Fortnite",
-    nation: "USA",
-    score: 95,
-    mover: "Canada",
-    moverChange: "+2",
-    loser: "Brazil",
-    loserChange: "-2",
-    trend: "M 0 38 C 20 35, 36 28, 58 32 S 88 18, 108 20 S 130 12, 150 8",
-  },
-  {
-    name: "Rocket League",
-    nation: "France",
-    score: 92,
-    mover: "Netherlands",
-    moverChange: "+3",
-    loser: "Australia",
-    loserChange: "-1",
-    trend: "M 0 45 C 25 42, 38 35, 58 36 S 85 24, 112 16 S 132 11, 150 9",
-  },
-  {
-    name: "Chess",
-    nation: "India",
-    score: 94,
-    mover: "Uzbekistan",
-    moverChange: "+5",
-    loser: "China",
-    loserChange: "-2",
-    trend: "M 0 42 C 18 35, 35 31, 52 33 S 78 22, 102 14 S 128 9, 150 6",
-  },
+  { name: "CS2", nation: "Denmark", score: 98, mover: "Sweden", moverChange: "+3", loser: "USA", loserChange: "-2", trend: "M 0 42 C 20 38, 38 39, 54 30 S 82 16, 105 18 S 130 8, 150 6" },
+  { name: "League of Legends", nation: "South Korea", score: 99, mover: "India", moverChange: "+4", loser: "USA", loserChange: "-2", trend: "M 0 40 C 22 34, 38 36, 55 28 S 82 20, 105 13 S 130 9, 150 10" },
+  { name: "Valorant", nation: "Brazil", score: 93, mover: "Turkey", moverChange: "+4", loser: "Japan", loserChange: "-2", trend: "M 0 44 C 20 36, 42 40, 60 32 S 88 24, 110 14 S 132 12, 150 7" },
+  { name: "Fortnite", nation: "USA", score: 95, mover: "Canada", moverChange: "+2", loser: "Brazil", loserChange: "-2", trend: "M 0 38 C 20 35, 36 28, 58 32 S 88 18, 108 20 S 130 12, 150 8" },
+  { name: "Rocket League", nation: "France", score: 92, mover: "Netherlands", moverChange: "+3", loser: "Australia", loserChange: "-1", trend: "M 0 45 C 25 42, 38 35, 58 36 S 85 24, 112 16 S 132 11, 150 9" },
+  { name: "Chess", nation: "India", score: 94, mover: "Uzbekistan", moverChange: "+5", loser: "China", loserChange: "-2", trend: "M 0 42 C 18 35, 35 31, 52 33 S 78 22, 102 14 S 128 9, 150 6" },
 ];
 
 const topCountriesByGame: Record<Game, RankingRow[]> = {
@@ -129,56 +75,31 @@ const topCountriesByGame: Record<Game, RankingRow[]> = {
   ],
 };
 
-const countryPool = [
-  "Germany", "France", "UK", "Canada", "Australia", "Netherlands", "Brazil", "Turkey", "Japan", "India",
-  "Russia", "Uzbekistan", "Taiwan", "Poland", "Finland", "Norway", "Spain", "Portugal", "Italy", "Mexico",
-  "Argentina", "Chile", "Colombia", "Peru", "New Zealand", "Singapore", "Malaysia", "Thailand", "Vietnam", "Philippines",
-  "Indonesia", "Saudi Arabia", "UAE", "Israel", "Ukraine", "Czech Republic", "Austria", "Switzerland", "Belgium", "Ireland",
-  "Greece", "Romania", "Hungary", "Serbia", "Croatia", "Slovenia", "Slovakia", "Lithuania", "Latvia", "Estonia",
-  "Iceland", "South Africa", "Egypt", "Morocco", "Nigeria", "Kenya", "Ghana", "Pakistan", "Bangladesh", "Sri Lanka",
-  "Nepal", "Iran", "Iraq", "Qatar", "Kuwait", "Jordan", "Lebanon", "Kazakhstan", "Mongolia", "Hong Kong",
-  "Uruguay", "Paraguay", "Bolivia", "Ecuador", "Venezuela", "Costa Rica", "Panama", "Dominican Republic", "Jamaica", "Cuba",
-  "Luxembourg", "Malta", "Cyprus", "Bulgaria", "Belarus", "Georgia", "Armenia", "Azerbaijan", "Algeria", "Tunisia",
-  "Ethiopia", "Tanzania", "Uganda", "Zimbabwe", "Cambodia",
-];
+const countryPool = ["Germany", "France", "UK", "Canada", "Australia", "Netherlands", "Brazil", "Turkey", "Japan", "India", "Russia", "Uzbekistan", "Taiwan", "Poland", "Finland", "Norway", "Spain", "Portugal", "Italy", "Mexico", "Argentina", "Chile", "Colombia", "Peru", "New Zealand", "Singapore", "Malaysia", "Thailand", "Vietnam", "Philippines", "Indonesia", "Saudi Arabia", "UAE", "Israel", "Ukraine", "Czech Republic", "Austria", "Switzerland", "Belgium", "Ireland", "Greece", "Romania", "Hungary", "Serbia", "Croatia", "Slovenia", "Slovakia", "Lithuania", "Latvia", "Estonia", "Iceland", "South Africa", "Egypt", "Morocco", "Nigeria", "Kenya", "Ghana", "Pakistan", "Bangladesh", "Sri Lanka", "Nepal", "Iran", "Iraq", "Qatar", "Kuwait", "Jordan", "Lebanon", "Kazakhstan", "Mongolia", "Hong Kong", "Uruguay", "Paraguay", "Bolivia", "Ecuador", "Venezuela", "Costa Rica", "Panama", "Dominican Republic", "Jamaica", "Cuba", "Luxembourg", "Malta", "Cyprus", "Bulgaria", "Belarus", "Georgia", "Armenia", "Azerbaijan", "Algeria", "Tunisia", "Ethiopia", "Tanzania", "Uganda", "Zimbabwe", "Cambodia"];
 
 const trendUp = "M 0 42 C 20 38, 40 36, 58 30 S 88 20, 112 14 S 135 9, 150 7";
 const trendDown = "M 0 16 C 22 19, 42 20, 62 26 S 92 31, 114 38 S 134 39, 150 44";
 
-function row(
-  country: string,
-  score: number,
-  rankChange: string,
-  percentChange: string,
-  direction: Direction,
-  reasons: string[],
-  improvements: string[]
-): RankingRow {
+function row(country: string, score: number, rankChange: string, percentChange: string, direction: Direction, reasons: string[], improvements: string[]): RankingRow {
   return { country, score, rankChange, percentChange, direction, reasons, improvements };
 }
 
 function buildTop100(game: Game): RankingRow[] {
   const existing = topCountriesByGame[game];
   const used = new Set(existing.map((item) => item.country));
-  const extras = countryPool
-    .filter((country) => !used.has(country))
-    .slice(0, 95)
-    .map((country, index) => {
-      const score = Math.max(42, 84 - Math.floor(index * 0.45));
-      const isUp = index % 4 !== 2;
-      const rankMove = isUp ? `+${(index % 5) + 1}` : `-${(index % 3) + 1}`;
-      const percentMove = isUp ? `+${(0.4 + (index % 9) * 0.3).toFixed(1)}%` : `-${(0.3 + (index % 6) * 0.2).toFixed(1)}%`;
-
-      return row(
-        country,
-        score,
-        rankMove,
-        percentMove,
-        isUp ? "up" : "down",
-        ["Growing talent", "Online access", "Competitive base"],
-        ["Elite infrastructure", "International exposure"]
-      );
-    });
+  const extras = countryPool.filter((country) => !used.has(country)).slice(0, 95).map((country, index) => {
+    const score = Math.max(42, 84 - Math.floor(index * 0.45));
+    const isUp = index % 4 !== 2;
+    return row(
+      country,
+      score,
+      isUp ? `+${(index % 5) + 1}` : `-${(index % 3) + 1}`,
+      isUp ? `+${(0.4 + (index % 9) * 0.3).toFixed(1)}%` : `-${(0.3 + (index % 6) * 0.2).toFixed(1)}%`,
+      isUp ? "up" : "down",
+      ["Growing talent", "Online access", "Competitive base"],
+      ["Elite infrastructure", "International exposure"]
+    );
+  });
 
   return [...existing, ...extras];
 }
@@ -186,6 +107,7 @@ function buildTop100(game: Game): RankingRow[] {
 export default function Home() {
   const [scrolled, setScrolled] = useState(false);
   const [statsIndex, setStatsIndex] = useState(0);
+  const [statsVisible, setStatsVisible] = useState(true);
   const [selectedGame, setSelectedGame] = useState<Game>("CS2");
   const [selectedPeriod, setSelectedPeriod] = useState<Period>("7 Days");
 
@@ -197,12 +119,19 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    const interval = window.setInterval(() => {
-      setStatsIndex((current) => (current + 1) % statGames.length);
-    }, 10000);
+    const stayTimer = window.setTimeout(() => {
+      setStatsVisible(false);
 
-    return () => window.clearInterval(interval);
-  }, []);
+      const switchTimer = window.setTimeout(() => {
+        setStatsIndex((current) => (current + 1) % statGames.length);
+        setStatsVisible(true);
+      }, 1500);
+
+      return () => window.clearTimeout(switchTimer);
+    }, 6000);
+
+    return () => window.clearTimeout(stayTimer);
+  }, [statsIndex]);
 
   const activeStats = statGames[statsIndex];
   const leaderboard = useMemo(() => buildTop100(selectedGame), [selectedGame]);
@@ -215,7 +144,6 @@ export default function Home() {
             <div className={`relative transition-all duration-300 ${scrolled ? "h-16 w-16" : "h-24 w-24"}`}>
               <Image src="/skillatlas-logo.png" alt="SkillAtlas logo" fill className="object-contain" priority />
             </div>
-
             <div className={`relative transition-all duration-300 ${scrolled ? "h-10 w-56" : "h-14 w-80"}`}>
               <Image src="/skillatlas-title.png" alt="SkillAtlas title" fill className="object-contain object-left" priority />
             </div>
@@ -223,11 +151,7 @@ export default function Home() {
 
           <nav className="hidden flex-1 items-center justify-around md:flex">
             {["Rankings", "World Map", "Countries", "Profiles", "User Rankings", "About"].map((item) => (
-              <a
-                key={item}
-                className="text-[1rem] font-semibold text-gray-700 transition-colors hover:text-[#19d3cf]"
-                href={item === "Rankings" ? "/" : `/${item.toLowerCase().replace(" ", "-")}`}
-              >
+              <a key={item} className="text-[1rem] font-semibold text-gray-700 transition-colors hover:text-[#19d3cf]" href={item === "Rankings" ? "/" : `/${item.toLowerCase().replace(" ", "-")}`}>
                 {item}
               </a>
             ))}
@@ -237,20 +161,12 @@ export default function Home() {
 
       <section className="mx-auto max-w-7xl px-8 py-8">
         <div className="mb-5 rounded-3xl border border-[#ff2fa8]/45 bg-white p-6 shadow-sm">
-          <p className="mb-2 text-xs font-bold uppercase tracking-[0.25em] text-[#19d3cf]">
-            Global Gaming Rankings
-          </p>
-
-          <h2 className="mb-2 text-lg font-black tracking-tight">
-            Which country is actually the best at gaming?
-          </h2>
-
-          <p className="text-sm text-gray-600 md:whitespace-nowrap">
-            Track which countries dominate each game, why they win, where they are improving, and where they are still vulnerable.
-          </p>
+          <p className="mb-2 text-xs font-bold uppercase tracking-[0.25em] text-[#19d3cf]">Global Gaming Rankings</p>
+          <h2 className="mb-2 text-lg font-black tracking-tight">Which country is actually the best at gaming?</h2>
+          <p className="text-sm text-gray-600 md:whitespace-nowrap">Track which countries dominate each game, why they win, where they are improving, and where they are still vulnerable.</p>
         </div>
 
-        <div key={activeStats.name} className="mb-5 grid animate-[fadeIn_2s_ease] gap-4 md:grid-cols-5">
+        <div className={`mb-5 grid gap-4 transition-all duration-[1500ms] ease-in-out md:grid-cols-5 ${statsVisible ? "translate-y-0 opacity-100" : "translate-y-2 opacity-0"}`}>
           <StatCard label="Top Game" value={activeStats.name} valueColor="text-[#19d3cf]" />
 
           <div className="rounded-2xl border border-[#ff2fa8]/35 bg-white p-5 shadow-sm md:col-span-2">
@@ -259,14 +175,12 @@ export default function Home() {
                 <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-gray-500">Leading Nation</p>
                 <p className="mt-4 text-lg font-black leading-none">{activeStats.nation}</p>
               </div>
-
               <div>
                 <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-gray-500">7D Trend</p>
                 <svg viewBox="0 0 150 50" className="mt-1 h-12 w-36">
                   <path d={activeStats.trend} fill="none" stroke="#19d3cf" strokeWidth="1.6" strokeLinecap="round" />
                 </svg>
               </div>
-
               <div className="text-right">
                 <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-gray-500">Dominance Score</p>
                 <p className="mt-4 text-lg font-black leading-none text-[#19d3cf]">{activeStats.score}</p>
@@ -281,15 +195,7 @@ export default function Home() {
         <div className="mb-6 flex items-center justify-between gap-4 rounded-3xl border border-[#ff2fa8]/45 bg-white p-4 shadow-sm">
           <div className="flex gap-3 overflow-x-auto">
             {games.map((game) => (
-              <button
-                key={game}
-                onClick={() => setSelectedGame(game)}
-                className={`whitespace-nowrap rounded-full px-5 py-2.5 text-sm font-bold transition-all duration-300 ${
-                  game === selectedGame
-                    ? "bg-[#19d3cf] text-white"
-                    : "border border-gray-200 bg-white text-gray-700 hover:border-[#ff2fa8]"
-                }`}
-              >
+              <button key={game} onClick={() => setSelectedGame(game)} className={`whitespace-nowrap rounded-full px-5 py-2.5 text-sm font-bold transition-all duration-300 ${game === selectedGame ? "bg-[#19d3cf] text-white" : "border border-gray-200 bg-white text-gray-700 hover:border-[#ff2fa8]"}`}>
                 {game}
               </button>
             ))}
@@ -297,15 +203,7 @@ export default function Home() {
 
           <div className="hidden shrink-0 gap-2 md:flex">
             {periods.map((period) => (
-              <button
-                key={period}
-                onClick={() => setSelectedPeriod(period)}
-                className={`rounded-full px-4 py-2 text-xs font-bold transition-all duration-300 ${
-                  selectedPeriod === period
-                    ? "bg-[#ff2fa8] text-white"
-                    : "border border-gray-200 bg-white text-gray-600 hover:border-[#19d3cf]"
-                }`}
-              >
+              <button key={period} onClick={() => setSelectedPeriod(period)} className={`rounded-full px-4 py-2 text-xs font-bold transition-all duration-300 ${selectedPeriod === period ? "bg-[#ff2fa8] text-white" : "border border-gray-200 bg-white text-gray-600 hover:border-[#19d3cf]"}`}>
                 {period}
               </button>
             ))}
@@ -314,104 +212,35 @@ export default function Home() {
 
         <section className="overflow-hidden rounded-3xl border border-[#ff2fa8]/45 bg-white shadow-sm">
           <div className="grid grid-cols-[0.6fr_1.4fr_1fr_1.4fr_1fr_1fr_2.2fr_2.2fr] border-b border-[#ff2fa8]/20 bg-gray-50 px-6 py-4 text-[11px] font-bold uppercase tracking-wide text-gray-500">
-            <div>Rank</div>
-            <div>Country</div>
-            <div>Score</div>
-            <div>{selectedPeriod} Score</div>
-            <div>{selectedPeriod} Rank</div>
-            <div>{selectedPeriod} %</div>
-            <div>Why they win</div>
-            <div>Room for improvement</div>
+            <div>Rank</div><div>Country</div><div>Score</div><div>{selectedPeriod} Score</div><div>{selectedPeriod} Rank</div><div>{selectedPeriod} %</div><div>Why they win</div><div>Room for improvement</div>
           </div>
 
           {leaderboard.map((item, index) => {
             const isUp = item.direction === "up";
-
             return (
-              <div
-                key={`${selectedGame}-${item.country}`}
-                className="grid grid-cols-[0.6fr_1.4fr_1fr_1.4fr_1fr_1fr_2.2fr_2.2fr] items-center border-b border-gray-100 px-6 py-4 text-sm last:border-b-0 hover:bg-gray-50"
-              >
+              <div key={`${selectedGame}-${item.country}`} className="grid grid-cols-[0.6fr_1.4fr_1fr_1.4fr_1fr_1fr_2.2fr_2.2fr] items-center border-b border-gray-100 px-6 py-4 text-sm last:border-b-0 hover:bg-gray-50">
                 <div className="text-base font-normal text-[#ff2fa8]">{index + 1}</div>
-
                 <div className="text-sm font-semibold">{item.country}</div>
-
-                <div>
-                  <span className="rounded-full bg-[#19d3cf]/10 px-4 py-2 text-sm font-black text-[#19d3cf]">
-                    {item.score}
-                  </span>
-                </div>
-
-                <div>
-                  <svg viewBox="0 0 150 50" className="h-10 w-28">
-                    <path
-                      d={isUp ? trendUp : trendDown}
-                      fill="none"
-                      stroke={isUp ? "#19d3cf" : "#ff2fa8"}
-                      strokeWidth="1.5"
-                      strokeLinecap="round"
-                    />
-                  </svg>
-                </div>
-
-                <div className={`font-bold ${isUp ? "text-[#19d3cf]" : "text-[#ff2fa8]"}`}>
-                  {isUp ? "▲" : "▼"} {item.rankChange}
-                </div>
-
-                <div className={`font-bold ${isUp ? "text-[#19d3cf]" : "text-[#ff2fa8]"}`}>
-                  {item.percentChange}
-                </div>
-
-                <div className="flex flex-wrap gap-2">
-                  {item.reasons.map((reason) => (
-                    <span key={reason} className="rounded-full border border-gray-200 bg-white px-3 py-1 text-xs font-semibold text-gray-600">
-                      {reason}
-                    </span>
-                  ))}
-                </div>
-
-                <div className="flex flex-wrap gap-2">
-                  {item.improvements.map((improvement) => (
-                    <span key={improvement} className="rounded-full border border-[#ff2fa8]/20 bg-[#ff2fa8]/5 px-3 py-1 text-xs font-semibold text-gray-600">
-                      {improvement}
-                    </span>
-                  ))}
-                </div>
+                <div><span className="rounded-full bg-[#19d3cf]/10 px-4 py-2 text-sm font-black text-[#19d3cf]">{item.score}</span></div>
+                <div><svg viewBox="0 0 150 50" className="h-10 w-28"><path d={isUp ? trendUp : trendDown} fill="none" stroke={isUp ? "#19d3cf" : "#ff2fa8"} strokeWidth="1.5" strokeLinecap="round" /></svg></div>
+                <div className={`font-bold ${isUp ? "text-[#19d3cf]" : "text-[#ff2fa8]"}`}>{isUp ? "▲" : "▼"} {item.rankChange}</div>
+                <div className={`font-bold ${isUp ? "text-[#19d3cf]" : "text-[#ff2fa8]"}`}>{item.percentChange}</div>
+                <div className="flex flex-wrap gap-2">{item.reasons.map((reason) => <span key={reason} className="rounded-full border border-gray-200 bg-white px-3 py-1 text-xs font-semibold text-gray-600">{reason}</span>)}</div>
+                <div className="flex flex-wrap gap-2">{item.improvements.map((improvement) => <span key={improvement} className="rounded-full border border-[#ff2fa8]/20 bg-[#ff2fa8]/5 px-3 py-1 text-xs font-semibold text-gray-600">{improvement}</span>)}</div>
               </div>
             );
           })}
         </section>
-
-        <style jsx global>{`
-          @keyframes fadeIn {
-            from {
-              opacity: 0.05;
-              transform: translateY(8px);
-            }
-            to {
-              opacity: 1;
-              transform: translateY(0);
-            }
-          }
-        `}</style>
       </section>
     </main>
   );
 }
 
-function StatCard({
-  label,
-  value,
-  valueColor,
-}: {
-  label: string;
-  value: string;
-  valueColor: string;
-}) {
+function StatCard({ label, value, valueColor }: { label: string; value: string; valueColor: string }) {
   return (
     <div className="rounded-2xl border border-[#ff2fa8]/35 bg-white p-5 shadow-sm">
       <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-gray-500">{label}</p>
-      <p className={`mt-4 text-lg font-black leading-none transition-all duration-2000 ${valueColor}`}>{value}</p>
+      <p className={`mt-4 text-lg font-black leading-none ${valueColor}`}>{value}</p>
     </div>
   );
 }
