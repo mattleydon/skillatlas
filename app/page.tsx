@@ -154,9 +154,12 @@ export default function Home() {
       <header className="sticky top-0 z-50 border-b border-[#ff2fa8]/25 bg-white transition-all duration-300">
         <div className={`mx-auto flex max-w-7xl items-center px-8 transition-all duration-300 ${scrolled ? "py-2" : "py-3"}`}>
           <div className="mr-14 flex shrink-0 items-center gap-5">
-            <div className={`relative transition-all duration-300 ${scrolled ? "h-16 w-16" : "h-24 w-24"}`}>
-              <Image src="/skillatlas-logo.png" alt="SkillAtlas logo" fill className="object-contain" priority />
-            </div>
+            <a
+  href="/space-invaders"
+  className={`relative transition-all duration-300 ${scrolled ? "h-16 w-16" : "h-24 w-24"}`}
+>
+  <Image src="/skillatlas-logo.png" alt="SkillAtlas logo" fill className="object-contain" priority />
+</a>
 
             <a href="/" className={`relative transition-all duration-300 ${scrolled ? "h-10 w-56" : "h-14 w-80"}`}>
               <Image src="/skillatlas-title.png" alt="SkillAtlas title" fill className="object-contain object-left" priority />
