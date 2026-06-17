@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 
 type Enemy = { id: number; x: number; y: number; cells: number[] };
 type Bullet = { id: number; x: number; y: number };
+type EnemyBullet = { id: number; x: number; y: number };
 
 const countries = ["Denmark", "South Korea", "China", "Sweden", "USA"];
 const players = ["AtlasPilot", "PixelWarden", "RankGoblin", "GlobeRunner", "SkillGhost"];
@@ -44,6 +45,7 @@ export default function SpaceInvaders() {
   const [intro, setIntro] = useState(true);
   const [shipX, setShipX] = useState(50);
   const [bullets, setBullets] = useState<Bullet[]>([]);
+  const [enemyBullets, setEnemyBullets] = useState<EnemyBullet[]>([]);
   const [enemies, setEnemies] = useState<Enemy[]>(createInitialWave);
   const [score, setScore] = useState(0);
   const [gameOver, setGameOver] = useState(false);
@@ -52,16 +54,19 @@ export default function SpaceInvaders() {
   const speed = useRef(START_SPEED);
   const spawnRate = useRef(82500);
   const lastSpawn = useRef(Date.now());
+  const enemyFireChance = useRef(0.012);
 
   function restartGame() {
     setShipX(50);
     setBullets([]);
+    setEnemyBullets([]);
     setEnemies(createInitialWave());
     setScore(0);
     setGameOver(false);
     speed.current = START_SPEED;
     spawnRate.current = 82500;
     lastSpawn.current = Date.now();
+    enemyFireChance.current = 0.012;
     nextId.current = 1000;
   }
 
@@ -77,8 +82,8 @@ export default function SpaceInvaders() {
         return;
       }
 
-      if (event.key === "ArrowLeft") setShipX((x) => Math.max(3, x - 3));
-      if (event.key === "ArrowRight") setShipX((x) => Math.min(97, x + 3));
+      if (event.key === "ArrowLeft") setShipX((x) => Math.max(3, x - 0.75));
+      if (event.key === "ArrowRight") setShipX((x) => Math.min(97, x + 0.75));
 
       if (event.key === " ") {
         event.preventDefault();
@@ -99,6 +104,7 @@ export default function SpaceInvaders() {
     const loop = window.setInterval(() => {
       speed.current = Math.min(0.09, speed.current + 0.000025);
       spawnRate.current = Math.max(24000, spawnRate.current - 2);
+      enemyFireChance.current = Math.min(0.08, enemyFireChance.current + 0.000012);
 
       setEnemies((enemyState) => {
         let nextEnemies = enemyState.map((enemy) => ({
@@ -128,23 +134,15 @@ export default function SpaceInvaders() {
 
                 const col = cellIndex % 5;
                 const row = Math.floor(cellIndex / 5);
-
                 const dotX = enemy.x + col * DOT_X_GAP;
                 const dotY = enemy.y + row * DOT_Y_GAP;
 
-                if (
-                  Math.abs(dotX - bullet.x) <= HIT_X &&
-                  Math.abs(dotY - bullet.y) <= HIT_Y
-                ) {
+                if (Math.abs(dotX - bullet.x) <= HIT_X && Math.abs(dotY - bullet.y) <= HIT_Y) {
                   newCells[cellIndex] -= 1;
                   bulletUsed = true;
                   setScore((current) => current + 10);
 
-                  nextEnemies[enemyIndex] = {
-                    ...enemy,
-                    cells: newCells,
-                  };
-
+                  nextEnemies[enemyIndex] = { ...enemy, cells: newCells };
                   break;
                 }
               }
@@ -175,6 +173,18 @@ export default function SpaceInvaders() {
           return nextEnemies;
         }
 
+        if (nextEnemies.length > 0 && Math.random() < enemyFireChance.current) {
+          const shooter = nextEnemies[Math.floor(Math.random() * nextEnemies.length)];
+          setEnemyBullets((current) => [
+            ...current,
+            {
+              id: Date.now() + Math.random(),
+              x: shooter.x + 2.1,
+              y: shooter.y + 4.8,
+            },
+          ]);
+        }
+
         const now = Date.now();
         if (now - lastSpawn.current > spawnRate.current) {
           nextEnemies = [...nextEnemies, ...createAlienLine(nextId.current, 7)];
@@ -184,10 +194,28 @@ export default function SpaceInvaders() {
 
         return nextEnemies;
       });
+
+      setEnemyBullets((bulletState) => {
+        const moved = bulletState
+          .map((bullet) => ({ ...bullet, y: bullet.y + 1.25 }))
+          .filter((bullet) => bullet.y < 96);
+
+        const playerHit = moved.some(
+          (bullet) =>
+            Math.abs(bullet.x - shipX) < 2.5 &&
+            Math.abs(bullet.y - PLAYER_Y) < 3.5
+        );
+
+        if (playerHit) {
+          setGameOver(true);
+        }
+
+        return moved;
+      });
     }, 60);
 
     return () => window.clearInterval(loop);
-  }, [intro, gameOver]);
+  }, [intro, gameOver, shipX]);
 
   return (
     <main className="relative min-h-screen overflow-hidden bg-white text-[#111827]">
@@ -233,6 +261,14 @@ export default function SpaceInvaders() {
             <div
               key={bullet.id}
               className="absolute h-6 w-1 rounded-full bg-[#19d3cf]"
+              style={{ left: `${bullet.x}%`, top: `${bullet.y}%` }}
+            />
+          ))}
+
+          {enemyBullets.map((bullet) => (
+            <div
+              key={bullet.id}
+              className="absolute h-5 w-1 rounded-full bg-[#ff2fa8]"
               style={{ left: `${bullet.x}%`, top: `${bullet.y}%` }}
             />
           ))}
