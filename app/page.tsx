@@ -14,18 +14,19 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-[#F8FAFC] text-[#111827]">
       <header className="sticky top-0 z-50 border-b border-[#ff2fa8]/25 bg-white">
-        <div className="mx-auto flex max-w-7xl items-center px-8 py-6">
-          <div className="mr-20 flex shrink-0 items-center">
+        <div className="mx-auto flex max-w-7xl items-center px-8 py-2">
+          <div className="mr-8 flex h-36 w-72 shrink-0 items-center justify-center overflow-hidden">
             <Image
               src="/skillatlas-logo.png"
               alt="SkillAtlas logo"
-              width={230}
-              height={230}
-              className="rounded-2xl"
+              width={300}
+              height={300}
+              className="scale-125 object-contain"
+              priority
             />
           </div>
 
-          <nav className="hidden flex-1 items-center justify-evenly text-base font-semibold text-gray-700 md:flex">
+          <nav className="hidden flex-1 items-center justify-around text-base font-semibold text-gray-700 md:flex">
             <a className="hover:text-[#19d3cf]" href="/">Rankings</a>
             <a className="hover:text-[#19d3cf]" href="/world-map">World Map</a>
             <a className="hover:text-[#19d3cf]" href="/countries">Countries</a>
