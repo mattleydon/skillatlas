@@ -3,46 +3,51 @@
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 
-type Enemy = { id: number; x: number; y: number; health: number };
+type Enemy = { id: number; x: number; y: number; cells: number[] };
 type Bullet = { id: number; x: number; y: number };
 
 const countries = ["Denmark", "South Korea", "China", "Sweden", "USA"];
 const players = ["AtlasPilot", "PixelWarden", "RankGoblin", "GlobeRunner", "SkillGhost"];
 
-const PLAY_LEFT = 27;
+const PLAY_LEFT = 23;
 const PLAY_RIGHT = 77;
 const PLAYER_Y = 86;
+const ALIEN_PATTERN = [0, 1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1, 0];
 
-function createEnemyWave(startId: number, y = 10): Enemy[] {
-  return Array.from({ length: 14 }, (_, i) => ({
+function createAlienLine(startId: number, y = 10): Enemy[] {
+  return Array.from({ length: 7 }, (_, i) => ({
     id: startId + i,
-    x: 8 + (i % 7) * 14,
-    y: y + Math.floor(i / 7) * 8,
-    health: 3,
+    x: 4 + i * 14.5,
+    y,
+    cells: ALIEN_PATTERN.map((cell) => (cell ? 3 : 0)),
   }));
+}
+
+function createInitialWave(): Enemy[] {
+  return [...createAlienLine(0, 9), ...createAlienLine(100, 19)];
 }
 
 export default function SpaceInvaders() {
   const [intro, setIntro] = useState(true);
   const [shipX, setShipX] = useState(50);
   const [bullets, setBullets] = useState<Bullet[]>([]);
-  const [enemies, setEnemies] = useState<Enemy[]>(() => createEnemyWave(0));
+  const [enemies, setEnemies] = useState<Enemy[]>(createInitialWave);
   const [score, setScore] = useState(0);
   const [gameOver, setGameOver] = useState(false);
 
   const nextId = useRef(1000);
-  const speed = useRef(0.012);
-  const spawnRate = useRef(11000);
+  const speed = useRef(0.006);
+  const spawnRate = useRef(55000);
   const lastSpawn = useRef(Date.now());
 
   function restartGame() {
     setShipX(50);
     setBullets([]);
-    setEnemies(createEnemyWave(0));
+    setEnemies(createInitialWave());
     setScore(0);
     setGameOver(false);
-    speed.current = 0.012;
-    spawnRate.current = 11000;
+    speed.current = 0.006;
+    spawnRate.current = 55000;
     lastSpawn.current = Date.now();
     nextId.current = 1000;
   }
@@ -59,8 +64,8 @@ export default function SpaceInvaders() {
         return;
       }
 
-      if (event.key === "ArrowLeft") setShipX((x) => Math.max(6, x - 3));
-      if (event.key === "ArrowRight") setShipX((x) => Math.min(94, x + 3));
+      if (event.key === "ArrowLeft") setShipX((x) => Math.max(3, x - 3));
+      if (event.key === "ArrowRight") setShipX((x) => Math.min(97, x + 3));
 
       if (event.key === " ") {
         event.preventDefault();
@@ -76,53 +81,74 @@ export default function SpaceInvaders() {
     if (intro || gameOver) return;
 
     const loop = window.setInterval(() => {
-      speed.current = Math.min(0.11, speed.current + 0.00008);
-      spawnRate.current = Math.max(4200, spawnRate.current - 2);
+      speed.current = Math.min(0.075, speed.current + 0.000025);
+      spawnRate.current = Math.max(16000, spawnRate.current - 3);
 
       setEnemies((enemyState) => {
-        let nextEnemies = enemyState.map((enemy) => ({
-          ...enemy,
-          y: enemy.y + speed.current,
-        }));
-
-        if (nextEnemies.some((enemy) => enemy.y >= PLAYER_Y - 3)) {
-          setGameOver(true);
-          return nextEnemies;
-        }
+        let nextEnemies = enemyState.map((enemy) => ({ ...enemy, y: enemy.y + speed.current }));
 
         setBullets((bulletState) => {
           const movedBullets = bulletState
-            .map((bullet) => ({ ...bullet, y: bullet.y - 3 }))
+            .map((bullet) => ({ ...bullet, y: bullet.y - 3.2 }))
             .filter((bullet) => bullet.y > 0);
 
           const remainingBullets: Bullet[] = [];
 
           for (const bullet of movedBullets) {
-            const hit = nextEnemies.find(
-              (enemy) =>
-                Math.abs(enemy.x - bullet.x) < 4 &&
-                Math.abs(enemy.y - bullet.y) < 4
-            );
+            let bulletUsed = false;
 
-            if (hit) {
-              nextEnemies = nextEnemies
-                .map((enemy) =>
-                  enemy.id === hit.id ? { ...enemy, health: enemy.health - 1 } : enemy
-                )
-                .filter((enemy) => enemy.health > 0);
+            nextEnemies = nextEnemies.map((enemy) => {
+              if (bulletUsed) return enemy;
 
-              setScore((current) => current + 50);
-            } else {
-              remainingBullets.push(bullet);
-            }
+              const newCells = [...enemy.cells];
+
+              for (let i = 0; i < newCells.length; i++) {
+                if (newCells[i] <= 0) continue;
+
+                const col = i % 5;
+                const row = Math.floor(i / 5);
+                const dotX = enemy.x + col * 0.72;
+                const dotY = enemy.y + row * 1.15;
+
+                if (Math.abs(dotX - bullet.x) < 0.65 && Math.abs(dotY - bullet.y) < 1.1) {
+                  newCells[i] -= 1;
+                  bulletUsed = true;
+                  setScore((current) => current + 10);
+                  break;
+                }
+              }
+
+              return { ...enemy, cells: newCells };
+            });
+
+            if (!bulletUsed) remainingBullets.push(bullet);
           }
+
+          nextEnemies = nextEnemies.filter((enemy) => {
+            const alive = enemy.cells.some((cell) => cell > 0);
+            if (!alive) setScore((current) => current + 50);
+            return alive;
+          });
 
           return remainingBullets;
         });
 
+        const touchingPlayer = nextEnemies.some((enemy) =>
+          enemy.cells.some((cell, i) => {
+            if (cell <= 0) return false;
+            const row = Math.floor(i / 5);
+            return enemy.y + row * 1.15 >= PLAYER_Y - 2;
+          })
+        );
+
+        if (touchingPlayer) {
+          setGameOver(true);
+          return nextEnemies;
+        }
+
         const now = Date.now();
         if (now - lastSpawn.current > spawnRate.current) {
-          nextEnemies = [...nextEnemies, ...createEnemyWave(nextId.current, 7)];
+          nextEnemies = [...nextEnemies, ...createAlienLine(nextId.current, 7)];
           nextId.current += 1000;
           lastSpawn.current = now;
         }
@@ -159,17 +185,14 @@ export default function SpaceInvaders() {
           )}
         </div>
 
-        <div className="absolute right-5 top-5 z-20 grid max-h-[92vh] gap-4 overflow-hidden">
+        <div className="absolute right-5 top-5 z-20 grid max-h-[90vh] gap-3 overflow-hidden">
           <Leaderboard title="Top Countries" items={countries} />
           <Leaderboard title="Top Players" items={players} />
         </div>
 
-        <div
-          className="absolute inset-y-0"
-          style={{ left: `${PLAY_LEFT}%`, right: `${100 - PLAY_RIGHT}%` }}
-        >
+        <div className="absolute inset-y-0" style={{ left: `${PLAY_LEFT}%`, right: `${100 - PLAY_RIGHT}%` }}>
           {enemies.map((enemy) => (
-            <Alien key={enemy.id} x={enemy.x} y={enemy.y} health={enemy.health} />
+            <Alien key={enemy.id} enemy={enemy} />
           ))}
 
           {bullets.map((bullet) => (
@@ -180,10 +203,7 @@ export default function SpaceInvaders() {
             />
           ))}
 
-          <div
-            className="absolute bottom-8 h-16 w-16 -translate-x-1/2"
-            style={{ left: `${shipX}%` }}
-          >
+          <div className="absolute bottom-8 h-16 w-16 -translate-x-1/2" style={{ left: `${shipX}%` }}>
             <Image src="/skillatlas-logo.png" alt="Player ship" fill className="object-contain mix-blend-multiply" priority />
           </div>
         </div>
@@ -200,26 +220,15 @@ export default function SpaceInvaders() {
   );
 }
 
-function Alien({ x, y, health }: { x: number; y: number; health: number }) {
-  const cells = [
-    0, 1, 0, 1, 0,
-    1, 1, 1, 1, 1,
-    1, 0, 1, 0, 1,
-    1, 1, 1, 1, 1,
-    0, 1, 0, 1, 0,
-  ];
-
-  const visibleLimit = health === 3 ? 25 : health === 2 ? 17 : 9;
-
+function Alien({ enemy }: { enemy: Enemy }) {
   return (
-    <div className="absolute h-8 w-10" style={{ left: `${x}%`, top: `${y}%` }}>
+    <div className="absolute h-8 w-10" style={{ left: `${enemy.x}%`, top: `${enemy.y}%` }}>
       <div className="grid grid-cols-5 gap-[2px]">
-        {cells.map((cell, index) => (
+        {enemy.cells.map((health, index) => (
           <div
             key={index}
-            className={`h-2 w-2 rounded-sm ${
-              cell && index < visibleLimit ? "bg-[#ff2fa8]" : "bg-transparent"
-            }`}
+            className={`h-2 w-2 rounded-sm ${health > 0 ? "bg-[#ff2fa8]" : "bg-transparent"}`}
+            style={{ opacity: health === 3 ? 1 : health === 2 ? 0.62 : health === 1 ? 0.32 : 0 }}
           />
         ))}
       </div>
@@ -229,14 +238,14 @@ function Alien({ x, y, health }: { x: number; y: number; health: number }) {
 
 function Leaderboard({ title, items }: { title: string; items: string[] }) {
   return (
-    <div className="w-72 rounded-2xl border border-[#ff2fa8]/35 bg-white p-4 shadow-sm">
-      <p className="mb-3 text-xs font-black uppercase tracking-[0.22em] text-[#19d3cf]">
+    <div className="w-64 rounded-2xl border border-[#ff2fa8]/35 bg-white p-3.5 shadow-sm">
+      <p className="mb-2 text-[11px] font-black uppercase tracking-[0.22em] text-[#19d3cf]">
         {title}
       </p>
 
-      <div className="space-y-2">
+      <div className="space-y-1.5">
         {items.map((item, index) => (
-          <div key={item} className="flex items-center justify-between rounded-xl bg-gray-50 px-4 py-2 text-sm">
+          <div key={item} className="flex items-center justify-between rounded-xl bg-gray-50 px-3 py-1.5 text-sm">
             <span className="font-bold text-[#ff2fa8]">{index + 1}</span>
             <span className="font-semibold">{item}</span>
             <span className="text-xs font-bold text-gray-400">{1000 - index * 87}</span>
