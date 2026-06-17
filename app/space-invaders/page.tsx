@@ -12,7 +12,8 @@ const players = ["AtlasPilot", "PixelWarden", "RankGoblin", "GlobeRunner", "Skil
 const PLAY_LEFT = 23;
 const PLAY_RIGHT = 77;
 const PLAYER_Y = 86;
-const ALIEN_PATTERN = [0,1,0,1,0,1,1,1,1,1,1,0,1,0,1,1,1,1,1,1,0,1,0,1,0];
+const START_SPEED = 0.01875;
+const ALIEN_PATTERN = [0, 1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1, 0];
 
 function createAlienLine(startId: number, y = 10): Enemy[] {
   return Array.from({ length: 7 }, (_, i) => ({
@@ -36,7 +37,7 @@ export default function SpaceInvaders() {
   const [gameOver, setGameOver] = useState(false);
 
   const nextId = useRef(1000);
-  const speed = useRef(0.015);
+  const speed = useRef(START_SPEED);
   const spawnRate = useRef(82500);
   const lastSpawn = useRef(Date.now());
 
@@ -46,7 +47,7 @@ export default function SpaceInvaders() {
     setEnemies(createInitialWave());
     setScore(0);
     setGameOver(false);
-    speed.current = 0.015;
+    speed.current = START_SPEED;
     spawnRate.current = 82500;
     lastSpawn.current = Date.now();
     nextId.current = 1000;
@@ -81,7 +82,7 @@ export default function SpaceInvaders() {
     if (intro || gameOver) return;
 
     const loop = window.setInterval(() => {
-      speed.current = Math.min(0.085, speed.current + 0.000025);
+      speed.current = Math.min(0.09, speed.current + 0.000025);
       spawnRate.current = Math.max(24000, spawnRate.current - 2);
 
       setEnemies((enemyState) => {
@@ -89,7 +90,7 @@ export default function SpaceInvaders() {
 
         setBullets((bulletState) => {
           const movedBullets = bulletState
-            .map((bullet) => ({ ...bullet, y: bullet.y - 2.4 }))
+            .map((bullet) => ({ ...bullet, y: bullet.y - 3.2 }))
             .filter((bullet) => bullet.y > 0);
 
           const remainingBullets: Bullet[] = [];
@@ -108,10 +109,13 @@ export default function SpaceInvaders() {
                 const col = i % 5;
                 const row = Math.floor(i / 5);
 
-                const dotX = enemy.x + col * 1.05;
-                const dotY = enemy.y + row * 1.35;
+                const dotX = enemy.x + col * 1.15;
+                const dotY = enemy.y + row * 1.65;
 
-                if (Math.abs(dotX - bullet.x) < 1.4 && Math.abs(dotY - bullet.y) < 1.7) {
+                const hitX = Math.abs(dotX - bullet.x) < 1.25;
+                const hitY = Math.abs(dotY - bullet.y) < 1.85;
+
+                if (hitX && hitY) {
                   newCells[i] -= 1;
                   bulletUsed = true;
                   setScore((current) => current + 10);
@@ -138,7 +142,7 @@ export default function SpaceInvaders() {
           enemy.cells.some((cell, i) => {
             if (cell <= 0) return false;
             const row = Math.floor(i / 5);
-            return enemy.y + row * 1.35 >= PLAYER_Y - 2;
+            return enemy.y + row * 1.65 >= PLAYER_Y - 2;
           })
         );
 
@@ -195,7 +199,7 @@ export default function SpaceInvaders() {
           {enemies.map((enemy) => <Alien key={enemy.id} enemy={enemy} />)}
 
           {bullets.map((bullet) => (
-            <div key={bullet.id} className="absolute h-5 w-1 rounded-full bg-[#19d3cf]" style={{ left: `${bullet.x}%`, top: `${bullet.y}%` }} />
+            <div key={bullet.id} className="absolute h-6 w-1 rounded-full bg-[#19d3cf]" style={{ left: `${bullet.x}%`, top: `${bullet.y}%` }} />
           ))}
 
           <div className="absolute bottom-8 h-16 w-16 -translate-x-1/2" style={{ left: `${shipX}%` }}>
@@ -217,12 +221,12 @@ export default function SpaceInvaders() {
 
 function Alien({ enemy }: { enemy: Enemy }) {
   return (
-    <div className="absolute h-8 w-10" style={{ left: `${enemy.x}%`, top: `${enemy.y}%` }}>
-      <div className="grid grid-cols-5 gap-[2px]">
+    <div className="absolute h-10 w-12" style={{ left: `${enemy.x}%`, top: `${enemy.y}%` }}>
+      <div className="grid grid-cols-5 gap-[3px]">
         {enemy.cells.map((health, index) => (
           <div
             key={index}
-            className={`h-2 w-2 rounded-sm ${health > 0 ? "bg-[#ff2fa8]" : "bg-transparent"}`}
+            className={`h-2.5 w-2.5 rounded-sm ${health > 0 ? "bg-[#ff2fa8]" : "bg-transparent"}`}
             style={{ opacity: health === 3 ? 1 : health === 2 ? 0.6 : health === 1 ? 0.3 : 0 }}
           />
         ))}
