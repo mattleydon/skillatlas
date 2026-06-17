@@ -6,7 +6,8 @@ import { useEffect, useState } from "react";
 const periods = ["7 Days", "1 Month", "1 Year"] as const;
 type Period = (typeof periods)[number];
 
-const games = ["CS2", "League of Legends", "Valorant", "Fortnite", "Rocket League", "Chess"];
+const games = ["CS2", "League of Legends", "Valorant", "Fortnite", "Rocket League", "Chess"] as const;
+type Game = (typeof games)[number];
 
 const statGames = [
   { name: "CS2", nation: "Denmark", score: 98, mover: "Sweden", moverChange: "+3", trend: "M 0 42 C 20 38, 38 39, 54 30 S 82 16, 105 18 S 130 8, 150 6" },
@@ -15,7 +16,10 @@ const statGames = [
   { name: "Fortnite", nation: "USA", score: 95, mover: "Canada", moverChange: "+2", trend: "M 0 38 C 20 35, 36 28, 58 32 S 88 18, 108 20 S 130 12, 150 8" },
 ];
 
-const rankingsByGame = {
+const trendUp = "M 0 42 C 20 38, 40 36, 58 30 S 88 20, 112 14 S 135 9, 150 7";
+const trendDown = "M 0 16 C 22 19, 42 20, 62 26 S 92 31, 114 38 S 134 39, 150 44";
+
+const rankingsByGame: Record<Game, [string, number, string, string, "up" | "down", string[]][]> = {
   CS2: [
     ["Denmark", 98, "+2", "+4.2%", "up", ["Team cohesion", "Tactical culture", "Elite CS systems"]],
     ["South Korea", 96, "+1", "+3.8%", "up", ["Esports academies", "Training discipline", "Low-latency infrastructure"]],
@@ -58,15 +62,12 @@ const rankingsByGame = {
     ["Uzbekistan", 88, "+5", "+5.1%", "up", ["Young grandmasters", "Team success", "Rapid growth"]],
     ["China", 86, "-2", "-1.4%", "down", ["Structured training", "Strong federation", "Elite players"]],
   ],
-} as const;
-
-const trendUp = "M 0 42 C 20 38, 40 36, 58 30 S 88 20, 112 14 S 135 9, 150 7";
-const trendDown = "M 0 16 C 22 19, 42 20, 62 26 S 92 31, 114 38 S 134 39, 150 44";
+};
 
 export default function Home() {
   const [scrolled, setScrolled] = useState(false);
   const [statsIndex, setStatsIndex] = useState(0);
-  const [selectedGame, setSelectedGame] = useState<(typeof games)[number]>("CS2");
+  const [selectedGame, setSelectedGame] = useState<Game>("CS2");
   const [selectedPeriod, setSelectedPeriod] = useState<Period>("7 Days");
 
   useEffect(() => {
