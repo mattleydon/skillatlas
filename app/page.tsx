@@ -33,8 +33,8 @@ const statGames = [
 const topCountriesByGame: Record<Game, RankingRow[]> = {
   CS2: [
     row("Denmark", 98, "+2", "+4.2%", "up", ["Team cohesion", "Tactical culture", "Elite CS systems"], ["Larger talent pool", "More aim depth"]),
-    row("South Korea", 96, "+1", "+3.8%", "up", ["Esports academies", "Training discipline", "Low-latency infrastructure"], ["More CS-specific history", "More tier-one teams"]),
-    row("China", 94, "-1", "-1.1%", "down", ["Huge player base", "Professional investment", "MOBA depth"], ["Tactical consistency", "International LAN pressure"]),
+    row("South Korea", 96, "+1", "+3.8%", "up", ["Esports academies", "Training discipline", "Low-latency infrastructure"], ["More CS history", "More tier-one teams"]),
+    row("China", 94, "-1", "-1.1%", "down", ["Huge player base", "Professional investment", "MOBA depth"], ["Tactical consistency", "LAN pressure"]),
     row("Sweden", 91, "+3", "+1.7%", "up", ["FPS history", "Grassroots scene", "Mechanical skill"], ["Modern team depth", "Youth pipeline"]),
     row("USA", 89, "-2", "-0.6%", "down", ["Large talent pool", "Creator scene", "Prize exposure"], ["Team discipline", "Tactical identity"]),
   ],
@@ -43,18 +43,18 @@ const topCountriesByGame: Record<Game, RankingRow[]> = {
     row("China", 97, "-1", "-0.8%", "down", ["Massive league", "Investment", "Mechanical talent"], ["International consistency", "Macro discipline"]),
     row("Denmark", 89, "+2", "+1.4%", "up", ["Mid-lane legacy", "Team systems", "EU infrastructure"], ["Player depth", "Domestic scale"]),
     row("Taiwan", 86, "+1", "+0.9%", "up", ["Regional history", "Discipline", "Strong fundamentals"], ["Investment scale", "Talent retention"]),
-    row("USA", 80, "-2", "-1.2%", "down", ["Big market", "Imports", "Content ecosystem"], ["Native talent development", "Practice culture"]),
+    row("USA", 80, "-2", "-1.2%", "down", ["Big market", "Imports", "Content ecosystem"], ["Native talent", "Practice culture"]),
   ],
   Valorant: [
     row("Brazil", 93, "+2", "+3.1%", "up", ["Aggression", "Aim culture", "LAN confidence"], ["Utility discipline", "Map pool depth"]),
     row("South Korea", 92, "+1", "+2.4%", "up", ["Structure", "Utility discipline", "Coaching"], ["Peak aim volatility", "Creative mid-rounding"]),
-    row("USA", 90, "-1", "-0.7%", "down", ["Creator pipeline", "Talent pool", "Org investment"], ["Role stability", "International consistency"]),
+    row("USA", 90, "-1", "-0.7%", "down", ["Creator pipeline", "Talent pool", "Org investment"], ["Role stability", "Consistency"]),
     row("Turkey", 88, "+4", "+4.8%", "up", ["Aim mechanics", "Ranked depth", "Young talent"], ["Team structure", "LAN experience"]),
     row("Japan", 84, "-2", "-0.9%", "down", ["Fanbase", "Organisation", "Tactical growth"], ["Aggression", "Mechanical ceiling"]),
   ],
   Fortnite: [
     row("USA", 95, "+1", "+2.2%", "up", ["Creator scene", "Prize exposure", "Huge player base"], ["Consistency", "Burnout management"]),
-    row("Canada", 91, "+2", "+2.7%", "up", ["Mechanical skill", "NA servers", "Tournament depth"], ["Scale", "Solo-to-team transition"]),
+    row("Canada", 91, "+2", "+2.7%", "up", ["Mechanical skill", "NA servers", "Tournament depth"], ["Scale", "Team transition"]),
     row("UK", 88, "-1", "-0.5%", "down", ["EU competition", "Scrim culture", "Young talent"], ["Pressure control", "Late-game consistency"]),
     row("France", 87, "+1", "+0.8%", "up", ["EU ecosystem", "Technical skill", "Competitive scene"], ["Creator exposure", "Regional dominance"]),
     row("Brazil", 84, "-2", "-1.3%", "down", ["Aggressive play", "Large player base", "Creative meta"], ["Defensive structure", "Tournament stability"]),
@@ -71,7 +71,7 @@ const topCountriesByGame: Record<Game, RankingRow[]> = {
     row("Russia", 93, "-1", "-0.6%", "down", ["Historic depth", "Schools", "Grandmaster density"], ["Youth momentum", "International access"]),
     row("USA", 91, "+1", "+1.3%", "up", ["University chess", "Online platforms", "Elite tournaments"], ["Grassroots scale", "Junior consistency"]),
     row("Uzbekistan", 88, "+5", "+5.1%", "up", ["Young grandmasters", "Team success", "Rapid growth"], ["Depth", "Long-term infrastructure"]),
-    row("China", 86, "-2", "-1.4%", "down", ["Structured training", "Strong federation", "Elite players"], ["Open tournament volume", "Visibility"]),
+    row("China", 86, "-2", "-1.4%", "down", ["Structured training", "Strong federation", "Elite players"], ["Tournament volume", "Visibility"]),
   ],
 };
 
@@ -175,14 +175,16 @@ export default function Home() {
                 <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-gray-500">Leading Nation</p>
                 <p className="mt-4 text-lg font-black leading-none">{activeStats.nation}</p>
               </div>
-              <div>
+
+              <div className="flex flex-col items-center">
                 <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-gray-500">7D Trend</p>
                 <svg viewBox="0 0 150 50" className="mt-1 h-12 w-36">
                   <path d={activeStats.trend} fill="none" stroke="#19d3cf" strokeWidth="1.6" strokeLinecap="round" />
                 </svg>
               </div>
+
               <div className="text-right">
-                <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-gray-500">Dominance Score</p>
+                <p className="whitespace-nowrap text-[11px] font-bold uppercase tracking-[0.18em] text-gray-500">Dominance Score</p>
                 <p className="mt-4 text-lg font-black leading-none text-[#19d3cf]">{activeStats.score}</p>
               </div>
             </div>
@@ -217,10 +219,25 @@ export default function Home() {
 
           {leaderboard.map((item, index) => {
             const isUp = item.direction === "up";
+            const rankStyle =
+              index === 0
+                ? "border border-[#19d3cf]/30 bg-[#19d3cf]/15 text-[#19d3cf]"
+                : index === 1
+                ? "border border-[#ff2fa8]/30 bg-[#ff2fa8]/10 text-[#ff2fa8]"
+                : index === 2
+                ? "border border-purple-200 bg-gradient-to-r from-[#19d3cf]/10 to-[#ff2fa8]/10 text-purple-500"
+                : "text-[#ff2fa8]";
+
             return (
               <div key={`${selectedGame}-${item.country}`} className="grid grid-cols-[0.6fr_1.4fr_1fr_1.4fr_1fr_1fr_2.2fr_2.2fr] items-center border-b border-gray-100 px-6 py-4 text-sm last:border-b-0 hover:bg-gray-50">
-                <div className="text-base font-normal text-[#ff2fa8]">{index + 1}</div>
-                <div className="text-sm font-semibold">{item.country}</div>
+                <div>
+                  <div className={`flex h-10 w-10 items-center justify-center rounded-xl font-black ${rankStyle}`}>
+                    {index + 1}
+                  </div>
+                </div>
+
+                <div className={`text-sm ${index <= 2 ? "font-black" : "font-semibold"}`}>{item.country}</div>
+
                 <div><span className="rounded-full bg-[#19d3cf]/10 px-4 py-2 text-sm font-black text-[#19d3cf]">{item.score}</span></div>
                 <div><svg viewBox="0 0 150 50" className="h-10 w-28"><path d={isUp ? trendUp : trendDown} fill="none" stroke={isUp ? "#19d3cf" : "#ff2fa8"} strokeWidth="1.5" strokeLinecap="round" /></svg></div>
                 <div className={`font-bold ${isUp ? "text-[#19d3cf]" : "text-[#ff2fa8]"}`}>{isUp ? "▲" : "▼"} {item.rankChange}</div>
