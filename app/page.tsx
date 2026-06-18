@@ -121,6 +121,7 @@ export default function Home() {
   const [scrolled, setScrolled] = useState(false);
   const [statsIndex, setStatsIndex] = useState(0);
   const [statsVisible, setStatsVisible] = useState(true);
+  const [manualStatsGame, setManualStatsGame] = useState<Game | "Auto">("Auto");
   const [selectedGame, setSelectedGame] = useState<Game>("CS2");
   const [selectedPeriod, setSelectedPeriod] = useState<Period>("7 Days");
 
@@ -132,34 +133,38 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
+    if (manualStatsGame !== "Auto") return;
+
     const stayTimer = window.setTimeout(() => {
       setStatsVisible(false);
 
       const switchTimer = window.setTimeout(() => {
         setStatsIndex((current) => (current + 1) % statGames.length);
         setStatsVisible(true);
-      }, 1500);
+      }, 3000);
 
       return () => window.clearTimeout(switchTimer);
     }, 6000);
 
     return () => window.clearTimeout(stayTimer);
-  }, [statsIndex]);
+  }, [statsIndex, manualStatsGame]);
 
-  const activeStats = statGames[statsIndex];
+  const activeStats = manualStatsGame === "Auto"
+    ? statGames[statsIndex]
+    : statGames.find((game) => game.name === manualStatsGame) ?? statGames[0];
+
   const leaderboard = useMemo(() => buildTop100(selectedGame), [selectedGame]);
 
   return (
-    <main className="min-h-screen bg-[#F8FAFC] text-[#111827]">
-      <header className="sticky top-0 z-50 border-b border-[#ff2fa8]/25 bg-white transition-all duration-300">
+    <main className="relative min-h-screen overflow-hidden bg-[#F8FAFC] text-[#111827]">
+      <RotatingGlobeBackground />
+
+      <header className="sticky top-0 z-50 border-b border-[#ff2fa8]/25 bg-white/95 backdrop-blur transition-all duration-300">
         <div className={`mx-auto flex max-w-7xl items-center px-8 transition-all duration-300 ${scrolled ? "py-2" : "py-3"}`}>
           <div className="mr-14 flex shrink-0 items-center gap-5">
-            <a
-  href="/space-invaders"
-  className={`relative transition-all duration-300 ${scrolled ? "h-16 w-16" : "h-24 w-24"}`}
->
-  <Image src="/skillatlas-logo.png" alt="SkillAtlas logo" fill className="object-contain" priority />
-</a>
+            <a href="/space-invaders" className={`relative transition-all duration-300 ${scrolled ? "h-16 w-16" : "h-24 w-24"}`}>
+              <Image src="/skillatlas-logo.png" alt="SkillAtlas logo" fill className="object-contain" priority />
+            </a>
 
             <a href="/" className={`relative transition-all duration-300 ${scrolled ? "h-10 w-56" : "h-14 w-80"}`}>
               <Image src="/skillatlas-title.png" alt="SkillAtlas title" fill className="object-contain object-left" priority />
@@ -180,17 +185,42 @@ export default function Home() {
         </div>
       </header>
 
-      <section className="mx-auto max-w-7xl px-8 py-8">
-        <div className="mb-5 rounded-3xl border border-[#ff2fa8]/45 bg-white p-6 shadow-sm">
+      <section className="relative z-10 mx-auto max-w-7xl px-8 py-8">
+        <div className="mb-5 rounded-3xl border border-[#ff2fa8]/45 bg-white/92 p-6 shadow-sm backdrop-blur">
           <p className="mb-2 text-xs font-bold uppercase tracking-[0.25em] text-[#19d3cf]">Global Gaming Rankings</p>
           <h2 className="mb-2 text-lg font-black tracking-tight">Which country is actually the best at gaming?</h2>
           <p className="text-sm text-gray-600 md:whitespace-nowrap">Track which countries dominate each game, why they win, where they are improving, and where they are still vulnerable.</p>
         </div>
 
-        <div className={`mb-5 grid gap-4 transition-all duration-[1500ms] ease-in-out md:grid-cols-5 ${statsVisible ? "translate-y-0 opacity-100" : "translate-y-2 opacity-0"}`}>
+        <div className="mb-3 flex justify-end">
+          <label className="flex items-center gap-3 rounded-full border border-[#ff2fa8]/35 bg-white/95 px-4 py-2 text-xs font-bold uppercase tracking-[0.15em] text-gray-500 shadow-sm">
+            Stats
+            <select
+              value={manualStatsGame}
+              onChange={(event) => {
+                const value = event.target.value as Game | "Auto";
+                setManualStatsGame(value);
+                setStatsVisible(true);
+
+                if (value !== "Auto") {
+                  const nextIndex = statGames.findIndex((game) => game.name === value);
+                  if (nextIndex >= 0) setStatsIndex(nextIndex);
+                }
+              }}
+              className="rounded-full border border-gray-200 bg-white px-3 py-1.5 text-sm font-black normal-case tracking-normal text-[#111827] outline-none transition focus:border-[#19d3cf]"
+            >
+              <option value="Auto">Auto rotate</option>
+              {games.map((game) => (
+                <option key={game} value={game}>{game}</option>
+              ))}
+            </select>
+          </label>
+        </div>
+
+        <div className={`mb-5 grid gap-4 transition-all duration-[3000ms] ease-in-out md:grid-cols-5 ${statsVisible ? "translate-y-0 opacity-100" : "translate-y-2 opacity-0"}`}>
           <StatCard label="Top Game" value={activeStats.name} valueColor="text-[#19d3cf]" />
 
-          <div className="rounded-2xl border border-[#ff2fa8]/35 bg-white p-5 shadow-sm md:col-span-2">
+          <div className="rounded-2xl border border-[#ff2fa8]/35 bg-white/92 p-5 shadow-sm backdrop-blur md:col-span-2">
             <div className="grid h-full grid-cols-3 items-start gap-6">
               <div>
                 <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-gray-500">Leading Nation</p>
@@ -198,7 +228,7 @@ export default function Home() {
               </div>
 
               <div className="flex flex-col items-center">
-                <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-gray-500">7D Trend</p>
+                <p className="text-center text-[11px] font-bold uppercase tracking-[0.18em] text-gray-500">7D Trend</p>
                 <svg viewBox="0 0 150 50" className="mt-1 h-12 w-36">
                   <path d={activeStats.trend} fill="none" stroke="#19d3cf" strokeWidth="1.6" strokeLinecap="round" />
                 </svg>
@@ -215,10 +245,14 @@ export default function Home() {
           <StatCard label="Biggest Loser" value={`${activeStats.loser} ▼${activeStats.loserChange.replace("-", "")}`} valueColor="text-[#ff2fa8]" />
         </div>
 
-        <div className="mb-6 flex items-center justify-between gap-4 rounded-3xl border border-[#ff2fa8]/45 bg-white p-4 shadow-sm">
+        <div className="mb-6 flex items-center justify-between gap-4 rounded-3xl border border-[#ff2fa8]/45 bg-white/92 p-4 shadow-sm backdrop-blur">
           <div className="flex gap-3 overflow-x-auto">
             {games.map((game) => (
-              <button key={game} onClick={() => setSelectedGame(game)} className={`whitespace-nowrap rounded-full px-5 py-2.5 text-sm font-bold transition-all duration-300 ${game === selectedGame ? "bg-[#19d3cf] text-white" : "border border-gray-200 bg-white text-gray-700 hover:border-[#ff2fa8]"}`}>
+              <button
+                key={game}
+                onClick={() => setSelectedGame(game)}
+                className={`whitespace-nowrap rounded-full px-5 py-2.5 text-sm font-bold transition-all duration-300 ${game === selectedGame ? "bg-[#19d3cf] text-white" : "border border-gray-200 bg-white text-gray-700 hover:border-[#ff2fa8]"}`}
+              >
                 {game}
               </button>
             ))}
@@ -226,15 +260,19 @@ export default function Home() {
 
           <div className="hidden shrink-0 gap-2 md:flex">
             {periods.map((period) => (
-              <button key={period} onClick={() => setSelectedPeriod(period)} className={`rounded-full px-4 py-2 text-xs font-bold transition-all duration-300 ${selectedPeriod === period ? "bg-[#ff2fa8] text-white" : "border border-gray-200 bg-white text-gray-600 hover:border-[#19d3cf]"}`}>
+              <button
+                key={period}
+                onClick={() => setSelectedPeriod(period)}
+                className={`rounded-full px-4 py-2 text-xs font-bold transition-all duration-300 ${selectedPeriod === period ? "bg-[#ff2fa8] text-white" : "border border-gray-200 bg-white text-gray-600 hover:border-[#19d3cf]"}`}
+              >
                 {period}
               </button>
             ))}
           </div>
         </div>
 
-        <section className="overflow-hidden rounded-3xl border border-[#ff2fa8]/45 bg-white shadow-sm">
-          <div className="grid grid-cols-[0.6fr_1.4fr_1fr_1.4fr_1fr_1fr_2.2fr_2.2fr] border-b border-[#ff2fa8]/20 bg-gray-50 px-6 py-4 text-[11px] font-bold uppercase tracking-wide text-gray-500">
+        <section className="overflow-hidden rounded-3xl border border-[#ff2fa8]/45 bg-white/92 shadow-sm backdrop-blur">
+          <div className="grid grid-cols-[0.6fr_1.4fr_1fr_1.4fr_1fr_1fr_2.2fr_2.2fr] border-b border-[#ff2fa8]/20 bg-gray-50/90 px-6 py-4 text-[11px] font-bold uppercase tracking-wide text-gray-500">
             <div>Rank</div>
             <div>Country</div>
             <div>Score</div>
@@ -249,7 +287,7 @@ export default function Home() {
             const isUp = item.direction === "up";
 
             return (
-              <div key={`${selectedGame}-${item.country}`} className="grid grid-cols-[0.6fr_1.4fr_1fr_1.4fr_1fr_1fr_2.2fr_2.2fr] items-center border-b border-gray-100 px-6 py-4 text-sm last:border-b-0 hover:bg-gray-50">
+              <div key={`${selectedGame}-${item.country}`} className="grid grid-cols-[0.6fr_1.4fr_1fr_1.4fr_1fr_1fr_2.2fr_2.2fr] items-center border-b border-gray-100 px-6 py-4 text-sm last:border-b-0 hover:bg-gray-50/90">
                 <div className="text-base font-normal text-[#ff2fa8]">{index + 1}</div>
                 <div className="text-sm font-semibold">{item.country}</div>
                 <div><span className="rounded-full bg-[#19d3cf]/10 px-4 py-2 text-sm font-black text-[#19d3cf]">{item.score}</span></div>
@@ -263,15 +301,45 @@ export default function Home() {
           })}
         </section>
       </section>
+
+      <style jsx global>{`
+        @keyframes globeSpin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+      `}</style>
     </main>
   );
 }
 
 function StatCard({ label, value, valueColor }: { label: string; value: string; valueColor: string }) {
   return (
-    <div className="rounded-2xl border border-[#ff2fa8]/35 bg-white p-5 shadow-sm">
+    <div className="rounded-2xl border border-[#ff2fa8]/35 bg-white/92 p-5 shadow-sm backdrop-blur">
       <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-gray-500">{label}</p>
       <p className={`mt-4 text-lg font-black leading-none ${valueColor}`}>{value}</p>
+    </div>
+  );
+}
+
+function RotatingGlobeBackground() {
+  return (
+    <div className="pointer-events-none fixed inset-0 z-0 flex items-center justify-center overflow-hidden">
+      <div className="relative h-[760px] w-[760px] opacity-[0.055]">
+        <div className="absolute inset-0 rounded-full border border-gray-700" />
+        <div className="absolute inset-[8%] rounded-full border border-gray-700" />
+        <div className="absolute inset-[18%] rounded-full border border-gray-700" />
+
+        <div className="absolute left-1/2 top-0 h-full w-px -translate-x-1/2 bg-gray-700" />
+        <div className="absolute left-[30%] top-0 h-full w-px -translate-x-1/2 rounded-full bg-gray-700" />
+        <div className="absolute left-[70%] top-0 h-full w-px -translate-x-1/2 rounded-full bg-gray-700" />
+
+        <div className="absolute left-0 top-1/2 h-px w-full -translate-y-1/2 bg-gray-700" />
+        <div className="absolute left-0 top-[35%] h-px w-full -translate-y-1/2 bg-gray-700" />
+        <div className="absolute left-0 top-[65%] h-px w-full -translate-y-1/2 bg-gray-700" />
+
+        <div className="absolute inset-0 animate-[globeSpin_70s_linear_infinite] rounded-full border border-dashed border-gray-700" />
+        <div className="absolute inset-[12%] animate-[globeSpin_90s_linear_infinite_reverse] rounded-full border border-dashed border-gray-700" />
+      </div>
     </div>
   );
 }
