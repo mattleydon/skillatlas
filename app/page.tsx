@@ -408,8 +408,53 @@ export default function Home() {
 
       <style jsx global>{`
         @keyframes globeSpin {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
+          from {
+            transform: rotate(0deg);
+          }
+          to {
+            transform: rotate(360deg);
+          }
+        }
+
+        @keyframes globeReverse {
+          from {
+            transform: rotate(360deg);
+          }
+          to {
+            transform: rotate(0deg);
+          }
+        }
+
+        @keyframes globeFloat {
+          0% {
+            transform: translate3d(0, 0, 0) scale(1);
+          }
+          50% {
+            transform: translate3d(0, -16px, 0) scale(1.015);
+          }
+          100% {
+            transform: translate3d(0, 0, 0) scale(1);
+          }
+        }
+
+        @keyframes nodePulse {
+          0%, 100% {
+            opacity: 0.35;
+            transform: scale(1);
+          }
+          50% {
+            opacity: 0.9;
+            transform: scale(1.75);
+          }
+        }
+
+        @keyframes orbitDash {
+          from {
+            stroke-dashoffset: 0;
+          }
+          to {
+            stroke-dashoffset: -220;
+          }
         }
       `}</style>
     </main>
@@ -493,22 +538,87 @@ function StatCard({ label, value, valueColor, visible }: { label: string; value:
 }
 
 function RotatingGlobeBackground() {
+  const nodes = [
+    { left: "28%", top: "29%", color: "#19d3cf", size: "h-3 w-3", delay: "0s" },
+    { left: "62%", top: "33%", color: "#ff2fa8", size: "h-2.5 w-2.5", delay: "1.2s" },
+    { left: "48%", top: "48%", color: "#94a3b8", size: "h-2 w-2", delay: "0.6s" },
+    { left: "69%", top: "59%", color: "#19d3cf", size: "h-2 w-2", delay: "2s" },
+    { left: "35%", top: "66%", color: "#ff2fa8", size: "h-2 w-2", delay: "1.7s" },
+    { left: "54%", top: "72%", color: "#94a3b8", size: "h-2.5 w-2.5", delay: "0.3s" },
+  ];
+
   return (
-    <div className="pointer-events-none fixed inset-0 z-0 flex items-center justify-center overflow-hidden">
-      <div className="relative h-[880px] w-[880px] opacity-[0.09]">
-        <div className="absolute inset-0 animate-[globeSpin_75s_linear_infinite] rounded-full border border-gray-500" />
-        <div className="absolute inset-[8%] animate-[globeSpin_95s_linear_infinite_reverse] rounded-full border border-gray-400" />
-        <div className="absolute inset-[18%] rounded-full border border-gray-300" />
-        <div className="absolute left-1/2 top-0 h-full w-px -translate-x-1/2 bg-gray-300" />
-        <div className="absolute left-[30%] top-0 h-full w-px -translate-x-1/2 bg-gray-300" />
-        <div className="absolute left-[70%] top-0 h-full w-px -translate-x-1/2 bg-gray-300" />
-        <div className="absolute left-0 top-1/2 h-px w-full -translate-y-1/2 bg-gray-300" />
-        <div className="absolute left-0 top-[35%] h-px w-full -translate-y-1/2 bg-gray-300" />
-        <div className="absolute left-0 top-[65%] h-px w-full -translate-y-1/2 bg-gray-300" />
-        <div className="absolute left-[18%] top-[24%] h-3 w-3 rounded-full bg-[#19d3cf]" />
-        <div className="absolute left-[66%] top-[38%] h-2 w-2 rounded-full bg-[#ff2fa8]" />
-        <div className="absolute left-[48%] top-[62%] h-2.5 w-2.5 rounded-full bg-gray-500" />
+    <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_38%,rgba(25,211,207,0.075),transparent_34%),radial-gradient(circle_at_62%_58%,rgba(255,47,168,0.055),transparent_30%),linear-gradient(180deg,#f8fafc_0%,#f1f5f9_100%)]" />
+
+      <div className="absolute left-1/2 top-[46%] h-[980px] w-[980px] -translate-x-1/2 -translate-y-1/2 opacity-[0.22]">
+        <div className="absolute inset-0 animate-[globeFloat_14s_ease-in-out_infinite]">
+          <div className="absolute inset-0 animate-[globeSpin_95s_linear_infinite] rounded-full border border-slate-400/45" />
+          <div className="absolute inset-[7%] animate-[globeReverse_120s_linear_infinite] rounded-full border border-slate-300/55" />
+          <div className="absolute inset-[16%] rounded-full border border-slate-300/50" />
+          <div className="absolute inset-[25%] rounded-full border border-slate-300/35" />
+
+          <div className="absolute left-1/2 top-0 h-full w-px -translate-x-1/2 bg-slate-300/55" />
+          <div className="absolute left-[28%] top-[4%] h-[92%] w-px rotate-[12deg] bg-slate-300/45" />
+          <div className="absolute left-[72%] top-[4%] h-[92%] w-px -rotate-[12deg] bg-slate-300/45" />
+          <div className="absolute left-[15%] top-[18%] h-[64%] w-px rotate-[28deg] bg-slate-300/35" />
+          <div className="absolute left-[85%] top-[18%] h-[64%] w-px -rotate-[28deg] bg-slate-300/35" />
+
+          <div className="absolute left-0 top-1/2 h-px w-full -translate-y-1/2 bg-slate-300/55" />
+          <div className="absolute left-[8%] top-[36%] h-px w-[84%] -translate-y-1/2 bg-slate-300/45" />
+          <div className="absolute left-[8%] top-[64%] h-px w-[84%] -translate-y-1/2 bg-slate-300/45" />
+          <div className="absolute left-[19%] top-[25%] h-px w-[62%] -translate-y-1/2 bg-slate-300/35" />
+          <div className="absolute left-[19%] top-[75%] h-px w-[62%] -translate-y-1/2 bg-slate-300/35" />
+
+          <svg className="absolute inset-0 h-full w-full" viewBox="0 0 980 980" fill="none">
+            <path
+              d="M170 560 C 300 420, 455 405, 620 310 C 710 260, 790 238, 862 206"
+              stroke="#19d3cf"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeDasharray="10 18"
+              opacity="0.6"
+              style={{ animation: "orbitDash 26s linear infinite" }}
+            />
+            <path
+              d="M160 395 C 300 460, 405 590, 574 618 C 690 637, 780 585, 850 520"
+              stroke="#ff2fa8"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeDasharray="8 18"
+              opacity="0.48"
+              style={{ animation: "orbitDash 32s linear infinite reverse" }}
+            />
+            <path
+              d="M300 220 C 420 330, 512 390, 645 465 C 730 515, 780 612, 810 740"
+              stroke="#64748b"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeDasharray="7 18"
+              opacity="0.42"
+              style={{ animation: "orbitDash 38s linear infinite" }}
+            />
+          </svg>
+
+          {nodes.map((node, index) => (
+            <div
+              key={`${node.left}-${node.top}-${index}`}
+              className={`absolute rounded-full ${node.size}`}
+              style={{
+                left: node.left,
+                top: node.top,
+                backgroundColor: node.color,
+                boxShadow: `0 0 24px ${node.color}`,
+                animation: `nodePulse 5s ease-in-out infinite`,
+                animationDelay: node.delay,
+              }}
+            />
+          ))}
+        </div>
       </div>
+
+      <div className="absolute left-[4%] top-[28%] h-64 w-64 rounded-full bg-[#19d3cf]/[0.035] blur-3xl" />
+      <div className="absolute bottom-[18%] right-[6%] h-72 w-72 rounded-full bg-[#ff2fa8]/[0.035] blur-3xl" />
     </div>
   );
 }
