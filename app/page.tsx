@@ -193,7 +193,7 @@ export default function Home() {
   const [selectedPeriod, setSelectedPeriod] = useState<Period>("7 Days");
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 40);
+    const onScroll = () => setScrolled(window.scrollY > 24);
     onScroll();
 
     window.addEventListener("scroll", onScroll);
@@ -230,14 +230,28 @@ export default function Home() {
     <main className="relative min-h-screen overflow-hidden bg-[#F8FAFC] text-[#111827]">
       <RotatingGlobeBackground />
 
-      <header className="sticky top-0 z-50 overflow-visible border-b border-[#ff2fa8]/25 bg-white/95 backdrop-blur transition-all duration-300">
-        <div className={`mx-auto flex max-w-7xl items-center px-8 transition-all duration-300 ${scrolled ? "py-2" : "py-3"}`}>
+      <header
+        className={`fixed left-0 right-0 top-0 z-50 border-b border-[#ff2fa8]/25 bg-white/95 backdrop-blur transition-all duration-300 ${
+          scrolled ? "h-[72px]" : "h-[126px]"
+        }`}
+      >
+        <div className="mx-auto flex h-full max-w-7xl items-center px-8">
           <div className="mr-14 flex shrink-0 items-center gap-5">
-            <a href="/space-invaders" className={`relative shrink-0 transition-all duration-300 ${scrolled ? "h-14 w-14" : "h-24 w-24"}`}>
+            <a
+              href="/space-invaders"
+              className={`relative shrink-0 transition-all duration-300 ${
+                scrolled ? "h-11 w-11" : "h-24 w-24"
+              }`}
+            >
               <Image src="/skillatlas-logo.png" alt="SkillAtlas logo" fill className="object-contain" priority />
             </a>
 
-            <a href="/" className={`relative shrink-0 transition-all duration-300 ${scrolled ? "h-9 w-52" : "h-14 w-80"}`}>
+            <a
+              href="/"
+              className={`relative shrink-0 transition-all duration-300 ${
+                scrolled ? "h-7 w-44" : "h-14 w-80"
+              }`}
+            >
               <Image src="/skillatlas-title.png" alt="SkillAtlas title" fill className="object-contain object-left" priority />
             </a>
           </div>
@@ -246,7 +260,9 @@ export default function Home() {
             {["Rankings", "World Map", "Countries", "Profiles", "User Rankings", "About"].map((item) => (
               <a
                 key={item}
-                className="text-[1rem] font-semibold text-gray-700 transition-colors hover:text-[#19d3cf]"
+                className={`font-semibold text-gray-700 transition-all duration-300 hover:text-[#19d3cf] ${
+                  scrolled ? "text-sm" : "text-[1rem]"
+                }`}
                 href={item === "Rankings" ? "/" : `/${item.toLowerCase().replace(" ", "-")}`}
               >
                 {item}
@@ -256,11 +272,13 @@ export default function Home() {
         </div>
       </header>
 
-      <section className="relative z-10 mx-auto max-w-7xl px-8 py-8">
+      <section className="relative z-10 mx-auto max-w-7xl px-8 pb-8 pt-[150px]">
         <div className="mb-6 rounded-3xl border border-[#ff2fa8]/45 bg-white/92 p-6 shadow-sm backdrop-blur">
           <p className="mb-2 text-xs font-bold uppercase tracking-[0.25em] text-[#19d3cf]">Global Gaming Rankings</p>
           <h2 className="mb-2 text-lg font-black tracking-tight">Which country is actually the best at gaming?</h2>
-          <p className="text-sm text-gray-600 md:whitespace-nowrap">Track which countries dominate each game, why they win, where they are improving, and where they are still vulnerable.</p>
+          <p className="text-sm text-gray-600 md:whitespace-nowrap">
+            Track which countries dominate each game, why they win, where they are improving, and where they are still vulnerable.
+          </p>
         </div>
 
         <div className="relative z-30 mb-5 grid items-stretch gap-4 overflow-visible md:grid-cols-[1.45fr_2.7fr_1.35fr_1.35fr]">
@@ -281,7 +299,11 @@ export default function Home() {
             />
           </div>
 
-          <div className={`min-h-[124px] rounded-2xl border border-[#ff2fa8]/35 bg-white/92 p-5 shadow-sm backdrop-blur transition-all duration-[3000ms] ease-in-out ${statsVisible ? "translate-y-0 opacity-100" : "translate-y-2 opacity-0"}`}>
+          <div
+            className={`min-h-[124px] rounded-2xl border border-[#ff2fa8]/35 bg-white/92 p-5 shadow-sm backdrop-blur transition-all duration-[3000ms] ease-in-out ${
+              statsVisible ? "translate-y-0 opacity-100" : "translate-y-2 opacity-0"
+            }`}
+          >
             <div className="grid h-full grid-cols-3 items-start gap-5">
               <div>
                 <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-gray-500">Leading Nation</p>
@@ -312,7 +334,9 @@ export default function Home() {
               <button
                 key={game}
                 onClick={() => setSelectedGame(game)}
-                className={`whitespace-nowrap rounded-full px-5 py-2.5 text-sm font-bold transition-all duration-300 ${game === selectedGame ? "bg-[#19d3cf] text-white" : "border border-gray-200 bg-white text-gray-700 hover:border-[#ff2fa8]"}`}
+                className={`whitespace-nowrap rounded-full px-5 py-2.5 text-sm font-bold transition-all duration-300 ${
+                  game === selectedGame ? "bg-[#19d3cf] text-white" : "border border-gray-200 bg-white text-gray-700 hover:border-[#ff2fa8]"
+                }`}
               >
                 {game}
               </button>
@@ -324,7 +348,9 @@ export default function Home() {
               <button
                 key={period}
                 onClick={() => setSelectedPeriod(period)}
-                className={`rounded-full px-4 py-2 text-xs font-bold transition-all duration-300 ${selectedPeriod === period ? "bg-[#ff2fa8] text-white" : "border border-gray-200 bg-white text-gray-600 hover:border-[#19d3cf]"}`}
+                className={`rounded-full px-4 py-2 text-xs font-bold transition-all duration-300 ${
+                  selectedPeriod === period ? "bg-[#ff2fa8] text-white" : "border border-gray-200 bg-white text-gray-600 hover:border-[#19d3cf]"
+                }`}
               >
                 {period}
               </button>
@@ -354,12 +380,26 @@ export default function Home() {
               >
                 <div className="text-base font-normal text-[#ff2fa8]">{index + 1}</div>
                 <div className="text-sm font-semibold">{item.country}</div>
-                <div><span className="rounded-full bg-[#19d3cf]/10 px-4 py-2 text-sm font-black text-[#19d3cf]">{item.score}</span></div>
-                <div><svg viewBox="0 0 150 50" className="h-10 w-28"><path d={isUp ? trendUp : trendDown} fill="none" stroke={isUp ? "#19d3cf" : "#ff2fa8"} strokeWidth="1.5" strokeLinecap="round" /></svg></div>
+                <div>
+                  <span className="rounded-full bg-[#19d3cf]/10 px-4 py-2 text-sm font-black text-[#19d3cf]">{item.score}</span>
+                </div>
+                <div>
+                  <svg viewBox="0 0 150 50" className="h-10 w-28">
+                    <path d={isUp ? trendUp : trendDown} fill="none" stroke={isUp ? "#19d3cf" : "#ff2fa8"} strokeWidth="1.5" strokeLinecap="round" />
+                  </svg>
+                </div>
                 <div className={`font-bold ${isUp ? "text-[#19d3cf]" : "text-[#ff2fa8]"}`}>{isUp ? "▲" : "▼"} {item.rankChange}</div>
                 <div className={`font-bold ${isUp ? "text-[#19d3cf]" : "text-[#ff2fa8]"}`}>{item.percentChange}</div>
-                <div className="flex flex-wrap gap-2">{item.reasons.map((reason) => <span key={reason} className="rounded-full border border-gray-200 bg-white px-3 py-1 text-xs font-semibold text-gray-600">{reason}</span>)}</div>
-                <div className="flex flex-wrap gap-2">{item.improvements.map((improvement) => <span key={improvement} className="rounded-full border border-[#ff2fa8]/20 bg-[#ff2fa8]/5 px-3 py-1 text-xs font-semibold text-gray-600">{improvement}</span>)}</div>
+                <div className="flex flex-wrap gap-2">
+                  {item.reasons.map((reason) => (
+                    <span key={reason} className="rounded-full border border-gray-200 bg-white px-3 py-1 text-xs font-semibold text-gray-600">{reason}</span>
+                  ))}
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {item.improvements.map((improvement) => (
+                    <span key={improvement} className="rounded-full border border-[#ff2fa8]/20 bg-[#ff2fa8]/5 px-3 py-1 text-xs font-semibold text-gray-600">{improvement}</span>
+                  ))}
+                </div>
               </div>
             );
           })}
@@ -404,7 +444,9 @@ function CustomGameDropdown({ value, visible, onChange }: { value: Game; visible
       <button
         type="button"
         onClick={() => setOpen((current) => !current)}
-        className={`flex h-[48px] w-full items-center justify-between rounded-2xl border bg-white px-4 py-2 text-left font-black shadow-sm transition-all duration-300 ${open ? "border-[#ff2fa8] shadow-md" : "border-[#19d3cf]/30 hover:border-[#ff2fa8]/60 hover:shadow-md"}`}
+        className={`flex h-[48px] w-full items-center justify-between rounded-2xl border bg-white px-4 py-2 text-left font-black shadow-sm transition-all duration-300 ${
+          open ? "border-[#ff2fa8] shadow-md" : "border-[#19d3cf]/30 hover:border-[#ff2fa8]/60 hover:shadow-md"
+        }`}
       >
         <span className={`block max-w-[245px] whitespace-nowrap text-[0.82rem] leading-none text-[#19d3cf] transition-all duration-1000 ease-in-out ${visible ? "translate-y-0 opacity-100" : "translate-y-1 opacity-0"}`}>
           {value}
@@ -412,7 +454,9 @@ function CustomGameDropdown({ value, visible, onChange }: { value: Game; visible
         <span className={`ml-3 shrink-0 text-xs text-[#ff2fa8] transition-transform duration-300 ${open ? "rotate-180" : ""}`}>▼</span>
       </button>
 
-      <div className={`absolute left-0 top-[calc(100%+0.5rem)] z-[9999] w-full overflow-hidden rounded-2xl border border-[#ff2fa8]/35 bg-white shadow-xl transition-all duration-300 ${open ? "translate-y-0 opacity-100" : "pointer-events-none -translate-y-2 opacity-0"}`}>
+      <div className={`absolute left-0 top-[calc(100%+0.5rem)] z-[9999] w-full overflow-hidden rounded-2xl border border-[#ff2fa8]/35 bg-white shadow-xl transition-all duration-300 ${
+        open ? "translate-y-0 opacity-100" : "pointer-events-none -translate-y-2 opacity-0"
+      }`}>
         {games.map((game) => {
           const selected = game === value;
 
@@ -424,7 +468,9 @@ function CustomGameDropdown({ value, visible, onChange }: { value: Game; visible
                 onChange(game);
                 setOpen(false);
               }}
-              className={`block w-full px-4 py-3 text-left text-sm font-black transition-all duration-200 ${selected ? "bg-[#19d3cf]/10 text-[#19d3cf]" : "text-[#ff2fa8] hover:bg-[#ff2fa8]/8 hover:text-[#ff2fa8]"}`}
+              className={`block w-full px-4 py-3 text-left text-sm font-black transition-all duration-200 ${
+                selected ? "bg-[#19d3cf]/10 text-[#19d3cf]" : "text-[#ff2fa8] hover:bg-[#ff2fa8]/8 hover:text-[#ff2fa8]"
+              }`}
             >
               {game}
             </button>
@@ -437,7 +483,9 @@ function CustomGameDropdown({ value, visible, onChange }: { value: Game; visible
 
 function StatCard({ label, value, valueColor, visible }: { label: string; value: string; valueColor: string; visible: boolean }) {
   return (
-    <div className={`min-h-[124px] rounded-2xl border border-[#ff2fa8]/35 bg-white/92 p-5 shadow-sm backdrop-blur transition-all duration-[3000ms] ease-in-out ${visible ? "translate-y-0 opacity-100" : "translate-y-2 opacity-0"}`}>
+    <div className={`min-h-[124px] rounded-2xl border border-[#ff2fa8]/35 bg-white/92 p-5 shadow-sm backdrop-blur transition-all duration-[3000ms] ease-in-out ${
+      visible ? "translate-y-0 opacity-100" : "translate-y-2 opacity-0"
+    }`}>
       <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-gray-500">{label}</p>
       <p className={`mt-8 text-base font-black leading-tight ${valueColor}`}>{value}</p>
     </div>
