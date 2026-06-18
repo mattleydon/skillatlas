@@ -21,17 +21,79 @@ type RankingRow = {
   improvements: string[];
 };
 
-function row(country: string, score: number, rankChange: string, percentChange: string, direction: Direction, reasons: string[], improvements: string[]): RankingRow {
+function row(
+  country: string,
+  score: number,
+  rankChange: string,
+  percentChange: string,
+  direction: Direction,
+  reasons: string[],
+  improvements: string[]
+): RankingRow {
   return { country, score, rankChange, percentChange, direction, reasons, improvements };
 }
 
 const statGames = [
-  { name: "CS2", nation: "Denmark", score: 98, mover: "Sweden", moverChange: "+3", loser: "USA", loserChange: "-2", trend: "M 0 42 C 20 38, 38 39, 54 30 S 82 16, 105 18 S 130 8, 150 6" },
-  { name: "League of Legends", nation: "South Korea", score: 99, mover: "India", moverChange: "+4", loser: "USA", loserChange: "-2", trend: "M 0 40 C 22 34, 38 36, 55 28 S 82 20, 105 13 S 130 9, 150 10" },
-  { name: "Valorant", nation: "Brazil", score: 93, mover: "Turkey", moverChange: "+4", loser: "Japan", loserChange: "-2", trend: "M 0 44 C 20 36, 42 40, 60 32 S 88 24, 110 14 S 132 12, 150 7" },
-  { name: "Fortnite", nation: "USA", score: 95, mover: "Canada", moverChange: "+2", loser: "Brazil", loserChange: "-2", trend: "M 0 38 C 20 35, 36 28, 58 32 S 88 18, 108 20 S 130 12, 150 8" },
-  { name: "Rocket League", nation: "France", score: 92, mover: "Netherlands", moverChange: "+3", loser: "Australia", loserChange: "-1", trend: "M 0 45 C 25 42, 38 35, 58 36 S 85 24, 112 16 S 132 11, 150 9" },
-  { name: "Chess", nation: "India", score: 94, mover: "Uzbekistan", moverChange: "+5", loser: "China", loserChange: "-2", trend: "M 0 42 C 18 35, 35 31, 52 33 S 78 22, 102 14 S 128 9, 150 6" },
+  {
+    name: "CS2",
+    nation: "Denmark",
+    score: 98,
+    mover: "Sweden",
+    moverChange: "+3",
+    loser: "USA",
+    loserChange: "-2",
+    trend: "M 0 42 C 20 38, 38 39, 54 30 S 82 16, 105 18 S 130 8, 150 6",
+  },
+  {
+    name: "League of Legends",
+    nation: "South Korea",
+    score: 99,
+    mover: "India",
+    moverChange: "+4",
+    loser: "USA",
+    loserChange: "-2",
+    trend: "M 0 40 C 22 34, 38 36, 55 28 S 82 20, 105 13 S 130 9, 150 10",
+  },
+  {
+    name: "Valorant",
+    nation: "Brazil",
+    score: 93,
+    mover: "Turkey",
+    moverChange: "+4",
+    loser: "Japan",
+    loserChange: "-2",
+    trend: "M 0 44 C 20 36, 42 40, 60 32 S 88 24, 110 14 S 132 12, 150 7",
+  },
+  {
+    name: "Fortnite",
+    nation: "USA",
+    score: 95,
+    mover: "Canada",
+    moverChange: "+2",
+    loser: "Brazil",
+    loserChange: "-2",
+    trend: "M 0 38 C 20 35, 36 28, 58 32 S 88 18, 108 20 S 130 12, 150 8",
+  },
+  {
+    name: "Rocket League",
+    nation: "France",
+    score: 92,
+    mover: "Netherlands",
+    moverChange: "+3",
+    loser: "Australia",
+    loserChange: "-1",
+    trend: "M 0 45 C 25 42, 38 35, 58 36 S 85 24, 112 16 S 132 11, 150 9",
+  },
+  {
+    name: "Chess",
+    nation: "India",
+    score: 94,
+    mover: "Uzbekistan",
+    moverChange: "+5",
+    loser: "China",
+    loserChange: "-2",
+    trend: "M 0 42 C 18 35, 35 31, 52 33 S 78 22, 102 14 S 128 9, 150 6",
+  },
 ] as const;
 
 const topCountriesByGame: Record<Game, RankingRow[]> = {
@@ -79,7 +141,19 @@ const topCountriesByGame: Record<Game, RankingRow[]> = {
   ],
 };
 
-const countryPool = ["Germany", "France", "UK", "Canada", "Australia", "Netherlands", "Brazil", "Turkey", "Japan", "India", "Russia", "Uzbekistan", "Taiwan", "Poland", "Finland", "Norway", "Spain", "Portugal", "Italy", "Mexico", "Argentina", "Chile", "Colombia", "Peru", "New Zealand", "Singapore", "Malaysia", "Thailand", "Vietnam", "Philippines", "Indonesia", "Saudi Arabia", "UAE", "Israel", "Ukraine", "Czech Republic", "Austria", "Switzerland", "Belgium", "Ireland", "Greece", "Romania", "Hungary", "Serbia", "Croatia", "Slovenia", "Slovakia", "Lithuania", "Latvia", "Estonia", "Iceland", "South Africa", "Egypt", "Morocco", "Nigeria", "Kenya", "Ghana", "Pakistan", "Bangladesh", "Sri Lanka", "Nepal", "Iran", "Iraq", "Qatar", "Kuwait", "Jordan", "Lebanon", "Kazakhstan", "Mongolia", "Hong Kong", "Uruguay", "Paraguay", "Bolivia", "Ecuador", "Venezuela", "Costa Rica", "Panama", "Dominican Republic", "Jamaica", "Cuba", "Luxembourg", "Malta", "Cyprus", "Bulgaria", "Belarus", "Georgia", "Armenia", "Azerbaijan", "Algeria", "Tunisia", "Ethiopia", "Tanzania", "Uganda", "Zimbabwe", "Cambodia"];
+const countryPool = [
+  "Germany", "France", "UK", "Canada", "Australia", "Netherlands", "Brazil", "Turkey", "Japan", "India",
+  "Russia", "Uzbekistan", "Taiwan", "Poland", "Finland", "Norway", "Spain", "Portugal", "Italy", "Mexico",
+  "Argentina", "Chile", "Colombia", "Peru", "New Zealand", "Singapore", "Malaysia", "Thailand", "Vietnam",
+  "Philippines", "Indonesia", "Saudi Arabia", "UAE", "Israel", "Ukraine", "Czech Republic", "Austria",
+  "Switzerland", "Belgium", "Ireland", "Greece", "Romania", "Hungary", "Serbia", "Croatia", "Slovenia",
+  "Slovakia", "Lithuania", "Latvia", "Estonia", "Iceland", "South Africa", "Egypt", "Morocco", "Nigeria",
+  "Kenya", "Ghana", "Pakistan", "Bangladesh", "Sri Lanka", "Nepal", "Iran", "Iraq", "Qatar", "Kuwait",
+  "Jordan", "Lebanon", "Kazakhstan", "Mongolia", "Hong Kong", "Uruguay", "Paraguay", "Bolivia", "Ecuador",
+  "Venezuela", "Costa Rica", "Panama", "Dominican Republic", "Jamaica", "Cuba", "Luxembourg", "Malta",
+  "Cyprus", "Bulgaria", "Belarus", "Georgia", "Armenia", "Azerbaijan", "Algeria", "Tunisia", "Ethiopia",
+  "Tanzania", "Uganda", "Zimbabwe", "Cambodia",
+];
 
 const trendUp = "M 0 42 C 20 38, 40 36, 58 30 S 88 20, 112 14 S 135 9, 150 7";
 const trendDown = "M 0 16 C 22 19, 42 20, 62 26 S 92 31, 114 38 S 134 39, 150 44";
@@ -121,6 +195,7 @@ export default function Home() {
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
     onScroll();
+
     window.addEventListener("scroll", onScroll);
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
@@ -169,7 +244,11 @@ export default function Home() {
 
           <nav className="hidden flex-1 items-center justify-around md:flex">
             {["Rankings", "World Map", "Countries", "Profiles", "User Rankings", "About"].map((item) => (
-              <a key={item} className="text-[1rem] font-semibold text-gray-700 transition-colors hover:text-[#19d3cf]" href={item === "Rankings" ? "/" : `/${item.toLowerCase().replace(" ", "-")}`}>
+              <a
+                key={item}
+                className="text-[1rem] font-semibold text-gray-700 transition-colors hover:text-[#19d3cf]"
+                href={item === "Rankings" ? "/" : `/${item.toLowerCase().replace(" ", "-")}`}
+              >
                 {item}
               </a>
             ))}
@@ -185,8 +264,8 @@ export default function Home() {
         </div>
 
         <div className="relative z-30 mb-5 grid items-stretch gap-4 overflow-visible md:grid-cols-[1.45fr_2.7fr_1.35fr_1.35fr]">
-          <div className="relative z-50 min-h-[148px] rounded-2xl border border-[#ff2fa8]/35 bg-white/92 p-5 shadow-sm backdrop-blur">
-            <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-gray-500">Top Game</p>
+          <div className="relative z-50 min-h-[124px] rounded-2xl border border-[#ff2fa8]/35 bg-white/92 p-5 shadow-sm backdrop-blur">
+            <p className="text-[10px] font-bold uppercase tracking-[0.17em] text-gray-500">Top Game</p>
 
             <CustomGameDropdown
               value={activeStats.name as Game}
@@ -202,23 +281,23 @@ export default function Home() {
             />
           </div>
 
-          <div className={`min-h-[148px] rounded-2xl border border-[#ff2fa8]/35 bg-white/92 p-5 shadow-sm backdrop-blur transition-all duration-[3000ms] ease-in-out ${statsVisible ? "translate-y-0 opacity-100" : "translate-y-2 opacity-0"}`}>
-            <div className="grid h-full grid-cols-3 items-start gap-6">
+          <div className={`min-h-[124px] rounded-2xl border border-[#ff2fa8]/35 bg-white/92 p-5 shadow-sm backdrop-blur transition-all duration-[3000ms] ease-in-out ${statsVisible ? "translate-y-0 opacity-100" : "translate-y-2 opacity-0"}`}>
+            <div className="grid h-full grid-cols-3 items-start gap-5">
               <div>
-                <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-gray-500">Leading Nation</p>
-                <p className="mt-10 text-lg font-black leading-none">{activeStats.nation}</p>
+                <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-gray-500">Leading Nation</p>
+                <p className="mt-8 text-base font-black leading-tight">{activeStats.nation}</p>
               </div>
 
               <div className="flex flex-col items-center">
-                <p className="text-center text-[11px] font-bold uppercase tracking-[0.18em] text-gray-500">7D Trend</p>
-                <svg viewBox="0 0 150 50" className="mt-7 h-12 w-36">
-                  <path d={activeStats.trend} fill="none" stroke="#19d3cf" strokeWidth="1.6" strokeLinecap="round" />
+                <p className="text-center text-[10px] font-bold uppercase tracking-[0.16em] text-gray-500">7D Trend</p>
+                <svg viewBox="0 0 150 50" className="mt-4 h-10 w-32">
+                  <path d={activeStats.trend} fill="none" stroke="#19d3cf" strokeWidth="1.45" strokeLinecap="round" />
                 </svg>
               </div>
 
-              <div className="text-right">
-                <p className="whitespace-nowrap text-[11px] font-bold uppercase tracking-[0.18em] text-gray-500">Dominance Score</p>
-                <p className="mt-10 text-lg font-black leading-none text-[#19d3cf]">{activeStats.score}</p>
+              <div className="pr-4 text-right">
+                <p className="whitespace-nowrap text-[10px] font-bold uppercase tracking-[0.12em] text-gray-500">Dominance Score</p>
+                <p className="mt-8 text-base font-black leading-tight text-[#19d3cf]">{activeStats.score}</p>
               </div>
             </div>
           </div>
@@ -230,7 +309,11 @@ export default function Home() {
         <div className="relative z-10 mb-6 flex items-center justify-between gap-4 rounded-3xl border border-[#ff2fa8]/45 bg-white/92 p-4 shadow-sm backdrop-blur">
           <div className="flex gap-3 overflow-x-auto">
             {games.map((game) => (
-              <button key={game} onClick={() => setSelectedGame(game)} className={`whitespace-nowrap rounded-full px-5 py-2.5 text-sm font-bold transition-all duration-300 ${game === selectedGame ? "bg-[#19d3cf] text-white" : "border border-gray-200 bg-white text-gray-700 hover:border-[#ff2fa8]"}`}>
+              <button
+                key={game}
+                onClick={() => setSelectedGame(game)}
+                className={`whitespace-nowrap rounded-full px-5 py-2.5 text-sm font-bold transition-all duration-300 ${game === selectedGame ? "bg-[#19d3cf] text-white" : "border border-gray-200 bg-white text-gray-700 hover:border-[#ff2fa8]"}`}
+              >
                 {game}
               </button>
             ))}
@@ -238,7 +321,11 @@ export default function Home() {
 
           <div className="hidden shrink-0 gap-2 md:flex">
             {periods.map((period) => (
-              <button key={period} onClick={() => setSelectedPeriod(period)} className={`rounded-full px-4 py-2 text-xs font-bold transition-all duration-300 ${selectedPeriod === period ? "bg-[#ff2fa8] text-white" : "border border-gray-200 bg-white text-gray-600 hover:border-[#19d3cf]"}`}>
+              <button
+                key={period}
+                onClick={() => setSelectedPeriod(period)}
+                className={`rounded-full px-4 py-2 text-xs font-bold transition-all duration-300 ${selectedPeriod === period ? "bg-[#ff2fa8] text-white" : "border border-gray-200 bg-white text-gray-600 hover:border-[#19d3cf]"}`}
+              >
                 {period}
               </button>
             ))}
@@ -261,7 +348,10 @@ export default function Home() {
             const isUp = item.direction === "up";
 
             return (
-              <div key={`${selectedGame}-${item.country}`} className="grid grid-cols-[0.6fr_1.4fr_1fr_1.4fr_1fr_1fr_2.2fr_2.2fr] items-center border-b border-gray-100 px-6 py-4 text-sm last:border-b-0 hover:bg-gray-50/90">
+              <div
+                key={`${selectedGame}-${item.country}`}
+                className="grid grid-cols-[0.6fr_1.4fr_1fr_1.4fr_1fr_1fr_2.2fr_2.2fr] items-center border-b border-gray-100 px-6 py-4 text-sm last:border-b-0 hover:bg-gray-50/90"
+              >
                 <div className="text-base font-normal text-[#ff2fa8]">{index + 1}</div>
                 <div className="text-sm font-semibold">{item.country}</div>
                 <div><span className="rounded-full bg-[#19d3cf]/10 px-4 py-2 text-sm font-black text-[#19d3cf]">{item.score}</span></div>
@@ -310,12 +400,16 @@ function CustomGameDropdown({ value, visible, onChange }: { value: Game; visible
   }, []);
 
   return (
-    <div ref={dropdownRef} className="relative z-[9999] mt-7">
-      <button type="button" onClick={() => setOpen((current) => !current)} className={`flex h-[58px] w-full items-center justify-between rounded-2xl border bg-white px-4 py-3 text-left font-black shadow-sm transition-all duration-300 ${open ? "border-[#ff2fa8] shadow-md" : "border-[#19d3cf]/30 hover:border-[#ff2fa8]/60 hover:shadow-md"}`}>
-        <span className={`block max-w-[240px] whitespace-nowrap text-[0.95rem] leading-tight text-[#19d3cf] transition-all duration-1000 ease-in-out ${visible ? "translate-y-0 opacity-100" : "translate-y-1 opacity-0"}`}>
+    <div ref={dropdownRef} className="relative z-[9999] mt-5">
+      <button
+        type="button"
+        onClick={() => setOpen((current) => !current)}
+        className={`flex h-[48px] w-full items-center justify-between rounded-2xl border bg-white px-4 py-2 text-left font-black shadow-sm transition-all duration-300 ${open ? "border-[#ff2fa8] shadow-md" : "border-[#19d3cf]/30 hover:border-[#ff2fa8]/60 hover:shadow-md"}`}
+      >
+        <span className={`block max-w-[245px] whitespace-nowrap text-[0.82rem] leading-none text-[#19d3cf] transition-all duration-1000 ease-in-out ${visible ? "translate-y-0 opacity-100" : "translate-y-1 opacity-0"}`}>
           {value}
         </span>
-        <span className={`ml-3 shrink-0 text-sm text-[#ff2fa8] transition-transform duration-300 ${open ? "rotate-180" : ""}`}>▼</span>
+        <span className={`ml-3 shrink-0 text-xs text-[#ff2fa8] transition-transform duration-300 ${open ? "rotate-180" : ""}`}>▼</span>
       </button>
 
       <div className={`absolute left-0 top-[calc(100%+0.5rem)] z-[9999] w-full overflow-hidden rounded-2xl border border-[#ff2fa8]/35 bg-white shadow-xl transition-all duration-300 ${open ? "translate-y-0 opacity-100" : "pointer-events-none -translate-y-2 opacity-0"}`}>
@@ -323,7 +417,15 @@ function CustomGameDropdown({ value, visible, onChange }: { value: Game; visible
           const selected = game === value;
 
           return (
-            <button key={game} type="button" onClick={() => { onChange(game); setOpen(false); }} className={`block w-full px-4 py-3 text-left text-sm font-black transition-all duration-200 ${selected ? "bg-[#19d3cf]/10 text-[#19d3cf]" : "text-[#ff2fa8] hover:bg-[#ff2fa8]/8 hover:text-[#ff2fa8]"}`}>
+            <button
+              key={game}
+              type="button"
+              onClick={() => {
+                onChange(game);
+                setOpen(false);
+              }}
+              className={`block w-full px-4 py-3 text-left text-sm font-black transition-all duration-200 ${selected ? "bg-[#19d3cf]/10 text-[#19d3cf]" : "text-[#ff2fa8] hover:bg-[#ff2fa8]/8 hover:text-[#ff2fa8]"}`}
+            >
               {game}
             </button>
           );
@@ -335,9 +437,9 @@ function CustomGameDropdown({ value, visible, onChange }: { value: Game; visible
 
 function StatCard({ label, value, valueColor, visible }: { label: string; value: string; valueColor: string; visible: boolean }) {
   return (
-    <div className={`min-h-[148px] rounded-2xl border border-[#ff2fa8]/35 bg-white/92 p-5 shadow-sm backdrop-blur transition-all duration-[3000ms] ease-in-out ${visible ? "translate-y-0 opacity-100" : "translate-y-2 opacity-0"}`}>
-      <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-gray-500">{label}</p>
-      <p className={`mt-10 text-lg font-black leading-none ${valueColor}`}>{value}</p>
+    <div className={`min-h-[124px] rounded-2xl border border-[#ff2fa8]/35 bg-white/92 p-5 shadow-sm backdrop-blur transition-all duration-[3000ms] ease-in-out ${visible ? "translate-y-0 opacity-100" : "translate-y-2 opacity-0"}`}>
+      <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-gray-500">{label}</p>
+      <p className={`mt-8 text-base font-black leading-tight ${valueColor}`}>{value}</p>
     </div>
   );
 }
