@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 const periods = ["7 Days", "1 Month", "1 Year"] as const;
 type Period = (typeof periods)[number];
@@ -194,22 +194,16 @@ export default function Home() {
           <div className="rounded-2xl border border-[#ff2fa8]/35 bg-white/92 p-5 shadow-sm backdrop-blur">
             <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-gray-500">Top Game</p>
 
-            <select
-              value={activeStats.name}
-              onChange={(event) => {
-                const value = event.target.value as Game;
-                setManualStatsGame(value);
+            <CustomGameDropdown
+              value={activeStats.name as Game}
+              onChange={(game) => {
+                setManualStatsGame(game);
                 setStatsVisible(true);
 
-                const nextIndex = statGames.findIndex((game) => game.name === value);
+                const nextIndex = statGames.findIndex((item) => item.name === game);
                 if (nextIndex >= 0) setStatsIndex(nextIndex);
               }}
-              className="mt-3 w-full rounded-xl border border-transparent bg-transparent text-lg font-black leading-none text-[#19d3cf] outline-none transition focus:border-[#19d3cf]/40"
-            >
-              {games.map((game) => (
-                <option key={game} value={game}>{game}</option>
-              ))}
-            </select>
+            />
           </div>
 
           <div className="rounded-2xl border border-[#ff2fa8]/35 bg-white/92 p-5 shadow-sm backdrop-blur md:col-span-2">
@@ -301,6 +295,77 @@ export default function Home() {
         }
       `}</style>
     </main>
+  );
+}
+
+function CustomGameDropdown({ value, onChange }: { value: Game; onChange: (game: Game) => void }) {
+  const [open, setOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (!dropdownRef.current) return;
+      if (!dropdownRef.current.contains(event.target as Node)) setOpen(false);
+    }
+
+    function handleEscape(event: KeyboardEvent) {
+      if (event.key === "Escape") setOpen(false);
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleEscape);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleEscape);
+    };
+  }, []);
+
+  return (
+    <div ref={dropdownRef} className="relative mt-3">
+      <button
+        type="button"
+        onClick={() => setOpen((current) => !current)}
+        className={`flex w-full items-center justify-between rounded-2xl border bg-white px-4 py-3 text-left text-lg font-black shadow-sm transition-all duration-300 ${
+          open
+            ? "border-[#ff2fa8] shadow-md"
+            : "border-[#19d3cf]/30 hover:border-[#ff2fa8]/60 hover:shadow-md"
+        }`}
+      >
+        <span className="text-[#19d3cf]">{value}</span>
+        <span className={`text-sm text-[#ff2fa8] transition-transform duration-300 ${open ? "rotate-180" : ""}`}>▼</span>
+      </button>
+
+      <div
+        className={`absolute left-0 top-[calc(100%+0.5rem)] z-40 w-full overflow-hidden rounded-2xl border border-[#ff2fa8]/35 bg-white shadow-xl transition-all duration-300 ${
+          open
+            ? "translate-y-0 opacity-100"
+            : "pointer-events-none -translate-y-2 opacity-0"
+        }`}
+      >
+        {games.map((game) => {
+          const selected = game === value;
+
+          return (
+            <button
+              key={game}
+              type="button"
+              onClick={() => {
+                onChange(game);
+                setOpen(false);
+              }}
+              className={`block w-full px-4 py-3 text-left text-sm font-black transition-all duration-200 ${
+                selected
+                  ? "bg-[#19d3cf]/10 text-[#19d3cf]"
+                  : "text-[#ff2fa8] hover:bg-[#ff2fa8]/8 hover:text-[#ff2fa8]"
+              }`}
+            >
+              {game}
+            </button>
+          );
+        })}
+      </div>
+    </div>
   );
 }
 
