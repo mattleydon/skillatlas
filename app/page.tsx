@@ -21,15 +21,7 @@ type RankingRow = {
   improvements: string[];
 };
 
-function row(
-  country: string,
-  score: number,
-  rankChange: string,
-  percentChange: string,
-  direction: Direction,
-  reasons: string[],
-  improvements: string[]
-): RankingRow {
+function row(country: string, score: number, rankChange: string, percentChange: string, direction: Direction, reasons: string[], improvements: string[]): RankingRow {
   return { country, score, rankChange, percentChange, direction, reasons, improvements };
 }
 
@@ -157,25 +149,21 @@ export default function Home() {
     <main className="relative min-h-screen overflow-hidden bg-[#F8FAFC] text-[#111827]">
       <RotatingGlobeBackground />
 
-      <header className="sticky top-0 z-50 border-b border-[#ff2fa8]/25 bg-white/95 backdrop-blur transition-all duration-300">
-        <div className={`mx-auto flex max-w-7xl items-center px-8 transition-all duration-300 ${scrolled ? "py-2" : "py-3"}`}>
+      <header className="sticky top-0 z-50 overflow-visible border-b border-[#ff2fa8]/25 bg-white/95 backdrop-blur transition-all duration-300">
+        <div className={`mx-auto flex max-w-7xl items-center px-8 transition-all duration-300 ${scrolled ? "py-1.5" : "py-3"}`}>
           <div className="mr-14 flex shrink-0 items-center gap-5">
-            <a href="/space-invaders" className={`relative transition-all duration-300 ${scrolled ? "h-16 w-16" : "h-24 w-24"}`}>
+            <a href="/space-invaders" className={`relative shrink-0 transition-all duration-300 ${scrolled ? "h-12 w-12" : "h-24 w-24"}`}>
               <Image src="/skillatlas-logo.png" alt="SkillAtlas logo" fill className="object-contain" priority />
             </a>
 
-            <a href="/" className={`relative transition-all duration-300 ${scrolled ? "h-10 w-56" : "h-14 w-80"}`}>
+            <a href="/" className={`relative shrink-0 transition-all duration-300 ${scrolled ? "h-8 w-44" : "h-14 w-80"}`}>
               <Image src="/skillatlas-title.png" alt="SkillAtlas title" fill className="object-contain object-left" priority />
             </a>
           </div>
 
           <nav className="hidden flex-1 items-center justify-around md:flex">
             {["Rankings", "World Map", "Countries", "Profiles", "User Rankings", "About"].map((item) => (
-              <a
-                key={item}
-                className="text-[1rem] font-semibold text-gray-700 transition-colors hover:text-[#19d3cf]"
-                href={item === "Rankings" ? "/" : `/${item.toLowerCase().replace(" ", "-")}`}
-              >
+              <a key={item} className="text-[1rem] font-semibold text-gray-700 transition-colors hover:text-[#19d3cf]" href={item === "Rankings" ? "/" : `/${item.toLowerCase().replace(" ", "-")}`}>
                 {item}
               </a>
             ))}
@@ -190,7 +178,7 @@ export default function Home() {
           <p className="text-sm text-gray-600 md:whitespace-nowrap">Track which countries dominate each game, why they win, where they are improving, and where they are still vulnerable.</p>
         </div>
 
-        <div className={`relative z-30 mb-5 grid items-stretch gap-4 overflow-visible transition-all duration-[3000ms] ease-in-out md:grid-cols-5 ${statsVisible ? "translate-y-0 opacity-100" : "translate-y-2 opacity-0"}`}>
+        <div className="relative z-30 mb-5 grid items-stretch gap-4 overflow-visible md:grid-cols-[1.35fr_2.8fr_1.35fr_1.35fr]">
           <div className="relative z-50 min-h-[148px] rounded-2xl border border-[#ff2fa8]/35 bg-white/92 p-5 shadow-sm backdrop-blur">
             <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-gray-500">Top Game</p>
 
@@ -206,39 +194,35 @@ export default function Home() {
             />
           </div>
 
-          <div className="min-h-[148px] rounded-2xl border border-[#ff2fa8]/35 bg-white/92 p-5 shadow-sm backdrop-blur md:col-span-2">
+          <div className={`min-h-[148px] rounded-2xl border border-[#ff2fa8]/35 bg-white/92 p-5 shadow-sm backdrop-blur transition-all duration-[3000ms] ease-in-out ${statsVisible ? "translate-y-0 opacity-100" : "translate-y-2 opacity-0"}`}>
             <div className="grid h-full grid-cols-3 items-start gap-6">
               <div>
                 <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-gray-500">Leading Nation</p>
-                <p className="mt-6 text-lg font-black leading-none">{activeStats.nation}</p>
+                <p className="mt-10 text-lg font-black leading-none">{activeStats.nation}</p>
               </div>
 
               <div className="flex flex-col items-center">
                 <p className="text-center text-[11px] font-bold uppercase tracking-[0.18em] text-gray-500">7D Trend</p>
-                <svg viewBox="0 0 150 50" className="mt-3 h-12 w-36">
+                <svg viewBox="0 0 150 50" className="mt-7 h-12 w-36">
                   <path d={activeStats.trend} fill="none" stroke="#19d3cf" strokeWidth="1.6" strokeLinecap="round" />
                 </svg>
               </div>
 
               <div className="text-right">
                 <p className="whitespace-nowrap text-[11px] font-bold uppercase tracking-[0.18em] text-gray-500">Dominance Score</p>
-                <p className="mt-6 text-lg font-black leading-none text-[#19d3cf]">{activeStats.score}</p>
+                <p className="mt-10 text-lg font-black leading-none text-[#19d3cf]">{activeStats.score}</p>
               </div>
             </div>
           </div>
 
-          <StatCard label="Biggest Mover" value={`${activeStats.mover} ▲${activeStats.moverChange.replace("+", "")}`} valueColor="text-[#19d3cf]" />
-          <StatCard label="Biggest Loser" value={`${activeStats.loser} ▼${activeStats.loserChange.replace("-", "")}`} valueColor="text-[#ff2fa8]" />
+          <StatCard visible={statsVisible} label="Biggest Mover" value={`${activeStats.mover} ▲${activeStats.moverChange.replace("+", "")}`} valueColor="text-[#19d3cf]" />
+          <StatCard visible={statsVisible} label="Biggest Loser" value={`${activeStats.loser} ▼${activeStats.loserChange.replace("-", "")}`} valueColor="text-[#ff2fa8]" />
         </div>
 
         <div className="relative z-10 mb-6 flex items-center justify-between gap-4 rounded-3xl border border-[#ff2fa8]/45 bg-white/92 p-4 shadow-sm backdrop-blur">
           <div className="flex gap-3 overflow-x-auto">
             {games.map((game) => (
-              <button
-                key={game}
-                onClick={() => setSelectedGame(game)}
-                className={`whitespace-nowrap rounded-full px-5 py-2.5 text-sm font-bold transition-all duration-300 ${game === selectedGame ? "bg-[#19d3cf] text-white" : "border border-gray-200 bg-white text-gray-700 hover:border-[#ff2fa8]"}`}
-              >
+              <button key={game} onClick={() => setSelectedGame(game)} className={`whitespace-nowrap rounded-full px-5 py-2.5 text-sm font-bold transition-all duration-300 ${game === selectedGame ? "bg-[#19d3cf] text-white" : "border border-gray-200 bg-white text-gray-700 hover:border-[#ff2fa8]"}`}>
                 {game}
               </button>
             ))}
@@ -246,11 +230,7 @@ export default function Home() {
 
           <div className="hidden shrink-0 gap-2 md:flex">
             {periods.map((period) => (
-              <button
-                key={period}
-                onClick={() => setSelectedPeriod(period)}
-                className={`rounded-full px-4 py-2 text-xs font-bold transition-all duration-300 ${selectedPeriod === period ? "bg-[#ff2fa8] text-white" : "border border-gray-200 bg-white text-gray-600 hover:border-[#19d3cf]"}`}
-              >
+              <button key={period} onClick={() => setSelectedPeriod(period)} className={`rounded-full px-4 py-2 text-xs font-bold transition-all duration-300 ${selectedPeriod === period ? "bg-[#ff2fa8] text-white" : "border border-gray-200 bg-white text-gray-600 hover:border-[#19d3cf]"}`}>
                 {period}
               </button>
             ))}
@@ -322,42 +302,20 @@ function CustomGameDropdown({ value, onChange }: { value: Game; onChange: (game:
   }, []);
 
   return (
-    <div ref={dropdownRef} className="relative z-[9999] mt-6">
-      <button
-        type="button"
-        onClick={() => setOpen((current) => !current)}
-        className={`flex h-[58px] w-full items-center justify-between rounded-2xl border bg-white px-4 py-3 text-left text-lg font-black shadow-sm transition-all duration-300 ${
-          open
-            ? "border-[#ff2fa8] shadow-md"
-            : "border-[#19d3cf]/30 hover:border-[#ff2fa8]/60 hover:shadow-md"
-        }`}
-      >
-        <span className="block max-w-[160px] truncate whitespace-nowrap text-[#19d3cf]">
+    <div ref={dropdownRef} className="relative z-[9999] mt-8">
+      <button type="button" onClick={() => setOpen((current) => !current)} className={`flex h-[62px] w-full items-center justify-between rounded-2xl border bg-white px-4 py-3 text-left font-black shadow-sm transition-all duration-300 ${open ? "border-[#ff2fa8] shadow-md" : "border-[#19d3cf]/30 hover:border-[#ff2fa8]/60 hover:shadow-md"}`}>
+        <span className="block max-w-[220px] whitespace-normal text-[1.05rem] leading-tight text-[#19d3cf]">
           {value}
         </span>
-        <span className={`text-sm text-[#ff2fa8] transition-transform duration-300 ${open ? "rotate-180" : ""}`}>▼</span>
+        <span className={`ml-3 shrink-0 text-sm text-[#ff2fa8] transition-transform duration-300 ${open ? "rotate-180" : ""}`}>▼</span>
       </button>
 
-      <div
-        className={`absolute left-0 top-[calc(100%+0.5rem)] z-[9999] w-full overflow-hidden rounded-2xl border border-[#ff2fa8]/35 bg-white shadow-xl transition-all duration-300 ${
-          open ? "translate-y-0 opacity-100" : "pointer-events-none -translate-y-2 opacity-0"
-        }`}
-      >
+      <div className={`absolute left-0 top-[calc(100%+0.5rem)] z-[9999] w-full overflow-hidden rounded-2xl border border-[#ff2fa8]/35 bg-white shadow-xl transition-all duration-300 ${open ? "translate-y-0 opacity-100" : "pointer-events-none -translate-y-2 opacity-0"}`}>
         {games.map((game) => {
           const selected = game === value;
 
           return (
-            <button
-              key={game}
-              type="button"
-              onClick={() => {
-                onChange(game);
-                setOpen(false);
-              }}
-              className={`block w-full px-4 py-3 text-left text-sm font-black transition-all duration-200 ${
-                selected ? "bg-[#19d3cf]/10 text-[#19d3cf]" : "text-[#ff2fa8] hover:bg-[#ff2fa8]/8 hover:text-[#ff2fa8]"
-              }`}
-            >
+            <button key={game} type="button" onClick={() => { onChange(game); setOpen(false); }} className={`block w-full px-4 py-3 text-left text-sm font-black transition-all duration-200 ${selected ? "bg-[#19d3cf]/10 text-[#19d3cf]" : "text-[#ff2fa8] hover:bg-[#ff2fa8]/8 hover:text-[#ff2fa8]"}`}>
               {game}
             </button>
           );
@@ -367,11 +325,11 @@ function CustomGameDropdown({ value, onChange }: { value: Game; onChange: (game:
   );
 }
 
-function StatCard({ label, value, valueColor }: { label: string; value: string; valueColor: string }) {
+function StatCard({ label, value, valueColor, visible }: { label: string; value: string; valueColor: string; visible: boolean }) {
   return (
-    <div className="min-h-[148px] rounded-2xl border border-[#ff2fa8]/35 bg-white/92 p-5 shadow-sm backdrop-blur">
+    <div className={`min-h-[148px] rounded-2xl border border-[#ff2fa8]/35 bg-white/92 p-5 shadow-sm backdrop-blur transition-all duration-[3000ms] ease-in-out ${visible ? "translate-y-0 opacity-100" : "translate-y-2 opacity-0"}`}>
       <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-gray-500">{label}</p>
-      <p className={`mt-6 text-lg font-black leading-none ${valueColor}`}>{value}</p>
+      <p className={`mt-10 text-lg font-black leading-none ${valueColor}`}>{value}</p>
     </div>
   );
 }
@@ -383,15 +341,12 @@ function RotatingGlobeBackground() {
         <div className="absolute inset-0 animate-[globeSpin_75s_linear_infinite] rounded-full border border-gray-500" />
         <div className="absolute inset-[8%] animate-[globeSpin_95s_linear_infinite_reverse] rounded-full border border-gray-400" />
         <div className="absolute inset-[18%] rounded-full border border-gray-300" />
-
         <div className="absolute left-1/2 top-0 h-full w-px -translate-x-1/2 bg-gray-300" />
         <div className="absolute left-[30%] top-0 h-full w-px -translate-x-1/2 bg-gray-300" />
         <div className="absolute left-[70%] top-0 h-full w-px -translate-x-1/2 bg-gray-300" />
-
         <div className="absolute left-0 top-1/2 h-px w-full -translate-y-1/2 bg-gray-300" />
         <div className="absolute left-0 top-[35%] h-px w-full -translate-y-1/2 bg-gray-300" />
         <div className="absolute left-0 top-[65%] h-px w-full -translate-y-1/2 bg-gray-300" />
-
         <div className="absolute left-[18%] top-[24%] h-3 w-3 rounded-full bg-[#19d3cf]" />
         <div className="absolute left-[66%] top-[38%] h-2 w-2 rounded-full bg-[#ff2fa8]" />
         <div className="absolute left-[48%] top-[62%] h-2.5 w-2.5 rounded-full bg-gray-500" />
