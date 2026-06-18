@@ -113,6 +113,7 @@ export default function Home() {
   const [scrolled, setScrolled] = useState(false);
   const [statsIndex, setStatsIndex] = useState(0);
   const [statsVisible, setStatsVisible] = useState(true);
+  const [gameTitleVisible, setGameTitleVisible] = useState(true);
   const [manualStatsGame, setManualStatsGame] = useState<Game | null>(null);
   const [selectedGame, setSelectedGame] = useState<Game>("CS2");
   const [selectedPeriod, setSelectedPeriod] = useState<Period>("7 Days");
@@ -129,10 +130,15 @@ export default function Home() {
 
     const stayTimer = window.setTimeout(() => {
       setStatsVisible(false);
+      setGameTitleVisible(false);
 
       window.setTimeout(() => {
         setStatsIndex((current) => (current + 1) % statGames.length);
         setStatsVisible(true);
+
+        window.setTimeout(() => {
+          setGameTitleVisible(true);
+        }, 100);
       }, 3000);
     }, 6000);
 
@@ -150,13 +156,13 @@ export default function Home() {
       <RotatingGlobeBackground />
 
       <header className="sticky top-0 z-50 overflow-visible border-b border-[#ff2fa8]/25 bg-white/95 backdrop-blur transition-all duration-300">
-        <div className={`mx-auto flex max-w-7xl items-center px-8 transition-all duration-300 ${scrolled ? "py-1.5" : "py-3"}`}>
+        <div className={`mx-auto flex max-w-7xl items-center px-8 transition-all duration-300 ${scrolled ? "py-2" : "py-3"}`}>
           <div className="mr-14 flex shrink-0 items-center gap-5">
-            <a href="/space-invaders" className={`relative shrink-0 transition-all duration-300 ${scrolled ? "h-12 w-12" : "h-24 w-24"}`}>
+            <a href="/space-invaders" className={`relative shrink-0 transition-all duration-300 ${scrolled ? "h-14 w-14" : "h-24 w-24"}`}>
               <Image src="/skillatlas-logo.png" alt="SkillAtlas logo" fill className="object-contain" priority />
             </a>
 
-            <a href="/" className={`relative shrink-0 transition-all duration-300 ${scrolled ? "h-8 w-44" : "h-14 w-80"}`}>
+            <a href="/" className={`relative shrink-0 transition-all duration-300 ${scrolled ? "h-9 w-52" : "h-14 w-80"}`}>
               <Image src="/skillatlas-title.png" alt="SkillAtlas title" fill className="object-contain object-left" priority />
             </a>
           </div>
@@ -178,15 +184,17 @@ export default function Home() {
           <p className="text-sm text-gray-600 md:whitespace-nowrap">Track which countries dominate each game, why they win, where they are improving, and where they are still vulnerable.</p>
         </div>
 
-        <div className="relative z-30 mb-5 grid items-stretch gap-4 overflow-visible md:grid-cols-[1.35fr_2.8fr_1.35fr_1.35fr]">
+        <div className="relative z-30 mb-5 grid items-stretch gap-4 overflow-visible md:grid-cols-[1.45fr_2.7fr_1.35fr_1.35fr]">
           <div className="relative z-50 min-h-[148px] rounded-2xl border border-[#ff2fa8]/35 bg-white/92 p-5 shadow-sm backdrop-blur">
             <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-gray-500">Top Game</p>
 
             <CustomGameDropdown
               value={activeStats.name as Game}
+              visible={gameTitleVisible}
               onChange={(game) => {
                 setManualStatsGame(game);
                 setStatsVisible(true);
+                setGameTitleVisible(true);
 
                 const nextIndex = statGames.findIndex((item) => item.name === game);
                 if (nextIndex >= 0) setStatsIndex(nextIndex);
@@ -278,7 +286,7 @@ export default function Home() {
   );
 }
 
-function CustomGameDropdown({ value, onChange }: { value: Game; onChange: (game: Game) => void }) {
+function CustomGameDropdown({ value, visible, onChange }: { value: Game; visible: boolean; onChange: (game: Game) => void }) {
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement | null>(null);
 
@@ -302,9 +310,9 @@ function CustomGameDropdown({ value, onChange }: { value: Game; onChange: (game:
   }, []);
 
   return (
-    <div ref={dropdownRef} className="relative z-[9999] mt-8">
-      <button type="button" onClick={() => setOpen((current) => !current)} className={`flex h-[62px] w-full items-center justify-between rounded-2xl border bg-white px-4 py-3 text-left font-black shadow-sm transition-all duration-300 ${open ? "border-[#ff2fa8] shadow-md" : "border-[#19d3cf]/30 hover:border-[#ff2fa8]/60 hover:shadow-md"}`}>
-        <span className="block max-w-[220px] whitespace-normal text-[1.05rem] leading-tight text-[#19d3cf]">
+    <div ref={dropdownRef} className="relative z-[9999] mt-7">
+      <button type="button" onClick={() => setOpen((current) => !current)} className={`flex h-[58px] w-full items-center justify-between rounded-2xl border bg-white px-4 py-3 text-left font-black shadow-sm transition-all duration-300 ${open ? "border-[#ff2fa8] shadow-md" : "border-[#19d3cf]/30 hover:border-[#ff2fa8]/60 hover:shadow-md"}`}>
+        <span className={`block max-w-[240px] whitespace-nowrap text-[0.95rem] leading-tight text-[#19d3cf] transition-all duration-1000 ease-in-out ${visible ? "translate-y-0 opacity-100" : "translate-y-1 opacity-0"}`}>
           {value}
         </span>
         <span className={`ml-3 shrink-0 text-sm text-[#ff2fa8] transition-transform duration-300 ${open ? "rotate-180" : ""}`}>▼</span>
