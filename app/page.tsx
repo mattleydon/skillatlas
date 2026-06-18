@@ -190,8 +190,8 @@ export default function Home() {
           <p className="text-sm text-gray-600 md:whitespace-nowrap">Track which countries dominate each game, why they win, where they are improving, and where they are still vulnerable.</p>
         </div>
 
-        <div className={`mb-5 grid gap-4 transition-all duration-[3000ms] ease-in-out md:grid-cols-5 ${statsVisible ? "translate-y-0 opacity-100" : "translate-y-2 opacity-0"}`}>
-          <div className="rounded-2xl border border-[#ff2fa8]/35 bg-white/92 p-5 shadow-sm backdrop-blur">
+        <div className={`relative z-30 mb-5 grid items-stretch gap-4 overflow-visible transition-all duration-[3000ms] ease-in-out md:grid-cols-5 ${statsVisible ? "translate-y-0 opacity-100" : "translate-y-2 opacity-0"}`}>
+          <div className="relative z-50 min-h-[148px] rounded-2xl border border-[#ff2fa8]/35 bg-white/92 p-5 shadow-sm backdrop-blur">
             <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-gray-500">Top Game</p>
 
             <CustomGameDropdown
@@ -206,23 +206,23 @@ export default function Home() {
             />
           </div>
 
-          <div className="rounded-2xl border border-[#ff2fa8]/35 bg-white/92 p-5 shadow-sm backdrop-blur md:col-span-2">
+          <div className="min-h-[148px] rounded-2xl border border-[#ff2fa8]/35 bg-white/92 p-5 shadow-sm backdrop-blur md:col-span-2">
             <div className="grid h-full grid-cols-3 items-start gap-6">
               <div>
                 <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-gray-500">Leading Nation</p>
-                <p className="mt-4 text-lg font-black leading-none">{activeStats.nation}</p>
+                <p className="mt-6 text-lg font-black leading-none">{activeStats.nation}</p>
               </div>
 
               <div className="flex flex-col items-center">
                 <p className="text-center text-[11px] font-bold uppercase tracking-[0.18em] text-gray-500">7D Trend</p>
-                <svg viewBox="0 0 150 50" className="mt-1 h-12 w-36">
+                <svg viewBox="0 0 150 50" className="mt-3 h-12 w-36">
                   <path d={activeStats.trend} fill="none" stroke="#19d3cf" strokeWidth="1.6" strokeLinecap="round" />
                 </svg>
               </div>
 
               <div className="text-right">
                 <p className="whitespace-nowrap text-[11px] font-bold uppercase tracking-[0.18em] text-gray-500">Dominance Score</p>
-                <p className="mt-4 text-lg font-black leading-none text-[#19d3cf]">{activeStats.score}</p>
+                <p className="mt-6 text-lg font-black leading-none text-[#19d3cf]">{activeStats.score}</p>
               </div>
             </div>
           </div>
@@ -231,7 +231,7 @@ export default function Home() {
           <StatCard label="Biggest Loser" value={`${activeStats.loser} ▼${activeStats.loserChange.replace("-", "")}`} valueColor="text-[#ff2fa8]" />
         </div>
 
-        <div className="mb-6 flex items-center justify-between gap-4 rounded-3xl border border-[#ff2fa8]/45 bg-white/92 p-4 shadow-sm backdrop-blur">
+        <div className="relative z-10 mb-6 flex items-center justify-between gap-4 rounded-3xl border border-[#ff2fa8]/45 bg-white/92 p-4 shadow-sm backdrop-blur">
           <div className="flex gap-3 overflow-x-auto">
             {games.map((game) => (
               <button
@@ -257,7 +257,7 @@ export default function Home() {
           </div>
         </div>
 
-        <section className="overflow-hidden rounded-3xl border border-[#ff2fa8]/45 bg-white/92 shadow-sm backdrop-blur">
+        <section className="relative z-0 overflow-hidden rounded-3xl border border-[#ff2fa8]/45 bg-white/92 shadow-sm backdrop-blur">
           <div className="grid grid-cols-[0.6fr_1.4fr_1fr_1.4fr_1fr_1fr_2.2fr_2.2fr] border-b border-[#ff2fa8]/20 bg-gray-50/90 px-6 py-4 text-[11px] font-bold uppercase tracking-wide text-gray-500">
             <div>Rank</div>
             <div>Country</div>
@@ -322,25 +322,25 @@ function CustomGameDropdown({ value, onChange }: { value: Game; onChange: (game:
   }, []);
 
   return (
-    <div ref={dropdownRef} className="relative mt-3">
+    <div ref={dropdownRef} className="relative z-[9999] mt-6">
       <button
         type="button"
         onClick={() => setOpen((current) => !current)}
-        className={`flex w-full items-center justify-between rounded-2xl border bg-white px-4 py-3 text-left text-lg font-black shadow-sm transition-all duration-300 ${
+        className={`flex h-[58px] w-full items-center justify-between rounded-2xl border bg-white px-4 py-3 text-left text-lg font-black shadow-sm transition-all duration-300 ${
           open
             ? "border-[#ff2fa8] shadow-md"
             : "border-[#19d3cf]/30 hover:border-[#ff2fa8]/60 hover:shadow-md"
         }`}
       >
-        <span className="text-[#19d3cf]">{value}</span>
+        <span className="block max-w-[160px] truncate whitespace-nowrap text-[#19d3cf]">
+          {value}
+        </span>
         <span className={`text-sm text-[#ff2fa8] transition-transform duration-300 ${open ? "rotate-180" : ""}`}>▼</span>
       </button>
 
       <div
-        className={`absolute left-0 top-[calc(100%+0.5rem)] z-40 w-full overflow-hidden rounded-2xl border border-[#ff2fa8]/35 bg-white shadow-xl transition-all duration-300 ${
-          open
-            ? "translate-y-0 opacity-100"
-            : "pointer-events-none -translate-y-2 opacity-0"
+        className={`absolute left-0 top-[calc(100%+0.5rem)] z-[9999] w-full overflow-hidden rounded-2xl border border-[#ff2fa8]/35 bg-white shadow-xl transition-all duration-300 ${
+          open ? "translate-y-0 opacity-100" : "pointer-events-none -translate-y-2 opacity-0"
         }`}
       >
         {games.map((game) => {
@@ -355,9 +355,7 @@ function CustomGameDropdown({ value, onChange }: { value: Game; onChange: (game:
                 setOpen(false);
               }}
               className={`block w-full px-4 py-3 text-left text-sm font-black transition-all duration-200 ${
-                selected
-                  ? "bg-[#19d3cf]/10 text-[#19d3cf]"
-                  : "text-[#ff2fa8] hover:bg-[#ff2fa8]/8 hover:text-[#ff2fa8]"
+                selected ? "bg-[#19d3cf]/10 text-[#19d3cf]" : "text-[#ff2fa8] hover:bg-[#ff2fa8]/8 hover:text-[#ff2fa8]"
               }`}
             >
               {game}
@@ -371,9 +369,9 @@ function CustomGameDropdown({ value, onChange }: { value: Game; onChange: (game:
 
 function StatCard({ label, value, valueColor }: { label: string; value: string; valueColor: string }) {
   return (
-    <div className="rounded-2xl border border-[#ff2fa8]/35 bg-white/92 p-5 shadow-sm backdrop-blur">
+    <div className="min-h-[148px] rounded-2xl border border-[#ff2fa8]/35 bg-white/92 p-5 shadow-sm backdrop-blur">
       <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-gray-500">{label}</p>
-      <p className={`mt-4 text-lg font-black leading-none ${valueColor}`}>{value}</p>
+      <p className={`mt-6 text-lg font-black leading-none ${valueColor}`}>{value}</p>
     </div>
   );
 }
