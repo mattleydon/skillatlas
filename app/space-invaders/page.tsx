@@ -14,13 +14,22 @@ const players = ["AtlasPilot", "PixelWarden", "RankGoblin", "GlobeRunner", "Skil
 const PLAY_LEFT = 23;
 const PLAY_RIGHT = 77;
 const PLAYER_Y = 86;
-const START_SPEED = 0.01875;
+
+const START_SPEED = 0.0215625;
+const SPEED_INCREASE = 0.0000275;
+const MAX_SPEED = 0.095;
+
 const PLAYER_STEP = 1.25;
 
 const DOT_X_GAP = 1.05;
 const DOT_Y_GAP = 1.45;
 const HIT_X = 0.9;
 const HIT_Y = 1.15;
+
+const START_SPAWN_RATE = 82500;
+const MIN_SPAWN_RATE = 24000;
+const SPAWN_RATE_DECREASE = 2;
+const MIN_TOP_CLEARANCE = 15;
 
 const ALIEN_PATTERN = [
   0, 1, 0, 1, 0,
@@ -43,6 +52,14 @@ function createInitialWave(): Enemy[] {
   return [...createAlienLine(0, 9), ...createAlienLine(100, 21)];
 }
 
+function getMultiplier(combo: number) {
+  if (combo >= 500) return 10;
+  if (combo >= 100) return 5;
+  if (combo >= 10) return 3;
+  if (combo >= 5) return 2;
+  return 1;
+}
+
 export default function SpaceInvaders() {
   const [intro, setIntro] = useState(true);
   const [shipX, setShipX] = useState(50);
@@ -57,8 +74,9 @@ export default function SpaceInvaders() {
 
   const nextId = useRef(1000);
   const speed = useRef(START_SPEED);
-  const spawnRate = useRef(82500);
+  const spawnRate = useRef(START_SPAWN_RATE);
   const lastSpawn = useRef(Date.now());
+  const lastTick = useRef(Date.now());
   const enemyFireChance = useRef(0.012);
   const comboRef = useRef(0);
   const multiplierRef = useRef(1);
@@ -66,6 +84,7 @@ export default function SpaceInvaders() {
   function showPopup(text: string) {
     const id = Date.now();
     setPopup({ id, text });
+
     window.setTimeout(() => {
       setPopup((current) => (current?.id === id ? null : current));
     }, 900);
@@ -80,7 +99,7 @@ export default function SpaceInvaders() {
 
   function registerHit() {
     const nextCombo = comboRef.current + 1;
-    const nextMultiplier = nextCombo >= 10 ? 3 : nextCombo >= 5 ? 2 : 1;
+    const nextMultiplier = getMultiplier(nextCombo);
 
     comboRef.current = nextCombo;
     setCombo(nextCombo);
@@ -103,9 +122,11 @@ export default function SpaceInvaders() {
     resetCombo();
     setPopup(null);
     setGameOver(false);
+
     speed.current = START_SPEED;
-    spawnRate.current = 82500;
+    spawnRate.current = START_SPAWN_RATE;
     lastSpawn.current = Date.now();
+    lastTick.current = Date.now();
     enemyFireChance.current = 0.012;
     nextId.current = 1000;
   }
@@ -127,6 +148,7 @@ export default function SpaceInvaders() {
 
       if (event.key === " ") {
         event.preventDefault();
+
         setBullets((current) => [
           ...current,
           { id: Date.now() + Math.random(), x: shipX, y: PLAYER_Y },
@@ -141,15 +163,22 @@ export default function SpaceInvaders() {
   useEffect(() => {
     if (intro || gameOver) return;
 
+    lastTick.current = Date.now();
+
     const loop = window.setInterval(() => {
-      speed.current = Math.min(0.09, speed.current + 0.000025);
-      spawnRate.current = Math.max(24000, spawnRate.current - 2);
-      enemyFireChance.current = Math.min(0.08, enemyFireChance.current + 0.000012);
+      const now = Date.now();
+      const deltaMs = Math.min(now - lastTick.current, 12000);
+      const deltaSteps = deltaMs / 60;
+      lastTick.current = now;
+
+      speed.current = Math.min(MAX_SPEED, speed.current + SPEED_INCREASE * deltaSteps);
+      spawnRate.current = Math.max(MIN_SPAWN_RATE, spawnRate.current - SPAWN_RATE_DECREASE * deltaSteps);
+      enemyFireChance.current = Math.min(0.08, enemyFireChance.current + 0.000012 * deltaSteps);
 
       setEnemies((enemyState) => {
         let nextEnemies = enemyState.map((enemy) => ({
           ...enemy,
-          y: enemy.y + speed.current,
+          y: enemy.y + speed.current * deltaSteps,
           cells: [...enemy.cells],
         }));
 
@@ -157,7 +186,7 @@ export default function SpaceInvaders() {
           const remainingBullets: Bullet[] = [];
 
           for (const oldBullet of bulletState) {
-            const bullet = { ...oldBullet, y: oldBullet.y - 3.2 };
+            const bullet = { ...oldBullet, y: oldBullet.y - 3.2 * deltaSteps };
 
             if (bullet.y <= 0) {
               resetCombo();
@@ -185,7 +214,11 @@ export default function SpaceInvaders() {
                   bulletUsed = true;
                   registerHit();
 
-                  nextEnemies[enemyIndex] = { ...enemy, cells: newCells };
+                  nextEnemies[enemyIndex] = {
+                    ...enemy,
+                    cells: newCells,
+                  };
+
                   break;
                 }
               }
@@ -216,8 +249,9 @@ export default function SpaceInvaders() {
           return nextEnemies;
         }
 
-        if (nextEnemies.length > 0 && Math.random() < enemyFireChance.current) {
+        if (nextEnemies.length > 0 && Math.random() < enemyFireChance.current * deltaSteps) {
           const shooter = nextEnemies[Math.floor(Math.random() * nextEnemies.length)];
+
           setEnemyBullets((current) => [
             ...current,
             {
@@ -228,8 +262,10 @@ export default function SpaceInvaders() {
           ]);
         }
 
-        const now = Date.now();
-        if (now - lastSpawn.current > spawnRate.current) {
+        const highestAlien = nextEnemies.length > 0 ? Math.min(...nextEnemies.map((enemy) => enemy.y)) : 99;
+        const enoughTopSpace = highestAlien > MIN_TOP_CLEARANCE;
+
+        if (now - lastSpawn.current > spawnRate.current && enoughTopSpace) {
           nextEnemies = [...nextEnemies, ...createAlienLine(nextId.current, 7)];
           nextId.current += 1000;
           lastSpawn.current = now;
@@ -240,7 +276,7 @@ export default function SpaceInvaders() {
 
       setEnemyBullets((bulletState) => {
         const moved = bulletState
-          .map((bullet) => ({ ...bullet, y: bullet.y + 1.25 }))
+          .map((bullet) => ({ ...bullet, y: bullet.y + 1.25 * deltaSteps }))
           .filter((bullet) => bullet.y < 96);
 
         const playerHit = moved.some(
@@ -267,7 +303,7 @@ export default function SpaceInvaders() {
               width={130}
               height={130}
               priority
-              className="mix-blend-multiply"
+              className="object-contain"
             />
           </div>
         </div>
@@ -329,7 +365,7 @@ export default function SpaceInvaders() {
               src="/skillatlas-logo.png"
               alt="Player ship"
               fill
-              className="object-contain mix-blend-multiply"
+              className="object-contain"
               priority
             />
           </div>
