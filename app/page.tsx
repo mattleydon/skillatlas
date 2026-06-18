@@ -429,8 +429,11 @@ export default function Home() {
           0% {
             transform: translate3d(0, 0, 0) scale(1);
           }
-          50% {
-            transform: translate3d(0, -18px, 0) scale(1.02);
+          33% {
+            transform: translate3d(22px, -28px, 0) scale(1.025);
+          }
+          66% {
+            transform: translate3d(-18px, 18px, 0) scale(1.01);
           }
           100% {
             transform: translate3d(0, 0, 0) scale(1);
@@ -440,12 +443,57 @@ export default function Home() {
         @keyframes nodePulse {
           0%,
           100% {
-            opacity: 0.38;
+            opacity: 0.35;
             transform: scale(1);
           }
           50% {
             opacity: 1;
-            transform: scale(1.95);
+            transform: scale(2.15);
+          }
+        }
+
+        @keyframes nodeDriftOne {
+          0% {
+            transform: translate3d(0, 0, 0);
+          }
+          35% {
+            transform: translate3d(34px, -22px, 0);
+          }
+          70% {
+            transform: translate3d(-24px, 18px, 0);
+          }
+          100% {
+            transform: translate3d(0, 0, 0);
+          }
+        }
+
+        @keyframes nodeDriftTwo {
+          0% {
+            transform: translate3d(0, 0, 0);
+          }
+          40% {
+            transform: translate3d(-38px, 24px, 0);
+          }
+          72% {
+            transform: translate3d(26px, 32px, 0);
+          }
+          100% {
+            transform: translate3d(0, 0, 0);
+          }
+        }
+
+        @keyframes nodeDriftThree {
+          0% {
+            transform: translate3d(0, 0, 0);
+          }
+          28% {
+            transform: translate3d(24px, 36px, 0);
+          }
+          66% {
+            transform: translate3d(-34px, -26px, 0);
+          }
+          100% {
+            transform: translate3d(0, 0, 0);
           }
         }
 
@@ -454,7 +502,48 @@ export default function Home() {
             stroke-dashoffset: 0;
           }
           to {
-            stroke-dashoffset: -220;
+            stroke-dashoffset: -260;
+          }
+        }
+
+        @keyframes pathSwayOne {
+          0% {
+            transform: translate3d(0, 0, 0) rotate(0deg);
+          }
+          50% {
+            transform: translate3d(24px, -18px, 0) rotate(4deg);
+          }
+          100% {
+            transform: translate3d(0, 0, 0) rotate(0deg);
+          }
+        }
+
+        @keyframes pathSwayTwo {
+          0% {
+            transform: translate3d(0, 0, 0) rotate(0deg);
+          }
+          50% {
+            transform: translate3d(-28px, 24px, 0) rotate(-5deg);
+          }
+          100% {
+            transform: translate3d(0, 0, 0) rotate(0deg);
+          }
+        }
+
+        @keyframes scanSweep {
+          0% {
+            transform: translateX(-35%) rotate(-8deg);
+            opacity: 0;
+          }
+          20% {
+            opacity: 0.35;
+          }
+          55% {
+            opacity: 0.55;
+          }
+          100% {
+            transform: translateX(135%) rotate(-8deg);
+            opacity: 0;
           }
         }
       `}</style>
@@ -540,74 +629,112 @@ function StatCard({ label, value, valueColor, visible }: { label: string; value:
 
 function RotatingGlobeBackground() {
   const nodes = [
-    { left: "24%", top: "26%", color: "#19d3cf", size: "h-4 w-4", delay: "0s" },
-    { left: "39%", top: "18%", color: "#94a3b8", size: "h-3 w-3", delay: "0.8s" },
-    { left: "61%", top: "24%", color: "#ff2fa8", size: "h-4 w-4", delay: "1.4s" },
-    { left: "72%", top: "40%", color: "#19d3cf", size: "h-3 w-3", delay: "2s" },
-    { left: "58%", top: "62%", color: "#ff2fa8", size: "h-3.5 w-3.5", delay: "1.2s" },
-    { left: "35%", top: "68%", color: "#19d3cf", size: "h-3 w-3", delay: "0.4s" },
-    { left: "21%", top: "52%", color: "#ff2fa8", size: "h-3.5 w-3.5", delay: "1.8s" },
-    { left: "47%", top: "49%", color: "#94a3b8", size: "h-3 w-3", delay: "2.2s" },
+    { left: "24%", top: "26%", color: "#19d3cf", size: "h-4 w-4", delay: "0s", drift: "nodeDriftOne", duration: "12s" },
+    { left: "39%", top: "18%", color: "#94a3b8", size: "h-3 w-3", delay: "0.8s", drift: "nodeDriftTwo", duration: "14s" },
+    { left: "61%", top: "24%", color: "#ff2fa8", size: "h-4 w-4", delay: "1.4s", drift: "nodeDriftThree", duration: "13s" },
+    { left: "72%", top: "40%", color: "#19d3cf", size: "h-3 w-3", delay: "2s", drift: "nodeDriftTwo", duration: "15s" },
+    { left: "58%", top: "62%", color: "#ff2fa8", size: "h-3.5 w-3.5", delay: "1.2s", drift: "nodeDriftOne", duration: "16s" },
+    { left: "35%", top: "68%", color: "#19d3cf", size: "h-3 w-3", delay: "0.4s", drift: "nodeDriftThree", duration: "14.5s" },
+    { left: "21%", top: "52%", color: "#ff2fa8", size: "h-3.5 w-3.5", delay: "1.8s", drift: "nodeDriftTwo", duration: "17s" },
+    { left: "47%", top: "49%", color: "#94a3b8", size: "h-3 w-3", delay: "2.2s", drift: "nodeDriftOne", duration: "13.5s" },
+    { left: "78%", top: "68%", color: "#19d3cf", size: "h-3 w-3", delay: "2.8s", drift: "nodeDriftThree", duration: "18s" },
+    { left: "50%", top: "30%", color: "#ff2fa8", size: "h-2.5 w-2.5", delay: "3.1s", drift: "nodeDriftTwo", duration: "12.5s" },
   ];
 
   return (
     <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
       <div className="absolute inset-0 bg-[linear-gradient(180deg,#f8fafc_0%,#f1f5f9_100%)]" />
 
-      <div className="absolute left-1/2 top-[44%] h-[900px] w-[900px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle,rgba(25,211,207,0.14)_0%,rgba(25,211,207,0.08)_22%,rgba(255,47,168,0.06)_42%,rgba(148,163,184,0.03)_58%,transparent_72%)] blur-2xl" />
+      <div className="absolute left-1/2 top-[44%] h-[940px] w-[940px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle,rgba(25,211,207,0.16)_0%,rgba(25,211,207,0.09)_24%,rgba(255,47,168,0.07)_42%,rgba(148,163,184,0.04)_58%,transparent_74%)] blur-2xl" />
 
-      <div className="absolute left-[8%] top-[24%] h-80 w-80 rounded-full bg-[#19d3cf]/[0.08] blur-3xl" />
-      <div className="absolute right-[8%] top-[34%] h-80 w-80 rounded-full bg-[#ff2fa8]/[0.08] blur-3xl" />
-      <div className="absolute bottom-[14%] left-[26%] h-72 w-72 rounded-full bg-[#94a3b8]/[0.06] blur-3xl" />
+      <div className="absolute left-[8%] top-[24%] h-80 w-80 rounded-full bg-[#19d3cf]/[0.09] blur-3xl" />
+      <div className="absolute right-[8%] top-[34%] h-80 w-80 rounded-full bg-[#ff2fa8]/[0.09] blur-3xl" />
+      <div className="absolute bottom-[14%] left-[26%] h-72 w-72 rounded-full bg-[#94a3b8]/[0.07] blur-3xl" />
 
-      <div className="absolute left-1/2 top-[50%] h-[1080px] w-[1080px] -translate-x-1/2 -translate-y-1/2 opacity-[0.52]">
-        <div className="absolute inset-0 animate-[globeFloat_16s_ease-in-out_infinite]">
-          <div className="absolute inset-0 rounded-full border border-slate-300/80 shadow-[0_0_80px_rgba(148,163,184,0.10)] animate-[globeSpin_140s_linear_infinite]" />
-          <div className="absolute inset-[7%] rounded-full border border-slate-300/65 animate-[globeReverse_120s_linear_infinite]" />
-          <div className="absolute inset-[15%] rounded-full border border-slate-300/55 animate-[globeSpin_100s_linear_infinite]" />
-          <div className="absolute inset-[24%] rounded-full border border-slate-300/45" />
-          <div className="absolute inset-[33%] rounded-full border border-slate-300/35" />
+      <div className="absolute left-1/2 top-[50%] h-[1080px] w-[1080px] -translate-x-1/2 -translate-y-1/2 opacity-[0.58]">
+        <div className="absolute inset-0 animate-[globeFloat_13s_ease-in-out_infinite]">
+          <div className="absolute inset-0 rounded-full border border-slate-300/85 shadow-[0_0_90px_rgba(148,163,184,0.12)] animate-[globeSpin_115s_linear_infinite]" />
+          <div className="absolute inset-[7%] rounded-full border border-slate-300/70 animate-[globeReverse_95s_linear_infinite]" />
+          <div className="absolute inset-[15%] rounded-full border border-slate-300/60 animate-[globeSpin_78s_linear_infinite]" />
+          <div className="absolute inset-[24%] rounded-full border border-slate-300/48 animate-[globeReverse_88s_linear_infinite]" />
+          <div className="absolute inset-[33%] rounded-full border border-slate-300/38" />
 
-          <div className="absolute left-1/2 top-[4%] h-[92%] w-px -translate-x-1/2 bg-slate-300/70" />
-          <div className="absolute left-[34%] top-[6%] h-[88%] w-px rotate-[10deg] bg-slate-300/55" />
-          <div className="absolute left-[66%] top-[6%] h-[88%] w-px -rotate-[10deg] bg-slate-300/55" />
-          <div className="absolute left-[22%] top-[14%] h-[72%] w-px rotate-[24deg] bg-slate-300/42" />
-          <div className="absolute left-[78%] top-[14%] h-[72%] w-px -rotate-[24deg] bg-slate-300/42" />
+          <div className="absolute left-1/2 top-[4%] h-[92%] w-px -translate-x-1/2 bg-slate-300/75" />
+          <div className="absolute left-[34%] top-[6%] h-[88%] w-px rotate-[10deg] bg-slate-300/60" />
+          <div className="absolute left-[66%] top-[6%] h-[88%] w-px -rotate-[10deg] bg-slate-300/60" />
+          <div className="absolute left-[22%] top-[14%] h-[72%] w-px rotate-[24deg] bg-slate-300/48" />
+          <div className="absolute left-[78%] top-[14%] h-[72%] w-px -rotate-[24deg] bg-slate-300/48" />
 
-          <div className="absolute left-[4%] top-1/2 h-px w-[92%] -translate-y-1/2 bg-slate-300/75" />
-          <div className="absolute left-[10%] top-[36%] h-px w-[80%] -translate-y-1/2 bg-slate-300/60" />
-          <div className="absolute left-[10%] top-[64%] h-px w-[80%] -translate-y-1/2 bg-slate-300/60" />
-          <div className="absolute left-[18%] top-[25%] h-px w-[64%] -translate-y-1/2 bg-slate-300/46" />
-          <div className="absolute left-[18%] top-[75%] h-px w-[64%] -translate-y-1/2 bg-slate-300/46" />
+          <div className="absolute left-[4%] top-1/2 h-px w-[92%] -translate-y-1/2 bg-slate-300/80" />
+          <div className="absolute left-[10%] top-[36%] h-px w-[80%] -translate-y-1/2 bg-slate-300/65" />
+          <div className="absolute left-[10%] top-[64%] h-px w-[80%] -translate-y-1/2 bg-slate-300/65" />
+          <div className="absolute left-[18%] top-[25%] h-px w-[64%] -translate-y-1/2 bg-slate-300/52" />
+          <div className="absolute left-[18%] top-[75%] h-px w-[64%] -translate-y-1/2 bg-slate-300/52" />
+
+          <div className="absolute inset-0 overflow-hidden rounded-full">
+            <div className="absolute top-0 h-full w-[35%] bg-gradient-to-r from-transparent via-white/35 to-transparent blur-md animate-[scanSweep_18s_ease-in-out_infinite]" />
+          </div>
 
           <svg className="absolute inset-0 h-full w-full" viewBox="0 0 1080 1080" fill="none">
-            <path
-              d="M180 610 C 320 450, 500 395, 680 295 C 780 238, 876 212, 954 180"
-              stroke="#19d3cf"
-              strokeWidth="2.4"
-              strokeLinecap="round"
-              strokeDasharray="12 20"
-              opacity="0.62"
-              style={{ animation: "orbitDash 18s linear infinite" }}
-            />
-            <path
-              d="M168 436 C 312 500, 430 640, 608 680 C 742 712, 848 652, 940 560"
-              stroke="#ff2fa8"
-              strokeWidth="2.4"
-              strokeLinecap="round"
-              strokeDasharray="10 20"
-              opacity="0.55"
-              style={{ animation: "orbitDash 22s linear infinite reverse" }}
-            />
-            <path
-              d="M318 238 C 454 362, 560 432, 702 524 C 816 598, 874 712, 906 854"
-              stroke="#94a3b8"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeDasharray="8 18"
-              opacity="0.42"
-              style={{ animation: "orbitDash 28s linear infinite" }}
-            />
+            <g style={{ animation: "pathSwayOne 16s ease-in-out infinite", transformOrigin: "540px 540px" }}>
+              <path
+                d="M180 610 C 320 450, 500 395, 680 295 C 780 238, 876 212, 954 180"
+                stroke="#19d3cf"
+                strokeWidth="2.6"
+                strokeLinecap="round"
+                strokeDasharray="12 20"
+                opacity="0.7"
+                style={{ animation: "orbitDash 14s linear infinite" }}
+              />
+            </g>
+
+            <g style={{ animation: "pathSwayTwo 19s ease-in-out infinite", transformOrigin: "540px 540px" }}>
+              <path
+                d="M168 436 C 312 500, 430 640, 608 680 C 742 712, 848 652, 940 560"
+                stroke="#ff2fa8"
+                strokeWidth="2.6"
+                strokeLinecap="round"
+                strokeDasharray="10 20"
+                opacity="0.64"
+                style={{ animation: "orbitDash 17s linear infinite reverse" }}
+              />
+            </g>
+
+            <g style={{ animation: "pathSwayOne 22s ease-in-out infinite reverse", transformOrigin: "540px 540px" }}>
+              <path
+                d="M318 238 C 454 362, 560 432, 702 524 C 816 598, 874 712, 906 854"
+                stroke="#94a3b8"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeDasharray="8 18"
+                opacity="0.48"
+                style={{ animation: "orbitDash 24s linear infinite" }}
+              />
+            </g>
+
+            <g style={{ animation: "pathSwayTwo 21s ease-in-out infinite reverse", transformOrigin: "540px 540px" }}>
+              <path
+                d="M222 742 C 372 620, 512 570, 672 470 C 770 410, 842 330, 912 240"
+                stroke="#19d3cf"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+                strokeDasharray="6 16"
+                opacity="0.42"
+                style={{ animation: "orbitDash 20s linear infinite reverse" }}
+              />
+            </g>
+
+            <g style={{ animation: "pathSwayOne 24s ease-in-out infinite", transformOrigin: "540px 540px" }}>
+              <path
+                d="M214 308 C 340 360, 420 470, 548 500 C 690 533, 792 488, 904 430"
+                stroke="#ff2fa8"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+                strokeDasharray="6 18"
+                opacity="0.36"
+                style={{ animation: "orbitDash 26s linear infinite" }}
+              />
+            </g>
           </svg>
 
           <div className="absolute left-1/2 top-1/2 h-64 w-64 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.55)_0%,rgba(255,255,255,0.22)_38%,rgba(255,255,255,0)_72%)]" />
@@ -615,20 +742,29 @@ function RotatingGlobeBackground() {
           {nodes.map((node, index) => (
             <div
               key={`${node.left}-${node.top}-${index}`}
-              className={`absolute rounded-full ${node.size}`}
+              className="absolute"
               style={{
                 left: node.left,
                 top: node.top,
-                backgroundColor: node.color,
-                boxShadow: `0 0 28px ${node.color}`,
-                animation: "nodePulse 4.2s ease-in-out infinite",
+                animation: `${node.drift} ${node.duration} ease-in-out infinite`,
                 animationDelay: node.delay,
               }}
-            />
+            >
+              <div
+                className={`rounded-full ${node.size}`}
+                style={{
+                  backgroundColor: node.color,
+                  boxShadow: `0 0 30px ${node.color}`,
+                  animation: "nodePulse 3.6s ease-in-out infinite",
+                  animationDelay: node.delay,
+                }}
+              />
+            </div>
           ))}
 
-          <div className="absolute inset-[12%] rounded-full border border-[#19d3cf]/20 animate-[globeSpin_60s_linear_infinite]" />
-          <div className="absolute inset-[20%] rounded-full border border-[#ff2fa8]/18 animate-[globeReverse_72s_linear_infinite]" />
+          <div className="absolute inset-[12%] rounded-full border border-[#19d3cf]/25 animate-[globeSpin_46s_linear_infinite]" />
+          <div className="absolute inset-[20%] rounded-full border border-[#ff2fa8]/22 animate-[globeReverse_58s_linear_infinite]" />
+          <div className="absolute inset-[28%] rounded-full border border-[#19d3cf]/16 animate-[globeSpin_72s_linear_infinite]" />
         </div>
       </div>
     </div>
