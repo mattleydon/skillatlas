@@ -430,7 +430,7 @@ export default function Home() {
             transform: translate3d(0, 0, 0) scale(1);
           }
           50% {
-            transform: translate3d(0, -16px, 0) scale(1.015);
+            transform: translate3d(0, -18px, 0) scale(1.02);
           }
           100% {
             transform: translate3d(0, 0, 0) scale(1);
@@ -438,13 +438,14 @@ export default function Home() {
         }
 
         @keyframes nodePulse {
-          0%, 100% {
-            opacity: 0.35;
+          0%,
+          100% {
+            opacity: 0.38;
             transform: scale(1);
           }
           50% {
-            opacity: 0.9;
-            transform: scale(1.75);
+            opacity: 1;
+            transform: scale(1.95);
           }
         }
 
@@ -539,66 +540,77 @@ function StatCard({ label, value, valueColor, visible }: { label: string; value:
 
 function RotatingGlobeBackground() {
   const nodes = [
-    { left: "28%", top: "29%", color: "#19d3cf", size: "h-3 w-3", delay: "0s" },
-    { left: "62%", top: "33%", color: "#ff2fa8", size: "h-2.5 w-2.5", delay: "1.2s" },
-    { left: "48%", top: "48%", color: "#94a3b8", size: "h-2 w-2", delay: "0.6s" },
-    { left: "69%", top: "59%", color: "#19d3cf", size: "h-2 w-2", delay: "2s" },
-    { left: "35%", top: "66%", color: "#ff2fa8", size: "h-2 w-2", delay: "1.7s" },
-    { left: "54%", top: "72%", color: "#94a3b8", size: "h-2.5 w-2.5", delay: "0.3s" },
+    { left: "24%", top: "26%", color: "#19d3cf", size: "h-4 w-4", delay: "0s" },
+    { left: "39%", top: "18%", color: "#94a3b8", size: "h-3 w-3", delay: "0.8s" },
+    { left: "61%", top: "24%", color: "#ff2fa8", size: "h-4 w-4", delay: "1.4s" },
+    { left: "72%", top: "40%", color: "#19d3cf", size: "h-3 w-3", delay: "2s" },
+    { left: "58%", top: "62%", color: "#ff2fa8", size: "h-3.5 w-3.5", delay: "1.2s" },
+    { left: "35%", top: "68%", color: "#19d3cf", size: "h-3 w-3", delay: "0.4s" },
+    { left: "21%", top: "52%", color: "#ff2fa8", size: "h-3.5 w-3.5", delay: "1.8s" },
+    { left: "47%", top: "49%", color: "#94a3b8", size: "h-3 w-3", delay: "2.2s" },
   ];
 
   return (
     <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_38%,rgba(25,211,207,0.075),transparent_34%),radial-gradient(circle_at_62%_58%,rgba(255,47,168,0.055),transparent_30%),linear-gradient(180deg,#f8fafc_0%,#f1f5f9_100%)]" />
+      <div className="absolute inset-0 bg-[linear-gradient(180deg,#f8fafc_0%,#f1f5f9_100%)]" />
 
-      <div className="absolute left-1/2 top-[46%] h-[980px] w-[980px] -translate-x-1/2 -translate-y-1/2 opacity-[0.22]">
-        <div className="absolute inset-0 animate-[globeFloat_14s_ease-in-out_infinite]">
-          <div className="absolute inset-0 animate-[globeSpin_95s_linear_infinite] rounded-full border border-slate-400/45" />
-          <div className="absolute inset-[7%] animate-[globeReverse_120s_linear_infinite] rounded-full border border-slate-300/55" />
-          <div className="absolute inset-[16%] rounded-full border border-slate-300/50" />
-          <div className="absolute inset-[25%] rounded-full border border-slate-300/35" />
+      <div className="absolute left-1/2 top-[44%] h-[900px] w-[900px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle,rgba(25,211,207,0.14)_0%,rgba(25,211,207,0.08)_22%,rgba(255,47,168,0.06)_42%,rgba(148,163,184,0.03)_58%,transparent_72%)] blur-2xl" />
 
-          <div className="absolute left-1/2 top-0 h-full w-px -translate-x-1/2 bg-slate-300/55" />
-          <div className="absolute left-[28%] top-[4%] h-[92%] w-px rotate-[12deg] bg-slate-300/45" />
-          <div className="absolute left-[72%] top-[4%] h-[92%] w-px -rotate-[12deg] bg-slate-300/45" />
-          <div className="absolute left-[15%] top-[18%] h-[64%] w-px rotate-[28deg] bg-slate-300/35" />
-          <div className="absolute left-[85%] top-[18%] h-[64%] w-px -rotate-[28deg] bg-slate-300/35" />
+      <div className="absolute left-[8%] top-[24%] h-80 w-80 rounded-full bg-[#19d3cf]/[0.08] blur-3xl" />
+      <div className="absolute right-[8%] top-[34%] h-80 w-80 rounded-full bg-[#ff2fa8]/[0.08] blur-3xl" />
+      <div className="absolute bottom-[14%] left-[26%] h-72 w-72 rounded-full bg-[#94a3b8]/[0.06] blur-3xl" />
 
-          <div className="absolute left-0 top-1/2 h-px w-full -translate-y-1/2 bg-slate-300/55" />
-          <div className="absolute left-[8%] top-[36%] h-px w-[84%] -translate-y-1/2 bg-slate-300/45" />
-          <div className="absolute left-[8%] top-[64%] h-px w-[84%] -translate-y-1/2 bg-slate-300/45" />
-          <div className="absolute left-[19%] top-[25%] h-px w-[62%] -translate-y-1/2 bg-slate-300/35" />
-          <div className="absolute left-[19%] top-[75%] h-px w-[62%] -translate-y-1/2 bg-slate-300/35" />
+      <div className="absolute left-1/2 top-[50%] h-[1080px] w-[1080px] -translate-x-1/2 -translate-y-1/2 opacity-[0.52]">
+        <div className="absolute inset-0 animate-[globeFloat_16s_ease-in-out_infinite]">
+          <div className="absolute inset-0 rounded-full border border-slate-300/80 shadow-[0_0_80px_rgba(148,163,184,0.10)] animate-[globeSpin_140s_linear_infinite]" />
+          <div className="absolute inset-[7%] rounded-full border border-slate-300/65 animate-[globeReverse_120s_linear_infinite]" />
+          <div className="absolute inset-[15%] rounded-full border border-slate-300/55 animate-[globeSpin_100s_linear_infinite]" />
+          <div className="absolute inset-[24%] rounded-full border border-slate-300/45" />
+          <div className="absolute inset-[33%] rounded-full border border-slate-300/35" />
 
-          <svg className="absolute inset-0 h-full w-full" viewBox="0 0 980 980" fill="none">
+          <div className="absolute left-1/2 top-[4%] h-[92%] w-px -translate-x-1/2 bg-slate-300/70" />
+          <div className="absolute left-[34%] top-[6%] h-[88%] w-px rotate-[10deg] bg-slate-300/55" />
+          <div className="absolute left-[66%] top-[6%] h-[88%] w-px -rotate-[10deg] bg-slate-300/55" />
+          <div className="absolute left-[22%] top-[14%] h-[72%] w-px rotate-[24deg] bg-slate-300/42" />
+          <div className="absolute left-[78%] top-[14%] h-[72%] w-px -rotate-[24deg] bg-slate-300/42" />
+
+          <div className="absolute left-[4%] top-1/2 h-px w-[92%] -translate-y-1/2 bg-slate-300/75" />
+          <div className="absolute left-[10%] top-[36%] h-px w-[80%] -translate-y-1/2 bg-slate-300/60" />
+          <div className="absolute left-[10%] top-[64%] h-px w-[80%] -translate-y-1/2 bg-slate-300/60" />
+          <div className="absolute left-[18%] top-[25%] h-px w-[64%] -translate-y-1/2 bg-slate-300/46" />
+          <div className="absolute left-[18%] top-[75%] h-px w-[64%] -translate-y-1/2 bg-slate-300/46" />
+
+          <svg className="absolute inset-0 h-full w-full" viewBox="0 0 1080 1080" fill="none">
             <path
-              d="M170 560 C 300 420, 455 405, 620 310 C 710 260, 790 238, 862 206"
+              d="M180 610 C 320 450, 500 395, 680 295 C 780 238, 876 212, 954 180"
               stroke="#19d3cf"
-              strokeWidth="2"
+              strokeWidth="2.4"
               strokeLinecap="round"
-              strokeDasharray="10 18"
-              opacity="0.6"
-              style={{ animation: "orbitDash 26s linear infinite" }}
+              strokeDasharray="12 20"
+              opacity="0.62"
+              style={{ animation: "orbitDash 18s linear infinite" }}
             />
             <path
-              d="M160 395 C 300 460, 405 590, 574 618 C 690 637, 780 585, 850 520"
+              d="M168 436 C 312 500, 430 640, 608 680 C 742 712, 848 652, 940 560"
               stroke="#ff2fa8"
+              strokeWidth="2.4"
+              strokeLinecap="round"
+              strokeDasharray="10 20"
+              opacity="0.55"
+              style={{ animation: "orbitDash 22s linear infinite reverse" }}
+            />
+            <path
+              d="M318 238 C 454 362, 560 432, 702 524 C 816 598, 874 712, 906 854"
+              stroke="#94a3b8"
               strokeWidth="2"
               strokeLinecap="round"
               strokeDasharray="8 18"
-              opacity="0.48"
-              style={{ animation: "orbitDash 32s linear infinite reverse" }}
-            />
-            <path
-              d="M300 220 C 420 330, 512 390, 645 465 C 730 515, 780 612, 810 740"
-              stroke="#64748b"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              strokeDasharray="7 18"
               opacity="0.42"
-              style={{ animation: "orbitDash 38s linear infinite" }}
+              style={{ animation: "orbitDash 28s linear infinite" }}
             />
           </svg>
+
+          <div className="absolute left-1/2 top-1/2 h-64 w-64 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.55)_0%,rgba(255,255,255,0.22)_38%,rgba(255,255,255,0)_72%)]" />
 
           {nodes.map((node, index) => (
             <div
@@ -608,17 +620,17 @@ function RotatingGlobeBackground() {
                 left: node.left,
                 top: node.top,
                 backgroundColor: node.color,
-                boxShadow: `0 0 24px ${node.color}`,
-                animation: `nodePulse 5s ease-in-out infinite`,
+                boxShadow: `0 0 28px ${node.color}`,
+                animation: "nodePulse 4.2s ease-in-out infinite",
                 animationDelay: node.delay,
               }}
             />
           ))}
+
+          <div className="absolute inset-[12%] rounded-full border border-[#19d3cf]/20 animate-[globeSpin_60s_linear_infinite]" />
+          <div className="absolute inset-[20%] rounded-full border border-[#ff2fa8]/18 animate-[globeReverse_72s_linear_infinite]" />
         </div>
       </div>
-
-      <div className="absolute left-[4%] top-[28%] h-64 w-64 rounded-full bg-[#19d3cf]/[0.035] blur-3xl" />
-      <div className="absolute bottom-[18%] right-[6%] h-72 w-72 rounded-full bg-[#ff2fa8]/[0.035] blur-3xl" />
     </div>
   );
 }
