@@ -40,7 +40,7 @@ const statGames = [
   { name: "Fortnite", nation: "USA", score: 95, mover: "Canada", moverChange: "+2", loser: "Brazil", loserChange: "-2", trend: "M 0 38 C 20 35, 36 28, 58 32 S 88 18, 108 20 S 130 12, 150 8" },
   { name: "Rocket League", nation: "France", score: 92, mover: "Netherlands", moverChange: "+3", loser: "Australia", loserChange: "-1", trend: "M 0 45 C 25 42, 38 35, 58 36 S 85 24, 112 16 S 132 11, 150 9" },
   { name: "Chess", nation: "India", score: 94, mover: "Uzbekistan", moverChange: "+5", loser: "China", loserChange: "-2", trend: "M 0 42 C 18 35, 35 31, 52 33 S 78 22, 102 14 S 128 9, 150 6" },
-];
+] as const;
 
 const topCountriesByGame: Record<Game, RankingRow[]> = {
   CS2: [
@@ -121,7 +121,7 @@ export default function Home() {
   const [scrolled, setScrolled] = useState(false);
   const [statsIndex, setStatsIndex] = useState(0);
   const [statsVisible, setStatsVisible] = useState(true);
-  const [manualStatsGame, setManualStatsGame] = useState<Game | "Auto">("Auto");
+  const [manualStatsGame, setManualStatsGame] = useState<Game | null>(null);
   const [selectedGame, setSelectedGame] = useState<Game>("CS2");
   const [selectedPeriod, setSelectedPeriod] = useState<Period>("7 Days");
 
@@ -133,25 +133,23 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    if (manualStatsGame !== "Auto") return;
+    if (manualStatsGame) return;
 
     const stayTimer = window.setTimeout(() => {
       setStatsVisible(false);
 
-      const switchTimer = window.setTimeout(() => {
+      window.setTimeout(() => {
         setStatsIndex((current) => (current + 1) % statGames.length);
         setStatsVisible(true);
       }, 3000);
-
-      return () => window.clearTimeout(switchTimer);
     }, 6000);
 
     return () => window.clearTimeout(stayTimer);
   }, [statsIndex, manualStatsGame]);
 
-  const activeStats = manualStatsGame === "Auto"
-    ? statGames[statsIndex]
-    : statGames.find((game) => game.name === manualStatsGame) ?? statGames[0];
+  const activeStats = manualStatsGame
+    ? statGames.find((game) => game.name === manualStatsGame) ?? statGames[0]
+    : statGames[statsIndex];
 
   const leaderboard = useMemo(() => buildTop100(selectedGame), [selectedGame]);
 
@@ -186,39 +184,33 @@ export default function Home() {
       </header>
 
       <section className="relative z-10 mx-auto max-w-7xl px-8 py-8">
-        <div className="mb-5 rounded-3xl border border-[#ff2fa8]/45 bg-white/92 p-6 shadow-sm backdrop-blur">
+        <div className="mb-6 rounded-3xl border border-[#ff2fa8]/45 bg-white/92 p-6 shadow-sm backdrop-blur">
           <p className="mb-2 text-xs font-bold uppercase tracking-[0.25em] text-[#19d3cf]">Global Gaming Rankings</p>
           <h2 className="mb-2 text-lg font-black tracking-tight">Which country is actually the best at gaming?</h2>
           <p className="text-sm text-gray-600 md:whitespace-nowrap">Track which countries dominate each game, why they win, where they are improving, and where they are still vulnerable.</p>
         </div>
 
-        <div className="mb-3 flex justify-end">
-          <label className="flex items-center gap-3 rounded-full border border-[#ff2fa8]/35 bg-white/95 px-4 py-2 text-xs font-bold uppercase tracking-[0.15em] text-gray-500 shadow-sm">
-            Stats
+        <div className={`mb-5 grid gap-4 transition-all duration-[3000ms] ease-in-out md:grid-cols-5 ${statsVisible ? "translate-y-0 opacity-100" : "translate-y-2 opacity-0"}`}>
+          <div className="rounded-2xl border border-[#ff2fa8]/35 bg-white/92 p-5 shadow-sm backdrop-blur">
+            <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-gray-500">Top Game</p>
+
             <select
-              value={manualStatsGame}
+              value={activeStats.name}
               onChange={(event) => {
-                const value = event.target.value as Game | "Auto";
+                const value = event.target.value as Game;
                 setManualStatsGame(value);
                 setStatsVisible(true);
 
-                if (value !== "Auto") {
-                  const nextIndex = statGames.findIndex((game) => game.name === value);
-                  if (nextIndex >= 0) setStatsIndex(nextIndex);
-                }
+                const nextIndex = statGames.findIndex((game) => game.name === value);
+                if (nextIndex >= 0) setStatsIndex(nextIndex);
               }}
-              className="rounded-full border border-gray-200 bg-white px-3 py-1.5 text-sm font-black normal-case tracking-normal text-[#111827] outline-none transition focus:border-[#19d3cf]"
+              className="mt-3 w-full rounded-xl border border-transparent bg-transparent text-lg font-black leading-none text-[#19d3cf] outline-none transition focus:border-[#19d3cf]/40"
             >
-              <option value="Auto">Auto rotate</option>
               {games.map((game) => (
                 <option key={game} value={game}>{game}</option>
               ))}
             </select>
-          </label>
-        </div>
-
-        <div className={`mb-5 grid gap-4 transition-all duration-[3000ms] ease-in-out md:grid-cols-5 ${statsVisible ? "translate-y-0 opacity-100" : "translate-y-2 opacity-0"}`}>
-          <StatCard label="Top Game" value={activeStats.name} valueColor="text-[#19d3cf]" />
+          </div>
 
           <div className="rounded-2xl border border-[#ff2fa8]/35 bg-white/92 p-5 shadow-sm backdrop-blur md:col-span-2">
             <div className="grid h-full grid-cols-3 items-start gap-6">
@@ -324,21 +316,22 @@ function StatCard({ label, value, valueColor }: { label: string; value: string; 
 function RotatingGlobeBackground() {
   return (
     <div className="pointer-events-none fixed inset-0 z-0 flex items-center justify-center overflow-hidden">
-      <div className="relative h-[760px] w-[760px] opacity-[0.055]">
-        <div className="absolute inset-0 rounded-full border border-gray-700" />
-        <div className="absolute inset-[8%] rounded-full border border-gray-700" />
-        <div className="absolute inset-[18%] rounded-full border border-gray-700" />
+      <div className="relative h-[880px] w-[880px] opacity-[0.09]">
+        <div className="absolute inset-0 animate-[globeSpin_75s_linear_infinite] rounded-full border border-gray-500" />
+        <div className="absolute inset-[8%] animate-[globeSpin_95s_linear_infinite_reverse] rounded-full border border-gray-400" />
+        <div className="absolute inset-[18%] rounded-full border border-gray-300" />
 
-        <div className="absolute left-1/2 top-0 h-full w-px -translate-x-1/2 bg-gray-700" />
-        <div className="absolute left-[30%] top-0 h-full w-px -translate-x-1/2 rounded-full bg-gray-700" />
-        <div className="absolute left-[70%] top-0 h-full w-px -translate-x-1/2 rounded-full bg-gray-700" />
+        <div className="absolute left-1/2 top-0 h-full w-px -translate-x-1/2 bg-gray-300" />
+        <div className="absolute left-[30%] top-0 h-full w-px -translate-x-1/2 bg-gray-300" />
+        <div className="absolute left-[70%] top-0 h-full w-px -translate-x-1/2 bg-gray-300" />
 
-        <div className="absolute left-0 top-1/2 h-px w-full -translate-y-1/2 bg-gray-700" />
-        <div className="absolute left-0 top-[35%] h-px w-full -translate-y-1/2 bg-gray-700" />
-        <div className="absolute left-0 top-[65%] h-px w-full -translate-y-1/2 bg-gray-700" />
+        <div className="absolute left-0 top-1/2 h-px w-full -translate-y-1/2 bg-gray-300" />
+        <div className="absolute left-0 top-[35%] h-px w-full -translate-y-1/2 bg-gray-300" />
+        <div className="absolute left-0 top-[65%] h-px w-full -translate-y-1/2 bg-gray-300" />
 
-        <div className="absolute inset-0 animate-[globeSpin_70s_linear_infinite] rounded-full border border-dashed border-gray-700" />
-        <div className="absolute inset-[12%] animate-[globeSpin_90s_linear_infinite_reverse] rounded-full border border-dashed border-gray-700" />
+        <div className="absolute left-[18%] top-[24%] h-3 w-3 rounded-full bg-[#19d3cf]" />
+        <div className="absolute left-[66%] top-[38%] h-2 w-2 rounded-full bg-[#ff2fa8]" />
+        <div className="absolute left-[48%] top-[62%] h-2.5 w-2.5 rounded-full bg-gray-500" />
       </div>
     </div>
   );
