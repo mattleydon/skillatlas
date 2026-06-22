@@ -68,7 +68,7 @@ const gameLabels: Record<GameKey, string> = {
 
 const heatModes: { id: HeatMode; label: string; description: string }[] = [
   { id: "ranking", label: "Ranking", description: "Turquoise heat by rank. 1st is darkest, 100th is lightest." },
-  { id: "emerging", label: "Emerging Force", description: "Purple heat for countries moving up most over all-time." },
+  { id: "emerging", label: "Biggest Gainer", description: "Purple heat for countries moving up most over all-time." },
   { id: "loser", label: "Biggest Loser", description: "Pink heat for countries falling down rankings most over all-time." },
 ];
 
@@ -518,12 +518,15 @@ export default function WorldMapPage() {
   const [heatMode, setHeatMode] = useState<HeatMode>("ranking");
   const [selectedCountryKey, setSelectedCountryKey] = useState("");
   const [isDragging, setIsDragging] = useState(false);
+  const [zoomed, setZoomed] = useState(false);
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const rotationRef = useRef({ lat: -8, lon: -8 });
   const velocityRef = useRef({ lat: 0, lon: 0.028 });
   const dragRef = useRef<{ pointerId: number; lastX: number; lastY: number; moved: boolean } | null>(null);
   const latestRef = useRef({ features, selectedGame, heatMode, selectedCountryKey });
+  const rowByNameRef = useRef<Map<string, RankedCountry>>(new Map());
+  const rankingRowRefs = useRef<Map<string, HTMLButtonElement>>(new Map());
 
   const activeCountries = gameData[selectedGame];
   const performanceByName = useMemo(() => buildPerformanceMap(activeCountries), [activeCountries]);
@@ -532,6 +535,15 @@ export default function WorldMapPage() {
   const rowByName = useMemo(() => new Map(rankingRows.map((row) => [row.normalisedName, row])), [rankingRows]);
   const selectedRow = rowByName.get(selectedCountryKey) ?? top100Rows[0];
   const activeHeatMode = heatModes.find((mode) => mode.id === heatMode) ?? heatModes[0];
+
+  useEffect(() => {
+    rowByNameRef.current = rowByName;
+  }, [rowByName]);
+
+  useEffect(() => {
+    const rowElement = rankingRowRefs.current.get(selectedCountryKey);
+    rowElement?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  }, [selectedCountryKey]);
 
   useEffect(() => {
     latestRef.current = { features, selectedGame, heatMode, selectedCountryKey };
@@ -611,13 +623,10 @@ export default function WorldMapPage() {
       }
 
       const current = latestRef.current;
-      const perfMap = buildPerformanceMap(gameData[current.selectedGame]);
-      const rows = buildRankingRows(current.features, current.selectedGame, perfMap);
-      const rowsByName = new Map(rows.map((row) => [row.normalisedName, row]));
-      const selected = current.selectedCountryKey || rows[0]?.normalisedName || "";
+      const selected = current.selectedCountryKey || "";
 
       if (canvasRef.current) {
-        drawGlobe(canvasRef.current, current.features, rowsByName, rotationRef.current, current.heatMode, selected);
+        drawGlobe(canvasRef.current, current.features, rowByNameRef.current, rotationRef.current, current.heatMode, selected);
       }
     }
 
@@ -661,13 +670,13 @@ export default function WorldMapPage() {
     if (Math.abs(deltaX) + Math.abs(deltaY) > 3) dragRef.current.moved = true;
 
     rotationRef.current = {
-      lat: clamp(rotationRef.current.lat + deltaY * 0.22, -64, 64),
-      lon: rotationRef.current.lon - deltaX * 0.28,
+      lat: clamp(rotationRef.current.lat - deltaY * 0.22, -64, 64),
+      lon: rotationRef.current.lon + deltaX * 0.28,
     };
 
     velocityRef.current = {
-      lat: deltaY * 0.045,
-      lon: -deltaX * 0.055,
+      lat: -deltaY * 0.045,
+      lon: deltaX * 0.055,
     };
 
     dragRef.current.lastX = event.clientX;
@@ -703,6 +712,8 @@ export default function WorldMapPage() {
   const selectedWhy = selectedRow?.performance?.why ?? ["Strong player base", "Competitive scene", "Growing esports culture"];
   const selectedImprove = selectedRow?.performance?.improve ?? ["More international results", "Clearer talent pipeline"];
   const selectedMove = selectedRow?.rankMoveAllTime ?? 0;
+  const selectedSevenDayRankDelta = selectedRow ? sevenDayRankDelta(selectedRow) : 0;
+  const selectedSevenDayPercentDelta = selectedRow ? sevenDayPercentDelta(selectedRow) : 0;
 
   return (
     <main className="relative min-h-screen overflow-hidden bg-[#F8FAFC] text-[#111827]">
@@ -755,7 +766,7 @@ export default function WorldMapPage() {
           <p className="mb-2 text-xs font-bold uppercase tracking-[0.25em] text-[#19d3cf]">World Map</p>
           <h1 className="mb-2 text-xl font-black tracking-tight">Spin the globe. See where each game belongs.</h1>
           <p className="text-sm text-gray-600 md:whitespace-nowrap">
-            Click a country or ranking row to bring up its profile. Drag the globe in the direction you want it to move.
+            Click a country or ranking row to bring up its profile. Drag the globe in the direction you want it to move. Double-click to zoom in or out.
           </p>
         </div>
 
@@ -805,7 +816,7 @@ export default function WorldMapPage() {
             <div className="mt-4 rounded-2xl border border-[#ff2fa8]/25 bg-[#ff2fa8]/5 p-4">
               <p className="mb-2 text-[10px] font-black uppercase tracking-[0.2em] text-[#ff2fa8]">Controls</p>
               <p className="text-xs font-semibold leading-relaxed text-gray-600">
-                Click a country to select it. Drag anywhere on the globe to rotate it from its centre point.
+                Click a country to select it. Drag anywhere on the globe to rotate it from its centre point. Double-click to zoom in or out.
               </p>
             </div>
           </aside>
@@ -818,8 +829,8 @@ export default function WorldMapPage() {
               </p>
             </div>
 
-            <div className="absolute inset-x-0 top-[64px] flex justify-center">
-              <div className="relative aspect-square w-full max-w-[620px]">
+            <div className="absolute inset-x-0 top-[52px] flex justify-center overflow-hidden">
+              <div className={`relative aspect-square w-full max-w-[560px] origin-center transition-transform duration-300 ${zoomed ? "scale-[1.55]" : "scale-100"}`}>
                 <canvas
                   ref={canvasRef}
                   width={CANVAS_SIZE}
@@ -829,6 +840,7 @@ export default function WorldMapPage() {
                   onPointerMove={handlePointerMove}
                   onPointerUp={handlePointerUp}
                   onPointerCancel={handlePointerUp}
+                  onDoubleClick={() => setZoomed((current) => !current)}
                 />
               </div>
 
@@ -839,10 +851,23 @@ export default function WorldMapPage() {
               )}
             </div>
 
-            <div className="absolute bottom-5 left-6 right-6 z-20 grid gap-3 md:grid-cols-3">
-              <MiniStat label="Selected Country" value={selectedRow?.name ?? "Loading"} />
-              <MiniStat label="Rank" value={selectedRow ? `#${selectedRow.rank}` : "-"} />
-              <MiniStat label={heatMode === "ranking" ? "Ranking Heat" : heatMode === "emerging" ? "Emerging Force" : "Biggest Loser"} value={heatMode === "ranking" ? "Turquoise" : heatMode === "emerging" ? "Purple" : "Pink"} />
+            <div className="absolute bottom-5 left-6 right-6 z-20 grid gap-3 md:grid-cols-6">
+              <MiniStat label="Selected" value={selectedRow?.name ?? "Loading"} compact />
+              <MiniStat label="Rank" value={selectedRow ? `#${selectedRow.rank}` : "-"} compact />
+              <MiniStat label="Score" value={selectedRow ? `${selectedRow.score}` : "-"} compact />
+              <MiniChartStat label="7 Days Score" row={selectedRow} />
+              <MiniStat
+                label="7 Days Rank"
+                value={selectedRow ? sevenDayRankChange(selectedRow) : "-"}
+                compact
+                colorClass={selectedSevenDayRankDelta >= 0 ? "text-[#19d3cf]" : "text-[#ff2fa8]"}
+              />
+              <MiniStat
+                label="7 Days %"
+                value={selectedRow ? sevenDayPercentChange(selectedRow) : "-"}
+                compact
+                colorClass={selectedSevenDayPercentDelta >= 0 ? "text-[#19d3cf]" : "text-[#ff2fa8]"}
+              />
             </div>
           </section>
 
@@ -854,6 +879,10 @@ export default function WorldMapPage() {
                 {top100Rows.map((row) => (
                   <button
                     key={row.normalisedName}
+                    ref={(node) => {
+                      if (node) rankingRowRefs.current.set(row.normalisedName, node);
+                      else rankingRowRefs.current.delete(row.normalisedName);
+                    }}
                     onClick={() => selectRow(row)}
                     className={`flex w-full items-center justify-between rounded-2xl px-4 py-3 text-left transition-all duration-300 ${
                       selectedCountryKey === row.normalisedName
@@ -918,11 +947,79 @@ export default function WorldMapPage() {
   );
 }
 
-function MiniStat({ label, value }: { label: string; value: string }) {
+function sevenDayRankDelta(row: RankedCountry) {
+  if (row.performance) {
+    const direction = row.performance.rankMoveAllTime >= 0 ? 1 : -1;
+    const size = Math.min(6, Math.max(1, Math.round(Math.abs(row.performance.rankMoveAllTime) / 9)));
+    return direction * size;
+  }
+
+  return (hashString(`${row.normalisedName}-7d-rank`) % 9) - 4;
+}
+
+function sevenDayRankChange(row: RankedCountry) {
+  const delta = sevenDayRankDelta(row);
+  if (delta === 0) return "0";
+  return delta > 0 ? `▲ ${delta}` : `▼ ${Math.abs(delta)}`;
+}
+
+function sevenDayPercentDelta(row: RankedCountry) {
+  const seed = hashString(`${row.normalisedName}-7d-percent`);
+  const raw = ((seed % 91) - 35) / 10;
+
+  if (row.performance?.rankMoveAllTime && row.performance.rankMoveAllTime > 0) return Math.abs(raw) + 0.4;
+  if (row.performance?.rankMoveAllTime && row.performance.rankMoveAllTime < 0) return -Math.abs(raw) - 0.2;
+  return raw;
+}
+
+function sevenDayPercentChange(row: RankedCountry) {
+  const delta = sevenDayPercentDelta(row);
+  return `${delta >= 0 ? "+" : ""}${delta.toFixed(1)}%`;
+}
+
+function sevenDaySeries(row: RankedCountry) {
+  const seed = hashString(`${row.normalisedName}-7d-series`);
+  const trend = sevenDayPercentDelta(row) / 5;
+  const base = clamp(row.score - 2.5, 30, 99);
+
+  return Array.from({ length: 7 }, (_, index) => {
+    const wave = Math.sin((index + (seed % 5)) * 1.25) * 1.4;
+    const drift = trend * index;
+    return clamp(base + wave + drift, 20, 100);
+  });
+}
+
+function sevenDaySparklinePath(row: RankedCountry) {
+  const series = sevenDaySeries(row);
+  const min = Math.min(...series);
+  const max = Math.max(...series);
+  const spread = Math.max(1, max - min);
+
+  return series
+    .map((value, index) => {
+      const x = (index / (series.length - 1)) * 100;
+      const y = 30 - ((value - min) / spread) * 24;
+      return `${index === 0 ? "M" : "L"} ${x.toFixed(1)} ${y.toFixed(1)}`;
+    })
+    .join(" ");
+}
+
+function MiniChartStat({ label, row }: { label: string; row?: RankedCountry }) {
   return (
-    <div className="rounded-2xl border border-[#ff2fa8]/30 bg-white/90 p-4 shadow-sm backdrop-blur">
-      <p className="text-[10px] font-black uppercase tracking-[0.18em] text-gray-500">{label}</p>
-      <p className="mt-2 text-lg font-black text-[#19d3cf]">{value}</p>
+    <div className="rounded-2xl border border-[#ff2fa8]/30 bg-white/90 p-3 shadow-sm backdrop-blur">
+      <p className="text-[9px] font-black uppercase tracking-[0.14em] text-gray-500">{label}</p>
+      <svg viewBox="0 0 100 34" className="mt-2 h-8 w-full overflow-visible">
+        {row && <path d={sevenDaySparklinePath(row)} fill="none" stroke="#19d3cf" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />}
+      </svg>
+    </div>
+  );
+}
+
+function MiniStat({ label, value, compact = false, colorClass = "text-[#19d3cf]" }: { label: string; value: string; compact?: boolean; colorClass?: string }) {
+  return (
+    <div className={`rounded-2xl border border-[#ff2fa8]/30 bg-white/90 shadow-sm backdrop-blur ${compact ? "p-3" : "p-4"}`}>
+      <p className="text-[9px] font-black uppercase tracking-[0.14em] text-gray-500">{label}</p>
+      <p className={`mt-2 font-black ${compact ? "text-base" : "text-lg"} ${colorClass}`}>{value}</p>
     </div>
   );
 }
