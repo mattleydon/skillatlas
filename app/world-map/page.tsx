@@ -374,7 +374,7 @@ function drawGlobe(
   const glow = ctx.createRadialGradient(CENTER - 140, CENTER - 150, 20, CENTER, CENTER, GLOBE_RADIUS);
   glow.addColorStop(0, "rgba(255,255,255,0.98)");
   glow.addColorStop(0.38, "rgba(248,250,252,0.88)");
-  glow.addColorStop(0.68, "rgba(255,47,168,0.045)");
+  glow.addColorStop(0.68, "rgba(241,245,249,0.72)");
   glow.addColorStop(1, "rgba(15,23,42,0.10)");
 
   ctx.save();
@@ -821,7 +821,7 @@ export default function WorldMapPage() {
             </div>
           </aside>
 
-          <section className="relative min-h-[740px] overflow-hidden rounded-3xl border border-[#ff2fa8]/40 bg-white/88 shadow-sm backdrop-blur">
+          <section className="relative min-h-[790px] overflow-hidden rounded-3xl border border-[#ff2fa8]/40 bg-white/88 shadow-sm backdrop-blur">
             <div className="absolute left-6 top-5 z-20">
               <p className="text-[11px] font-black uppercase tracking-[0.22em] text-[#19d3cf]">{gameLabels[selectedGame]}</p>
               <p className="mt-1 text-sm font-semibold text-gray-500">
@@ -829,8 +829,8 @@ export default function WorldMapPage() {
               </p>
             </div>
 
-            <div className="absolute inset-x-0 top-[42px] flex justify-center overflow-hidden">
-              <div className={`relative aspect-square w-full max-w-[500px] origin-center transition-transform duration-300 ${zoomed ? "scale-[1.55]" : "scale-100"}`}>
+            <div className="absolute inset-x-0 top-[38px] flex justify-center overflow-hidden">
+              <div className={`relative aspect-square w-full max-w-[560px] origin-center transition-transform duration-300 ${zoomed ? "scale-[1.45]" : "scale-100"}`}>
                 <canvas
                   ref={canvasRef}
                   width={CANVAS_SIZE}
@@ -851,7 +851,7 @@ export default function WorldMapPage() {
               )}
             </div>
 
-            <div className="absolute left-6 right-6 top-[548px] z-20 grid gap-3 md:grid-cols-3">
+            <div className="absolute bottom-5 left-6 right-6 top-[610px] z-20 grid grid-rows-2 gap-3 md:grid-cols-3">
               <MiniStat label="Selected" value={selectedRow?.name ?? "Loading"} compact />
               <MiniStat label="Rank" value={selectedRow ? `#${selectedRow.rank}` : "-"} compact />
               <MiniStat label="Score" value={selectedRow ? `${selectedRow.score}` : "-"} compact />
@@ -1006,7 +1006,7 @@ function sevenDaySparklinePath(row: RankedCountry) {
 
 function MiniChartStat({ label, row }: { label: string; row?: RankedCountry }) {
   return (
-    <div className="rounded-2xl border border-[#ff2fa8]/30 bg-white/90 p-3 shadow-sm backdrop-blur">
+    <div className="flex h-full flex-col justify-center rounded-2xl border border-[#ff2fa8]/30 bg-white/90 p-3 shadow-sm backdrop-blur">
       <p className="text-[9px] font-black uppercase tracking-[0.14em] text-gray-500">{label}</p>
       <svg viewBox="0 0 100 34" className="mt-2 h-8 w-full overflow-visible">
         {row && <path d={sevenDaySparklinePath(row)} fill="none" stroke="#19d3cf" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />}
@@ -1017,7 +1017,7 @@ function MiniChartStat({ label, row }: { label: string; row?: RankedCountry }) {
 
 function MiniStat({ label, value, compact = false, colorClass = "text-[#19d3cf]" }: { label: string; value: string; compact?: boolean; colorClass?: string }) {
   return (
-    <div className={`rounded-2xl border border-[#ff2fa8]/30 bg-white/90 shadow-sm backdrop-blur ${compact ? "p-3" : "p-4"}`}>
+    <div className={`flex h-full flex-col justify-center rounded-2xl border border-[#ff2fa8]/30 bg-white/90 shadow-sm backdrop-blur ${compact ? "p-3" : "p-4"}`}>
       <p className="text-[9px] font-black uppercase tracking-[0.14em] text-gray-500">{label}</p>
       <p className={`mt-2 font-black ${compact ? "text-base" : "text-lg"} ${colorClass}`}>{value}</p>
     </div>
@@ -1028,8 +1028,8 @@ function WorldMapBackground() {
   return (
     <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
       <div className="absolute inset-0 bg-[linear-gradient(180deg,#f8fafc_0%,#f1f5f9_100%)]" />
-      <div className="absolute bottom-[12%] right-[8%] h-80 w-80 rounded-full bg-[#ff2fa8]/[0.035] blur-3xl" />
-      <div className="absolute left-[10%] top-[18%] h-72 w-72 rounded-full bg-slate-300/[0.10] blur-3xl" />
+      <div className="absolute left-[10%] top-[18%] h-72 w-72 rounded-full bg-slate-300/[0.08] blur-3xl" />
+      <div className="absolute bottom-[12%] right-[8%] h-80 w-80 rounded-full bg-slate-200/[0.10] blur-3xl" />
     </div>
   );
 }
