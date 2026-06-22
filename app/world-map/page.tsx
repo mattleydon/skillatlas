@@ -153,8 +153,8 @@ function geometryToRings(geometry: GeoGeometry): LonLat[][] {
 }
 
 function simplifyRing(ring: LonLat[]) {
-  if (ring.length <= 140) return ring;
-  const step = Math.ceil(ring.length / 140);
+  if (ring.length <= 100) return ring;
+  const step = Math.ceil(ring.length / 100);
   return ring.filter((_, index) => index % step === 0 || index === ring.length - 1);
 }
 
@@ -225,11 +225,6 @@ function makeCountryPath(ctx: CanvasRenderingContext2D, feature: PreparedFeature
 
     for (const [lon, lat] of ring) {
       const point = projectPoint(lon, lat, rotation);
-
-      if (!point.visible) {
-        started = false;
-        continue;
-      }
 
       if (!started) {
         ctx.moveTo(point.x, point.y);
@@ -367,7 +362,7 @@ function drawGlobe(
       frontness: featureFrontness(feature, rotation),
       performance: performanceByName.get(feature.normalisedName),
     }))
-    .filter((item) => item.frontness > -0.15)
+    .filter((item) => item.frontness > -0.12)
     .sort((a, b) => a.frontness - b.frontness);
 
   for (const item of orderedFeatures) {
@@ -386,13 +381,13 @@ function drawGlobe(
       ctx.lineWidth = metric.isTopTen ? 1.35 : 0.85;
       ctx.stroke();
     } else {
-      ctx.fillStyle = "rgba(100,116,139,0.22)";
-      ctx.globalAlpha = 0.18 * frontFade;
+      ctx.fillStyle = "rgba(100,116,139,0.34)";
+      ctx.globalAlpha = 0.34 * frontFade;
       ctx.fill();
 
-      ctx.globalAlpha = 0.22 * frontFade;
-      ctx.strokeStyle = "rgba(71,85,105,0.32)";
-      ctx.lineWidth = 0.55;
+      ctx.globalAlpha = 0.44 * frontFade;
+      ctx.strokeStyle = "rgba(71,85,105,0.42)";
+      ctx.lineWidth = 0.68;
       ctx.stroke();
     }
   }
@@ -677,7 +672,7 @@ export default function WorldMapPage() {
           <p className="mb-2 text-xs font-bold uppercase tracking-[0.25em] text-[#19d3cf]">World Map</p>
           <h1 className="mb-2 text-xl font-black tracking-tight">Spin the globe. See where each game belongs.</h1>
           <p className="text-sm text-gray-600 md:whitespace-nowrap">
-            Country outlines stay locked to the globe while heat settings change how dominance is visualised.
+            Country outlines stay locked to a true circular globe while heat settings change how dominance is visualised.
           </p>
         </div>
 
@@ -727,7 +722,7 @@ export default function WorldMapPage() {
             <div className="mt-4 rounded-2xl border border-[#ff2fa8]/25 bg-[#ff2fa8]/5 p-4">
               <p className="mb-2 text-[10px] font-black uppercase tracking-[0.2em] text-[#ff2fa8]">Controls</p>
               <p className="text-xs font-semibold leading-relaxed text-gray-600">
-                Grab anywhere on the globe and drag. Canvas rendering keeps the country shapes locked in position while spinning.
+                Grab anywhere on the globe and drag. Canvas rendering keeps the globe circular and country shapes locked in position while spinning.
               </p>
             </div>
           </aside>
@@ -741,16 +736,18 @@ export default function WorldMapPage() {
             </div>
 
             <div className="absolute inset-0 flex items-center justify-center pt-12">
-              <canvas
-                ref={canvasRef}
-                width={CANVAS_SIZE}
-                height={CANVAS_SIZE}
-                className={`h-[690px] w-[690px] max-w-[96%] select-none touch-none ${isDragging ? "cursor-grabbing" : "cursor-grab"}`}
-                onPointerDown={handlePointerDown}
-                onPointerMove={handlePointerMove}
-                onPointerUp={handlePointerUp}
-                onPointerCancel={handlePointerUp}
-              />
+              <div className="relative aspect-square w-full max-w-[690px]">
+                <canvas
+                  ref={canvasRef}
+                  width={CANVAS_SIZE}
+                  height={CANVAS_SIZE}
+                  className={`absolute inset-0 h-full w-full select-none touch-none ${isDragging ? "cursor-grabbing" : "cursor-grab"}`}
+                  onPointerDown={handlePointerDown}
+                  onPointerMove={handlePointerMove}
+                  onPointerUp={handlePointerUp}
+                  onPointerCancel={handlePointerUp}
+                />
+              </div>
 
               {loadState !== "ready" && (
                 <div className="absolute rounded-2xl border border-[#19d3cf]/25 bg-white/90 px-5 py-4 text-sm font-black text-[#19d3cf] shadow-sm">
