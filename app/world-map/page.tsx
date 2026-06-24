@@ -67,9 +67,9 @@ const gameLabels: Record<GameKey, string> = {
 };
 
 const heatModes: { id: HeatMode; label: string; description: string }[] = [
-  { id: "ranking", label: "Ranking", description: "Turquoise heat by rank. 1st is darkest, 100th is lightest." },
-  { id: "emerging", label: "Biggest Gainer", description: "Purple heat for countries moving up most over all-time." },
-  { id: "loser", label: "Biggest Loser", description: "Pink heat for countries falling down rankings most over all-time." },
+  { id: "ranking", label: "Ranking", description: "Overall ranking for countries for each game." },
+  { id: "emerging", label: "Biggest Gainer", description: "Ranking for countries that have moved up in overall ranking the most over all-time." },
+  { id: "loser", label: "Biggest Loser", description: "Ranking for countries that have moved down in overall ranking the most over all-time." },
 ];
 
 const gameOrder: GameKey[] = ["cs2", "league", "valorant", "fortnite", "rocketLeague", "chess"];
@@ -371,20 +371,20 @@ function drawGlobe(
 
   ctx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
 
-  const globeSurface = ctx.createRadialGradient(CENTER - 110, CENTER - 120, 24, CENTER, CENTER, GLOBE_RADIUS);
-  globeSurface.addColorStop(0, "rgba(255,255,255,0.99)");
-  globeSurface.addColorStop(0.55, "rgba(248,250,252,0.98)");
-  globeSurface.addColorStop(0.82, "rgba(241,245,249,0.96)");
-  globeSurface.addColorStop(1, "rgba(226,232,240,0.94)");
+  const glow = ctx.createRadialGradient(CENTER - 140, CENTER - 150, 20, CENTER, CENTER, GLOBE_RADIUS);
+  glow.addColorStop(0, "rgba(255,255,255,0.98)");
+  glow.addColorStop(0.38, "rgba(248,250,252,0.88)");
+  glow.addColorStop(0.68, "rgba(241,245,249,0.72)");
+  glow.addColorStop(1, "rgba(15,23,42,0.10)");
 
   ctx.save();
   ctx.beginPath();
   ctx.arc(CENTER, CENTER, GLOBE_RADIUS, 0, Math.PI * 2);
-  ctx.fillStyle = globeSurface;
+  ctx.fillStyle = glow;
   ctx.fill();
   ctx.clip();
 
-  ctx.strokeStyle = "rgba(100,116,139,0.15)";
+  ctx.strokeStyle = "rgba(100,116,139,0.18)";
   ctx.lineWidth = 1;
 
   for (const scale of [0.82, 0.62, 0.42, 0.22]) {
@@ -421,12 +421,12 @@ function drawGlobe(
       ctx.lineWidth = metric.isTopTen ? 1.4 : 0.85;
       ctx.stroke();
     } else {
-      ctx.fillStyle = "rgba(148,163,184,0.20)";
-      ctx.globalAlpha = 0.55 * frontFade;
+      ctx.fillStyle = "rgba(100,116,139,0.34)";
+      ctx.globalAlpha = 0.34 * frontFade;
       ctx.fill();
 
-      ctx.strokeStyle = "rgba(148,163,184,0.34)";
-      ctx.globalAlpha = 0.55 * frontFade;
+      ctx.strokeStyle = "rgba(71,85,105,0.42)";
+      ctx.globalAlpha = 0.44 * frontFade;
       ctx.lineWidth = 0.68;
       ctx.stroke();
     }
@@ -452,7 +452,7 @@ function drawGlobe(
   ctx.restore();
 
   ctx.globalAlpha = 1;
-  ctx.strokeStyle = "rgba(255,255,255,0.82)";
+  ctx.strokeStyle = "rgba(255,255,255,0.76)";
   ctx.lineWidth = 2;
   ctx.beginPath();
   ctx.arc(CENTER, CENTER, GLOBE_RADIUS, 0, Math.PI * 2);
@@ -464,7 +464,7 @@ function drawGlobe(
 
     if (selectedPoint.visible) {
       ctx.save();
-      ctx.fillStyle = "rgba(255,255,255,0.96)";
+      ctx.fillStyle = "rgba(255,255,255,0.94)";
       ctx.strokeStyle = metric?.color ?? "#19d3cf";
       ctx.lineWidth = 1;
       ctx.beginPath();
@@ -510,12 +510,6 @@ function findCountryAtPoint(
   return null;
 }
 
-function getHeatAuraClasses(mode: HeatMode) {
-  if (mode === "emerging") return "bg-[#8b5cf6]/12";
-  if (mode === "loser") return "bg-[#ff2fa8]/10";
-  return "bg-[#19d3cf]/10";
-}
-
 export default function WorldMapPage() {
   const [features, setFeatures] = useState<PreparedFeature[]>([]);
   const [loadState, setLoadState] = useState<"loading" | "ready" | "error">("loading");
@@ -537,9 +531,26 @@ export default function WorldMapPage() {
   const activeCountries = gameData[selectedGame];
   const performanceByName = useMemo(() => buildPerformanceMap(activeCountries), [activeCountries]);
   const rankingRows = useMemo(() => buildRankingRows(features, selectedGame, performanceByName), [features, selectedGame, performanceByName]);
-  const top100Rows = rankingRows.slice(0, 100);
+  const heatRankedRows = useMemo(() => {
+    if (heatMode === "emerging") {
+      return [...rankingRows].sort((a, b) => b.rankMoveAllTime - a.rankMoveAllTime || a.rank - b.rank);
+    }
+
+    if (heatMode === "loser") {
+      return [...rankingRows].sort((a, b) => a.rankMoveAllTime - b.rankMoveAllTime || a.rank - b.rank);
+    }
+
+    return rankingRows;
+  }, [rankingRows, heatMode]);
+
+  const top100Rows = heatRankedRows.slice(0, 100);
+  const heatRankByName = useMemo(
+    () => new Map(heatRankedRows.map((row, index) => [row.normalisedName, index + 1])),
+    [heatRankedRows]
+  );
   const rowByName = useMemo(() => new Map(rankingRows.map((row) => [row.normalisedName, row])), [rankingRows]);
   const selectedRow = rowByName.get(selectedCountryKey) ?? top100Rows[0];
+  const selectedHeatRank = selectedRow ? heatRankByName.get(selectedRow.normalisedName) ?? selectedRow.rank : 0;
   const activeHeatMode = heatModes.find((mode) => mode.id === heatMode) ?? heatModes[0];
 
   useEffect(() => {
@@ -676,12 +687,12 @@ export default function WorldMapPage() {
     if (Math.abs(deltaX) + Math.abs(deltaY) > 3) dragRef.current.moved = true;
 
     rotationRef.current = {
-      lat: clamp(rotationRef.current.lat - deltaY * 0.22, -64, 64),
+      lat: clamp(rotationRef.current.lat + deltaY * 0.22, -64, 64),
       lon: rotationRef.current.lon + deltaX * 0.28,
     };
 
     velocityRef.current = {
-      lat: -deltaY * 0.045,
+      lat: deltaY * 0.045,
       lon: deltaX * 0.055,
     };
 
@@ -835,12 +846,8 @@ export default function WorldMapPage() {
               </p>
             </div>
 
-            <div className="pointer-events-none absolute inset-x-0 top-[118px] z-0 flex justify-center">
-              <div className={`h-[420px] w-[420px] rounded-full blur-3xl transition-all duration-300 ${getHeatAuraClasses(heatMode)}`} />
-            </div>
-
             <div className="absolute inset-x-0 top-[38px] flex justify-center overflow-hidden">
-              <div className={`relative aspect-square w-full max-w-[600px] origin-center transition-transform duration-300 ${zoomed ? "scale-[1.45]" : "scale-100"}`}>
+              <div className={`relative aspect-square w-full max-w-[560px] origin-center transition-transform duration-300 ${zoomed ? "scale-[1.45]" : "scale-100"}`}>
                 <canvas
                   ref={canvasRef}
                   width={CANVAS_SIZE}
@@ -861,9 +868,9 @@ export default function WorldMapPage() {
               )}
             </div>
 
-            <div className="absolute bottom-5 left-6 right-6 top-[610px] z-20 grid grid-cols-3 grid-rows-2 gap-3">
+            <div className="absolute bottom-5 left-6 right-6 top-[610px] z-20 grid grid-rows-2 gap-3 md:grid-cols-3">
               <MiniStat label="Selected" value={selectedRow?.name ?? "Loading"} compact />
-              <MiniStat label="Rank" value={selectedRow ? `#${selectedRow.rank}` : "-"} compact />
+              <MiniStat label="Rank" value={selectedRow ? `#${selectedHeatRank}` : "-"} compact />
               <MiniStat label="Score" value={selectedRow ? `${selectedRow.score}` : "-"} compact />
               <MiniChartStat label="7 Days Score" row={selectedRow} />
               <MiniStat
@@ -886,7 +893,7 @@ export default function WorldMapPage() {
               <p className="mb-4 text-[11px] font-black uppercase tracking-[0.22em] text-[#19d3cf]">Top 100 Countries</p>
 
               <div className="max-h-[360px] space-y-3 overflow-y-auto pr-1">
-                {top100Rows.map((row) => (
+                {top100Rows.map((row, index) => (
                   <button
                     key={row.normalisedName}
                     ref={(node) => {
@@ -901,7 +908,7 @@ export default function WorldMapPage() {
                     }`}
                   >
                     <span className="flex items-center gap-3">
-                      <span className={selectedCountryKey === row.normalisedName ? "font-black text-white" : "font-black text-[#ff2fa8]"}>{row.rank}</span>
+                      <span className={selectedCountryKey === row.normalisedName ? "font-black text-white" : "font-black text-[#ff2fa8]"}>{index + 1}</span>
                       <span className="font-black">{row.name}</span>
                     </span>
                     <span className="text-xs font-black">{row.score}</span>
@@ -1016,30 +1023,20 @@ function sevenDaySparklinePath(row: RankedCountry) {
 
 function MiniChartStat({ label, row }: { label: string; row?: RankedCountry }) {
   return (
-    <div className="flex h-full flex-col justify-center rounded-2xl border border-[#ff2fa8]/30 bg-white/90 p-4 shadow-sm backdrop-blur">
-      <p className="text-[10px] font-black uppercase tracking-[0.16em] text-gray-500">{label}</p>
-      <svg viewBox="0 0 100 34" className="mt-3 h-10 w-full overflow-visible">
+    <div className="flex h-full flex-col justify-center rounded-2xl border border-[#ff2fa8]/30 bg-white/90 p-3 shadow-sm backdrop-blur">
+      <p className="text-[9px] font-black uppercase tracking-[0.14em] text-gray-500">{label}</p>
+      <svg viewBox="0 0 100 34" className="mt-2 h-8 w-full overflow-visible">
         {row && <path d={sevenDaySparklinePath(row)} fill="none" stroke="#19d3cf" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />}
       </svg>
     </div>
   );
 }
 
-function MiniStat({
-  label,
-  value,
-  compact = false,
-  colorClass = "text-[#19d3cf]",
-}: {
-  label: string;
-  value: string;
-  compact?: boolean;
-  colorClass?: string;
-}) {
+function MiniStat({ label, value, compact = false, colorClass = "text-[#19d3cf]" }: { label: string; value: string; compact?: boolean; colorClass?: string }) {
   return (
-    <div className={`flex h-full flex-col justify-center rounded-2xl border border-[#ff2fa8]/30 bg-white/90 shadow-sm backdrop-blur ${compact ? "p-4" : "p-5"}`}>
-      <p className="text-[10px] font-black uppercase tracking-[0.16em] text-gray-500">{label}</p>
-      <p className={`mt-3 font-black leading-tight ${compact ? "text-[1.05rem] md:text-[1.2rem]" : "text-xl"} ${colorClass}`}>{value}</p>
+    <div className={`flex h-full flex-col justify-center rounded-2xl border border-[#ff2fa8]/30 bg-white/90 shadow-sm backdrop-blur ${compact ? "p-3" : "p-4"}`}>
+      <p className="text-[9px] font-black uppercase tracking-[0.14em] text-gray-500">{label}</p>
+      <p className={`mt-2 font-black ${compact ? "text-base" : "text-lg"} ${colorClass}`}>{value}</p>
     </div>
   );
 }
@@ -1048,8 +1045,8 @@ function WorldMapBackground() {
   return (
     <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
       <div className="absolute inset-0 bg-[linear-gradient(180deg,#f8fafc_0%,#f1f5f9_100%)]" />
-      <div className="absolute left-[10%] top-[18%] h-72 w-72 rounded-full bg-slate-300/[0.05] blur-3xl" />
-      <div className="absolute bottom-[12%] right-[8%] h-80 w-80 rounded-full bg-slate-200/[0.06] blur-3xl" />
+      <div className="absolute left-[10%] top-[18%] h-72 w-72 rounded-full bg-slate-300/[0.08] blur-3xl" />
+      <div className="absolute bottom-[12%] right-[8%] h-80 w-80 rounded-full bg-slate-200/[0.10] blur-3xl" />
     </div>
   );
 }
