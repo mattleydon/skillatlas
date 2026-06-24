@@ -397,6 +397,8 @@ function drawGlobe(
     ctx.stroke();
   }
 
+  ctx.globalAlpha = 1;
+
   const orderedFeatures = features
     .map((feature) => ({
       feature,
@@ -443,9 +445,9 @@ function drawGlobe(
     ctx.lineWidth = 12;
     ctx.stroke();
 
-    ctx.strokeStyle = "#ffffff";
+    ctx.strokeStyle = heatBaseColor;
     ctx.globalAlpha = 0.95;
-    ctx.lineWidth = 2.4;
+    ctx.lineWidth = 2.6;
     ctx.stroke();
   }
 
