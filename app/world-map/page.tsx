@@ -309,6 +309,12 @@ function buildRankingRows(features: PreparedFeature[], game: GameKey, performanc
     }));
 }
 
+function getHeatBaseColor(mode: HeatMode) {
+  if (mode === "emerging") return "#8b5cf6";
+  if (mode === "loser") return "#ff2fa8";
+  return "#19d3cf";
+}
+
 function metricForRow(row: RankedCountry | undefined, heatMode: HeatMode): Metric | null {
   if (!row) return null;
 
@@ -371,11 +377,13 @@ function drawGlobe(
 
   ctx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
 
+  const heatBaseColor = getHeatBaseColor(heatMode);
+
   const glow = ctx.createRadialGradient(CENTER - 140, CENTER - 150, 20, CENTER, CENTER, GLOBE_RADIUS);
-  glow.addColorStop(0, "rgba(255,255,255,0.98)");
-  glow.addColorStop(0.38, "rgba(248,250,252,0.88)");
-  glow.addColorStop(0.68, "rgba(241,245,249,0.72)");
-  glow.addColorStop(1, "rgba(15,23,42,0.10)");
+  glow.addColorStop(0, "rgba(255,255,255,1)");
+  glow.addColorStop(0.52, "rgba(255,255,255,1)");
+  glow.addColorStop(0.82, "rgba(255,255,255,0.99)");
+  glow.addColorStop(1, "rgba(255,255,255,0.98)");
 
   ctx.save();
   ctx.beginPath();
@@ -384,7 +392,8 @@ function drawGlobe(
   ctx.fill();
   ctx.clip();
 
-  ctx.strokeStyle = "rgba(100,116,139,0.18)";
+  ctx.strokeStyle = heatBaseColor;
+  ctx.globalAlpha = 0.12;
   ctx.lineWidth = 1;
 
   for (const scale of [0.82, 0.62, 0.42, 0.22]) {
@@ -396,6 +405,8 @@ function drawGlobe(
     ctx.ellipse(CENTER, CENTER, GLOBE_RADIUS * scale, GLOBE_RADIUS, 0, 0, Math.PI * 2);
     ctx.stroke();
   }
+
+  ctx.globalAlpha = 1;
 
   ctx.globalAlpha = 1;
 
@@ -423,13 +434,13 @@ function drawGlobe(
       ctx.lineWidth = metric.isTopTen ? 1.4 : 0.85;
       ctx.stroke();
     } else {
-      ctx.fillStyle = "rgba(100,116,139,0.34)";
-      ctx.globalAlpha = 0.34 * frontFade;
+      ctx.fillStyle = "rgba(255,255,255,0.44)";
+      ctx.globalAlpha = 0.30 * frontFade;
       ctx.fill();
 
-      ctx.strokeStyle = "rgba(71,85,105,0.42)";
-      ctx.globalAlpha = 0.44 * frontFade;
-      ctx.lineWidth = 0.68;
+      ctx.strokeStyle = heatBaseColor;
+      ctx.globalAlpha = 0.62 * frontFade;
+      ctx.lineWidth = 0.9;
       ctx.stroke();
     }
   }
@@ -453,12 +464,14 @@ function drawGlobe(
 
   ctx.restore();
 
-  ctx.globalAlpha = 1;
-  ctx.strokeStyle = "rgba(255,255,255,0.76)";
+  ctx.globalAlpha = 0.20;
+  ctx.strokeStyle = heatBaseColor;
   ctx.lineWidth = 2;
   ctx.beginPath();
   ctx.arc(CENTER, CENTER, GLOBE_RADIUS, 0, Math.PI * 2);
   ctx.stroke();
+
+  ctx.globalAlpha = 1;
 
   if (selectedFeature?.row) {
     const selectedPoint = projectPoint(selectedFeature.row.feature.centroid.lon, selectedFeature.row.feature.centroid.lat, rotation);
@@ -1040,9 +1053,9 @@ function sevenDaySparklinePath(row: RankedCountry) {
 
 function MiniChartStat({ label, row }: { label: string; row?: RankedCountry }) {
   return (
-    <div className="flex h-full flex-col justify-center rounded-2xl border border-[#ff2fa8]/30 bg-white/90 p-3 shadow-sm backdrop-blur">
-      <p className="text-[9px] font-black uppercase tracking-[0.14em] text-gray-500">{label}</p>
-      <svg viewBox="0 0 100 34" className="mt-2 h-8 w-full overflow-visible">
+    <div className="flex h-full flex-col justify-center rounded-2xl border border-[#ff2fa8]/30 bg-white/90 p-5 shadow-sm backdrop-blur">
+      <p className="text-[12px] font-black uppercase tracking-[0.12em] text-gray-500">{label}</p>
+      <svg viewBox="0 0 100 34" className="mt-3 h-14 w-full overflow-visible">
         {row && <path d={sevenDaySparklinePath(row)} fill="none" stroke="#19d3cf" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />}
       </svg>
     </div>
@@ -1051,9 +1064,9 @@ function MiniChartStat({ label, row }: { label: string; row?: RankedCountry }) {
 
 function MiniStat({ label, value, compact = false, colorClass = "text-[#19d3cf]" }: { label: string; value: string; compact?: boolean; colorClass?: string }) {
   return (
-    <div className={`flex h-full flex-col justify-center rounded-2xl border border-[#ff2fa8]/30 bg-white/90 shadow-sm backdrop-blur ${compact ? "p-3" : "p-4"}`}>
-      <p className="text-[9px] font-black uppercase tracking-[0.14em] text-gray-500">{label}</p>
-      <p className={`mt-2 font-black ${compact ? "text-base" : "text-lg"} ${colorClass}`}>{value}</p>
+    <div className={`flex h-full flex-col justify-center rounded-2xl border border-[#ff2fa8]/30 bg-white/90 shadow-sm backdrop-blur ${compact ? "p-5" : "p-5"}`}>
+      <p className="text-[12px] font-black uppercase tracking-[0.12em] text-gray-500">{label}</p>
+      <p className={`mt-3 break-words font-black leading-tight ${compact ? "text-[1.55rem] md:text-[1.75rem]" : "text-xl"} ${colorClass}`}>{value}</p>
     </div>
   );
 }
@@ -1061,9 +1074,7 @@ function MiniStat({ label, value, compact = false, colorClass = "text-[#19d3cf]"
 function WorldMapBackground() {
   return (
     <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
-      <div className="absolute inset-0 bg-[linear-gradient(180deg,#f8fafc_0%,#f1f5f9_100%)]" />
-      <div className="absolute left-[10%] top-[18%] h-72 w-72 rounded-full bg-slate-300/[0.08] blur-3xl" />
-      <div className="absolute bottom-[12%] right-[8%] h-80 w-80 rounded-full bg-slate-200/[0.10] blur-3xl" />
+      <div className="absolute inset-0 bg-[#f8fafc]" />
     </div>
   );
 }
