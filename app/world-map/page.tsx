@@ -911,7 +911,9 @@ export default function WorldMapPage() {
                       <span className={selectedCountryKey === row.normalisedName ? "font-black text-white" : "font-black text-[#ff2fa8]"}>{index + 1}</span>
                       <span className="font-black">{row.name}</span>
                     </span>
-                    <span className="text-xs font-black">{row.score}</span>
+                    <span className={`text-sm font-black ${top100DisplayColor(heatMode, selectedCountryKey === row.normalisedName)}`}>
+                      {top100DisplayValue(row, heatMode)}
+                    </span>
                   </button>
                 ))}
               </div>
@@ -962,6 +964,19 @@ export default function WorldMapPage() {
       </section>
     </main>
   );
+}
+
+function top100DisplayValue(row: RankedCountry, heatMode: HeatMode) {
+  if (heatMode === "emerging") return `▲ ${Math.max(0, row.rankMoveAllTime)}`;
+  if (heatMode === "loser") return `▼ ${Math.max(0, -row.rankMoveAllTime)}`;
+  return `${row.score}`;
+}
+
+function top100DisplayColor(heatMode: HeatMode, selected: boolean) {
+  if (selected) return "text-white";
+  if (heatMode === "emerging") return "text-[#8b5cf6]";
+  if (heatMode === "loser") return "text-[#ff2fa8]";
+  return "text-gray-700";
 }
 
 function sevenDayRankDelta(row: RankedCountry) {
