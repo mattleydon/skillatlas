@@ -429,9 +429,9 @@ function drawGlobe(
       ctx.globalAlpha = metric.alpha * frontFade;
       ctx.fill();
 
-      ctx.strokeStyle = metric.stroke;
-      ctx.globalAlpha = metric.isTopTen ? 0.95 * frontFade : 0.58 * frontFade;
-      ctx.lineWidth = metric.isTopTen ? 1.4 : 0.85;
+      ctx.strokeStyle = heatBaseColor;
+      ctx.globalAlpha = metric.isTopTen ? 0.95 * frontFade : 0.62 * frontFade;
+      ctx.lineWidth = metric.isTopTen ? 1.45 : 0.9;
       ctx.stroke();
     } else {
       ctx.fillStyle = "rgba(255,255,255,0.44)";
@@ -451,7 +451,7 @@ function drawGlobe(
     const metric = metricForRow(selectedFeature.row, heatMode);
     makeCountryPath(ctx, selectedFeature.feature, rotation);
 
-    ctx.strokeStyle = metric?.color ?? "#19d3cf";
+    ctx.strokeStyle = heatBaseColor;
     ctx.globalAlpha = 0.25;
     ctx.lineWidth = 12;
     ctx.stroke();
@@ -480,14 +480,14 @@ function drawGlobe(
     if (selectedPoint.visible) {
       ctx.save();
       ctx.fillStyle = "rgba(255,255,255,0.94)";
-      ctx.strokeStyle = metric?.color ?? "#19d3cf";
+      ctx.strokeStyle = heatBaseColor;
       ctx.lineWidth = 1;
       ctx.beginPath();
       ctx.roundRect(selectedPoint.x - 68, selectedPoint.y + 18, 136, 32, 16);
       ctx.fill();
       ctx.stroke();
 
-      ctx.fillStyle = metric?.color ?? "#19d3cf";
+      ctx.fillStyle = heatBaseColor;
       ctx.font = "900 14px Arial";
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
