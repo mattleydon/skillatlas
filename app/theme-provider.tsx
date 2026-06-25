@@ -123,7 +123,7 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
 
         .skillatlas-theme-switch {
           position: fixed;
-          right: 88px;
+          right: 56px;
           top: 12px;
           z-index: 100;
           width: 46px;
