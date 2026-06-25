@@ -381,10 +381,18 @@ function drawGlobe(
   const heatBaseColor = getHeatBaseColor(heatMode);
 
   const glow = ctx.createRadialGradient(CENTER - 140, CENTER - 150, 20, CENTER, CENTER, GLOBE_RADIUS);
-  glow.addColorStop(0, "rgba(255,255,255,1)");
-  glow.addColorStop(0.52, "rgba(255,255,255,1)");
-  glow.addColorStop(0.82, "rgba(255,255,255,0.99)");
-  glow.addColorStop(1, "rgba(255,255,255,0.98)");
+
+  if (darkMode) {
+    glow.addColorStop(0, "rgba(62,75,90,1)");
+    glow.addColorStop(0.48, "rgba(47,58,70,0.99)");
+    glow.addColorStop(0.78, "rgba(39,51,65,0.98)");
+    glow.addColorStop(1, "rgba(32,43,55,0.97)");
+  } else {
+    glow.addColorStop(0, "rgba(255,255,255,1)");
+    glow.addColorStop(0.52, "rgba(255,255,255,1)");
+    glow.addColorStop(0.82, "rgba(255,255,255,0.99)");
+    glow.addColorStop(1, "rgba(255,255,255,0.98)");
+  }
 
   ctx.save();
   ctx.beginPath();
@@ -435,8 +443,8 @@ function drawGlobe(
       ctx.lineWidth = metric.isTopTen ? 1.45 : 0.9;
       ctx.stroke();
     } else {
-      ctx.fillStyle = darkMode ? "rgba(15,23,42,0.60)" : "rgba(255,255,255,0.44)";
-      ctx.globalAlpha = darkMode ? 0.42 * frontFade : 0.30 * frontFade;
+      ctx.fillStyle = darkMode ? "rgba(47,58,70,0.72)" : "rgba(255,255,255,0.44)";
+      ctx.globalAlpha = darkMode ? 0.46 * frontFade : 0.30 * frontFade;
       ctx.fill();
 
       ctx.strokeStyle = heatBaseColor;
@@ -761,7 +769,7 @@ export default function WorldMapPage() {
   const selectedSevenDayPercentDelta = selectedRow ? sevenDayPercentDelta(selectedRow) : 0;
 
   return (
-    <main className={`world-map-shell relative min-h-screen overflow-hidden transition-colors duration-300 ${darkMode ? "world-map-dark bg-[#111827] text-slate-100" : "bg-[#F8FAFC] text-[#111827]"}`}>
+    <main className={`world-map-shell relative min-h-screen overflow-hidden transition-colors duration-300 ${darkMode ? "world-map-dark bg-[#2f3a46] text-slate-100" : "bg-[#F8FAFC] text-[#111827]"}`}>
       <WorldMapBackground darkMode={darkMode} />
 
       <style>{`
@@ -1130,7 +1138,7 @@ function MiniStat({ label, value, compact = false, colorClass = "text-[#19d3cf]"
 function WorldMapBackground({ darkMode }: { darkMode: boolean }) {
   return (
     <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
-      <div className={`absolute inset-0 transition-colors duration-300 ${darkMode ? "bg-[#111827]" : "bg-[#f8fafc]"}`} />
+      <div className={`absolute inset-0 transition-colors duration-300 ${darkMode ? "bg-[#2f3a46]" : "bg-[#f8fafc]"}`} />
       <div
         className={`absolute left-[8%] top-[18%] h-72 w-72 rounded-full blur-3xl transition-all duration-300 ${
           darkMode ? "bg-[#19d3cf]/[0.035]" : "bg-transparent"
