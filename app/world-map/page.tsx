@@ -370,7 +370,8 @@ function drawGlobe(
   rowByName: Map<string, RankedCountry>,
   rotation: { lat: number; lon: number },
   heatMode: HeatMode,
-  selectedKey: string
+  selectedKey: string,
+  darkMode: boolean
 ) {
   const ctx = canvas.getContext("2d");
   if (!ctx) return;
@@ -434,8 +435,8 @@ function drawGlobe(
       ctx.lineWidth = metric.isTopTen ? 1.45 : 0.9;
       ctx.stroke();
     } else {
-      ctx.fillStyle = "rgba(255,255,255,0.44)";
-      ctx.globalAlpha = 0.30 * frontFade;
+      ctx.fillStyle = darkMode ? "rgba(15,23,42,0.60)" : "rgba(255,255,255,0.44)";
+      ctx.globalAlpha = darkMode ? 0.42 * frontFade : 0.30 * frontFade;
       ctx.fill();
 
       ctx.strokeStyle = heatBaseColor;
@@ -534,12 +535,13 @@ export default function WorldMapPage() {
   const [selectedCountryKey, setSelectedCountryKey] = useState("");
   const [isDragging, setIsDragging] = useState(false);
   const [zoomed, setZoomed] = useState(false);
+  const [darkMode, setDarkMode] = useState(false);
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const rotationRef = useRef({ lat: -8, lon: -8 });
   const velocityRef = useRef({ lat: 0, lon: 0.028 });
   const dragRef = useRef<{ pointerId: number; lastX: number; lastY: number; moved: boolean } | null>(null);
-  const latestRef = useRef({ features, selectedGame, heatMode, selectedCountryKey });
+  const latestRef = useRef({ features, selectedGame, heatMode, selectedCountryKey, darkMode });
   const rowByNameRef = useRef<Map<string, RankedCountry>>(new Map());
   const rankingRowRefs = useRef<Map<string, HTMLButtonElement>>(new Map());
 
@@ -578,8 +580,8 @@ export default function WorldMapPage() {
   }, [selectedCountryKey]);
 
   useEffect(() => {
-    latestRef.current = { features, selectedGame, heatMode, selectedCountryKey };
-  }, [features, selectedGame, heatMode, selectedCountryKey]);
+    latestRef.current = { features, selectedGame, heatMode, selectedCountryKey, darkMode };
+  }, [features, selectedGame, heatMode, selectedCountryKey, darkMode]);
 
   useEffect(() => {
     if (!selectedCountryKey && top100Rows[0]) {
@@ -594,6 +596,17 @@ export default function WorldMapPage() {
 
     window.addEventListener("scroll", onScroll);
     return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  useEffect(() => {
+    const syncTheme = () => {
+      setDarkMode(document.documentElement.classList.contains("skillatlas-dark"));
+    };
+
+    syncTheme();
+    window.addEventListener("skillatlas-theme-change", syncTheme);
+
+    return () => window.removeEventListener("skillatlas-theme-change", syncTheme);
   }, []);
 
   useEffect(() => {
@@ -658,7 +671,7 @@ export default function WorldMapPage() {
       const selected = current.selectedCountryKey || "";
 
       if (canvasRef.current) {
-        drawGlobe(canvasRef.current, current.features, rowByNameRef.current, rotationRef.current, current.heatMode, selected);
+        drawGlobe(canvasRef.current, current.features, rowByNameRef.current, rotationRef.current, current.heatMode, selected, current.darkMode);
       }
     }
 
@@ -748,15 +761,40 @@ export default function WorldMapPage() {
   const selectedSevenDayPercentDelta = selectedRow ? sevenDayPercentDelta(selectedRow) : 0;
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-[#F8FAFC] text-[#111827]">
-      <WorldMapBackground />
+    <main className={`world-map-shell relative min-h-screen overflow-hidden transition-colors duration-300 ${darkMode ? "world-map-dark bg-[#111827] text-slate-100" : "bg-[#F8FAFC] text-[#111827]"}`}>
+      <WorldMapBackground darkMode={darkMode} />
+
+      <style>{`
+        .world-map-dark [class*="bg-white"] {
+          background-color: rgba(31, 41, 55, 0.92) !important;
+        }
+
+        .world-map-dark [class*="bg-gray-50"] {
+          background-color: rgba(15, 23, 42, 0.62) !important;
+        }
+
+        .world-map-dark [class*="text-gray-"] {
+          color: rgb(203, 213, 225) !important;
+        }
+
+        .world-map-dark [class*="text-[#111827]"] {
+          color: rgb(248, 250, 252) !important;
+        }
+
+        .world-map-dark header {
+          background-color: rgba(17, 24, 39, 0.96) !important;
+        }
+
+        .world-map-dark canvas {
+          filter: drop-shadow(0 0 34px rgba(25, 211, 207, 0.08));
+        }
+      `}</style>
 
       <header
         className={`fixed left-0 right-0 top-0 z-50 border-b border-[#ff2fa8]/25 bg-white/95 backdrop-blur transition-all duration-300 ${
           scrolled ? "h-[72px]" : "h-[126px]"
         }`}
-      >
-        <div className="mx-auto flex h-full max-w-7xl items-center px-8">
+      >        <div className="mx-auto flex h-full max-w-7xl items-center px-8">
           <div className="mr-14 flex shrink-0 items-center gap-5">
             <a
               href="/space-invaders"
@@ -1089,10 +1127,20 @@ function MiniStat({ label, value, compact = false, colorClass = "text-[#19d3cf]"
   );
 }
 
-function WorldMapBackground() {
+function WorldMapBackground({ darkMode }: { darkMode: boolean }) {
   return (
     <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
-      <div className="absolute inset-0 bg-[#f8fafc]" />
+      <div className={`absolute inset-0 transition-colors duration-300 ${darkMode ? "bg-[#111827]" : "bg-[#f8fafc]"}`} />
+      <div
+        className={`absolute left-[8%] top-[18%] h-72 w-72 rounded-full blur-3xl transition-all duration-300 ${
+          darkMode ? "bg-[#19d3cf]/[0.035]" : "bg-transparent"
+        }`}
+      />
+      <div
+        className={`absolute bottom-[10%] right-[8%] h-80 w-80 rounded-full blur-3xl transition-all duration-300 ${
+          darkMode ? "bg-[#ff2fa8]/[0.025]" : "bg-transparent"
+        }`}
+      />
     </div>
   );
 }
