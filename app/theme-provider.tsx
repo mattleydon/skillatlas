@@ -182,8 +182,12 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
 
         html.skillatlas-dark .skillatlas-theme-switch {
           background: #172838 !important;
-          border-color: var(--skillatlas-turquoise);
+          border-color: #f8fafc;
           box-shadow: 0 8px 20px rgba(0, 0, 0, 0.22);
+        }
+
+        html.skillatlas-dark .skillatlas-theme-switch:hover {
+          border-color: var(--skillatlas-turquoise);
         }
 
         html.skillatlas-dark .skillatlas-theme-sun {
