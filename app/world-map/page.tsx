@@ -916,17 +916,22 @@ export default function WorldMapPage() {
                       else rankingRowRefs.current.delete(row.normalisedName);
                     }}
                     onClick={() => selectRow(row)}
-                    className={`flex w-full items-center justify-between rounded-2xl px-4 py-3 text-left transition-all duration-300 ${
+                    className={`flex w-full min-w-0 items-center justify-between gap-3 rounded-2xl px-4 py-3 text-left transition-all duration-300 ${
                       selectedCountryKey === row.normalisedName
                         ? "bg-[#19d3cf] text-white shadow-md"
                         : "bg-gray-50 text-gray-700 hover:bg-[#ff2fa8]/8"
                     }`}
                   >
-                    <span className="flex items-center gap-3">
-                      <span className={selectedCountryKey === row.normalisedName ? "font-black text-white" : "font-black text-[#ff2fa8]"}>{index + 1}</span>
-                      <span className="font-black">{row.name}</span>
+                    <span className="flex min-w-0 flex-1 items-center gap-3">
+                      <span className={`shrink-0 font-black ${selectedCountryKey === row.normalisedName ? "text-white" : "text-[#ff2fa8]"}`}>{index + 1}</span>
+                      <span className="min-w-0 flex-1 font-black leading-tight">{row.name}</span>
                     </span>
-                    <span className={`text-sm font-black ${top100DisplayColor(heatMode, selectedCountryKey === row.normalisedName)}`}>
+                    <span
+                      className={`ml-3 flex min-w-[52px] shrink-0 items-center justify-end whitespace-nowrap text-right text-sm font-black tabular-nums leading-none ${top100DisplayColor(
+                        heatMode,
+                        selectedCountryKey === row.normalisedName
+                      )}`}
+                    >
                       {top100DisplayValue(row, heatMode)}
                     </span>
                   </button>
