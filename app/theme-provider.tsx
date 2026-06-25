@@ -15,6 +15,7 @@ function applyTheme(darkMode: boolean) {
 export default function ThemeProvider({ children }: { children: ReactNode }) {
   const [darkMode, setDarkMode] = useState(false);
   const [ready, setReady] = useState(false);
+  const [headerShrunk, setHeaderShrunk] = useState(false);
 
   useEffect(() => {
     const savedTheme = window.localStorage.getItem(THEME_KEY);
@@ -24,6 +25,17 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
     setDarkMode(shouldUseDark);
     applyTheme(shouldUseDark);
     setReady(true);
+  }, []);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setHeaderShrunk(window.scrollY > 24);
+    };
+
+    handleScroll();
+    window.addEventListener("scroll", handleScroll, { passive: true });
+
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   function toggleTheme() {
@@ -111,15 +123,15 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
 
         .skillatlas-theme-switch {
           position: fixed;
-          right: 76px;
+          right: 88px;
           top: 12px;
           z-index: 100;
-          width: 58px;
-          height: 30px;
+          width: 46px;
+          height: 24px;
           border-radius: 999px;
           border: 2px solid #0f2530;
           background: rgba(255, 255, 255, 0.96);
-          box-shadow: 0 8px 22px rgba(15, 23, 42, 0.12);
+          box-shadow: 0 8px 20px rgba(15, 23, 42, 0.12);
           transition:
             background-color 260ms ease,
             border-color 260ms ease,
@@ -136,20 +148,20 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
           position: absolute;
           top: 50%;
           transform: translateY(-50%);
-          font-size: 14px;
+          font-size: 11px;
           line-height: 1;
           transition: opacity 220ms ease;
           pointer-events: none;
         }
 
         .skillatlas-theme-sun {
-          left: 9px;
+          left: 7px;
           color: #facc15;
           opacity: 1;
         }
 
         .skillatlas-theme-moon {
-          right: 9px;
+          right: 7px;
           color: #facc15;
           opacity: 0;
         }
@@ -157,21 +169,21 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
         .skillatlas-theme-knob {
           position: absolute;
           left: 3px;
-          top: 3px;
-          width: 20px;
-          height: 20px;
+          top: 2px;
+          width: 16px;
+          height: 16px;
           border-radius: 999px;
-          background: #facc15 !important;
-          box-shadow: 0 2px 8px rgba(15, 23, 42, 0.22);
+          background: var(--skillatlas-charcoal) !important;
+          box-shadow: 0 2px 7px rgba(15, 23, 42, 0.22);
           transition:
             transform 260ms ease,
             background-color 260ms ease;
         }
 
         html.skillatlas-dark .skillatlas-theme-switch {
-          background: #152734 !important;
+          background: #172838 !important;
           border-color: var(--skillatlas-turquoise);
-          box-shadow: 0 8px 22px rgba(0, 0, 0, 0.22);
+          box-shadow: 0 8px 20px rgba(0, 0, 0, 0.22);
         }
 
         html.skillatlas-dark .skillatlas-theme-sun {
@@ -183,7 +195,7 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
         }
 
         html.skillatlas-dark .skillatlas-theme-knob {
-          transform: translateX(28px);
+          transform: translateX(20px);
           background: #f8fafc !important;
         }
 
@@ -198,7 +210,9 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
       <button
         type="button"
         onClick={toggleTheme}
-        className={`skillatlas-theme-switch ${ready ? "opacity-100" : "opacity-0"}`}
+        className={`skillatlas-theme-switch ${
+          ready && !headerShrunk ? "opacity-100" : "pointer-events-none -translate-y-2 opacity-0"
+        }`}
         aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
         aria-pressed={darkMode}
       >
