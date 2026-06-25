@@ -1056,11 +1056,20 @@ function sevenDaySparklinePath(row: RankedCountry) {
     .join(" ");
 }
 
+function miniStatValueSize(value: string, compact: boolean) {
+  if (!compact) return "text-xl";
+
+  if (value.length <= 4) return "text-[1.32rem] md:text-[1.48rem]";
+  if (value.length <= 9) return "text-[1.12rem] md:text-[1.26rem]";
+  if (value.length <= 14) return "text-[0.98rem] md:text-[1.10rem]";
+  return "text-[0.86rem] md:text-[0.96rem]";
+}
+
 function MiniChartStat({ label, row }: { label: string; row?: RankedCountry }) {
   return (
     <div className="flex h-full flex-col justify-center rounded-2xl border border-[#ff2fa8]/30 bg-white/90 p-5 shadow-sm backdrop-blur">
-      <p className="text-[12px] font-black uppercase tracking-[0.12em] text-gray-500">{label}</p>
-      <svg viewBox="0 0 100 34" className="mt-3 h-14 w-full overflow-visible">
+      <p className="text-[11px] font-black uppercase tracking-[0.12em] text-gray-500">{label}</p>
+      <svg viewBox="0 0 100 34" className="mt-3 h-12 w-full overflow-visible">
         {row && <path d={sevenDaySparklinePath(row)} fill="none" stroke="#19d3cf" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />}
       </svg>
     </div>
@@ -1069,9 +1078,13 @@ function MiniChartStat({ label, row }: { label: string; row?: RankedCountry }) {
 
 function MiniStat({ label, value, compact = false, colorClass = "text-[#19d3cf]" }: { label: string; value: string; compact?: boolean; colorClass?: string }) {
   return (
-    <div className={`flex h-full flex-col justify-center rounded-2xl border border-[#ff2fa8]/30 bg-white/90 shadow-sm backdrop-blur ${compact ? "p-5" : "p-5"}`}>
-      <p className="text-[12px] font-black uppercase tracking-[0.12em] text-gray-500">{label}</p>
-      <p className={`mt-3 break-words font-black leading-tight ${compact ? "text-[1.55rem] md:text-[1.75rem]" : "text-xl"} ${colorClass}`}>{value}</p>
+    <div className={`flex h-full flex-col justify-center rounded-2xl border border-[#ff2fa8]/30 bg-white/90 shadow-sm backdrop-blur ${compact ? "p-4" : "p-5"}`}>
+      <p className="text-[11px] font-black uppercase tracking-[0.12em] text-gray-500">{label}</p>
+      <p
+        className={`mt-3 max-w-full whitespace-normal break-words font-black leading-[1.08] ${miniStatValueSize(value, compact)} ${colorClass}`}
+      >
+        {value}
+      </p>
     </div>
   );
 }
