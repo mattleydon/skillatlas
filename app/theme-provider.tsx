@@ -12,6 +12,30 @@ function applyTheme(darkMode: boolean) {
   window.dispatchEvent(new CustomEvent("skillatlas-theme-change", { detail: { darkMode } }));
 }
 
+
+function normaliseHref(path: string) {
+  if (!path) return "/";
+  const withoutOrigin = path.replace(/^https?:\/\/[^/]+/i, "");
+  const cleanPath = withoutOrigin.split("?")[0].split("#")[0];
+  if (!cleanPath || cleanPath === "") return "/";
+  return cleanPath.endsWith("/") && cleanPath.length > 1 ? cleanPath.slice(0, -1) : cleanPath;
+}
+
+function updateActiveHeaderNavigation() {
+  const currentPath = normaliseHref(window.location.pathname);
+  const links = Array.from(document.querySelectorAll<HTMLAnchorElement>("header nav a[href]"));
+
+  links.forEach((link) => {
+    const linkPath = normaliseHref(link.getAttribute("href") ?? "");
+    const isRankings = currentPath === "/" && linkPath === "/";
+    const isOtherPage = linkPath !== "/" && currentPath.startsWith(linkPath);
+    const isActive = isRankings || isOtherPage;
+
+    link.classList.toggle("skillatlas-active-nav", isActive);
+    link.setAttribute("aria-current", isActive ? "page" : "false");
+  });
+}
+
 export default function ThemeProvider({ children }: { children: ReactNode }) {
   const [darkMode, setDarkMode] = useState(false);
   const [ready, setReady] = useState(false);
@@ -36,6 +60,30 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
     window.addEventListener("scroll", handleScroll, { passive: true });
 
     return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  useEffect(() => {
+    updateActiveHeaderNavigation();
+
+    const observer = new MutationObserver(() => updateActiveHeaderNavigation());
+    observer.observe(document.body, { childList: true, subtree: true });
+
+    window.addEventListener("popstate", updateActiveHeaderNavigation);
+    window.addEventListener("skillatlas-theme-change", updateActiveHeaderNavigation);
+
+    const handleClick = () => {
+      window.setTimeout(updateActiveHeaderNavigation, 0);
+      window.setTimeout(updateActiveHeaderNavigation, 120);
+    };
+
+    document.addEventListener("click", handleClick);
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("popstate", updateActiveHeaderNavigation);
+      window.removeEventListener("skillatlas-theme-change", updateActiveHeaderNavigation);
+      document.removeEventListener("click", handleClick);
+    };
   }, []);
 
   function toggleTheme() {
@@ -119,6 +167,15 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
 
         html.skillatlas-dark canvas {
           filter: drop-shadow(0 0 34px rgba(25, 211, 207, 0.08));
+        }
+
+
+        header nav a.skillatlas-active-nav {
+          color: var(--skillatlas-turquoise) !important;
+        }
+
+        header nav a[aria-current="page"] {
+          color: var(--skillatlas-turquoise) !important;
         }
 
         .skillatlas-theme-switch {
