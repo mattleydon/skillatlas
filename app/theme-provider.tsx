@@ -8,11 +8,16 @@ const LIGHT_TITLE_LOGO_SRC = "/skillatlas-title.png";
 const DARK_TITLE_LOGO_SRC = "/skillatlas-title-dark.png";
 
 function applyTheme(darkMode: boolean) {
+  document.documentElement.classList.add("skillatlas-theme-changing");
   document.documentElement.classList.toggle("skillatlas-dark", darkMode);
   document.documentElement.style.colorScheme = darkMode ? "dark" : "light";
   window.localStorage.setItem(THEME_KEY, darkMode ? "dark" : "light");
   swapTitleLogos(darkMode);
   window.dispatchEvent(new CustomEvent("skillatlas-theme-change", { detail: { darkMode } }));
+
+  window.setTimeout(() => {
+    document.documentElement.classList.remove("skillatlas-theme-changing");
+  }, 340);
 }
 
 
@@ -226,6 +231,29 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
           color: var(--skillatlas-turquoise) !important;
         }
 
+
+
+        html.skillatlas-theme-changing *,
+        html.skillatlas-theme-changing *::before,
+        html.skillatlas-theme-changing *::after {
+          transition-delay: 0ms !important;
+          transition-duration: 260ms !important;
+        }
+
+        html.skillatlas-theme-changing [class*="duration-500"],
+        html.skillatlas-theme-changing [class*="duration-700"],
+        html.skillatlas-theme-changing [class*="duration-1000"] {
+          transition-duration: 260ms !important;
+        }
+
+        html.skillatlas-theme-changing [class*="bg-white"],
+        html.skillatlas-theme-changing [class*="bg-gray-50"],
+        html.skillatlas-theme-changing [class*="bg-[#F8FAFC]"],
+        html.skillatlas-theme-changing [class*="bg-[#f8fafc]"],
+        html.skillatlas-theme-changing [class*="text-gray-"],
+        html.skillatlas-theme-changing [class*="text-[#111827]"] {
+          transition-property: background-color, border-color, color, opacity, box-shadow, filter, transform !important;
+        }
 
         .skillatlas-title-logo-transition {
           transition:
