@@ -848,8 +848,8 @@ export default function WorldMapPage() {
           </p>
         </div>
 
-        <div className="grid gap-5 xl:grid-cols-[minmax(0,1.02fr)_minmax(0,2.25fr)_minmax(0,1.05fr)]">
-          <aside className="min-w-0 rounded-3xl border border-[#ff2fa8]/40 bg-white/92 p-5 shadow-sm backdrop-blur">
+        <div className="grid gap-5 xl:grid-cols-[1.02fr_minmax(0,2.25fr)_1.05fr]">
+          <aside className="rounded-3xl border border-[#ff2fa8]/40 bg-white/92 p-5 shadow-sm backdrop-blur">
             <p className="mb-4 text-[11px] font-black uppercase tracking-[0.22em] text-gray-500">Select Game</p>
 
             <div className="grid gap-3">
@@ -950,10 +950,10 @@ export default function WorldMapPage() {
           </section>
 
           <aside className="grid min-w-0 gap-4">
-            <div className="rounded-3xl border border-[#ff2fa8]/40 bg-white/92 p-5 shadow-sm backdrop-blur">
+            <div className="min-w-0 overflow-hidden rounded-3xl border border-[#ff2fa8]/40 bg-white/92 p-5 shadow-sm backdrop-blur">
               <p className="mb-4 text-[11px] font-black uppercase tracking-[0.22em] text-[#19d3cf]">Top 100 Countries</p>
 
-              <div className="max-h-[360px] space-y-3 overflow-y-auto pr-1">
+              <div className="max-h-[360px] min-w-0 space-y-3 overflow-y-auto pr-1">
                 {top100Rows.map((row, index) => (
                   <button
                     key={row.normalisedName}
@@ -962,7 +962,7 @@ export default function WorldMapPage() {
                       else rankingRowRefs.current.delete(row.normalisedName);
                     }}
                     onClick={() => selectRow(row)}
-                    className={`flex w-full min-w-0 items-center justify-between gap-3 rounded-2xl px-4 py-3 text-left transition-all duration-300 ${
+                    className={`flex w-full min-w-0 max-w-full items-center justify-between gap-3 overflow-hidden rounded-2xl px-4 py-3 text-left transition-all duration-300 ${
                       selectedCountryKey === row.normalisedName
                         ? "bg-[#19d3cf] text-white shadow-md"
                         : "bg-gray-50 text-gray-700 hover:bg-[#ff2fa8]/8"
@@ -970,7 +970,7 @@ export default function WorldMapPage() {
                   >
                     <span className="flex min-w-0 flex-1 items-center gap-3">
                       <span className={`shrink-0 font-black ${selectedCountryKey === row.normalisedName ? "text-white" : "text-[#ff2fa8]"}`}>{index + 1}</span>
-                      <span className="min-w-0 flex-1 break-words font-black leading-tight">{row.name}</span>
+                      <span className="min-w-0 flex-1 overflow-hidden break-words font-black leading-tight">{row.name}</span>
                     </span>
                     <span
                       className={`ml-3 flex min-w-[52px] shrink-0 items-center justify-end whitespace-nowrap text-right text-sm font-black tabular-nums leading-none ${top100DisplayColor(
@@ -985,7 +985,7 @@ export default function WorldMapPage() {
               </div>
             </div>
 
-            <div className="rounded-3xl border border-[#ff2fa8]/40 bg-white/92 p-5 shadow-sm backdrop-blur">
+            <div className="min-w-0 overflow-hidden rounded-3xl border border-[#ff2fa8]/40 bg-white/92 p-5 shadow-sm backdrop-blur">
               <p className="mb-2 text-[11px] font-black uppercase tracking-[0.22em] text-[#ff2fa8]">Country Detail</p>
               <h2 className="text-2xl font-black">{selectedRow?.name ?? "Loading"}</h2>
 
