@@ -1,19 +1,43 @@
 "use client";
 
 import type { FormEvent, ReactNode } from "react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { flushSync } from "react-dom";
 import { usePathname } from "next/navigation";
+import { createClient } from "@supabase/supabase-js";
 
 const THEME_KEY = "skillatlas-theme";
 const LIGHT_TITLE_LOGO_SRC = "/skillatlas-title.png";
 const DARK_TITLE_LOGO_SRC = "/skillatlas-title-dark.png";
 
-type ChatMessage = {
-  id: number;
-  sender: "assistant" | "visitor";
-  text: string;
+type PageComment = {
+  id: string;
+  page_path: string;
+  display_name: string;
+  body: string;
+  created_at: string;
 };
+
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
+const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "";
+
+const pageCommentsClient =
+  SUPABASE_URL && SUPABASE_ANON_KEY ? createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+
+function displayPathName(pathname: string) {
+  if (pathname === "/") return "Rankings";
+
+  return pathname
+    .split("/")
+    .filter(Boolean)
+    .map((part) =>
+      part
+        .split("-")
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(" ")
+    )
+    .join(" / ");
+}
 
 function normaliseHref(path: string) {
   if (!path) return "/";
@@ -95,14 +119,13 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
 
   const [darkMode, setDarkMode] = useState(false);
   const [chatOpen, setChatOpen] = useState(false);
+  const [displayName, setDisplayName] = useState("Visitor");
   const [chatInput, setChatInput] = useState("");
-  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
-    {
-      id: 1,
-      sender: "assistant",
-      text: "Need help exploring SkillAtlas? Drop a message here.",
-    },
-  ]);
+  const [comments, setComments] = useState<PageComment[]>([]);
+  const [commentsLoading, setCommentsLoading] = useState(false);
+  const [commentsError, setCommentsError] = useState("");
+  const currentPagePath = pathname || "/";
+  const currentPageName = useMemo(() => displayPathName(currentPagePath), [currentPagePath]);
   const [ready, setReady] = useState(false);
   const [headerShrunk, setHeaderShrunk] = useState(false);
 
@@ -156,6 +179,78 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
+  useEffect(() => {
+    if (hideLiveChat) {
+      setChatOpen(false);
+      return;
+    }
+
+    if (!pageCommentsClient) {
+      setComments([]);
+      setCommentsLoading(false);
+      setCommentsError("Connect Supabase to make this comment section live for everyone.");
+      return;
+    }
+
+    let mounted = true;
+
+    const addComment = (comment: PageComment) => {
+      setComments((currentComments) => {
+        if (currentComments.some((currentComment) => currentComment.id === comment.id)) return currentComments;
+
+        return [...currentComments, comment]
+          .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
+          .slice(-80);
+      });
+    };
+
+    async function loadComments() {
+      setCommentsLoading(true);
+      setCommentsError("");
+
+      const { data, error } = await pageCommentsClient
+        .from("skillatlas_page_comments")
+        .select("id,page_path,display_name,body,created_at")
+        .eq("page_path", currentPagePath)
+        .order("created_at", { ascending: true })
+        .limit(80);
+
+      if (!mounted) return;
+
+      if (error) {
+        setComments([]);
+        setCommentsError("Could not load page comments yet.");
+      } else {
+        setComments((data ?? []) as PageComment[]);
+      }
+
+      setCommentsLoading(false);
+    }
+
+    loadComments();
+
+    const channel = pageCommentsClient
+      .channel(`skillatlas-page-comments:${currentPagePath}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "skillatlas_page_comments",
+          filter: `page_path=eq.${currentPagePath}`,
+        },
+        (payload) => {
+          addComment(payload.new as PageComment);
+        }
+      )
+      .subscribe();
+
+    return () => {
+      mounted = false;
+      pageCommentsClient.removeChannel(channel);
+    };
+  }, [currentPagePath, hideLiveChat]);
+
   function setTheme(nextDarkMode: boolean) {
     const updateThemeNow = () => {
       flushSync(() => {
@@ -186,26 +281,44 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
     setTheme(!document.documentElement.classList.contains("skillatlas-dark"));
   }
 
-  function handleChatSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleChatSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    const trimmedMessage = chatInput.trim();
+    const trimmedName = displayName.trim().slice(0, 32) || "Visitor";
+    const trimmedMessage = chatInput.trim().slice(0, 500);
+
     if (!trimmedMessage) return;
 
-    setChatMessages((messages) => [
-      ...messages,
-      {
-        id: Date.now(),
-        sender: "visitor",
-        text: trimmedMessage,
-      },
-      {
-        id: Date.now() + 1,
-        sender: "assistant",
-        text: "Thanks, your message has been noted. Live replies can be connected here later.",
-      },
-    ]);
+    if (!pageCommentsClient) {
+      setCommentsError("Supabase is not connected yet, so comments are not live.");
+      return;
+    }
 
+    setCommentsError("");
+
+    const { data, error } = await pageCommentsClient
+      .from("skillatlas_page_comments")
+      .insert({
+        page_path: currentPagePath,
+        display_name: trimmedName,
+        body: trimmedMessage,
+      })
+      .select("id,page_path,display_name,body,created_at")
+      .single();
+
+    if (error) {
+      setCommentsError("Could not send your comment. Try again in a moment.");
+      return;
+    }
+
+    if (data) {
+      setComments((currentComments) => {
+        if (currentComments.some((comment) => comment.id === data.id)) return currentComments;
+        return [...currentComments, data as PageComment].slice(-80);
+      });
+    }
+
+    setDisplayName(trimmedName);
     setChatInput("");
   }
 
@@ -538,17 +651,51 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
           color: #ffffff;
         }
 
+        .skillatlas-live-chat-meta {
+          margin: 0 0 4px;
+          font-size: 10px;
+          font-weight: 900;
+          letter-spacing: 0.12em;
+          text-transform: uppercase;
+          opacity: 0.76;
+        }
+
+        .skillatlas-live-chat-empty,
+        .skillatlas-live-chat-error {
+          margin: 0;
+          border-radius: 16px;
+          padding: 10px 12px;
+          font-size: 12px;
+          font-weight: 800;
+          line-height: 1.35;
+        }
+
+        .skillatlas-live-chat-empty {
+          background: rgba(25, 211, 207, 0.10);
+          color: #334155;
+        }
+
+        .skillatlas-live-chat-error {
+          background: rgba(255, 47, 168, 0.10);
+          color: #be185d;
+        }
+
         .skillatlas-live-chat-form {
-          display: flex;
+          display: grid;
           gap: 8px;
           padding: 12px;
           border-top: 1px solid rgba(255, 47, 168, 0.16);
           background: rgba(248, 250, 252, 0.86);
         }
 
-        .skillatlas-live-chat-input {
+        .skillatlas-live-chat-input-row {
+          display: flex;
+          gap: 8px;
+        }
+
+        .skillatlas-live-chat-input,
+        .skillatlas-live-chat-name {
           min-width: 0;
-          flex: 1;
           border: 1px solid rgba(15, 23, 42, 0.12);
           border-radius: 999px;
           background: #ffffff;
@@ -559,7 +706,16 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
           outline: none;
         }
 
-        .skillatlas-live-chat-input:focus {
+        .skillatlas-live-chat-name {
+          width: 100%;
+        }
+
+        .skillatlas-live-chat-input {
+          flex: 1;
+        }
+
+        .skillatlas-live-chat-input:focus,
+        .skillatlas-live-chat-name:focus {
           border-color: var(--skillatlas-turquoise);
           box-shadow: 0 0 0 3px rgba(25, 211, 207, 0.14);
         }
@@ -649,10 +805,21 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
           background: rgba(39, 51, 65, 0.86);
         }
 
-        html.skillatlas-dark .skillatlas-live-chat-input {
+        html.skillatlas-dark .skillatlas-live-chat-input,
+        html.skillatlas-dark .skillatlas-live-chat-name {
           border-color: rgba(203, 213, 225, 0.24);
           background: rgba(32, 43, 55, 0.96);
           color: var(--skillatlas-text-dark);
+        }
+
+        html.skillatlas-dark .skillatlas-live-chat-empty {
+          background: rgba(25, 211, 207, 0.10);
+          color: var(--skillatlas-muted-dark);
+        }
+
+        html.skillatlas-dark .skillatlas-live-chat-error {
+          background: rgba(255, 47, 168, 0.12);
+          color: #ff8ccc;
         }
 
         @keyframes skillatlas-chat-rise {
@@ -716,42 +883,63 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
       {!hideLiveChat && (
         <div className="skillatlas-live-chat">
           {chatOpen && (
-            <section className="skillatlas-live-chat-panel" aria-label="SkillAtlas live chat">
+            <section className="skillatlas-live-chat-panel" aria-label="SkillAtlas page comments">
               <div className="skillatlas-live-chat-header">
                 <div>
-                  <p className="skillatlas-live-chat-kicker">Live Chat</p>
-                  <p className="skillatlas-live-chat-title">Ask SkillAtlas</p>
+                  <p className="skillatlas-live-chat-kicker">Live Comments</p>
+                  <p className="skillatlas-live-chat-title">{currentPageName}</p>
                 </div>
 
                 <button
                   type="button"
                   className="skillatlas-live-chat-close"
                   onClick={() => setChatOpen(false)}
-                  aria-label="Close live chat"
+                  aria-label="Close page comments"
                 >
                   ×
                 </button>
               </div>
 
               <div className="skillatlas-live-chat-body">
-                {chatMessages.map((message) => (
-                  <div key={message.id} className={`skillatlas-live-chat-message ${message.sender}`}>
-                    {message.text}
+                {commentsLoading && <p className="skillatlas-live-chat-empty">Loading comments...</p>}
+
+                {!commentsLoading && comments.length === 0 && !commentsError && (
+                  <p className="skillatlas-live-chat-empty">No comments on this page yet. Be first through the portal.</p>
+                )}
+
+                {comments.map((comment) => (
+                  <div key={comment.id} className="skillatlas-live-chat-message assistant">
+                    <p className="skillatlas-live-chat-meta">{comment.display_name}</p>
+                    {comment.body}
                   </div>
                 ))}
+
+                {commentsError && <p className="skillatlas-live-chat-error">{commentsError}</p>}
               </div>
 
               <form className="skillatlas-live-chat-form" onSubmit={handleChatSubmit}>
                 <input
-                  className="skillatlas-live-chat-input"
-                  value={chatInput}
-                  onChange={(event) => setChatInput(event.target.value)}
-                  placeholder="Type your message..."
-                  aria-label="Live chat message"
+                  className="skillatlas-live-chat-name"
+                  value={displayName}
+                  onChange={(event) => setDisplayName(event.target.value)}
+                  placeholder="Name"
+                  maxLength={32}
+                  aria-label="Display name"
                 />
-                <button type="submit" className="skillatlas-live-chat-send">
-                  Send
-                </button>
+
+                <div className="skillatlas-live-chat-input-row">
+                  <input
+                    className="skillatlas-live-chat-input"
+                    value={chatInput}
+                    onChange={(event) => setChatInput(event.target.value)}
+                    placeholder="Add a comment..."
+                    maxLength={500}
+                    aria-label="Page comment"
+                  />
+                  <button type="submit" className="skillatlas-live-chat-send">
+                    Send
+                  </button>
+                </div>
               </form>
             </section>
           )}
@@ -760,7 +948,7 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
             type="button"
             className={`skillatlas-live-chat-toggle ${chatOpen ? "open" : ""}`}
             onClick={() => setChatOpen((open) => !open)}
-            aria-label={chatOpen ? "Close live chat" : "Open live chat"}
+            aria-label={chatOpen ? "Close page comments" : "Open page comments"}
             aria-expanded={chatOpen}
           >
             <span className="skillatlas-live-chat-arrow">➜</span>
