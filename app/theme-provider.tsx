@@ -185,7 +185,9 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
       return;
     }
 
-    if (!pageCommentsClient) {
+    const client = pageCommentsClient;
+
+    if (!client) {
       setComments([]);
       setCommentsLoading(false);
       setCommentsError("Connect Supabase to make this comment section live for everyone.");
@@ -208,7 +210,7 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
       setCommentsLoading(true);
       setCommentsError("");
 
-      const { data, error } = await pageCommentsClient
+      const { data, error } = await client
         .from("skillatlas_page_comments")
         .select("id,page_path,display_name,body,created_at")
         .eq("page_path", currentPagePath)
@@ -229,7 +231,7 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
 
     loadComments();
 
-    const channel = pageCommentsClient
+    const channel = client
       .channel(`skillatlas-page-comments:${currentPagePath}`)
       .on(
         "postgres_changes",
@@ -247,7 +249,7 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
 
     return () => {
       mounted = false;
-      pageCommentsClient.removeChannel(channel);
+      client.removeChannel(channel);
     };
   }, [currentPagePath, hideLiveChat]);
 
@@ -289,14 +291,16 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
 
     if (!trimmedMessage) return;
 
-    if (!pageCommentsClient) {
+    const client = pageCommentsClient;
+
+    if (!client) {
       setCommentsError("Supabase is not connected yet, so comments are not live.");
       return;
     }
 
     setCommentsError("");
 
-    const { data, error } = await pageCommentsClient
+    const { data, error } = await client
       .from("skillatlas_page_comments")
       .insert({
         page_path: currentPagePath,
