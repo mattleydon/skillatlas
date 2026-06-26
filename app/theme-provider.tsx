@@ -17,7 +17,7 @@ function applyTheme(darkMode: boolean) {
 
   window.setTimeout(() => {
     document.documentElement.classList.remove("skillatlas-theme-changing");
-  }, 340);
+  }, 620);
 }
 
 
@@ -81,7 +81,7 @@ function swapTitleLogos(darkMode: boolean, animated = true) {
       image.removeAttribute("srcset");
       image.src = targetSrc;
       image.classList.remove("skillatlas-title-logo-fade-out");
-    }, 135);
+    }, 190);
   });
 }
 
@@ -233,17 +233,49 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
 
 
 
+        html,
+        body,
+        main,
+        header,
+        section,
+        aside,
+        nav,
+        article,
+        div,
+        button,
+        a,
+        p,
+        h1,
+        h2,
+        h3,
+        span,
+        table,
+        thead,
+        tbody,
+        tr,
+        th,
+        td,
+        input,
+        textarea,
+        select,
+        canvas {
+          transition-property: background-color, background-image, border-color, color, fill, stroke, opacity, box-shadow, filter, transform;
+          transition-duration: 520ms;
+          transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
         html.skillatlas-theme-changing *,
         html.skillatlas-theme-changing *::before,
         html.skillatlas-theme-changing *::after {
           transition-delay: 0ms !important;
-          transition-duration: 260ms !important;
+          transition-duration: 520ms !important;
+          transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1) !important;
         }
 
         html.skillatlas-theme-changing [class*="duration-500"],
         html.skillatlas-theme-changing [class*="duration-700"],
         html.skillatlas-theme-changing [class*="duration-1000"] {
-          transition-duration: 260ms !important;
+          transition-duration: 520ms !important;
         }
 
         html.skillatlas-theme-changing [class*="bg-white"],
@@ -252,20 +284,21 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
         html.skillatlas-theme-changing [class*="bg-[#f8fafc]"],
         html.skillatlas-theme-changing [class*="text-gray-"],
         html.skillatlas-theme-changing [class*="text-[#111827]"] {
-          transition-property: background-color, border-color, color, opacity, box-shadow, filter, transform !important;
+          transition-property: background-color, background-image, border-color, color, opacity, box-shadow, filter, transform !important;
         }
 
         .skillatlas-title-logo-transition {
           transition:
-            opacity 270ms ease,
-            filter 270ms ease,
-            transform 270ms ease;
+            opacity 380ms cubic-bezier(0.22, 1, 0.36, 1),
+            filter 380ms cubic-bezier(0.22, 1, 0.36, 1),
+            transform 380ms cubic-bezier(0.22, 1, 0.36, 1);
+          will-change: opacity, filter, transform;
         }
 
         .skillatlas-title-logo-fade-out {
           opacity: 0;
-          filter: blur(2px);
-          transform: translateY(-1px);
+          filter: blur(1.5px);
+          transform: translateY(-1px) scale(0.992);
         }
 
         .skillatlas-theme-switch {
@@ -280,10 +313,11 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
           background: rgba(255, 255, 255, 0.96);
           box-shadow: 0 8px 20px rgba(15, 23, 42, 0.12);
           transition:
-            background-color 260ms ease,
-            border-color 260ms ease,
-            opacity 260ms ease,
-            transform 260ms ease;
+            background-color 420ms cubic-bezier(0.22, 1, 0.36, 1),
+            border-color 420ms cubic-bezier(0.22, 1, 0.36, 1),
+            opacity 420ms cubic-bezier(0.22, 1, 0.36, 1),
+            transform 420ms cubic-bezier(0.22, 1, 0.36, 1),
+            box-shadow 420ms cubic-bezier(0.22, 1, 0.36, 1);
         }
 
         .skillatlas-theme-switch:hover {
@@ -297,7 +331,7 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
           transform: translateY(-50%);
           font-size: 11px;
           line-height: 1;
-          transition: opacity 220ms ease;
+          transition: opacity 360ms cubic-bezier(0.22, 1, 0.36, 1);
           pointer-events: none;
         }
 
@@ -323,8 +357,9 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
           background: var(--skillatlas-charcoal) !important;
           box-shadow: 0 2px 7px rgba(15, 23, 42, 0.22);
           transition:
-            transform 260ms ease,
-            background-color 260ms ease;
+            transform 420ms cubic-bezier(0.22, 1, 0.36, 1),
+            background-color 420ms cubic-bezier(0.22, 1, 0.36, 1),
+            box-shadow 420ms cubic-bezier(0.22, 1, 0.36, 1);
         }
 
         html.skillatlas-dark .skillatlas-theme-switch {
@@ -348,6 +383,43 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
         html.skillatlas-dark .skillatlas-theme-knob {
           transform: translateX(20px);
           background: #f8fafc !important;
+        }
+
+
+        @media (prefers-reduced-motion: reduce) {
+          html,
+          body,
+          main,
+          header,
+          section,
+          aside,
+          nav,
+          article,
+          div,
+          button,
+          a,
+          p,
+          h1,
+          h2,
+          h3,
+          span,
+          table,
+          thead,
+          tbody,
+          tr,
+          th,
+          td,
+          input,
+          textarea,
+          select,
+          canvas,
+          *,
+          *::before,
+          *::after {
+            transition-duration: 0.01ms !important;
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+          }
         }
 
         @media (max-width: 900px) {
