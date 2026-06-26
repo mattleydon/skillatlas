@@ -899,8 +899,8 @@ export default function WorldMapPage() {
             </div>
           </aside>
 
-          <section className="relative min-h-[790px] overflow-hidden rounded-3xl border border-[#ff2fa8]/40 bg-white/88 shadow-sm backdrop-blur">
-            <div className="absolute left-6 right-6 top-5 z-20">
+          <section className="relative h-[790px] min-h-[790px] max-h-[790px] self-start overflow-hidden rounded-3xl border border-[#ff2fa8]/40 bg-white/88 shadow-sm backdrop-blur">
+            <div className="absolute left-6 right-6 top-5 z-20 min-h-[46px]">
               <p className="text-[11px] font-black uppercase tracking-[0.22em] text-[#19d3cf]">{gameLabels[selectedGame]}</p>
               <p className="mt-1 max-w-full text-sm font-semibold leading-snug text-gray-500">
                 {loadState === "ready" ? activeHeatMode.description : "Loading country outlines"}
