@@ -132,22 +132,32 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
 
   function setTheme(nextDarkMode: boolean) {
     const updateThemeNow = () => {
-      flushSync(() => setDarkMode(nextDarkMode));
+      flushSync(() => {
+        setDarkMode(nextDarkMode);
+      });
+
       applyTheme(nextDarkMode);
     };
 
-    const startViewTransition = (document as ViewTransitionDocument).startViewTransition;
+    const canUseViewTransition =
+      Boolean((document as ViewTransitionDocument).startViewTransition) &&
+      !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-    if (startViewTransition && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      startViewTransition(updateThemeNow);
-      return;
+    if (canUseViewTransition) {
+      try {
+        (document as ViewTransitionDocument).startViewTransition?.(updateThemeNow);
+        return;
+      } catch {
+        updateThemeNow();
+        return;
+      }
     }
 
     updateThemeNow();
   }
 
   function toggleTheme() {
-    setTheme(!darkMode);
+    setTheme(!document.documentElement.classList.contains("skillatlas-dark"));
   }
 
   return (
@@ -233,11 +243,18 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
           color: var(--skillatlas-turquoise) !important;
         }
 
+        ::view-transition-group(root) {
+          animation-duration: 340ms;
+          animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+          pointer-events: none;
+        }
+
         ::view-transition-old(root),
         ::view-transition-new(root) {
           animation-duration: 340ms;
           animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
           mix-blend-mode: normal;
+          pointer-events: none;
         }
 
         ::view-transition-old(root) {
