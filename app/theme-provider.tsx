@@ -4,11 +4,14 @@ import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
 
 const THEME_KEY = "skillatlas-theme";
+const LIGHT_TITLE_LOGO_SRC = "/skillatlas-title.png";
+const DARK_TITLE_LOGO_SRC = "/skillatlas-title-dark.png";
 
 function applyTheme(darkMode: boolean) {
   document.documentElement.classList.toggle("skillatlas-dark", darkMode);
   document.documentElement.style.colorScheme = darkMode ? "dark" : "light";
   window.localStorage.setItem(THEME_KEY, darkMode ? "dark" : "light");
+  swapTitleLogos(darkMode);
   window.dispatchEvent(new CustomEvent("skillatlas-theme-change", { detail: { darkMode } }));
 }
 
@@ -36,6 +39,47 @@ function updateActiveHeaderNavigation() {
   });
 }
 
+
+function isSkillAtlasTitleImage(image: HTMLImageElement) {
+  const alt = image.getAttribute("alt")?.toLowerCase() ?? "";
+  const src = image.getAttribute("src") ?? "";
+  const currentSrc = image.currentSrc ?? "";
+
+  return (
+    alt.includes("skillatlas title") ||
+    src.includes("skillatlas-title") ||
+    currentSrc.includes("skillatlas-title")
+  );
+}
+
+function swapTitleLogos(darkMode: boolean, animated = true) {
+  const targetSrc = darkMode ? DARK_TITLE_LOGO_SRC : LIGHT_TITLE_LOGO_SRC;
+  const images = Array.from(document.querySelectorAll<HTMLImageElement>("img")).filter(isSkillAtlasTitleImage);
+
+  images.forEach((image) => {
+    const currentRawSrc = image.getAttribute("src") ?? "";
+    const currentSrc = image.currentSrc || currentRawSrc;
+
+    if (currentRawSrc.includes(targetSrc) || currentSrc.includes(targetSrc)) return;
+
+    image.classList.add("skillatlas-title-logo-transition");
+
+    if (!animated) {
+      image.removeAttribute("srcset");
+      image.src = targetSrc;
+      return;
+    }
+
+    image.classList.add("skillatlas-title-logo-fade-out");
+
+    window.setTimeout(() => {
+      image.removeAttribute("srcset");
+      image.src = targetSrc;
+      image.classList.remove("skillatlas-title-logo-fade-out");
+    }, 135);
+  });
+}
+
 export default function ThemeProvider({ children }: { children: ReactNode }) {
   const [darkMode, setDarkMode] = useState(false);
   const [ready, setReady] = useState(false);
@@ -48,6 +92,7 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
 
     setDarkMode(shouldUseDark);
     applyTheme(shouldUseDark);
+    window.setTimeout(() => swapTitleLogos(shouldUseDark, false), 0);
     setReady(true);
   }, []);
 
@@ -65,7 +110,10 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     updateActiveHeaderNavigation();
 
-    const observer = new MutationObserver(() => updateActiveHeaderNavigation());
+    const observer = new MutationObserver(() => {
+      updateActiveHeaderNavigation();
+      swapTitleLogos(document.documentElement.classList.contains("skillatlas-dark"), false);
+    });
     observer.observe(document.body, { childList: true, subtree: true });
 
     window.addEventListener("popstate", updateActiveHeaderNavigation);
@@ -176,6 +224,20 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
 
         header nav a[aria-current="page"] {
           color: var(--skillatlas-turquoise) !important;
+        }
+
+
+        .skillatlas-title-logo-transition {
+          transition:
+            opacity 270ms ease,
+            filter 270ms ease,
+            transform 270ms ease;
+        }
+
+        .skillatlas-title-logo-fade-out {
+          opacity: 0;
+          filter: blur(2px);
+          transform: translateY(-1px);
         }
 
         .skillatlas-theme-switch {
