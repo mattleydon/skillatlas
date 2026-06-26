@@ -364,7 +364,7 @@ function metricForRow(row: RankedCountry | undefined, heatMode: HeatMode): Metri
   };
 }
 
-function drawCountryBubbleLabel(ctx: CanvasRenderingContext2D, label: string, x: number, y: number, heatBaseColor: string) {
+function drawCountryBubbleLabel(ctx: CanvasRenderingContext2D, label: string, x: number, y: number, heatBaseColor: string, darkMode: boolean) {
   let fontSize = 13;
   if (label.length >= 34) fontSize = 10;
   else if (label.length >= 25) fontSize = 11;
@@ -417,13 +417,22 @@ function drawCountryBubbleLabel(ctx: CanvasRenderingContext2D, label: string, x:
   const firstLineY = bubbleY + bubbleHeight / 2 - ((lines.length - 1) * lineHeight) / 2;
 
   ctx.save();
-  ctx.fillStyle = "rgba(255,255,255,0.95)";
+  ctx.fillStyle = darkMode ? "rgba(52,64,78,0.96)" : "rgba(255,255,255,0.95)";
   ctx.strokeStyle = heatBaseColor;
-  ctx.lineWidth = 1;
+  ctx.lineWidth = darkMode ? 1.2 : 1;
+  if (darkMode) {
+    ctx.shadowColor = "rgba(0,0,0,0.16)";
+    ctx.shadowBlur = 10;
+    ctx.shadowOffsetY = 3;
+  }
   ctx.beginPath();
   ctx.roundRect(bubbleX, bubbleY, bubbleWidth, bubbleHeight, Math.min(16, bubbleHeight / 2));
   ctx.fill();
   ctx.stroke();
+
+  ctx.shadowColor = "transparent";
+  ctx.shadowBlur = 0;
+  ctx.shadowOffsetY = 0;
 
   ctx.fillStyle = heatBaseColor;
   ctx.font = `900 ${fontSize}px Arial`;
@@ -560,7 +569,7 @@ function drawGlobe(
     const metric = metricForRow(selectedFeature.row, heatMode);
 
     if (selectedPoint.visible) {
-      drawCountryBubbleLabel(ctx, selectedFeature.row.name, selectedPoint.x, selectedPoint.y + 34, heatBaseColor);
+      drawCountryBubbleLabel(ctx, selectedFeature.row.name, selectedPoint.x, selectedPoint.y + 34, heatBaseColor, darkMode);
     }
   }
 }
