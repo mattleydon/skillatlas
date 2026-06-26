@@ -3,6 +3,7 @@
 import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
 import { flushSync } from "react-dom";
+import { usePathname } from "next/navigation";
 
 const THEME_KEY = "skillatlas-theme";
 const LIGHT_TITLE_LOGO_SRC = "/skillatlas-title.png";
@@ -81,6 +82,9 @@ type ViewTransitionDocument = Document & {
 };
 
 export default function ThemeProvider({ children }: { children: ReactNode }) {
+  const pathname = usePathname();
+  const hideToggle = pathname?.startsWith("/space-invaders") ?? false;
+
   const [darkMode, setDarkMode] = useState(false);
   const [ready, setReady] = useState(false);
   const [headerShrunk, setHeaderShrunk] = useState(false);
@@ -411,7 +415,7 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
         type="button"
         onClick={toggleTheme}
         className={`skillatlas-theme-switch ${
-          ready && !headerShrunk ? "opacity-100" : "pointer-events-none -translate-y-2 opacity-0"
+          ready && !headerShrunk && !hideToggle ? "opacity-100" : "pointer-events-none -translate-y-2 opacity-0"
         }`}
         aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
         aria-pressed={darkMode}
