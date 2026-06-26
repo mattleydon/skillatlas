@@ -848,8 +848,8 @@ export default function WorldMapPage() {
           </p>
         </div>
 
-        <div className="grid gap-5 xl:grid-cols-[1.02fr_2.25fr_1.05fr]">
-          <aside className="rounded-3xl border border-[#ff2fa8]/40 bg-white/92 p-5 shadow-sm backdrop-blur">
+        <div className="grid gap-5 xl:grid-cols-[minmax(0,1.02fr)_minmax(0,2.25fr)_minmax(0,1.05fr)]">
+          <aside className="min-w-0 rounded-3xl border border-[#ff2fa8]/40 bg-white/92 p-5 shadow-sm backdrop-blur">
             <p className="mb-4 text-[11px] font-black uppercase tracking-[0.22em] text-gray-500">Select Game</p>
 
             <div className="grid gap-3">
@@ -899,8 +899,8 @@ export default function WorldMapPage() {
             </div>
           </aside>
 
-          <section className="relative h-[790px] min-h-[790px] max-h-[790px] self-start overflow-hidden rounded-3xl border border-[#ff2fa8]/40 bg-white/88 shadow-sm backdrop-blur">
-            <div className="absolute left-6 right-6 top-5 z-20 min-h-[46px]">
+          <section className="relative min-w-0 min-h-[790px] overflow-hidden rounded-3xl border border-[#ff2fa8]/40 bg-white/88 shadow-sm backdrop-blur">
+            <div className="absolute left-6 right-6 top-5 z-20">
               <p className="text-[11px] font-black uppercase tracking-[0.22em] text-[#19d3cf]">{gameLabels[selectedGame]}</p>
               <p className="mt-1 max-w-full text-sm font-semibold leading-snug text-gray-500">
                 {loadState === "ready" ? activeHeatMode.description : "Loading country outlines"}
@@ -949,7 +949,7 @@ export default function WorldMapPage() {
             </div>
           </section>
 
-          <aside className="grid gap-4">
+          <aside className="grid min-w-0 gap-4">
             <div className="rounded-3xl border border-[#ff2fa8]/40 bg-white/92 p-5 shadow-sm backdrop-blur">
               <p className="mb-4 text-[11px] font-black uppercase tracking-[0.22em] text-[#19d3cf]">Top 100 Countries</p>
 
@@ -970,7 +970,7 @@ export default function WorldMapPage() {
                   >
                     <span className="flex min-w-0 flex-1 items-center gap-3">
                       <span className={`shrink-0 font-black ${selectedCountryKey === row.normalisedName ? "text-white" : "text-[#ff2fa8]"}`}>{index + 1}</span>
-                      <span className="min-w-0 flex-1 font-black leading-tight">{row.name}</span>
+                      <span className="min-w-0 flex-1 break-words font-black leading-tight">{row.name}</span>
                     </span>
                     <span
                       className={`ml-3 flex min-w-[52px] shrink-0 items-center justify-end whitespace-nowrap text-right text-sm font-black tabular-nums leading-none ${top100DisplayColor(
