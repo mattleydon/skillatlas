@@ -364,6 +364,79 @@ function metricForRow(row: RankedCountry | undefined, heatMode: HeatMode): Metri
   };
 }
 
+function drawCountryBubbleLabel(ctx: CanvasRenderingContext2D, label: string, x: number, y: number, heatBaseColor: string) {
+  let fontSize = 13;
+  if (label.length >= 34) fontSize = 10;
+  else if (label.length >= 25) fontSize = 11;
+  else if (label.length >= 19) fontSize = 12;
+
+  const maxBubbleWidth = 292;
+  const minBubbleWidth = 96;
+  const horizontalPadding = 18;
+  const verticalPadding = 8;
+  const maxTextWidth = maxBubbleWidth - horizontalPadding * 2;
+
+  function wrapLabel(size: number) {
+    ctx.font = `900 ${size}px Arial`;
+    const words = label.split(/\s+/).filter(Boolean);
+    const lines: string[] = [];
+
+    let currentLine = "";
+
+    for (const word of words) {
+      const testLine = currentLine ? `${currentLine} ${word}` : word;
+
+      if (ctx.measureText(testLine).width <= maxTextWidth || !currentLine) {
+        currentLine = testLine;
+      } else {
+        lines.push(currentLine);
+        currentLine = word;
+      }
+    }
+
+    if (currentLine) lines.push(currentLine);
+
+    return lines.length ? lines : [label];
+  }
+
+  let lines = wrapLabel(fontSize);
+  let widestLine = Math.max(...lines.map((line) => ctx.measureText(line).width));
+
+  while (widestLine > maxTextWidth && fontSize > 8) {
+    fontSize -= 1;
+    lines = wrapLabel(fontSize);
+    widestLine = Math.max(...lines.map((line) => ctx.measureText(line).width));
+  }
+
+  const lineHeight = fontSize + 4;
+  const bubbleWidth = Math.min(maxBubbleWidth, Math.max(minBubbleWidth, Math.ceil(widestLine + horizontalPadding * 2)));
+  const bubbleHeight = Math.max(30, Math.ceil(lines.length * lineHeight + verticalPadding * 2));
+  const bubbleX = clamp(x - bubbleWidth / 2, 12, CANVAS_SIZE - bubbleWidth - 12);
+  const bubbleY = clamp(y - bubbleHeight / 2, 12, CANVAS_SIZE - bubbleHeight - 12);
+  const textX = bubbleX + bubbleWidth / 2;
+  const firstLineY = bubbleY + bubbleHeight / 2 - ((lines.length - 1) * lineHeight) / 2;
+
+  ctx.save();
+  ctx.fillStyle = "rgba(255,255,255,0.95)";
+  ctx.strokeStyle = heatBaseColor;
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.roundRect(bubbleX, bubbleY, bubbleWidth, bubbleHeight, Math.min(16, bubbleHeight / 2));
+  ctx.fill();
+  ctx.stroke();
+
+  ctx.fillStyle = heatBaseColor;
+  ctx.font = `900 ${fontSize}px Arial`;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+
+  lines.forEach((line, index) => {
+    ctx.fillText(line, textX, firstLineY + index * lineHeight);
+  });
+
+  ctx.restore();
+}
+
 function drawGlobe(
   canvas: HTMLCanvasElement,
   features: PreparedFeature[],
@@ -487,21 +560,7 @@ function drawGlobe(
     const metric = metricForRow(selectedFeature.row, heatMode);
 
     if (selectedPoint.visible) {
-      ctx.save();
-      ctx.fillStyle = "rgba(255,255,255,0.94)";
-      ctx.strokeStyle = heatBaseColor;
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.roundRect(selectedPoint.x - 68, selectedPoint.y + 18, 136, 32, 16);
-      ctx.fill();
-      ctx.stroke();
-
-      ctx.fillStyle = heatBaseColor;
-      ctx.font = "900 14px Arial";
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-      ctx.fillText(selectedFeature.row.name, selectedPoint.x, selectedPoint.y + 34);
-      ctx.restore();
+      drawCountryBubbleLabel(ctx, selectedFeature.row.name, selectedPoint.x, selectedPoint.y + 34, heatBaseColor);
     }
   }
 }
@@ -970,7 +1029,13 @@ export default function WorldMapPage() {
                   >
                     <span className="flex min-w-0 flex-1 items-center gap-3">
                       <span className={`shrink-0 font-black ${selectedCountryKey === row.normalisedName ? "text-white" : "text-[#ff2fa8]"}`}>{index + 1}</span>
-                      <span className="min-w-0 flex-1 overflow-hidden break-words font-black leading-tight">{row.name}</span>
+                      <span
+                        className={`min-w-0 flex-1 overflow-hidden whitespace-normal font-black [overflow-wrap:normal] [word-break:normal] ${countryNameTextClass(
+                          row.name
+                        )}`}
+                      >
+                        {row.name}
+                      </span>
                     </span>
                     <span
                       className={`ml-3 flex min-w-[52px] shrink-0 items-center justify-end whitespace-nowrap text-right text-sm font-black tabular-nums leading-none ${top100DisplayColor(
@@ -1043,6 +1108,18 @@ function top100DisplayColor(heatMode: HeatMode, selected: boolean) {
   if (heatMode === "emerging") return "text-[#8b5cf6]";
   if (heatMode === "loser") return "text-[#ff2fa8]";
   return "text-gray-700";
+}
+
+function countryNameTextClass(name: string) {
+  const words = name.split(/\s+/).filter(Boolean);
+  const longestWord = words.reduce((longest, word) => Math.max(longest, word.length), 0);
+  const totalLength = name.length;
+
+  if (longestWord >= 15 || totalLength >= 38) return "text-[0.72rem] leading-[1.05]";
+  if (longestWord >= 12 || totalLength >= 31) return "text-[0.80rem] leading-[1.08]";
+  if (longestWord >= 10 || totalLength >= 25) return "text-[0.88rem] leading-[1.1]";
+  if (longestWord >= 8 || totalLength >= 20) return "text-[0.96rem] leading-[1.12]";
+  return "text-base leading-tight";
 }
 
 function sevenDayRankDelta(row: RankedCountry) {
