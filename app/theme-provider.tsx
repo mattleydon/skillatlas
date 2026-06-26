@@ -1,6 +1,6 @@
 "use client";
 
-import type { ReactNode } from "react";
+import type { FormEvent, ReactNode } from "react";
 import { useEffect, useState } from "react";
 import { flushSync } from "react-dom";
 import { usePathname } from "next/navigation";
@@ -8,6 +8,12 @@ import { usePathname } from "next/navigation";
 const THEME_KEY = "skillatlas-theme";
 const LIGHT_TITLE_LOGO_SRC = "/skillatlas-title.png";
 const DARK_TITLE_LOGO_SRC = "/skillatlas-title-dark.png";
+
+type ChatMessage = {
+  id: number;
+  sender: "assistant" | "visitor";
+  text: string;
+};
 
 function normaliseHref(path: string) {
   if (!path) return "/";
@@ -83,9 +89,20 @@ type ViewTransitionDocument = Document & {
 
 export default function ThemeProvider({ children }: { children: ReactNode }) {
   const pathname = usePathname();
-  const hideToggle = pathname?.startsWith("/space-invaders") ?? false;
+  const isSkillInvadersPage = pathname?.startsWith("/space-invaders") ?? false;
+  const hideToggle = isSkillInvadersPage;
+  const hideLiveChat = isSkillInvadersPage;
 
   const [darkMode, setDarkMode] = useState(false);
+  const [chatOpen, setChatOpen] = useState(false);
+  const [chatInput, setChatInput] = useState("");
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
+    {
+      id: 1,
+      sender: "assistant",
+      text: "Need help exploring SkillAtlas? Drop a message here.",
+    },
+  ]);
   const [ready, setReady] = useState(false);
   const [headerShrunk, setHeaderShrunk] = useState(false);
 
@@ -167,6 +184,29 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
 
   function toggleTheme() {
     setTheme(!document.documentElement.classList.contains("skillatlas-dark"));
+  }
+
+  function handleChatSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    const trimmedMessage = chatInput.trim();
+    if (!trimmedMessage) return;
+
+    setChatMessages((messages) => [
+      ...messages,
+      {
+        id: Date.now(),
+        sender: "visitor",
+        text: trimmedMessage,
+      },
+      {
+        id: Date.now() + 1,
+        sender: "assistant",
+        text: "Thanks, your message has been noted. Live replies can be connected here later.",
+      },
+    ]);
+
+    setChatInput("");
   }
 
   return (
@@ -392,12 +432,251 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
           background: #f8fafc !important;
         }
 
+
+        .skillatlas-live-chat {
+          position: fixed;
+          right: 24px;
+          bottom: 24px;
+          z-index: 120;
+          display: flex;
+          flex-direction: column;
+          align-items: flex-end;
+          gap: 12px;
+          font-family: inherit;
+        }
+
+        .skillatlas-live-chat-panel {
+          width: min(360px, calc(100vw - 32px));
+          overflow: hidden;
+          border: 1px solid rgba(255, 47, 168, 0.36);
+          border-radius: 24px;
+          background: rgba(255, 255, 255, 0.96);
+          box-shadow: 0 22px 60px rgba(15, 23, 42, 0.18);
+          backdrop-filter: blur(18px);
+          transform-origin: bottom right;
+          animation: skillatlas-chat-rise 220ms ease both;
+        }
+
+        .skillatlas-live-chat-header {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 12px;
+          padding: 16px 18px;
+          border-bottom: 1px solid rgba(255, 47, 168, 0.18);
+          background:
+            linear-gradient(135deg, rgba(25, 211, 207, 0.12), rgba(255, 47, 168, 0.10)),
+            rgba(255, 255, 255, 0.84);
+        }
+
+        .skillatlas-live-chat-kicker {
+          margin: 0;
+          font-size: 10px;
+          font-weight: 900;
+          letter-spacing: 0.22em;
+          text-transform: uppercase;
+          color: var(--skillatlas-turquoise);
+        }
+
+        .skillatlas-live-chat-title {
+          margin: 3px 0 0;
+          font-size: 17px;
+          font-weight: 950;
+          color: #111827;
+        }
+
+        .skillatlas-live-chat-close {
+          display: grid;
+          width: 32px;
+          height: 32px;
+          place-items: center;
+          border: 1px solid rgba(15, 23, 42, 0.12);
+          border-radius: 999px;
+          background: rgba(255, 255, 255, 0.82);
+          color: #111827;
+          font-size: 18px;
+          font-weight: 900;
+          line-height: 1;
+          transition:
+            border-color 180ms ease,
+            color 180ms ease,
+            transform 180ms ease;
+        }
+
+        .skillatlas-live-chat-close:hover {
+          transform: translateY(-1px);
+          border-color: var(--skillatlas-pink);
+          color: var(--skillatlas-pink);
+        }
+
+        .skillatlas-live-chat-body {
+          display: grid;
+          max-height: 280px;
+          gap: 10px;
+          overflow-y: auto;
+          padding: 16px;
+        }
+
+        .skillatlas-live-chat-message {
+          max-width: 86%;
+          border-radius: 18px;
+          padding: 10px 12px;
+          font-size: 13px;
+          font-weight: 700;
+          line-height: 1.35;
+        }
+
+        .skillatlas-live-chat-message.assistant {
+          justify-self: start;
+          background: rgba(25, 211, 207, 0.12);
+          color: #243447;
+        }
+
+        .skillatlas-live-chat-message.visitor {
+          justify-self: end;
+          background: linear-gradient(135deg, var(--skillatlas-turquoise), var(--skillatlas-pink));
+          color: #ffffff;
+        }
+
+        .skillatlas-live-chat-form {
+          display: flex;
+          gap: 8px;
+          padding: 12px;
+          border-top: 1px solid rgba(255, 47, 168, 0.16);
+          background: rgba(248, 250, 252, 0.86);
+        }
+
+        .skillatlas-live-chat-input {
+          min-width: 0;
+          flex: 1;
+          border: 1px solid rgba(15, 23, 42, 0.12);
+          border-radius: 999px;
+          background: #ffffff;
+          color: #111827;
+          padding: 10px 13px;
+          font-size: 13px;
+          font-weight: 700;
+          outline: none;
+        }
+
+        .skillatlas-live-chat-input:focus {
+          border-color: var(--skillatlas-turquoise);
+          box-shadow: 0 0 0 3px rgba(25, 211, 207, 0.14);
+        }
+
+        .skillatlas-live-chat-send {
+          border: 0;
+          border-radius: 999px;
+          background: var(--skillatlas-turquoise);
+          color: #ffffff;
+          padding: 0 14px;
+          font-size: 13px;
+          font-weight: 900;
+          transition:
+            filter 180ms ease,
+            transform 180ms ease;
+        }
+
+        .skillatlas-live-chat-send:hover {
+          filter: brightness(1.04);
+          transform: translateY(-1px);
+        }
+
+        .skillatlas-live-chat-toggle {
+          display: grid;
+          width: 54px;
+          height: 54px;
+          place-items: center;
+          border: 1px solid rgba(255, 47, 168, 0.38);
+          border-radius: 999px;
+          background: linear-gradient(135deg, var(--skillatlas-turquoise), var(--skillatlas-pink));
+          box-shadow: 0 14px 32px rgba(15, 23, 42, 0.24);
+          color: #ffffff;
+          font-size: 24px;
+          font-weight: 950;
+          line-height: 1;
+          transition:
+            opacity 180ms ease,
+            transform 180ms ease,
+            box-shadow 180ms ease;
+        }
+
+        .skillatlas-live-chat-toggle:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 18px 38px rgba(15, 23, 42, 0.28);
+        }
+
+        .skillatlas-live-chat-arrow {
+          display: block;
+          transform: rotate(-45deg);
+          transition: transform 180ms ease;
+        }
+
+        .skillatlas-live-chat-toggle.open .skillatlas-live-chat-arrow {
+          transform: rotate(135deg);
+        }
+
+        html.skillatlas-dark .skillatlas-live-chat-panel {
+          border-color: rgba(255, 47, 168, 0.42);
+          background: rgba(47, 58, 70, 0.97);
+          box-shadow: 0 22px 60px rgba(0, 0, 0, 0.26);
+        }
+
+        html.skillatlas-dark .skillatlas-live-chat-header {
+          border-bottom-color: rgba(255, 47, 168, 0.26);
+          background:
+            linear-gradient(135deg, rgba(25, 211, 207, 0.12), rgba(255, 47, 168, 0.12)),
+            rgba(53, 66, 80, 0.92);
+        }
+
+        html.skillatlas-dark .skillatlas-live-chat-title,
+        html.skillatlas-dark .skillatlas-live-chat-close {
+          color: var(--skillatlas-text-dark);
+        }
+
+        html.skillatlas-dark .skillatlas-live-chat-close {
+          border-color: rgba(203, 213, 225, 0.22);
+          background: rgba(39, 51, 65, 0.88);
+        }
+
+        html.skillatlas-dark .skillatlas-live-chat-message.assistant {
+          background: rgba(25, 211, 207, 0.12);
+          color: var(--skillatlas-text-dark);
+        }
+
+        html.skillatlas-dark .skillatlas-live-chat-form {
+          border-top-color: rgba(255, 47, 168, 0.22);
+          background: rgba(39, 51, 65, 0.86);
+        }
+
+        html.skillatlas-dark .skillatlas-live-chat-input {
+          border-color: rgba(203, 213, 225, 0.24);
+          background: rgba(32, 43, 55, 0.96);
+          color: var(--skillatlas-text-dark);
+        }
+
+        @keyframes skillatlas-chat-rise {
+          from {
+            opacity: 0;
+            transform: translateY(10px) scale(0.98);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+          }
+        }
+
         @media (prefers-reduced-motion: reduce) {
           ::view-transition-old(root),
           ::view-transition-new(root),
           .skillatlas-theme-switch,
           .skillatlas-theme-track-icon,
-          .skillatlas-theme-knob {
+          .skillatlas-theme-knob,
+          .skillatlas-live-chat-panel,
+          .skillatlas-live-chat-toggle,
+          .skillatlas-live-chat-arrow,
+          .skillatlas-live-chat-close,
+          .skillatlas-live-chat-send {
             animation-duration: 0.01ms !important;
             transition-duration: 0.01ms !important;
           }
@@ -407,6 +686,15 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
           .skillatlas-theme-switch {
             right: 18px;
             top: 12px;
+          }
+
+          .skillatlas-live-chat {
+            right: 16px;
+            bottom: 16px;
+          }
+
+          .skillatlas-live-chat-panel {
+            width: min(340px, calc(100vw - 32px));
           }
         }
       `}</style>
@@ -424,6 +712,61 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
         <span className="skillatlas-theme-track-icon skillatlas-theme-moon">☾</span>
         <span className="skillatlas-theme-knob" />
       </button>
+
+      {!hideLiveChat && (
+        <div className="skillatlas-live-chat">
+          {chatOpen && (
+            <section className="skillatlas-live-chat-panel" aria-label="SkillAtlas live chat">
+              <div className="skillatlas-live-chat-header">
+                <div>
+                  <p className="skillatlas-live-chat-kicker">Live Chat</p>
+                  <p className="skillatlas-live-chat-title">Ask SkillAtlas</p>
+                </div>
+
+                <button
+                  type="button"
+                  className="skillatlas-live-chat-close"
+                  onClick={() => setChatOpen(false)}
+                  aria-label="Close live chat"
+                >
+                  ×
+                </button>
+              </div>
+
+              <div className="skillatlas-live-chat-body">
+                {chatMessages.map((message) => (
+                  <div key={message.id} className={`skillatlas-live-chat-message ${message.sender}`}>
+                    {message.text}
+                  </div>
+                ))}
+              </div>
+
+              <form className="skillatlas-live-chat-form" onSubmit={handleChatSubmit}>
+                <input
+                  className="skillatlas-live-chat-input"
+                  value={chatInput}
+                  onChange={(event) => setChatInput(event.target.value)}
+                  placeholder="Type your message..."
+                  aria-label="Live chat message"
+                />
+                <button type="submit" className="skillatlas-live-chat-send">
+                  Send
+                </button>
+              </form>
+            </section>
+          )}
+
+          <button
+            type="button"
+            className={`skillatlas-live-chat-toggle ${chatOpen ? "open" : ""}`}
+            onClick={() => setChatOpen((open) => !open)}
+            aria-label={chatOpen ? "Close live chat" : "Open live chat"}
+            aria-expanded={chatOpen}
+          >
+            <span className="skillatlas-live-chat-arrow">➜</span>
+          </button>
+        </div>
+      )}
 
       {children}
     </>
