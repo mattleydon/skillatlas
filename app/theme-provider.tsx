@@ -72,9 +72,25 @@ function renderSkillAtlasEmoji(emoji: SkillAtlasEmoji, key?: string | number) {
         aria-label={emoji.label}
         title={emoji.label}
       >
-        <span className="skillatlas-earth-land land-a" />
-        <span className="skillatlas-earth-land land-b" />
-        <span className="skillatlas-earth-land land-c" />
+        <span className="skillatlas-earth-land land-americas" />
+        <span className="skillatlas-earth-land land-eurasia" />
+        <span className="skillatlas-earth-land land-africa" />
+        <span className="skillatlas-earth-land land-australia" />
+      </span>
+    );
+  }
+
+  if (emoji.className.includes("smiley") || emoji.className.includes("frowny")) {
+    return (
+      <span
+        key={key}
+        className={`skillatlas-custom-comment-emoji ${emoji.className}`}
+        aria-label={emoji.label}
+        title={emoji.label}
+      >
+        <span className="skillatlas-face-eye left" />
+        <span className="skillatlas-face-eye right" />
+        <span className="skillatlas-face-mouth" />
       </span>
     );
   }
@@ -437,7 +453,10 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
       emojiNode.innerHTML = '<img src="/skillatlas-logo.png" alt="" class="skillatlas-mini-logo-image" />';
     } else if (emoji.className.includes("earth")) {
       emojiNode.innerHTML =
-        '<span class="skillatlas-earth-land land-a"></span><span class="skillatlas-earth-land land-b"></span><span class="skillatlas-earth-land land-c"></span>';
+        '<span class="skillatlas-earth-land land-americas"></span><span class="skillatlas-earth-land land-eurasia"></span><span class="skillatlas-earth-land land-africa"></span><span class="skillatlas-earth-land land-australia"></span>';
+    } else if (emoji.className.includes("smiley") || emoji.className.includes("frowny")) {
+      emojiNode.innerHTML =
+        '<span class="skillatlas-face-eye left"></span><span class="skillatlas-face-eye right"></span><span class="skillatlas-face-mouth"></span>';
     } else {
       emojiNode.textContent = emoji.symbol;
     }
@@ -941,14 +960,52 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
         }
 
         .skillatlas-custom-comment-emoji.face {
-          font-family: Arial, Helvetica, sans-serif;
-          font-size: 1.22em;
-          line-height: 1;
+          font-size: 1em;
+          background: rgba(255,255,255,0.9);
         }
 
         .skillatlas-custom-comment-emoji.smiley,
         .skillatlas-custom-comment-emoji.frowny {
-          font-size: 1.24em;
+          width: 1.42em;
+          height: 1.42em;
+        }
+
+        .skillatlas-face-eye {
+          position: absolute;
+          top: 34%;
+          width: 10%;
+          height: 10%;
+          border-radius: 999px;
+          background: currentColor;
+        }
+
+        .skillatlas-face-eye.left {
+          left: 33%;
+        }
+
+        .skillatlas-face-eye.right {
+          right: 33%;
+        }
+
+        .skillatlas-face-mouth {
+          position: absolute;
+          left: 31%;
+          width: 38%;
+          height: 25%;
+          border: 0.11em solid currentColor;
+          border-left-color: transparent;
+          border-right-color: transparent;
+          border-top-color: transparent;
+          border-radius: 0 0 999px 999px;
+        }
+
+        .skillatlas-custom-comment-emoji.smiley .skillatlas-face-mouth {
+          top: 45%;
+        }
+
+        .skillatlas-custom-comment-emoji.frowny .skillatlas-face-mouth {
+          bottom: 21%;
+          transform: rotate(180deg);
         }
 
         .skillatlas-custom-comment-emoji.native-tint {
@@ -977,48 +1034,59 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
         .skillatlas-custom-comment-emoji.earth {
           color: #ffffff;
           background:
-            radial-gradient(circle at 32% 25%, rgba(255,255,255,0.92) 0 8%, transparent 9%),
+            radial-gradient(circle at 31% 24%, rgba(255,255,255,0.92) 0 7%, transparent 8%),
+            radial-gradient(circle at 68% 76%, rgba(0,0,0,0.10) 0 8%, transparent 9%),
             linear-gradient(135deg, var(--skillatlas-turquoise), #127c8f);
         }
 
         .skillatlas-custom-comment-emoji.earth.pink {
           background:
-            radial-gradient(circle at 32% 25%, rgba(255,255,255,0.92) 0 8%, transparent 9%),
+            radial-gradient(circle at 31% 24%, rgba(255,255,255,0.92) 0 7%, transparent 8%),
+            radial-gradient(circle at 68% 76%, rgba(0,0,0,0.10) 0 8%, transparent 9%),
             linear-gradient(135deg, var(--skillatlas-pink), #8f216e);
         }
 
         .skillatlas-earth-land {
           position: absolute;
           display: block;
-          background: rgba(255,255,255,0.82);
-          box-shadow: 0 0 0 0.5px rgba(0,0,0,0.05);
+          background: rgba(255,255,255,0.86);
+          box-shadow: 0 0 0 0.5px rgba(0,0,0,0.07);
         }
 
-        .skillatlas-earth-land.land-a {
-          left: 28%;
-          top: 24%;
-          width: 31%;
-          height: 23%;
-          border-radius: 62% 38% 42% 58%;
-          transform: rotate(-18deg);
+        .skillatlas-earth-land.land-americas {
+          left: 16%;
+          top: 21%;
+          width: 29%;
+          height: 48%;
+          clip-path: polygon(48% 0%, 72% 11%, 60% 24%, 77% 39%, 58% 50%, 64% 68%, 47% 87%, 58% 100%, 28% 90%, 19% 72%, 33% 58%, 18% 43%, 30% 26%, 18% 14%);
+          transform: rotate(-17deg);
         }
 
-        .skillatlas-earth-land.land-b {
-          left: 50%;
-          top: 51%;
-          width: 28%;
-          height: 25%;
-          border-radius: 45% 55% 60% 40%;
-          transform: rotate(21deg);
+        .skillatlas-earth-land.land-eurasia {
+          left: 44%;
+          top: 20%;
+          width: 43%;
+          height: 29%;
+          clip-path: polygon(2% 41%, 16% 11%, 39% 18%, 54% 3%, 82% 15%, 100% 38%, 86% 63%, 67% 54%, 49% 72%, 31% 61%, 13% 77%);
+          transform: rotate(9deg);
         }
 
-        .skillatlas-earth-land.land-c {
-          left: 22%;
-          top: 59%;
-          width: 20%;
-          height: 18%;
-          border-radius: 57% 43% 48% 52%;
-          transform: rotate(14deg);
+        .skillatlas-earth-land.land-africa {
+          left: 51%;
+          top: 47%;
+          width: 27%;
+          height: 38%;
+          clip-path: polygon(29% 0%, 63% 10%, 78% 31%, 61% 48%, 70% 67%, 52% 100%, 31% 79%, 16% 56%, 3% 28%);
+          transform: rotate(-7deg);
+        }
+
+        .skillatlas-earth-land.land-australia {
+          left: 70%;
+          top: 67%;
+          width: 19%;
+          height: 12%;
+          border-radius: 55% 45% 62% 38%;
+          transform: rotate(-8deg);
         }
 
         .skillatlas-custom-comment-emoji.skillatlas-gradient {
@@ -1161,10 +1229,6 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
           vertical-align: middle;
         }
 
-        .skillatlas-live-chat-emoji-trigger .skillatlas-custom-comment-emoji.smiley {
-          font-size: 22px;
-        }
-
         .skillatlas-live-chat-emoji-trigger:hover,
         .skillatlas-live-chat-emoji-trigger.open {
           transform: translateY(-1px);
@@ -1223,9 +1287,10 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
           vertical-align: middle;
         }
 
-        .skillatlas-live-chat-emoji-option .skillatlas-custom-comment-emoji.smiley,
-        .skillatlas-live-chat-emoji-option .skillatlas-custom-comment-emoji.frowny {
-          font-size: 22px;
+        .skillatlas-live-chat-emoji-trigger .skillatlas-custom-comment-emoji.face,
+        .skillatlas-live-chat-emoji-option .skillatlas-custom-comment-emoji.face,
+        .skillatlas-live-chat-editor .skillatlas-custom-comment-emoji.face {
+          font-size: 18px;
         }
 
         .skillatlas-live-chat-emoji-option.turquoise:hover {
