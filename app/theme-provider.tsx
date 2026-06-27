@@ -28,8 +28,8 @@ const pageCommentsClient =
 const SKILLATLAS_EMOJIS = [
   { label: "Turquoise smiley", symbol: "🙂", code: ":sa_turquoise_smiley:", className: "turquoise native-tint face-emoji" },
   { label: "Pink frowny", symbol: "🙁", code: ":sa_pink_frowny:", className: "pink native-tint face-emoji" },
-  { label: "Turquoise heart", symbol: "♥", code: ":sa_turquoise_heart:", className: "turquoise heart" },
-  { label: "Pink heart", symbol: "♥", code: ":sa_pink_heart:", className: "pink heart" },
+  { label: "Turquoise heart", symbol: "💙", code: ":sa_turquoise_heart:", className: "turquoise native-tint heart-emoji" },
+  { label: "Pink heart", symbol: "💖", code: ":sa_pink_heart:", className: "pink native-tint heart-emoji" },
   { label: "Turquoise crying laughing", symbol: "😂", code: ":sa_turquoise_laugh:", className: "turquoise laugh native-tint" },
   { label: "Pink angry", symbol: "😠", code: ":sa_pink_angry:", className: "pink angry native-tint" },
   { label: "Turquoise thumbs up", symbol: "👍", code: ":sa_turquoise_thumbsup:", className: "turquoise thumb native-tint" },
@@ -933,9 +933,18 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
           filter: grayscale(0.45) sepia(0.9) saturate(2.7) hue-rotate(128deg) brightness(1.1);
         }
 
-        .skillatlas-custom-comment-emoji.heart {
-          font-size: 1.18em;
+        .skillatlas-custom-comment-emoji.heart-emoji {
           background: rgba(255,255,255,0.84);
+          font-size: 1.17em;
+          filter: saturate(1.28);
+        }
+
+        .skillatlas-custom-comment-emoji.heart-emoji.turquoise {
+          filter: grayscale(0.32) sepia(0.85) saturate(2.55) hue-rotate(128deg) brightness(1.12);
+        }
+
+        .skillatlas-custom-comment-emoji.heart-emoji.pink {
+          filter: grayscale(0.12) sepia(0.75) saturate(2.4) hue-rotate(288deg) brightness(1.08);
         }
 
         .skillatlas-custom-comment-emoji.native-tint.pink {
