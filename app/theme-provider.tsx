@@ -18,7 +18,8 @@ type PageComment = {
   created_at: string;
 };
 
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
+const RAW_SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
+const SUPABASE_URL = RAW_SUPABASE_URL.replace(/\/rest\/v1\/?$/i, "").replace(/\/+$/, "");
 const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "";
 
 const pageCommentsClient =
@@ -199,7 +200,7 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
     if (!client) {
       setComments([]);
       setCommentsLoading(false);
-      setCommentsError("Connect Supabase to make this comment section live for everyone.");
+      setCommentsError("Connect Supabase to make this comment section live for everyone. Use the base Project URL, not the /rest/v1 endpoint.");
       return;
     }
 
@@ -307,7 +308,7 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
     const client = pageCommentsClient;
 
     if (!client) {
-      setCommentsError("Supabase is not connected yet, so comments are not live.");
+      setCommentsError("Supabase is not connected yet. Check the Project URL and public key environment variables.");
       return;
     }
 
