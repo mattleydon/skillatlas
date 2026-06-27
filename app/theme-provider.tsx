@@ -26,18 +26,20 @@ const pageCommentsClient =
   SUPABASE_URL && SUPABASE_ANON_KEY ? createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
 
 const SKILLATLAS_EMOJIS = [
-  { label: "Turquoise spark", symbol: "✦", code: ":sa_turquoise_spark:", className: "turquoise" },
-  { label: "Pink spark", symbol: "✦", code: ":sa_pink_spark:", className: "pink" },
-  { label: "Turquoise smiley", symbol: "☺", code: ":sa_turquoise_smiley:", className: "turquoise face" },
-  { label: "Pink frowny", symbol: "☹", code: ":sa_pink_frowny:", className: "pink face" },
+  { label: "Turquoise smiley", symbol: "☺", code: ":sa_turquoise_smiley:", className: "turquoise face smiley" },
+  { label: "Pink frowny", symbol: "☹", code: ":sa_pink_frowny:", className: "pink face frowny" },
+  { label: "Turquoise spark", symbol: "✦", code: ":sa_turquoise_spark:", className: "turquoise spark" },
+  { label: "Pink spark", symbol: "✦", code: ":sa_pink_spark:", className: "pink spark" },
+  { label: "Turquoise crying laughing", symbol: "😂", code: ":sa_turquoise_laugh:", className: "turquoise laugh" },
+  { label: "Pink angry", symbol: "😠", code: ":sa_pink_angry:", className: "pink angry" },
+  { label: "Turquoise thumbs up", symbol: "👍", code: ":sa_turquoise_thumbsup:", className: "turquoise thumb" },
+  { label: "Pink thumbs down", symbol: "👎", code: ":sa_pink_thumbsdown:", className: "pink thumb" },
   { label: "Turquoise controller", symbol: "🎮", code: ":sa_turquoise_controller:", className: "turquoise controller" },
-  { label: "Pink controller", symbol: "🎮", code: ":sa_pink_controller:", className: "pink controller" },
-  { label: "Turquoise earth", symbol: "◍", code: ":sa_turquoise_earth:", className: "turquoise earth" },
-  { label: "Pink earth", symbol: "◍", code: ":sa_pink_earth:", className: "pink earth" },
-  { label: "SkillAtlas mark", symbol: "⟁", code: ":sa_logo:", className: "skillatlas-logo" },
-  { label: "Turquoise crown", symbol: "♛", code: ":sa_turquoise_crown:", className: "turquoise crown" },
-  { label: "Pink crown", symbol: "♛", code: ":sa_pink_crown:", className: "pink crown" },
-  { label: "Skill surge", symbol: "↯", code: ":sa_surge:", className: "skillatlas-gradient" },
+  { label: "Pink computer", symbol: "💻", code: ":sa_pink_computer:", className: "pink computer" },
+  { label: "Turquoise earth", symbol: "🌍", code: ":sa_turquoise_earth:", className: "turquoise earth" },
+  { label: "Pink earth", symbol: "🌎", code: ":sa_pink_earth:", className: "pink earth" },
+  { label: "SkillAtlas logo", symbol: "", code: ":sa_logo:", className: "skillatlas-logo" },
+  { label: "Skill surge", symbol: "↯", code: ":sa_surge:", className: "skillatlas-gradient surge" },
 ] as const;
 
 type SkillAtlasEmoji = (typeof SKILLATLAS_EMOJIS)[number];
@@ -46,15 +48,24 @@ function findSkillAtlasEmoji(code: string) {
   return SKILLATLAS_EMOJIS.find((emoji) => emoji.code === code);
 }
 
-function shortEmojiLabel(label: string) {
-  return label
-    .replace("Turquoise ", "TQ ")
-    .replace("Pink ", "PK ")
-    .replace("SkillAtlas ", "SA ")
-    .replace("Skill ", "SA ");
-}
-
 function renderSkillAtlasEmoji(emoji: SkillAtlasEmoji, key?: string | number) {
+  if (emoji.className.includes("skillatlas-logo")) {
+    return (
+      <span
+        key={key}
+        className="skillatlas-custom-comment-emoji skillatlas-logo"
+        aria-label={emoji.label}
+        title={emoji.label}
+      >
+        <span className="skillatlas-mini-logo-mark">
+          <span className="skillatlas-mini-logo-left" />
+          <span className="skillatlas-mini-logo-right" />
+          <span className="skillatlas-mini-logo-inner" />
+        </span>
+      </span>
+    );
+  }
+
   return (
     <span
       key={key}
@@ -408,7 +419,13 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
     emojiNode.setAttribute("aria-label", emoji.label);
     emojiNode.setAttribute("title", emoji.label);
     emojiNode.setAttribute("contenteditable", "false");
-    emojiNode.textContent = emoji.symbol;
+
+    if (emoji.className.includes("skillatlas-logo")) {
+      emojiNode.innerHTML =
+        '<span class="skillatlas-mini-logo-mark"><span class="skillatlas-mini-logo-left"></span><span class="skillatlas-mini-logo-right"></span><span class="skillatlas-mini-logo-inner"></span></span>';
+    } else {
+      emojiNode.textContent = emoji.symbol;
+    }
 
     const trailingSpace = document.createTextNode("\u00a0");
     const fragment = document.createDocumentFragment();
@@ -884,6 +901,7 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
         }
 
         .skillatlas-custom-comment-emoji {
+          position: relative;
           display: inline-grid;
           width: 1.42em;
           height: 1.42em;
@@ -896,6 +914,7 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
           vertical-align: -0.16em;
           background: rgba(255,255,255,0.78);
           box-shadow: inset 0 0 0 1px rgba(15,23,42,0.06);
+          overflow: hidden;
         }
 
         .skillatlas-custom-comment-emoji.turquoise {
@@ -906,26 +925,84 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
           color: var(--skillatlas-pink);
         }
 
-        .skillatlas-custom-comment-emoji.skillatlas-gradient,
-        .skillatlas-custom-comment-emoji.skillatlas-logo {
+        .skillatlas-custom-comment-emoji.face,
+        .skillatlas-custom-comment-emoji.laugh,
+        .skillatlas-custom-comment-emoji.angry,
+        .skillatlas-custom-comment-emoji.thumb {
+          font-size: 1.08em;
+        }
+
+        .skillatlas-custom-comment-emoji.frowny,
+        .skillatlas-custom-comment-emoji.smiley {
+          font-size: 1.10em;
+        }
+
+        .skillatlas-custom-comment-emoji.controller,
+        .skillatlas-custom-comment-emoji.computer {
+          font-size: 0.98em;
+          filter: saturate(1.28);
+        }
+
+        .skillatlas-custom-comment-emoji.earth {
+          color: #ffffff;
+          font-size: 0;
+          background:
+            radial-gradient(circle at 34% 31%, rgba(255,255,255,0.96) 0 8%, transparent 9%),
+            radial-gradient(circle at 64% 62%, currentColor 0 10%, transparent 11%),
+            radial-gradient(circle at 36% 67%, currentColor 0 12%, transparent 13%),
+            radial-gradient(circle at 58% 35%, currentColor 0 16%, transparent 17%),
+            linear-gradient(135deg, rgba(25,211,207,0.95), rgba(20,118,135,0.95));
+        }
+
+        .skillatlas-custom-comment-emoji.earth.pink {
+          background:
+            radial-gradient(circle at 34% 31%, rgba(255,255,255,0.96) 0 8%, transparent 9%),
+            radial-gradient(circle at 64% 62%, #ffd2eb 0 10%, transparent 11%),
+            radial-gradient(circle at 36% 67%, #ffd2eb 0 12%, transparent 13%),
+            radial-gradient(circle at 58% 35%, #ffd2eb 0 16%, transparent 17%),
+            linear-gradient(135deg, rgba(255,47,168,0.95), rgba(140,35,116,0.95));
+        }
+
+        .skillatlas-custom-comment-emoji.skillatlas-gradient {
           color: #ffffff;
           background: linear-gradient(135deg, var(--skillatlas-turquoise), var(--skillatlas-pink));
         }
 
         .skillatlas-custom-comment-emoji.skillatlas-logo {
-          font-size: 1.08em;
-          clip-path: polygon(50% 2%, 95% 90%, 55% 70%, 50% 47%, 45% 70%, 5% 90%);
+          background: transparent !important;
+          box-shadow: none;
+          overflow: visible;
         }
 
-        .skillatlas-custom-comment-emoji.earth {
-          background:
-            radial-gradient(circle at 35% 35%, rgba(255,255,255,0.9) 0 13%, transparent 14%),
-            linear-gradient(135deg, rgba(25,211,207,0.18), rgba(255,47,168,0.14)),
-            rgba(255,255,255,0.78);
+        .skillatlas-mini-logo-mark {
+          position: relative;
+          display: block;
+          width: 1.32em;
+          height: 1.32em;
         }
 
-        .skillatlas-custom-comment-emoji.controller {
-          font-size: 0.98em;
+        .skillatlas-mini-logo-left,
+        .skillatlas-mini-logo-right,
+        .skillatlas-mini-logo-inner {
+          position: absolute;
+          inset: 0;
+          display: block;
+        }
+
+        .skillatlas-mini-logo-left {
+          background: var(--skillatlas-turquoise);
+          clip-path: polygon(50% 0%, 8% 94%, 42% 73%, 50% 45%);
+        }
+
+        .skillatlas-mini-logo-right {
+          background: var(--skillatlas-pink);
+          clip-path: polygon(50% 0%, 92% 94%, 58% 73%, 50% 45%);
+        }
+
+        .skillatlas-mini-logo-inner {
+          background: currentColor;
+          opacity: 0.88;
+          clip-path: polygon(50% 31%, 63% 73%, 50% 61%, 37% 73%);
         }
 
         .skillatlas-live-chat-empty,
@@ -1027,12 +1104,12 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
           width: 42px;
           height: 42px;
           place-items: center;
-          border: 1px solid rgba(255, 47, 168, 0.24);
+          border: 1px solid rgba(25, 211, 207, 0.34);
           border-radius: 999px;
           background:
-            linear-gradient(135deg, rgba(25,211,207,0.14), rgba(255,47,168,0.14)),
+            linear-gradient(135deg, rgba(25,211,207,0.14), rgba(255,47,168,0.10)),
             rgba(255,255,255,0.92);
-          color: var(--skillatlas-pink);
+          color: var(--skillatlas-turquoise);
           font-size: 18px;
           font-weight: 950;
           line-height: 1;
@@ -1040,6 +1117,14 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
             border-color 160ms ease,
             transform 160ms ease,
             box-shadow 160ms ease;
+        }
+
+        .skillatlas-live-chat-emoji-trigger .skillatlas-custom-comment-emoji {
+          width: 26px;
+          height: 26px;
+          margin: 0;
+          font-size: 18px;
+          vertical-align: middle;
         }
 
         .skillatlas-live-chat-emoji-trigger:hover,
@@ -1055,7 +1140,8 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
           bottom: calc(100% + 8px);
           z-index: 6;
           display: grid;
-          width: min(248px, calc(100vw - 64px));
+          width: 224px;
+          max-width: calc(100vw - 64px);
           max-height: min(280px, calc(100vh - 220px));
           grid-template-columns: repeat(4, minmax(0, 1fr));
           gap: 7px;
@@ -1066,6 +1152,7 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
           background: rgba(255,255,255,0.98);
           box-shadow: 0 18px 42px rgba(15, 23, 42, 0.18);
           padding: 8px;
+          transform: translateX(-2px);
           backdrop-filter: blur(16px);
         }
 
@@ -1094,7 +1181,7 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
           width: 28px;
           height: 28px;
           margin: 0;
-          font-size: 17px;
+          font-size: 18px;
           vertical-align: middle;
         }
 
@@ -1170,12 +1257,12 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
 
         .skillatlas-live-chat-arrow {
           display: block;
-          transform: rotate(-135deg);
+          transform: translateY(-1px);
           transition: transform 180ms ease;
         }
 
         .skillatlas-live-chat-toggle.open .skillatlas-live-chat-arrow {
-          transform: rotate(45deg);
+          transform: translateY(1px) scale(0.96);
         }
 
         html.skillatlas-dark .skillatlas-live-chat-panel {
@@ -1300,7 +1387,7 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
           }
 
           .skillatlas-live-chat-emoji-menu {
-            width: min(220px, calc(100vw - 64px));
+            width: min(224px, calc(100vw - 64px));
             grid-template-columns: repeat(4, minmax(0, 1fr));
           }
         }
@@ -1405,7 +1492,7 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
                       aria-label="Open SkillAtlas emoji menu"
                       aria-expanded={emojiMenuOpen}
                     >
-                      ✦
+                      {renderSkillAtlasEmoji(SKILLATLAS_EMOJIS[0])}
                     </button>
 
                     {emojiMenuOpen && (
@@ -1442,7 +1529,7 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
             aria-label={chatOpen ? "Close page comments" : "Open page comments"}
             aria-expanded={chatOpen}
           >
-            <span className="skillatlas-live-chat-arrow">➜</span>
+            <span className="skillatlas-live-chat-arrow">☝</span>
           </button>
         </div>
       )}
