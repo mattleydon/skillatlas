@@ -636,7 +636,10 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
         }
 
         .skillatlas-live-chat-panel {
+          display: flex;
           width: min(480px, calc(100vw - 32px));
+          max-height: min(680px, calc(100vh - 116px));
+          flex-direction: column;
           overflow: hidden;
           border: 1px solid rgba(255, 47, 168, 0.36);
           border-radius: 24px;
@@ -649,6 +652,7 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
 
         .skillatlas-live-chat-header {
           display: flex;
+          flex: 0 0 auto;
           align-items: center;
           justify-content: space-between;
           gap: 12px;
@@ -701,9 +705,12 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
 
         .skillatlas-live-chat-body {
           display: grid;
-          max-height: 405px;
+          flex: 1 1 auto;
+          min-height: 120px;
+          max-height: none;
           gap: 5px;
           overflow-y: auto;
+          overscroll-behavior: contain;
           padding: 10px;
         }
 
@@ -811,6 +818,7 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
 
         .skillatlas-live-chat-form {
           display: grid;
+          flex: 0 0 auto;
           gap: 8px;
           padding: 10px 12px;
           border-top: 1px solid rgba(255, 47, 168, 0.16);
@@ -823,18 +831,63 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
           gap: 8px;
         }
 
-        .skillatlas-live-chat-emoji-toolbar {
-          position: relative;
+        .skillatlas-live-chat-name-row {
+          flex: 0 0 auto;
+        }
+
+        .skillatlas-live-chat-input-row {
+          align-items: stretch;
+        }
+
+        .skillatlas-live-chat-input-shell {
           display: flex;
+          min-width: 0;
+          flex: 1;
           align-items: center;
-          justify-content: space-between;
-          gap: 8px;
-          border: 1px solid rgba(255, 47, 168, 0.16);
-          border-radius: 18px;
-          background:
-            linear-gradient(135deg, rgba(25,211,207,0.08), rgba(255,47,168,0.08)),
-            rgba(255,255,255,0.76);
-          padding: 7px;
+          gap: 6px;
+          border: 1px solid rgba(15, 23, 42, 0.12);
+          border-radius: 999px;
+          background: #ffffff;
+          padding: 5px 10px;
+          box-shadow: inset 0 0 0 1px rgba(25, 211, 207, 0);
+        }
+
+        .skillatlas-live-chat-input-shell:focus-within {
+          border-color: var(--skillatlas-turquoise);
+          box-shadow: 0 0 0 3px rgba(25, 211, 207, 0.14);
+        }
+
+        .skillatlas-live-chat-selected-emojis {
+          display: flex;
+          max-width: 42%;
+          flex: 0 0 auto;
+          flex-wrap: wrap;
+          align-items: center;
+          gap: 4px;
+        }
+
+        .skillatlas-live-chat-selected-emoji {
+          display: grid;
+          width: 24px;
+          height: 24px;
+          place-items: center;
+          border: 0;
+          border-radius: 999px;
+          background: transparent;
+          padding: 0;
+          transition: transform 160ms ease;
+        }
+
+        .skillatlas-live-chat-selected-emoji:hover {
+          transform: translateY(-1px) scale(1.06);
+        }
+
+        .skillatlas-live-chat-selected-emoji .skillatlas-custom-comment-emoji {
+          width: 22px;
+          height: 22px;
+          margin: 0;
+          font-size: 14px;
+          vertical-align: middle;
         }
 
         .skillatlas-live-chat-emoji-menu-wrap {
@@ -844,8 +897,8 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
 
         .skillatlas-live-chat-emoji-trigger {
           display: grid;
-          width: 36px;
-          height: 36px;
+          width: 42px;
+          height: 42px;
           place-items: center;
           border: 1px solid rgba(255, 47, 168, 0.24);
           border-radius: 999px;
@@ -871,33 +924,35 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
 
         .skillatlas-live-chat-emoji-menu {
           position: absolute;
-          right: 0;
-          top: calc(100% + 8px);
+          right: 50%;
+          bottom: calc(100% + 8px);
           z-index: 6;
           display: grid;
-          width: 316px;
-          grid-template-columns: repeat(2, minmax(0, 1fr));
-          gap: 6px;
+          width: min(248px, calc(100vw - 64px));
+          max-height: min(280px, calc(100vh - 220px));
+          grid-template-columns: repeat(4, minmax(0, 1fr));
+          gap: 7px;
+          overflow-y: auto;
+          overscroll-behavior: contain;
           border: 1px solid rgba(255, 47, 168, 0.28);
           border-radius: 18px;
           background: rgba(255,255,255,0.98);
           box-shadow: 0 18px 42px rgba(15, 23, 42, 0.18);
           padding: 8px;
+          transform: translateX(50%);
           backdrop-filter: blur(16px);
         }
 
         .skillatlas-live-chat-emoji-option {
-          display: flex;
-          align-items: center;
-          gap: 7px;
-          min-width: 0;
+          display: grid;
+          width: 44px;
+          height: 44px;
+          place-items: center;
           border: 1px solid rgba(15, 23, 42, 0.08);
-          border-radius: 12px;
+          border-radius: 14px;
           background: rgba(248,250,252,0.84);
-          padding: 7px;
+          padding: 0;
           color: #243447;
-          font-weight: 900;
-          text-align: left;
           transition:
             border-color 160ms ease,
             transform 160ms ease,
@@ -909,22 +964,12 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
           background: rgba(255,255,255,0.98);
         }
 
-        .skillatlas-live-chat-emoji-option .skillatlas-custom-comment-emoji,
-        .skillatlas-live-chat-selected-emoji .skillatlas-custom-comment-emoji {
-          width: 24px;
-          height: 24px;
+        .skillatlas-live-chat-emoji-option .skillatlas-custom-comment-emoji {
+          width: 28px;
+          height: 28px;
           margin: 0;
-          font-size: 15px;
+          font-size: 17px;
           vertical-align: middle;
-        }
-
-        .skillatlas-live-chat-emoji-option small {
-          min-width: 0;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          white-space: nowrap;
-          font-size: 10px;
-          font-weight: 950;
         }
 
         .skillatlas-live-chat-emoji-option.turquoise:hover {
@@ -937,52 +982,11 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
           border-color: var(--skillatlas-pink);
         }
 
-        .skillatlas-live-chat-selected-emojis {
-          display: flex;
-          min-height: 34px;
-          min-width: 0;
-          flex: 1;
-          flex-wrap: wrap;
-          align-items: center;
-          gap: 6px;
-        }
-
-        .skillatlas-live-chat-emoji-hint {
-          padding-left: 4px;
-          color: #64748b;
-          font-size: 11px;
-          font-weight: 900;
-          letter-spacing: 0.10em;
-          text-transform: uppercase;
-        }
-
-        .skillatlas-live-chat-selected-emoji {
-          display: grid;
-          width: 30px;
-          height: 30px;
-          place-items: center;
-          border: 1px solid rgba(15, 23, 42, 0.10);
-          border-radius: 999px;
-          background: rgba(255,255,255,0.88);
-          padding: 0;
-          transition:
-            border-color 160ms ease,
-            transform 160ms ease;
-        }
-
-        .skillatlas-live-chat-selected-emoji:hover {
-          transform: translateY(-1px);
-          border-color: var(--skillatlas-pink);
-        }
-
         .skillatlas-live-chat-input,
         .skillatlas-live-chat-name {
           min-width: 0;
-          border: 1px solid rgba(15, 23, 42, 0.12);
-          border-radius: 999px;
           background: #ffffff;
           color: #111827;
-          padding: 10px 13px;
           font-size: 13px;
           font-weight: 700;
           outline: none;
@@ -990,13 +994,18 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
 
         .skillatlas-live-chat-name {
           width: 100%;
+          border: 1px solid rgba(15, 23, 42, 0.12);
+          border-radius: 999px;
+          padding: 10px 13px;
         }
 
         .skillatlas-live-chat-input {
+          min-width: 84px;
           flex: 1;
+          border: 0;
+          padding: 5px 0;
         }
 
-        .skillatlas-live-chat-input:focus,
         .skillatlas-live-chat-name:focus {
           border-color: var(--skillatlas-turquoise);
           box-shadow: 0 0 0 3px rgba(25, 211, 207, 0.14);
@@ -1046,12 +1055,12 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
 
         .skillatlas-live-chat-arrow {
           display: block;
-          transform: rotate(-45deg);
+          transform: rotate(-135deg);
           transition: transform 180ms ease;
         }
 
         .skillatlas-live-chat-toggle.open .skillatlas-live-chat-arrow {
-          transform: rotate(135deg);
+          transform: rotate(45deg);
         }
 
         html.skillatlas-dark .skillatlas-live-chat-panel {
@@ -1094,11 +1103,9 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
           color: var(--skillatlas-text-dark);
         }
 
-        html.skillatlas-dark .skillatlas-live-chat-emoji-toolbar {
-          border-color: rgba(255, 47, 168, 0.22);
-          background:
-            linear-gradient(135deg, rgba(25,211,207,0.08), rgba(255,47,168,0.08)),
-            rgba(39, 51, 65, 0.86);
+        html.skillatlas-dark .skillatlas-live-chat-input-shell {
+          border-color: rgba(203, 213, 225, 0.24);
+          background: rgba(32, 43, 55, 0.96);
         }
 
         html.skillatlas-dark .skillatlas-live-chat-emoji-trigger,
@@ -1107,10 +1114,6 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
         html.skillatlas-dark .skillatlas-custom-comment-emoji {
           border-color: rgba(203, 213, 225, 0.18);
           background: rgba(32, 43, 55, 0.92);
-        }
-
-        html.skillatlas-dark .skillatlas-live-chat-emoji-hint {
-          color: var(--skillatlas-muted-dark);
         }
 
         html.skillatlas-dark .skillatlas-live-chat-emoji-option {
@@ -1179,8 +1182,8 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
           }
 
           .skillatlas-live-chat-emoji-menu {
-            width: min(316px, calc(100vw - 64px));
-            grid-template-columns: 1fr;
+            width: min(220px, calc(100vw - 64px));
+            grid-template-columns: repeat(4, minmax(0, 1fr));
           }
         }
       `}</style>
@@ -1239,23 +1242,43 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
               </div>
 
               <form className="skillatlas-live-chat-form" onSubmit={handleChatSubmit}>
-                <div className="skillatlas-live-chat-emoji-toolbar">
-                  <div className="skillatlas-live-chat-selected-emojis" aria-label="Selected SkillAtlas emojis">
-                    {selectedEmojis.length === 0 ? (
-                      <span className="skillatlas-live-chat-emoji-hint">Pick emojis</span>
-                    ) : (
-                      selectedEmojis.map((emoji, index) => (
-                        <button
-                          key={`${emoji.code}-${index}`}
-                          type="button"
-                          className={`skillatlas-live-chat-selected-emoji ${emoji.className}`}
-                          onClick={() => removeSelectedEmoji(index)}
-                          aria-label={`Remove ${emoji.label}`}
-                        >
-                          {renderSkillAtlasEmoji(emoji)}
-                        </button>
-                      ))
+                <div className="skillatlas-live-chat-name-row">
+                  <input
+                    className="skillatlas-live-chat-name"
+                    value={displayName}
+                    onChange={(event) => setDisplayName(event.target.value)}
+                    placeholder="Name"
+                    maxLength={32}
+                    aria-label="Display name"
+                  />
+                </div>
+
+                <div className="skillatlas-live-chat-input-row">
+                  <div className="skillatlas-live-chat-input-shell">
+                    {selectedEmojis.length > 0 && (
+                      <div className="skillatlas-live-chat-selected-emojis" aria-label="Selected SkillAtlas emojis">
+                        {selectedEmojis.map((emoji, index) => (
+                          <button
+                            key={`${emoji.code}-${index}`}
+                            type="button"
+                            className={`skillatlas-live-chat-selected-emoji ${emoji.className}`}
+                            onClick={() => removeSelectedEmoji(index)}
+                            aria-label={`Remove ${emoji.label}`}
+                          >
+                            {renderSkillAtlasEmoji(emoji)}
+                          </button>
+                        ))}
+                      </div>
                     )}
+
+                    <input
+                      className="skillatlas-live-chat-input"
+                      value={chatInput}
+                      onChange={(event) => setChatInput(event.target.value)}
+                      placeholder={selectedEmojis.length > 0 ? "Add text..." : "Add a comment..."}
+                      maxLength={350}
+                      aria-label="Page comment"
+                    />
                   </div>
 
                   <div className="skillatlas-live-chat-emoji-menu-wrap">
@@ -1278,36 +1301,15 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
                             className={`skillatlas-live-chat-emoji-option ${emoji.className}`}
                             onClick={() => addEmojiToComment(emoji)}
                             aria-label={`Add ${emoji.label}`}
+                            title={emoji.label}
                           >
                             {renderSkillAtlasEmoji(emoji)}
-                            <small>{shortEmojiLabel(emoji.label)}</small>
                           </button>
                         ))}
                       </div>
                     )}
                   </div>
-                </div>
 
-                <div className="skillatlas-live-chat-name-row">
-                  <input
-                    className="skillatlas-live-chat-name"
-                    value={displayName}
-                    onChange={(event) => setDisplayName(event.target.value)}
-                    placeholder="Name"
-                    maxLength={32}
-                    aria-label="Display name"
-                  />
-                </div>
-
-                <div className="skillatlas-live-chat-input-row">
-                  <input
-                    className="skillatlas-live-chat-input"
-                    value={chatInput}
-                    onChange={(event) => setChatInput(event.target.value)}
-                    placeholder="Add a comment..."
-                    maxLength={350}
-                    aria-label="Page comment"
-                  />
                   <button type="submit" className="skillatlas-live-chat-send">
                     Send
                   </button>
