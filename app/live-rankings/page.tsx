@@ -226,106 +226,72 @@ export default function LiveRankingsPage() {
           </div>
         </div>
 
-        <div className="mb-6 grid gap-5 xl:grid-cols-[0.82fr_1.18fr]">
-          <div className="rounded-3xl border border-[#ff2fa8]/45 bg-white/92 p-6 shadow-sm backdrop-blur">
-            <p className="mb-2 text-[11px] font-black uppercase tracking-[0.24em] text-[#19d3cf]">Live Leader</p>
-            <div className="flex items-start justify-between gap-4">
-              <div className="flex items-center gap-4">
-                <span className="grid h-16 w-16 shrink-0 place-items-center overflow-hidden rounded-3xl bg-gray-50 shadow-inner">
-                  <img src={`https://flagcdn.com/w160/${leader.code}.png`} alt={`${leader.name} flag`} className="h-full w-full object-cover" />
-                </span>
-                <div>
-                  <h2 className="text-3xl font-black">{leader.name}</h2>
-                  <p className="font-black text-[#ff2fa8]">{selectedGame} · moving live</p>
-                </div>
-              </div>
-
-              <div className="rounded-3xl bg-[#19d3cf]/12 px-4 py-3 text-center">
-                <p className="text-[10px] font-black uppercase tracking-[0.16em] text-gray-500">Live Score</p>
-                <p className="text-3xl font-black text-[#19d3cf]">{leader.score}</p>
-              </div>
-            </div>
-
-            <div className="mt-5 grid gap-3">
-              <div className="rounded-2xl border border-gray-200 bg-white/70 p-4">
-                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-gray-500">Live Heat</p>
-                <p className="text-lg font-black text-[#19d3cf]">{liveScore.toLocaleString()}</p>
-              </div>
-              <div className="rounded-2xl border border-gray-200 bg-white/70 p-4">
-                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-gray-500">Instruction</p>
-                <p className="text-sm font-semibold leading-relaxed text-gray-600">Drag a country card over another country to reorder the live board. Use arrows as a fallback.</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="overflow-hidden rounded-3xl border border-[#ff2fa8]/45 bg-white/92 shadow-sm backdrop-blur">
-            <div className="flex items-center justify-between gap-4 border-b border-[#ff2fa8]/20 p-5">
-              <p className="text-[11px] font-black uppercase tracking-[0.24em] text-[#19d3cf]">Live Board</p>
+        <section className="mb-6 overflow-hidden rounded-3xl border border-[#ff2fa8]/45 bg-white/92 shadow-sm backdrop-blur">
+          <div className="flex items-center justify-between gap-4 border-b border-[#ff2fa8]/20 p-5">
+            <p className="text-[11px] font-black uppercase tracking-[0.24em] text-[#19d3cf]">Live Board</p>
+            <div className="flex items-center gap-3">
               <p className="text-xs font-black text-[#ff2fa8]">{selectedGame}</p>
-            </div>
-
-            <div className="overflow-x-auto">
-              <table className="w-full min-w-[900px] border-collapse text-left">
-                <thead>
-                  <tr className="border-b border-gray-200 text-[11px] uppercase tracking-[0.16em] text-gray-500">
-                    <th className="px-5 py-4 font-black">Rank</th>
-                    <th className="px-5 py-4 font-black">Country</th>
-                    <th className="px-5 py-4 font-black">Live Score</th>
-                    <th className="px-5 py-4 font-black">Momentum</th>
-                    <th className="px-5 py-4 font-black">Moved By</th>
-                    <th className="px-5 py-4 font-black">Why</th>
-                    <th className="px-5 py-4 font-black">Move</th>
-                  </tr>
-                </thead>
-
-                <tbody>
-                  {countries.map((country, index) => (
-                    <tr
-                      key={country.name}
-                      draggable
-                      onDragStart={() => setDraggedName(country.name)}
-                      onDragOver={(event) => event.preventDefault()}
-                      onDrop={(event) => handleDrop(event, index)}
-                      className={`cursor-grab border-b border-gray-200/80 transition-all duration-300 active:cursor-grabbing ${
-                        draggedName === country.name ? "bg-[#19d3cf]/15 opacity-70" : "hover:bg-[#19d3cf]/5"
-                      }`}
-                    >
-                      <td className="px-5 py-4 text-lg font-black text-[#ff2fa8]">#{index + 1}</td>
-                      <td className="px-5 py-4">
-                        <div className="flex items-center gap-3">
-                          <span className="grid h-8 w-8 shrink-0 place-items-center overflow-hidden rounded-xl bg-gray-50 shadow-inner">
-                            <img src={`https://flagcdn.com/w80/${country.code}.png`} alt={`${country.name} flag`} className="h-full w-full object-cover" />
-                          </span>
-                          <span className="font-black">{country.name}</span>
-                        </div>
-                      </td>
-                      <td className="px-5 py-4">
-                        <span className="rounded-full bg-[#19d3cf]/12 px-3 py-1 text-sm font-black text-[#19d3cf]">{country.score}</span>
-                      </td>
-                      <td className={`px-5 py-4 text-sm font-black ${country.momentum >= 0 ? "text-[#19d3cf]" : "text-[#ff2fa8]"}`}>
-                        {country.momentum >= 0 ? `▲ ${country.momentum}` : `▼ ${Math.abs(country.momentum)}`}
-                      </td>
-                      <td className="px-5 py-4 text-sm font-black text-gray-700">{country.movedBy}</td>
-                      <td className="px-5 py-4">
-                        <div className="flex flex-wrap gap-2">
-                          {country.reasons.map((reason) => (
-                            <span key={reason} className="rounded-full border border-[#19d3cf]/25 bg-[#19d3cf]/10 px-3 py-1 text-xs font-black text-gray-700">{reason}</span>
-                          ))}
-                        </div>
-                      </td>
-                      <td className="px-5 py-4">
-                        <div className="flex gap-2">
-                          <button type="button" onClick={() => moveCountry(index, index - 1)} className="rounded-full border border-[#19d3cf]/35 px-3 py-1 text-xs font-black text-[#19d3cf]">↑</button>
-                          <button type="button" onClick={() => moveCountry(index, index + 1)} className="rounded-full border border-[#ff2fa8]/35 px-3 py-1 text-xs font-black text-[#ff2fa8]">↓</button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+              <span className="rounded-full bg-[#19d3cf]/12 px-3 py-1 text-xs font-black text-[#19d3cf]">Live heat {liveScore.toLocaleString()}</span>
             </div>
           </div>
-        </div>
+
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[1080px] border-collapse text-left">
+              <thead>
+                <tr className="border-b border-gray-200 text-[11px] uppercase tracking-[0.16em] text-gray-500">
+                  <th className="px-5 py-4 font-black">Rank</th>
+                  <th className="px-5 py-4 font-black">Country</th>
+                  <th className="px-5 py-4 font-black">Live Score</th>
+                  <th className="px-5 py-4 font-black">Momentum</th>
+                  <th className="px-5 py-4 font-black">Moved By</th>
+                  <th className="px-5 py-4 font-black">Why</th>
+                  <th className="px-5 py-4 font-black">Move</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {countries.map((country, index) => (
+                  <tr
+                    key={country.name}
+                    draggable
+                    onDragStart={() => setDraggedName(country.name)}
+                    onDragOver={(event) => event.preventDefault()}
+                    onDrop={(event) => handleDrop(event, index)}
+                    className={`h-[88px] cursor-grab border-b border-gray-200/80 transition-all duration-300 active:cursor-grabbing ${
+                      draggedName === country.name ? "bg-[#19d3cf]/15 opacity-70" : "hover:bg-[#19d3cf]/5"
+                    }`}
+                  >
+                    <td className="whitespace-nowrap px-5 py-4 text-lg font-black text-[#ff2fa8]">#{index + 1}</td>
+                    <td className="whitespace-nowrap px-5 py-4">
+                      <div className="flex items-center gap-3">
+                        <span className="grid h-8 w-8 shrink-0 place-items-center overflow-hidden rounded-xl bg-gray-50 shadow-inner">
+                          <img src={`https://flagcdn.com/w80/${country.code}.png`} alt={`${country.name} flag`} className="h-full w-full object-cover" />
+                        </span>
+                        <span className="font-black">{country.name}</span>
+                      </div>
+                    </td>
+                    <td className="whitespace-nowrap px-5 py-4">
+                      <span className="rounded-full bg-[#19d3cf]/12 px-3 py-1 text-sm font-black text-[#19d3cf]">{country.score}</span>
+                    </td>
+                    <td className={`whitespace-nowrap px-5 py-4 text-sm font-black ${country.momentum >= 0 ? "text-[#19d3cf]" : "text-[#ff2fa8]"}`}>
+                      {country.momentum >= 0 ? `▲ ${country.momentum}` : `▼ ${Math.abs(country.momentum)}`}
+                    </td>
+                    <td className="whitespace-nowrap px-5 py-4 text-sm font-black text-gray-700">{country.movedBy}</td>
+                    <td className="px-5 py-4 text-sm font-black text-gray-700">
+                      <span className="block max-w-[360px] truncate">{country.reasons.join(" · ")}</span>
+                    </td>
+                    <td className="whitespace-nowrap px-5 py-4">
+                      <div className="flex gap-2">
+                        <button type="button" onClick={() => moveCountry(index, index - 1)} className="rounded-full border border-[#19d3cf]/35 px-3 py-1 text-xs font-black text-[#19d3cf]">↑</button>
+                        <button type="button" onClick={() => moveCountry(index, index + 1)} className="rounded-full border border-[#ff2fa8]/35 px-3 py-1 text-xs font-black text-[#ff2fa8]">↓</button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
 
         <section className="rounded-3xl border border-[#ff2fa8]/45 bg-white/92 p-5 shadow-sm backdrop-blur">
           <p className="mb-4 text-[11px] font-black uppercase tracking-[0.24em] text-[#19d3cf]">Live Movement Feed</p>

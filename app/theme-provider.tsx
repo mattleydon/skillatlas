@@ -203,16 +203,23 @@ function alignHeaderNavigationToThemeToggle() {
 
     const switchCentre = switchRect.left + switchRect.width / 2;
     const itemRects = items.map((item) => item.getBoundingClientRect());
-    const firstCentre = itemRects[0].left + itemRects[0].width / 2;
-    const spacing = (switchCentre - firstCentre) / Math.max(items.length - 1, 1);
+    const itemWidths = itemRects.map((rect) => rect.width);
+    const firstLeft = itemRects[0].left;
+    const lastWidth = itemWidths[itemWidths.length - 1] ?? 0;
+    const lastLeft = switchCentre - lastWidth / 2;
+    const totalItemWidth = itemWidths.reduce((sum, width) => sum + width, 0);
+    const availableGapSpace = Math.max(0, lastLeft + lastWidth - firstLeft - totalItemWidth);
+    const equalGap = availableGapSpace / Math.max(items.length - 1, 1);
+
+    let nextLeft = firstLeft;
 
     items.forEach((item, index) => {
       const rect = itemRects[index];
-      const currentCentre = rect.left + rect.width / 2;
-      const targetCentre = firstCentre + spacing * index;
-      const offset = targetCentre - currentCentre;
+      const targetLeft = index === items.length - 1 ? lastLeft : nextLeft;
+      const offset = targetLeft - rect.left;
 
       item.style.transform = `translateX(${offset.toFixed(2)}px)`;
+      nextLeft = targetLeft + itemWidths[index] + equalGap;
     });
   });
 }
