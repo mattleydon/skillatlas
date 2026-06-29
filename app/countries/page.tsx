@@ -534,6 +534,60 @@ function CountriesBackground() {
   );
 }
 
+const countryFlagCodes: Record<string, string> = {
+  denmark: "dk",
+  "south-korea": "kr",
+  china: "cn",
+  usa: "us",
+  brazil: "br",
+  france: "fr",
+  sweden: "se",
+  germany: "de",
+  japan: "jp",
+  "united-kingdom": "gb",
+  canada: "ca",
+  australia: "au",
+  netherlands: "nl",
+  india: "in",
+  turkey: "tr",
+  finland: "fi",
+  poland: "pl",
+  spain: "es",
+  "south-africa": "za",
+  mexico: "mx",
+  "saudi-arabia": "sa",
+  argentina: "ar",
+  "new-zealand": "nz",
+  nigeria: "ng",
+};
+
+function CountryFlag({ country, size = "md" }: { country: CountryProfile; size?: "sm" | "md" | "lg" | "xl" }) {
+  const flagCode = countryFlagCodes[country.id];
+  const sizeClass =
+    size === "xl"
+      ? "h-16 w-16 rounded-3xl"
+      : size === "lg"
+        ? "h-14 w-14 rounded-3xl"
+        : size === "sm"
+          ? "h-8 w-8 rounded-xl"
+          : "h-12 w-12 rounded-2xl";
+
+  return (
+    <span className={`grid ${sizeClass} shrink-0 place-items-center overflow-hidden bg-gray-50 shadow-inner`}>
+      {flagCode ? (
+        <img
+          src={`https://flagcdn.com/w160/${flagCode}.png`}
+          alt={`${country.name} flag`}
+          className="h-full w-full object-cover"
+          loading="lazy"
+        />
+      ) : (
+        <span className="text-xl">{country.flag}</span>
+      )}
+    </span>
+  );
+}
+
 function CountryCard({ country, selected, onSelect }: { country: CountryProfile; selected: boolean; onSelect: () => void }) {
   return (
     <button
@@ -547,7 +601,7 @@ function CountryCard({ country, selected, onSelect }: { country: CountryProfile;
     >
       <div className="mb-4 flex items-start justify-between gap-3">
         <div className="flex min-w-0 items-center gap-3">
-          <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-gray-50 text-3xl shadow-inner">{country.flag}</span>
+          <CountryFlag country={country} />
           <div className="min-w-0">
             <p className="truncate text-lg font-black">{country.name}</p>
             <p className="text-[11px] font-black uppercase tracking-[0.18em] text-[#19d3cf]">{country.identity}</p>
@@ -839,43 +893,45 @@ export default function CountriesPage() {
         </div>
 
         <div className="mb-6 grid gap-5 xl:grid-cols-[1.25fr_0.75fr]">
-          <div className="flex flex-col justify-center rounded-3xl border border-[#ff2fa8]/40 bg-white/88 px-4 py-5 shadow-sm backdrop-blur">
-            <div className="mb-3 flex items-center justify-start gap-4">
+          <div className="flex min-h-[210px] flex-col rounded-3xl border border-[#ff2fa8]/40 bg-white/88 px-4 py-5 shadow-sm backdrop-blur">
+            <div className="flex items-center justify-start gap-4">
               <p className="text-[11px] font-black uppercase tracking-[0.24em] text-gray-500">Region Filters</p>
             </div>
 
-            <div className="flex flex-wrap justify-start gap-2">
-              {regions.map((region) => (
-                <button
-                  key={region}
-                  type="button"
-                  onClick={() => setSelectedRegion(region)}
-                  className={`rounded-full border px-3.5 py-1.5 text-sm font-black transition-all duration-300 ${
-                    selectedRegion === region
-                      ? "border-[#19d3cf] bg-[#19d3cf] text-white shadow-lg shadow-[#19d3cf]/20"
-                      : "border-gray-200 bg-white/70 text-gray-700 hover:border-[#19d3cf]/60 hover:text-[#19d3cf]"
-                  }`}
-                >
-                  {region}
-                </button>
-              ))}
-            </div>
+            <div className="flex flex-1 flex-col justify-center">
+              <div className="flex flex-wrap justify-start gap-2">
+                {regions.map((region) => (
+                  <button
+                    key={region}
+                    type="button"
+                    onClick={() => setSelectedRegion(region)}
+                    className={`rounded-full border px-3.5 py-1.5 text-sm font-black transition-all duration-300 ${
+                      selectedRegion === region
+                        ? "border-[#19d3cf] bg-[#19d3cf] text-white shadow-lg shadow-[#19d3cf]/20"
+                        : "border-gray-200 bg-white/70 text-gray-700 hover:border-[#19d3cf]/60 hover:text-[#19d3cf]"
+                    }`}
+                  >
+                    {region}
+                  </button>
+                ))}
+              </div>
 
-            <div className="mt-3 flex flex-wrap justify-start gap-2">
-              {categories.map((category) => (
-                <button
-                  key={category}
-                  type="button"
-                  onClick={() => setSelectedCategory(category)}
-                  className={`rounded-full border px-3 py-1 text-xs font-black transition-all duration-300 ${
-                    selectedCategory === category
-                      ? "border-[#ff2fa8] bg-[#ff2fa8] text-white shadow-lg shadow-[#ff2fa8]/20"
-                      : "border-gray-200 bg-white/70 text-gray-700 hover:border-[#ff2fa8]/60 hover:text-[#ff2fa8]"
-                  }`}
-                >
-                  {category}
-                </button>
-              ))}
+              <div className="mt-3 flex flex-wrap justify-start gap-2">
+                {categories.map((category) => (
+                  <button
+                    key={category}
+                    type="button"
+                    onClick={() => setSelectedCategory(category)}
+                    className={`rounded-full border px-3 py-1 text-xs font-black transition-all duration-300 ${
+                      selectedCategory === category
+                        ? "border-[#ff2fa8] bg-[#ff2fa8] text-white shadow-lg shadow-[#ff2fa8]/20"
+                        : "border-gray-200 bg-white/70 text-gray-700 hover:border-[#ff2fa8]/60 hover:text-[#ff2fa8]"
+                    }`}
+                  >
+                    {category}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
 
@@ -912,7 +968,7 @@ export default function CountriesPage() {
               <p className="mb-2 text-[11px] font-black uppercase tracking-[0.24em] text-[#19d3cf]">Featured Nation</p>
               <div className="mb-4 flex items-start justify-between gap-4">
                 <div className="flex items-center gap-4">
-                  <span className="grid h-16 w-16 place-items-center rounded-3xl bg-gray-50 text-4xl shadow-inner">{featuredCountry.flag}</span>
+                  <CountryFlag country={featuredCountry} size="xl" />
                   <div>
                     <h2 className="text-3xl font-black">{featuredCountry.name}</h2>
                     <p className="font-black text-[#ff2fa8]">{featuredCountry.aura}</p>
@@ -959,10 +1015,37 @@ export default function CountriesPage() {
                 <h2 className="text-3xl font-black">{selectedCountry.name}</h2>
                 <p className="font-black text-[#19d3cf]">{selectedCountry.identity}</p>
               </div>
-              <span className="text-5xl">{selectedCountry.flag}</span>
+              <CountryFlag country={selectedCountry} size="xl" />
             </div>
 
             <p className="mb-5 text-sm font-semibold leading-relaxed text-gray-600">{selectedCountry.description}</p>
+
+            <div className="mb-5 grid gap-3 sm:grid-cols-3">
+              <div className="rounded-2xl border border-gray-200 bg-white/70 p-4">
+                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-gray-500">Atlas Rank</p>
+                <p className="mt-1 text-lg font-black text-[#ff2fa8]">#{selectedCountry.rank}</p>
+              </div>
+              <div className="rounded-2xl border border-gray-200 bg-white/70 p-4">
+                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-gray-500">Best Game</p>
+                <p className="mt-1 text-sm font-black">{selectedCountry.bestGame}</p>
+              </div>
+              <div className="rounded-2xl border border-gray-200 bg-white/70 p-4">
+                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-gray-500">Dominance Score</p>
+                <p className="mt-1 text-lg font-black text-[#19d3cf]">{selectedCountry.dominanceScore}</p>
+              </div>
+              <div className="rounded-2xl border border-gray-200 bg-white/70 p-4">
+                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-gray-500">Trend</p>
+                <p className={`mt-1 text-sm font-black ${trendClass(selectedCountry.trend)}`}>{trendLabel(selectedCountry.trend)}</p>
+              </div>
+              <div className="rounded-2xl border border-gray-200 bg-white/70 p-4">
+                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-gray-500">Region</p>
+                <p className="mt-1 text-sm font-black">{selectedCountry.region}</p>
+              </div>
+              <div className="rounded-2xl border border-gray-200 bg-white/70 p-4">
+                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-gray-500">Aura</p>
+                <p className="mt-1 text-sm font-black text-[#ff2fa8]">{selectedCountry.aura}</p>
+              </div>
+            </div>
 
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="rounded-2xl border border-gray-200 bg-white/70 p-4">
@@ -1063,7 +1146,7 @@ export default function CountriesPage() {
                       <td className="px-5 py-4 text-lg font-black text-[#ff2fa8]">#{country.rank}</td>
                       <td className="px-5 py-4">
                         <button type="button" onClick={() => selectCountry(country.id, true)} className="flex items-center gap-3 text-left">
-                          <span className="text-2xl">{country.flag}</span>
+                          <CountryFlag country={country} size="sm" />
                           <span className="font-black">{country.name}</span>
                         </button>
                       </td>
