@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 type Region =
   | "World"
@@ -590,7 +590,10 @@ export default function CountriesPage() {
   const [selectedRegion, setSelectedRegion] = useState<Region>("World");
   const [selectedCategory, setSelectedCategory] = useState<Category>("All");
   const [selectedCountryId, setSelectedCountryId] = useState(countries[0].id);
-  const [featuredIndex, setFeaturedIndex] = useState(0);
+  const [featuredCountryId, setFeaturedCountryId] = useState(countries[0].id);
+  const [featuredLocked, setFeaturedLocked] = useState(false);
+  const [featuredTransitioning, setFeaturedTransitioning] = useState(false);
+  const countryIdentityRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
@@ -632,24 +635,52 @@ export default function CountriesPage() {
   }, [filteredCountries]);
 
   useEffect(() => {
-    setFeaturedIndex(0);
     if (filteredCountries[0]) {
       setSelectedCountryId(filteredCountries[0].id);
+
+      if (!featuredLocked) {
+        setFeaturedCountryId(filteredCountries[0].id);
+      }
     }
-  }, [selectedCategory, selectedRegion, search, filteredCountries]);
+  }, [selectedCategory, selectedRegion, search, filteredCountries, featuredLocked]);
 
   useEffect(() => {
-    if (featuredPool.length <= 1) return;
+    if (featuredLocked || featuredPool.length <= 1) return;
 
-    const interval = window.setInterval(() => {
-      setFeaturedIndex((index) => (index + 1) % featuredPool.length);
-    }, 5000);
+    const showTimer = window.setTimeout(() => {
+      setFeaturedTransitioning(true);
 
-    return () => window.clearInterval(interval);
-  }, [featuredPool.length]);
+      const transitionTimer = window.setTimeout(() => {
+        setFeaturedCountryId((currentId) => {
+          const currentIndex = featuredPool.findIndex((country) => country.id === currentId);
+          const nextIndex = currentIndex >= 0 ? (currentIndex + 1) % featuredPool.length : 0;
+          return featuredPool[nextIndex]?.id ?? featuredPool[0].id;
+        });
 
-  const featuredCountry = featuredPool[featuredIndex] ?? countries[0];
+        setFeaturedTransitioning(false);
+      }, 3000);
+
+      return () => window.clearTimeout(transitionTimer);
+    }, 6000);
+
+    return () => window.clearTimeout(showTimer);
+  }, [featuredCountryId, featuredLocked, featuredPool]);
+
+  const featuredCountry = countries.find((country) => country.id === featuredCountryId) ?? featuredPool[0] ?? countries[0];
   const selectedCountry = countries.find((country) => country.id === selectedCountryId) ?? featuredCountry;
+
+  function selectCountry(countryId: string, scrollToIdentity = false) {
+    setSelectedCountryId(countryId);
+    setFeaturedCountryId(countryId);
+    setFeaturedLocked(true);
+    setFeaturedTransitioning(false);
+
+    if (scrollToIdentity) {
+      window.setTimeout(() => {
+        countryIdentityRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 50);
+    }
+  }
   const topMover = filteredCountries.reduce((best, country) => (country.trend > best.trend ? country : best), filteredCountries[0] ?? countries[0]);
   const averageScore = Math.round(filteredCountries.reduce((sum, country) => sum + country.dominanceScore, 0) / Math.max(filteredCountries.length, 1));
 
@@ -734,8 +765,8 @@ export default function CountriesPage() {
           <p className="mb-2 text-xs font-black uppercase tracking-[0.28em] text-[#19d3cf]">Countries</p>
           <div className="grid gap-5 lg:grid-cols-[1.25fr_0.75fr] lg:items-end">
             <div>
-              <h1 className="mb-2 text-2xl font-black tracking-tight md:text-3xl">Explore the gaming profile of every nation.</h1>
-              <p className="max-w-4xl text-sm font-semibold leading-relaxed text-gray-600 md:text-base">
+              <h1 className="mb-2 text-xl font-black tracking-tight">Explore the gaming profile of every nation.</h1>
+              <p className="max-w-4xl text-sm font-semibold leading-relaxed text-gray-600">
                 Browse each country’s competitive identity, strongest games, current trend, and the traits that make its players different.
               </p>
             </div>
@@ -754,7 +785,7 @@ export default function CountriesPage() {
         </div>
 
         <div className="mb-6 grid gap-5 xl:grid-cols-[1.25fr_0.75fr]">
-          <div className="rounded-3xl border border-[#ff2fa8]/40 bg-white/88 p-5 shadow-sm backdrop-blur">
+          <div className="rounded-3xl border border-[#ff2fa8]/40 bg-white/88 p-4 shadow-sm backdrop-blur">
             <div className="mb-4 flex items-center justify-between gap-4">
               <p className="text-[11px] font-black uppercase tracking-[0.24em] text-gray-500">Region Filters</p>
               <p className="text-xs font-black text-[#19d3cf]">{filteredCountries.length} countries shown</p>
@@ -766,7 +797,7 @@ export default function CountriesPage() {
                   key={region}
                   type="button"
                   onClick={() => setSelectedRegion(region)}
-                  className={`rounded-full border px-5 py-3 text-sm font-black transition-all duration-300 ${
+                  className={`rounded-full border px-4 py-2 text-sm font-black transition-all duration-300 ${
                     selectedRegion === region
                       ? "border-[#19d3cf] bg-[#19d3cf] text-white shadow-lg shadow-[#19d3cf]/20"
                       : "border-gray-200 bg-white/70 text-gray-700 hover:border-[#19d3cf]/60 hover:text-[#19d3cf]"
@@ -777,13 +808,13 @@ export default function CountriesPage() {
               ))}
             </div>
 
-            <div className="mt-5 flex flex-wrap gap-3">
+            <div className="mt-4 flex flex-wrap gap-2">
               {categories.map((category) => (
                 <button
                   key={category}
                   type="button"
                   onClick={() => setSelectedCategory(category)}
-                  className={`rounded-full border px-4 py-2 text-xs font-black transition-all duration-300 ${
+                  className={`rounded-full border px-3 py-1.5 text-xs font-black transition-all duration-300 ${
                     selectedCategory === category
                       ? "border-[#ff2fa8] bg-[#ff2fa8] text-white shadow-lg shadow-[#ff2fa8]/20"
                       : "border-gray-200 bg-white/70 text-gray-700 hover:border-[#ff2fa8]/60 hover:text-[#ff2fa8]"
@@ -796,28 +827,27 @@ export default function CountriesPage() {
           </div>
 
           <div className="grid gap-3 sm:grid-cols-3 xl:grid-cols-1">
-            <div className="rounded-3xl border border-[#ff2fa8]/40 bg-white/88 p-5 shadow-sm backdrop-blur">
-              <p className="text-[11px] font-black uppercase tracking-[0.22em] text-gray-500">Average Score</p>
-              <p className="mt-2 text-3xl font-black text-[#19d3cf]">{averageScore}</p>
+            <div className="rounded-3xl border border-[#ff2fa8]/40 bg-white/88 p-4 shadow-sm backdrop-blur">
+              <p className="text-[10px] font-black uppercase tracking-[0.22em] text-gray-500">Average Score</p>
+              <p className="mt-1 text-2xl font-black text-[#19d3cf]">{averageScore}</p>
             </div>
-            <div className="rounded-3xl border border-[#ff2fa8]/40 bg-white/88 p-5 shadow-sm backdrop-blur">
-              <p className="text-[11px] font-black uppercase tracking-[0.22em] text-gray-500">Top Mover</p>
-              <p className="mt-2 truncate text-xl font-black">{topMover?.name}</p>
-              <p className={`text-sm font-black ${trendClass(topMover?.trend ?? 0)}`}>{trendLabel(topMover?.trend ?? 0)}</p>
+            <div className="rounded-3xl border border-[#ff2fa8]/40 bg-white/88 p-4 shadow-sm backdrop-blur">
+              <p className="text-[10px] font-black uppercase tracking-[0.22em] text-gray-500">Top Mover</p>
+              <p className="mt-1 truncate text-lg font-black">{topMover?.name}</p>
+              <p className={`text-xs font-black ${trendClass(topMover?.trend ?? 0)}`}>{trendLabel(topMover?.trend ?? 0)}</p>
             </div>
-            <div className="rounded-3xl border border-[#ff2fa8]/40 bg-white/88 p-5 shadow-sm backdrop-blur">
-              <p className="text-[11px] font-black uppercase tracking-[0.22em] text-gray-500">Current Lens</p>
-              <p className="mt-2 text-lg font-black text-[#ff2fa8]">{selectedCategory}</p>
+            <div className="rounded-3xl border border-[#ff2fa8]/40 bg-white/88 p-4 shadow-sm backdrop-blur">
+              <p className="text-[10px] font-black uppercase tracking-[0.22em] text-gray-500">Current Lens</p>
+              <p className="mt-1 text-base font-black text-[#ff2fa8]">{selectedCategory}</p>
             </div>
           </div>
         </div>
 
         <section className="mb-6 grid gap-5 xl:grid-cols-[0.95fr_1.05fr]">
           <div className="relative overflow-hidden rounded-3xl border border-[#ff2fa8]/45 bg-white/92 p-6 shadow-sm backdrop-blur">
-            <div className="absolute -right-16 -top-16 h-48 w-48 rounded-full bg-[#19d3cf]/12" />
-            <div className="absolute -bottom-20 left-24 h-56 w-56 rounded-full bg-[#ff2fa8]/10" />
-
-            <div className="relative">
+            <div className={`relative transition-all duration-[3000ms] ease-in-out ${
+              featuredTransitioning ? "translate-y-2 opacity-0 blur-sm" : "translate-y-0 opacity-100 blur-0"
+            }`}>
               <p className="mb-2 text-[11px] font-black uppercase tracking-[0.24em] text-[#19d3cf]">Featured Nation</p>
               <div className="mb-4 flex items-start justify-between gap-4">
                 <div className="flex items-center gap-4">
@@ -861,7 +891,7 @@ export default function CountriesPage() {
             </div>
           </div>
 
-          <div className="rounded-3xl border border-[#ff2fa8]/45 bg-white/92 p-6 shadow-sm backdrop-blur">
+          <section ref={countryIdentityRef} className="scroll-mt-28 rounded-3xl border border-[#ff2fa8]/45 bg-white/92 p-6 shadow-sm backdrop-blur">
             <p className="mb-2 text-[11px] font-black uppercase tracking-[0.24em] text-[#ff2fa8]">Country Identity</p>
             <div className="mb-4 flex items-start justify-between gap-4">
               <div>
@@ -900,7 +930,7 @@ export default function CountriesPage() {
                 <p className="text-sm font-black">{selectedCountry.primaryGenre}</p>
               </div>
             </div>
-          </div>
+          </section>
         </section>
 
         <section className="mb-6 rounded-3xl border border-[#ff2fa8]/45 bg-white/92 p-5 shadow-sm backdrop-blur">
@@ -919,7 +949,7 @@ export default function CountriesPage() {
                   key={country.id}
                   country={country}
                   selected={selectedCountry.id === country.id}
-                  onSelect={() => setSelectedCountryId(country.id)}
+                  onSelect={() => selectCountry(country.id, true)}
                 />
               ))}
             </div>
@@ -955,7 +985,7 @@ export default function CountriesPage() {
                   <tr key={country.id} className="border-b border-gray-200/80 transition-colors hover:bg-[#19d3cf]/5">
                     <td className="px-5 py-4 text-lg font-black text-[#ff2fa8]">#{country.rank}</td>
                     <td className="px-5 py-4">
-                      <button type="button" onClick={() => setSelectedCountryId(country.id)} className="flex items-center gap-3 text-left">
+                      <button type="button" onClick={() => selectCountry(country.id, true)} className="flex items-center gap-3 text-left">
                         <span className="text-2xl">{country.flag}</span>
                         <span className="font-black">{country.name}</span>
                       </button>
