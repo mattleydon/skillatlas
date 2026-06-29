@@ -183,6 +183,40 @@ function setupRankingsDropdown() {
   });
 }
 
+
+function alignHeaderNavigationToThemeToggle() {
+  const switchButton = document.querySelector<HTMLElement>(".skillatlas-theme-switch");
+  const navs = Array.from(document.querySelectorAll<HTMLElement>("header nav"));
+
+  navs.forEach((nav) => {
+    const items = Array.from(nav.children).filter((child): child is HTMLElement => child instanceof HTMLElement);
+
+    items.forEach((item) => {
+      item.style.transform = "";
+    });
+
+    if (!switchButton || items.length < 2) return;
+
+    const switchRect = switchButton.getBoundingClientRect();
+
+    if (switchRect.width <= 0) return;
+
+    const switchCentre = switchRect.left + switchRect.width / 2;
+    const itemRects = items.map((item) => item.getBoundingClientRect());
+    const firstCentre = itemRects[0].left + itemRects[0].width / 2;
+    const spacing = (switchCentre - firstCentre) / Math.max(items.length - 1, 1);
+
+    items.forEach((item, index) => {
+      const rect = itemRects[index];
+      const currentCentre = rect.left + rect.width / 2;
+      const targetCentre = firstCentre + spacing * index;
+      const offset = targetCentre - currentCentre;
+
+      item.style.transform = `translateX(${offset.toFixed(2)}px)`;
+    });
+  });
+}
+
 function updateActiveHeaderNavigation() {
   setupRankingsDropdown();
 
@@ -217,6 +251,8 @@ function updateActiveHeaderNavigation() {
       item.setAttribute("aria-current", itemActive ? "page" : "false");
     });
   });
+
+  window.requestAnimationFrame(alignHeaderNavigationToThemeToggle);
 }
 
 function isSkillAtlasTitleImage(image: HTMLImageElement) {
@@ -322,6 +358,7 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
     observer.observe(document.body, { childList: true, subtree: true });
 
     window.addEventListener("popstate", updateActiveHeaderNavigation);
+    window.addEventListener("resize", updateActiveHeaderNavigation);
     window.addEventListener("skillatlas-theme-change", updateActiveHeaderNavigation);
 
     const handleClick = () => {
@@ -334,6 +371,7 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
     return () => {
       observer.disconnect();
       window.removeEventListener("popstate", updateActiveHeaderNavigation);
+      window.removeEventListener("resize", updateActiveHeaderNavigation);
       window.removeEventListener("skillatlas-theme-change", updateActiveHeaderNavigation);
       document.removeEventListener("click", handleClick);
     };
@@ -724,10 +762,6 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
           margin-left: clamp(12px, 2.2vw, 38px) !important;
           margin-right: clamp(6px, 1vw, 18px) !important;
           max-width: none !important;
-        }
-
-        header nav > a:last-child {
-          transform: translateX(18px);
         }
 
         header nav .skillatlas-rankings-dropdown {

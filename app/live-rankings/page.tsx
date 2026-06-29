@@ -258,60 +258,71 @@ export default function LiveRankingsPage() {
             </div>
           </div>
 
-          <div className="rounded-3xl border border-[#ff2fa8]/45 bg-white/92 p-5 shadow-sm backdrop-blur">
-            <div className="mb-4 flex items-center justify-between gap-4">
+          <div className="overflow-hidden rounded-3xl border border-[#ff2fa8]/45 bg-white/92 shadow-sm backdrop-blur">
+            <div className="flex items-center justify-between gap-4 border-b border-[#ff2fa8]/20 p-5">
               <p className="text-[11px] font-black uppercase tracking-[0.24em] text-[#19d3cf]">Live Board</p>
               <p className="text-xs font-black text-[#ff2fa8]">{selectedGame}</p>
             </div>
 
-            <div className="grid gap-3">
-              {countries.map((country, index) => (
-                <div
-                  key={country.name}
-                  draggable
-                  onDragStart={() => setDraggedName(country.name)}
-                  onDragOver={(event) => event.preventDefault()}
-                  onDrop={(event) => handleDrop(event, index)}
-                  className={`group grid cursor-grab grid-cols-[auto_1fr_auto] items-center gap-4 rounded-3xl border p-4 transition-all duration-300 active:cursor-grabbing ${
-                    draggedName === country.name
-                      ? "border-[#19d3cf] bg-[#19d3cf]/15 opacity-70"
-                      : "border-gray-200 bg-white/78 hover:-translate-y-0.5 hover:border-[#19d3cf]/55"
-                  }`}
-                >
-                  <div className="text-2xl font-black text-[#ff2fa8]">#{index + 1}</div>
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[900px] border-collapse text-left">
+                <thead>
+                  <tr className="border-b border-gray-200 text-[11px] uppercase tracking-[0.16em] text-gray-500">
+                    <th className="px-5 py-4 font-black">Rank</th>
+                    <th className="px-5 py-4 font-black">Country</th>
+                    <th className="px-5 py-4 font-black">Live Score</th>
+                    <th className="px-5 py-4 font-black">Momentum</th>
+                    <th className="px-5 py-4 font-black">Moved By</th>
+                    <th className="px-5 py-4 font-black">Why</th>
+                    <th className="px-5 py-4 font-black">Move</th>
+                  </tr>
+                </thead>
 
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-3">
-                      <span className="grid h-9 w-9 shrink-0 place-items-center overflow-hidden rounded-xl bg-gray-50 shadow-inner">
-                        <img src={`https://flagcdn.com/w80/${country.code}.png`} alt={`${country.name} flag`} className="h-full w-full object-cover" />
-                      </span>
-                      <div className="min-w-0">
-                        <p className="truncate text-lg font-black">{country.name}</p>
-                        <p className="text-xs font-black text-gray-500">{country.movedBy}</p>
-                      </div>
-                    </div>
-
-                    <div className="mt-3 flex flex-wrap gap-2">
-                      {country.reasons.map((reason) => (
-                        <span key={reason} className="rounded-full border border-[#19d3cf]/25 bg-[#19d3cf]/10 px-3 py-1 text-xs font-black text-gray-700">{reason}</span>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-3">
-                    <div className="text-right">
-                      <p className="text-xl font-black text-[#19d3cf]">{country.score}</p>
-                      <p className={`text-xs font-black ${country.momentum >= 0 ? "text-[#19d3cf]" : "text-[#ff2fa8]"}`}>
+                <tbody>
+                  {countries.map((country, index) => (
+                    <tr
+                      key={country.name}
+                      draggable
+                      onDragStart={() => setDraggedName(country.name)}
+                      onDragOver={(event) => event.preventDefault()}
+                      onDrop={(event) => handleDrop(event, index)}
+                      className={`cursor-grab border-b border-gray-200/80 transition-all duration-300 active:cursor-grabbing ${
+                        draggedName === country.name ? "bg-[#19d3cf]/15 opacity-70" : "hover:bg-[#19d3cf]/5"
+                      }`}
+                    >
+                      <td className="px-5 py-4 text-lg font-black text-[#ff2fa8]">#{index + 1}</td>
+                      <td className="px-5 py-4">
+                        <div className="flex items-center gap-3">
+                          <span className="grid h-8 w-8 shrink-0 place-items-center overflow-hidden rounded-xl bg-gray-50 shadow-inner">
+                            <img src={`https://flagcdn.com/w80/${country.code}.png`} alt={`${country.name} flag`} className="h-full w-full object-cover" />
+                          </span>
+                          <span className="font-black">{country.name}</span>
+                        </div>
+                      </td>
+                      <td className="px-5 py-4">
+                        <span className="rounded-full bg-[#19d3cf]/12 px-3 py-1 text-sm font-black text-[#19d3cf]">{country.score}</span>
+                      </td>
+                      <td className={`px-5 py-4 text-sm font-black ${country.momentum >= 0 ? "text-[#19d3cf]" : "text-[#ff2fa8]"}`}>
                         {country.momentum >= 0 ? `▲ ${country.momentum}` : `▼ ${Math.abs(country.momentum)}`}
-                      </p>
-                    </div>
-                    <div className="grid gap-1">
-                      <button type="button" onClick={() => moveCountry(index, index - 1)} className="rounded-full border border-[#19d3cf]/35 px-2 py-1 text-xs font-black text-[#19d3cf]">↑</button>
-                      <button type="button" onClick={() => moveCountry(index, index + 1)} className="rounded-full border border-[#ff2fa8]/35 px-2 py-1 text-xs font-black text-[#ff2fa8]">↓</button>
-                    </div>
-                  </div>
-                </div>
-              ))}
+                      </td>
+                      <td className="px-5 py-4 text-sm font-black text-gray-700">{country.movedBy}</td>
+                      <td className="px-5 py-4">
+                        <div className="flex flex-wrap gap-2">
+                          {country.reasons.map((reason) => (
+                            <span key={reason} className="rounded-full border border-[#19d3cf]/25 bg-[#19d3cf]/10 px-3 py-1 text-xs font-black text-gray-700">{reason}</span>
+                          ))}
+                        </div>
+                      </td>
+                      <td className="px-5 py-4">
+                        <div className="flex gap-2">
+                          <button type="button" onClick={() => moveCountry(index, index - 1)} className="rounded-full border border-[#19d3cf]/35 px-3 py-1 text-xs font-black text-[#19d3cf]">↑</button>
+                          <button type="button" onClick={() => moveCountry(index, index + 1)} className="rounded-full border border-[#ff2fa8]/35 px-3 py-1 text-xs font-black text-[#ff2fa8]">↓</button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
         </div>
