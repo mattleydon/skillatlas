@@ -27,7 +27,7 @@ const rankingSignals = [
   },
   {
     title: "Community opinion",
-    description: "User Rankings and Live Rankings will let players vote, argue, drag, reorder, and build the public pulse of the site.",
+    description: "User Rankings and Live Rankings will let players vote, argue, reorder, and build the public pulse of the site.",
   },
   {
     title: "Momentum",
@@ -42,21 +42,6 @@ const siteAreas = [
     href: "/",
   },
   {
-    name: "World Map",
-    description: "A visual globe layer for exploring country strength by game and geography.",
-    href: "/world-map",
-  },
-  {
-    name: "Countries",
-    description: "Country profile cards with rankings, strengths, weaknesses, identities, and gaming fingerprints.",
-    href: "/countries",
-  },
-  {
-    name: "Players",
-    description: "Player archetypes, roles, fictional profiles for now, and eventually real user-created SkillAtlas profiles.",
-    href: "/profiles",
-  },
-  {
     name: "User Rankings",
     description: "Community voting by game. Players decide which countries deserve to rise or fall.",
     href: "/user-rankings",
@@ -65,6 +50,21 @@ const siteAreas = [
     name: "Live Rankings",
     description: "A real-time ranking sandbox where users can move countries up and down the leaderboard.",
     href: "/live-rankings",
+  },
+  {
+    name: "Players",
+    description: "Player archetypes, roles, and eventually real user-created SkillAtlas profiles.",
+    href: "/profiles",
+  },
+  {
+    name: "World Map",
+    description: "A visual globe layer for exploring country strength by game and geography.",
+    href: "/world-map",
+  },
+  {
+    name: "Countries",
+    description: "Country profile cards with rankings, strengths, weaknesses, identities, and gaming fingerprints.",
+    href: "/countries",
   },
 ];
 
@@ -228,7 +228,7 @@ export default function AboutPage() {
 
       <section className="relative z-10 mx-auto max-w-7xl px-8 pb-16 pt-[150px]">
         <div className="mb-6 overflow-hidden rounded-3xl border border-[#ff2fa8]/45 bg-white/92 shadow-sm backdrop-blur">
-          <div className="grid gap-6 p-6 lg:grid-cols-[1.15fr_0.85fr] lg:items-end">
+          <div className="grid gap-6 p-6 lg:grid-cols-[1.15fr_0.85fr] lg:items-start">
             <div>
               <p className="mb-2 text-xs font-black uppercase tracking-[0.28em] text-[#19d3cf]">About SkillAtlas</p>
               <h1 className="mb-3 max-w-4xl text-3xl font-black tracking-tight md:text-4xl">
@@ -275,6 +275,9 @@ export default function AboutPage() {
               <p>
                 It should be useful for esports fans, casual gamers, content creators, analysts, and anyone who has ever wondered, “Why is that country so good at this game?”
               </p>
+              <p>
+                The bigger vision is to make global gaming feel connected: a place where a player in Sydney, Seoul, São Paulo, Copenhagen, or Lagos can see their scene represented and compare it with the rest of the world.
+              </p>
             </div>
           </div>
 
@@ -294,8 +297,8 @@ export default function AboutPage() {
               <p className="mb-2 text-[11px] font-black uppercase tracking-[0.24em] text-[#19d3cf]">How the site works</p>
               <h2 className="text-2xl font-black">The SkillAtlas ecosystem.</h2>
             </div>
-            <p className="max-w-xl text-sm font-semibold leading-relaxed text-gray-600">
-              Each page answers a different part of the same question: where does gaming skill come from?
+            <p className="max-w-3xl whitespace-nowrap text-sm font-semibold leading-relaxed text-gray-600">
+              Each page answers one question: where does gaming skill come from?
             </p>
           </div>
 
@@ -319,11 +322,11 @@ export default function AboutPage() {
             <h2 className="mb-5 text-2xl font-black">Where it can go next.</h2>
             <div className="space-y-3">
               {roadmapItems.map((item, index) => (
-                <div key={item} className="flex gap-3 rounded-2xl border border-gray-200 bg-white/70 p-4">
+                <div key={item} className="flex min-h-[76px] items-center gap-3 rounded-2xl border border-gray-200 bg-white/70 p-4">
                   <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-[#ff2fa8]/10 text-xs font-black text-[#ff2fa8]">
                     {index + 1}
                   </span>
-                  <p className="text-sm font-bold leading-relaxed text-gray-600">{item}</p>
+                  <p className="text-sm font-bold leading-snug text-gray-600">{item}</p>
                 </div>
               ))}
             </div>
