@@ -443,6 +443,25 @@ function RankWheel({
     return 0.25;
   }
 
+  function numberColour(distance: number) {
+    if (distance === 0) return "#ff2fa8";
+    if (distance === 1) return "rgba(255,47,168,0.72)";
+    if (distance === 2) return "rgba(255,47,168,0.48)";
+    if (distance === 3) return "rgba(255,47,168,0.30)";
+    return "#111827";
+  }
+
+  function numberStroke(distance: number) {
+    if (distance <= 3) return "0.75px rgba(15,23,42,0.92)";
+    return "0.55px rgba(15,23,42,0.72)";
+  }
+
+  function numberShadow(distance: number) {
+    if (distance === 0) return "0 0 2px rgba(255,255,255,0.86), 0 0 13px rgba(255,47,168,0.44), 0 7px 16px rgba(15,23,42,0.26)";
+    if (distance <= 3) return "0 0 2px rgba(255,255,255,0.72), 0 0 9px rgba(255,47,168,0.20), 0 5px 12px rgba(15,23,42,0.22)";
+    return "0 0 2px rgba(255,255,255,0.62), 0 4px 10px rgba(15,23,42,0.22)";
+  }
+
   return (
     <div
       className="skillatlas-rank-wheel fixed bottom-0 left-0 z-[95] h-[208px] w-[208px] overflow-visible"
@@ -486,19 +505,16 @@ function RankWheel({
               event.preventDefault();
               onDropRank(rank - 1);
             }}
-            className={`absolute border-0 bg-transparent p-0 text-[1.55rem] font-black leading-none tracking-[-0.08em] transition-all duration-[420ms] ease-[cubic-bezier(0.16,1,0.3,1)] ${
-              active ? "text-[#ff2fa8]" : "text-[#19d3cf]"
-            }`}
+            className="absolute border-0 bg-transparent p-0 text-[1.55rem] font-black leading-none tracking-[-0.08em] transition-all duration-[420ms] ease-[cubic-bezier(0.16,1,0.3,1)]"
             style={{
               left,
               bottom,
+              color: numberColour(distanceFromActive),
               opacity,
               transform: `translate(-50%, 50%) scale(${scale})`,
               transformOrigin: "center",
-              WebkitTextStroke: active ? "0.75px rgba(255,255,255,0.96)" : "0.65px rgba(15,23,42,0.72)",
-              textShadow: active
-                ? "0 0 2px rgba(255,255,255,0.95), 0 0 13px rgba(255,47,168,0.70), 0 8px 18px rgba(15,23,42,0.28)"
-                : "0 0 2px rgba(255,255,255,0.88), 0 0 12px rgba(25,211,207,0.68), 0 6px 14px rgba(15,23,42,0.22)",
+              WebkitTextStroke: numberStroke(distanceFromActive),
+              textShadow: numberShadow(distanceFromActive),
             }}
             aria-label={`Move ${draggedName} to rank ${rank}`}
           >
