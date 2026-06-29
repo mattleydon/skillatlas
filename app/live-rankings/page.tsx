@@ -433,7 +433,7 @@ function RankWheel({
   const activeRank = activeIndex + 1;
   const ranks = visibleRankWindow(total, activeIndex);
   const activeWindowIndex = ranks.indexOf(activeRank);
-  const radius = 242;
+  const radius = 198;
 
   function sizeForDistance(distance: number) {
     if (distance === 0) return 1;
@@ -445,7 +445,7 @@ function RankWheel({
 
   return (
     <div
-      className="skillatlas-rank-wheel fixed bottom-0 left-0 z-[95] h-[238px] w-[238px] overflow-visible"
+      className="skillatlas-rank-wheel fixed bottom-0 left-0 z-[95] h-[208px] w-[208px] overflow-visible"
       onDragOver={(event) => event.preventDefault()}
       onDragLeave={(event) => {
         if (event.currentTarget === event.target) setTargetIndex(draggedIndex);
@@ -486,7 +486,7 @@ function RankWheel({
               event.preventDefault();
               onDropRank(rank - 1);
             }}
-            className={`absolute border-0 bg-transparent p-0 text-[2rem] font-black leading-none transition-all duration-[420ms] ease-[cubic-bezier(0.16,1,0.3,1)] ${
+            className={`absolute border-0 bg-transparent p-0 text-[1.55rem] font-black leading-none transition-all duration-[420ms] ease-[cubic-bezier(0.16,1,0.3,1)] ${
               active ? "text-[#ff2fa8] drop-shadow-[0_8px_18px_rgba(255,47,168,0.34)]" : "text-[#111827]"
             }`}
             style={{
