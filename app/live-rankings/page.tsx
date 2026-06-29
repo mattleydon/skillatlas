@@ -438,11 +438,7 @@ function RankWheel({
   return (
     <div
       className="skillatlas-rank-wheel fixed bottom-0 left-0 z-[95] h-[190px] w-[190px] overflow-visible"
-      onDragOver={(event) => {
-                      event.preventDefault();
-                      setTargetIndex(index);
-                    }}
-                    onDragEnter={() => setWheelTargetIndex(index)}
+      onDragOver={(event) => event.preventDefault()}
       onDragLeave={(event) => {
         if (event.currentTarget === event.target) setTargetIndex(draggedIndex);
       }}
