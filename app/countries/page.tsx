@@ -839,12 +839,12 @@ export default function CountriesPage() {
         </div>
 
         <div className="mb-6 grid gap-5 xl:grid-cols-[1.25fr_0.75fr]">
-          <div className="rounded-3xl border border-[#ff2fa8]/40 bg-white/88 p-3 shadow-sm backdrop-blur">
-            <div className="mb-2 flex items-center justify-between gap-4">
+          <div className="flex flex-col justify-center rounded-3xl border border-[#ff2fa8]/40 bg-white/88 px-4 py-5 shadow-sm backdrop-blur">
+            <div className="mb-3 flex items-center justify-start gap-4">
               <p className="text-[11px] font-black uppercase tracking-[0.24em] text-gray-500">Region Filters</p>
             </div>
 
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap justify-start gap-2">
               {regions.map((region) => (
                 <button
                   key={region}
@@ -861,7 +861,7 @@ export default function CountriesPage() {
               ))}
             </div>
 
-            <div className="mt-3 flex flex-wrap justify-center gap-2">
+            <div className="mt-3 flex flex-wrap justify-start gap-2">
               {categories.map((category) => (
                 <button
                   key={category}
