@@ -1130,7 +1130,7 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
           font-size: 20px;
           line-height: 1;
           vertical-align: middle;
-          transform: translateY(0);
+          transform: translateY(-1.5px);
         }
 
         .skillatlas-live-chat-emoji-trigger:hover,
