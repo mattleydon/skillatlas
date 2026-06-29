@@ -424,14 +424,10 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
       emojiNode.textContent = emoji.symbol;
     }
 
-    const trailingSpace = document.createTextNode("\u00a0");
-    const fragment = document.createDocumentFragment();
-    fragment.append(emojiNode, trailingSpace);
-
     range.deleteContents();
-    range.insertNode(fragment);
-    range.setStartAfter(trailingSpace);
-    range.setEndAfter(trailingSpace);
+    range.insertNode(emojiNode);
+    range.setStartAfter(emojiNode);
+    range.setEndAfter(emojiNode);
 
     const selection = window.getSelection();
     selection?.removeAllRanges();
@@ -439,7 +435,6 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
 
     savedEditorRangeRef.current = range.cloneRange();
     setCommentEditorEmpty(false);
-    setEmojiMenuOpen(false);
   }
 
   function serializeEditorNode(node: ChildNode): string {
@@ -447,7 +442,7 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
 
     if (node instanceof HTMLElement) {
       const emojiCode = node.dataset.emojiCode;
-      if (emojiCode) return ` ${emojiCode} `;
+      if (emojiCode) return emojiCode;
 
       if (node.tagName === "BR") return "\n";
     }
@@ -826,6 +821,7 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
         }
 
         .skillatlas-live-chat-close {
+          position: relative;
           display: grid;
           width: 32px;
           height: 32px;
@@ -834,13 +830,35 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
           border-radius: 999px;
           background: rgba(255, 255, 255, 0.82);
           color: #111827;
-          font-size: 18px;
+          font-size: 0;
           font-weight: 900;
-          line-height: 1;
+          line-height: 0;
+          padding: 0;
           transition:
             border-color 180ms ease,
             color 180ms ease,
             transform 180ms ease;
+        }
+
+        .skillatlas-live-chat-close::before,
+        .skillatlas-live-chat-close::after {
+          content: "";
+          position: absolute;
+          left: 50%;
+          top: 50%;
+          width: 13px;
+          height: 2.4px;
+          border-radius: 999px;
+          background: currentColor;
+          transform-origin: center;
+        }
+
+        .skillatlas-live-chat-close::before {
+          transform: translate(-50%, -50%) rotate(45deg);
+        }
+
+        .skillatlas-live-chat-close::after {
+          transform: translate(-50%, -50%) rotate(-45deg);
         }
 
         .skillatlas-live-chat-close:hover {
@@ -1095,6 +1113,7 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
           font-size: 18px;
           font-weight: 950;
           line-height: 1;
+          padding: 0;
           transition:
             border-color 160ms ease,
             transform 160ms ease,
@@ -1102,11 +1121,16 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
         }
 
         .skillatlas-live-chat-emoji-trigger .skillatlas-custom-comment-emoji {
+          display: flex;
           width: 26px;
           height: 26px;
+          align-items: center;
+          justify-content: center;
           margin: 0;
-          font-size: 18px;
+          font-size: 20px;
+          line-height: 1;
           vertical-align: middle;
+          transform: translateY(0);
         }
 
         .skillatlas-live-chat-emoji-trigger:hover,
