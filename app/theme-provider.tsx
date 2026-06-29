@@ -144,13 +144,12 @@ function setupRankingsDropdown() {
     wrapper.className = "skillatlas-rankings-dropdown";
     wrapper.setAttribute("data-skillatlas-rankings-dropdown", "true");
 
-    const trigger = document.createElement("button");
-    trigger.type = "button";
+    const trigger = document.createElement("a");
+    trigger.href = "/";
     trigger.className = rankingsLink.className;
     trigger.classList.add("skillatlas-rankings-trigger");
     trigger.innerHTML = '<span>Rankings</span>';
     trigger.setAttribute("aria-haspopup", "true");
-    trigger.setAttribute("aria-expanded", "false");
 
     const menu = document.createElement("div");
     menu.className = "skillatlas-rankings-menu";
@@ -174,20 +173,12 @@ function setupRankingsDropdown() {
     wrapper.append(trigger, menu);
     rankingsLink.replaceWith(wrapper);
 
-    wrapper.addEventListener("mouseenter", () => trigger.setAttribute("aria-expanded", "true"));
-    wrapper.addEventListener("mouseleave", () => trigger.setAttribute("aria-expanded", "false"));
-    wrapper.addEventListener("focusin", () => trigger.setAttribute("aria-expanded", "true"));
     wrapper.addEventListener("focusout", () => {
       window.setTimeout(() => {
         if (!wrapper.contains(document.activeElement)) {
-          trigger.setAttribute("aria-expanded", "false");
+          trigger.blur();
         }
       }, 0);
-    });
-
-    trigger.addEventListener("click", () => {
-      const open = trigger.getAttribute("aria-expanded") === "true";
-      trigger.setAttribute("aria-expanded", open ? "false" : "true");
     });
   });
 }
@@ -728,7 +719,15 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
 
 
         header nav {
+          flex: 1 1 auto !important;
           justify-content: space-between !important;
+          margin-left: clamp(12px, 2.2vw, 38px) !important;
+          margin-right: clamp(6px, 1vw, 18px) !important;
+          max-width: none !important;
+        }
+
+        header nav > a:last-child {
+          transform: translateX(-18px);
         }
 
         header nav .skillatlas-rankings-dropdown {
@@ -742,10 +741,10 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
         header nav .skillatlas-rankings-dropdown::after {
           content: "";
           position: absolute;
-          left: -36px;
-          right: -36px;
+          left: -54px;
+          right: -54px;
           top: 100%;
-          height: 26px;
+          height: 46px;
         }
 
         header nav .skillatlas-rankings-trigger {
@@ -759,6 +758,7 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
           font-weight: 700;
           line-height: 1;
           padding: 0;
+          text-decoration: none;
         }
 
         header nav .skillatlas-rankings-trigger.skillatlas-active-nav {
@@ -769,9 +769,9 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
           pointer-events: none;
           position: absolute;
           left: 50%;
-          top: calc(100% + 4px);
+          top: calc(100% + 2px);
           z-index: 80;
-          width: 232px;
+          width: 248px;
           transform: translateX(-50%) translateY(-6px) scale(0.98);
           overflow: hidden;
           border: 1px solid rgba(255, 47, 168, 0.28);
@@ -790,7 +790,7 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
 
         header nav .skillatlas-rankings-dropdown:hover .skillatlas-rankings-menu,
         header nav .skillatlas-rankings-dropdown:focus-within .skillatlas-rankings-menu,
-        header nav .skillatlas-rankings-trigger[aria-expanded="true"] + .skillatlas-rankings-menu {
+        header nav .skillatlas-rankings-trigger:focus + .skillatlas-rankings-menu {
           pointer-events: auto;
           opacity: 1;
           transform: translateX(-50%) translateY(0) scale(1);
