@@ -21,9 +21,248 @@ const initialCountries: LiveCountry[] = [
   { name: "Brazil", code: "br", score: 93, momentum: 14, movedBy: "FPS voters", reasons: ["Aggression", "Aim", "Fan energy"] },
   { name: "France", code: "fr", score: 92, momentum: 6, movedBy: "Rocket League voters", reasons: ["Aerial play", "Technical depth", "Clubs"] },
   { name: "Sweden", code: "se", score: 91, momentum: -2, movedBy: "Legacy voters", reasons: ["CS history", "LAN culture", "AWPers"] },
+  { name: "Germany", code: "de", score: 90, momentum: 3, movedBy: "Structure voters", reasons: ["Organisation", "Sports titles", "Stable scene"] },
   { name: "Japan", code: "jp", score: 89, momentum: 5, movedBy: "Fighting game voters", reasons: ["Precision", "Arcade roots", "Patience"] },
+  { name: "United Kingdom", code: "gb", score: 88, momentum: 4, movedBy: "Hybrid voters", reasons: ["Adaptability", "Rocket League", "FPS support"] },
   { name: "Canada", code: "ca", score: 87, momentum: 8, movedBy: "Valorant voters", reasons: ["Composure", "FPS skill", "NA scene"] },
   { name: "Australia", code: "au", score: 86, momentum: 4, movedBy: "OCE voters", reasons: ["Resilience", "FPS grit", "Distance fighter"] },
+  { name: "Netherlands", code: "nl", score: 85, momentum: 5, movedBy: "Rocket League voters", reasons: ["Precision", "Small-scene depth", "Tactics"] },
+  { name: "India", code: "in", score: 84, momentum: 8, movedBy: "Mobile voters", reasons: ["Audience scale", "Mobile growth", "Young scene"] },
+  { name: "Turkey", code: "tr", score: 83, momentum: 5, movedBy: "Valorant voters", reasons: ["Raw aim", "Fans", "FPS culture"] },
+  { name: "Finland", code: "fi", score: 82, momentum: -1, movedBy: "Aim voters", reasons: ["Composure", "FPS legacy", "Snipers"] },
+  { name: "Poland", code: "pl", score: 81, momentum: 2, movedBy: "CS voters", reasons: ["CS history", "Grind culture", "Local scene"] },
+  { name: "Spain", code: "es", score: 80, momentum: 4, movedBy: "Momentum voters", reasons: ["Valorant growth", "Audience", "Energy"] },
+  { name: "South Africa", code: "za", score: 78, momentum: 6, movedBy: "Regional voters", reasons: ["Leadership", "Resilience", "Community drive"] },
+  { name: "Mexico", code: "mx", score: 77, momentum: 4, movedBy: "Fighting game voters", reasons: ["Fan intensity", "Local events", "Rivalry"] },
+  { name: "Saudi Arabia", code: "sa", score: 76, momentum: 7, movedBy: "Investment voters", reasons: ["Events", "Rocket League", "Rapid growth"] },
+  { name: "Argentina", code: "ar", score: 75, momentum: 2, movedBy: "Sports voters", reasons: ["Football mindset", "Passion", "Tactical instinct"] },
+  { name: "New Zealand", code: "nz", score: 73, momentum: 1, movedBy: "OCE voters", reasons: ["Adaptability", "Creativity", "Regional pride"] },
+  { name: "Nigeria", code: "ng", score: 72, momentum: 9, movedBy: "Future voters", reasons: ["Youth", "Mobile growth", "Cultural energy"] },
+  { name: "Afghanistan", code: "af", score: 71, momentum: -5, movedBy: "Strategy voters", reasons: ["Patience", "Decision making", "Preparation"] },
+  { name: "Albania", code: "al", score: 71, momentum: -1, movedBy: "FPS voters", reasons: ["Aim culture", "Local scene", "Team play"] },
+  { name: "Algeria", code: "dz", score: 71, momentum: 3, movedBy: "Strategy voters", reasons: ["Patience", "Decision making", "Preparation"] },
+  { name: "American Samoa", code: "as", score: 71, momentum: 7, movedBy: "FPS voters", reasons: ["Aim culture", "Local scene", "Team play"] },
+  { name: "Andorra", code: "ad", score: 71, momentum: 8, movedBy: "Momentum voters", reasons: ["Breakout players", "Fan energy", "Recent form"] },
+  { name: "Angola", code: "ao", score: 71, momentum: -3, movedBy: "Momentum voters", reasons: ["Breakout players", "Fan energy", "Recent form"] },
+  { name: "Anguilla", code: "ai", score: 70, momentum: -5, movedBy: "Mobile voters", reasons: ["Mobile access", "Young audience", "Fast growth"] },
+  { name: "Antarctica", code: "aq", score: 70, momentum: 5, movedBy: "Infrastructure voters", reasons: ["Teams", "Events", "Coaching"] },
+  { name: "Antigua and Barbuda", code: "ag", score: 70, momentum: 6, movedBy: "Strategy voters", reasons: ["Patience", "Decision making", "Preparation"] },
+  { name: "Armenia", code: "am", score: 70, momentum: -5, movedBy: "Mobile voters", reasons: ["Mobile access", "Young audience", "Fast growth"] },
+  { name: "Aruba", code: "aw", score: 70, momentum: -4, movedBy: "Infrastructure voters", reasons: ["Teams", "Events", "Coaching"] },
+  { name: "Austria", code: "at", score: 70, momentum: 3, movedBy: "Community voters", reasons: ["Grassroots scene", "Online activity", "Rising talent"] },
+  { name: "Azerbaijan", code: "az", score: 69, momentum: 7, movedBy: "Strategy voters", reasons: ["Patience", "Decision making", "Preparation"] },
+  { name: "Bahamas", code: "bs", score: 69, momentum: 9, movedBy: "Community voters", reasons: ["Grassroots scene", "Online activity", "Rising talent"] },
+  { name: "Bahrain", code: "bh", score: 69, momentum: 7, movedBy: "Mobile voters", reasons: ["Mobile access", "Young audience", "Fast growth"] },
+  { name: "Bangladesh", code: "bd", score: 69, momentum: -4, movedBy: "Infrastructure voters", reasons: ["Teams", "Events", "Coaching"] },
+  { name: "Barbados", code: "bb", score: 69, momentum: 6, movedBy: "Momentum voters", reasons: ["Breakout players", "Fan energy", "Recent form"] },
+  { name: "Belarus", code: "by", score: 69, momentum: 1, movedBy: "Momentum voters", reasons: ["Breakout players", "Fan energy", "Recent form"] },
+  { name: "Belgium", code: "be", score: 68, momentum: 2, movedBy: "Momentum voters", reasons: ["Breakout players", "Fan energy", "Recent form"] },
+  { name: "Belize", code: "bz", score: 68, momentum: 6, movedBy: "Momentum voters", reasons: ["Breakout players", "Fan energy", "Recent form"] },
+  { name: "Benin", code: "bj", score: 68, momentum: 4, movedBy: "Momentum voters", reasons: ["Breakout players", "Fan energy", "Recent form"] },
+  { name: "Bermuda", code: "bm", score: 68, momentum: -1, movedBy: "Community voters", reasons: ["Grassroots scene", "Online activity", "Rising talent"] },
+  { name: "Bhutan", code: "bt", score: 68, momentum: 6, movedBy: "Mobile voters", reasons: ["Mobile access", "Young audience", "Fast growth"] },
+  { name: "Bolivia", code: "bo", score: 68, momentum: 7, movedBy: "FPS voters", reasons: ["Aim culture", "Local scene", "Team play"] },
+  { name: "Bosnia and Herzegovina", code: "ba", score: 67, momentum: -4, movedBy: "Infrastructure voters", reasons: ["Teams", "Events", "Coaching"] },
+  { name: "Botswana", code: "bw", score: 67, momentum: 3, movedBy: "Momentum voters", reasons: ["Breakout players", "Fan energy", "Recent form"] },
+  { name: "Bouvet Island", code: "bv", score: 67, momentum: 1, movedBy: "Community voters", reasons: ["Grassroots scene", "Online activity", "Rising talent"] },
+  { name: "British Indian Ocean Territory", code: "io", score: 67, momentum: 0, movedBy: "Infrastructure voters", reasons: ["Teams", "Events", "Coaching"] },
+  { name: "British Virgin Islands", code: "vg", score: 67, momentum: 8, movedBy: "Mobile voters", reasons: ["Mobile access", "Young audience", "Fast growth"] },
+  { name: "Brunei", code: "bn", score: 67, momentum: -5, movedBy: "Infrastructure voters", reasons: ["Teams", "Events", "Coaching"] },
+  { name: "Bulgaria", code: "bg", score: 66, momentum: 5, movedBy: "Momentum voters", reasons: ["Breakout players", "Fan energy", "Recent form"] },
+  { name: "Burkina Faso", code: "bf", score: 66, momentum: 3, movedBy: "Strategy voters", reasons: ["Patience", "Decision making", "Preparation"] },
+  { name: "Burundi", code: "bi", score: 66, momentum: -2, movedBy: "MOBA voters", reasons: ["Macro sense", "Practice culture", "Mechanical growth"] },
+  { name: "Cabo Verde", code: "cv", score: 66, momentum: 0, movedBy: "Momentum voters", reasons: ["Breakout players", "Fan energy", "Recent form"] },
+  { name: "Cambodia", code: "kh", score: 66, momentum: 0, movedBy: "Strategy voters", reasons: ["Patience", "Decision making", "Preparation"] },
+  { name: "Cameroon", code: "cm", score: 66, momentum: 5, movedBy: "Mobile voters", reasons: ["Mobile access", "Young audience", "Fast growth"] },
+  { name: "Caribbean Netherlands", code: "bq", score: 65, momentum: -4, movedBy: "Strategy voters", reasons: ["Patience", "Decision making", "Preparation"] },
+  { name: "Cayman Islands", code: "ky", score: 65, momentum: 9, movedBy: "Mobile voters", reasons: ["Mobile access", "Young audience", "Fast growth"] },
+  { name: "Central African Republic", code: "cf", score: 65, momentum: 2, movedBy: "Infrastructure voters", reasons: ["Teams", "Events", "Coaching"] },
+  { name: "Chad", code: "td", score: 65, momentum: -4, movedBy: "Strategy voters", reasons: ["Patience", "Decision making", "Preparation"] },
+  { name: "Chile", code: "cl", score: 65, momentum: 7, movedBy: "FPS voters", reasons: ["Aim culture", "Local scene", "Team play"] },
+  { name: "Christmas Island", code: "cx", score: 65, momentum: -1, movedBy: "Infrastructure voters", reasons: ["Teams", "Events", "Coaching"] },
+  { name: "Cocos Islands", code: "cc", score: 64, momentum: -3, movedBy: "Momentum voters", reasons: ["Breakout players", "Fan energy", "Recent form"] },
+  { name: "Colombia", code: "co", score: 64, momentum: 4, movedBy: "Momentum voters", reasons: ["Breakout players", "Fan energy", "Recent form"] },
+  { name: "Comoros", code: "km", score: 64, momentum: -5, movedBy: "FPS voters", reasons: ["Aim culture", "Local scene", "Team play"] },
+  { name: "Cook Islands", code: "ck", score: 64, momentum: 9, movedBy: "FPS voters", reasons: ["Aim culture", "Local scene", "Team play"] },
+  { name: "Costa Rica", code: "cr", score: 64, momentum: 1, movedBy: "FPS voters", reasons: ["Aim culture", "Local scene", "Team play"] },
+  { name: "Croatia", code: "hr", score: 64, momentum: 7, movedBy: "Mobile voters", reasons: ["Mobile access", "Young audience", "Fast growth"] },
+  { name: "Cuba", code: "cu", score: 63, momentum: -3, movedBy: "Mobile voters", reasons: ["Mobile access", "Young audience", "Fast growth"] },
+  { name: "Curaçao", code: "cw", score: 63, momentum: 4, movedBy: "Momentum voters", reasons: ["Breakout players", "Fan energy", "Recent form"] },
+  { name: "Cyprus", code: "cy", score: 63, momentum: -4, movedBy: "Mobile voters", reasons: ["Mobile access", "Young audience", "Fast growth"] },
+  { name: "Czechia", code: "cz", score: 63, momentum: 0, movedBy: "Community voters", reasons: ["Grassroots scene", "Online activity", "Rising talent"] },
+  { name: "Côte d’Ivoire", code: "ci", score: 63, momentum: -5, movedBy: "FPS voters", reasons: ["Aim culture", "Local scene", "Team play"] },
+  { name: "Djibouti", code: "dj", score: 62, momentum: 6, movedBy: "Strategy voters", reasons: ["Patience", "Decision making", "Preparation"] },
+  { name: "Dominica", code: "dm", score: 62, momentum: 1, movedBy: "Infrastructure voters", reasons: ["Teams", "Events", "Coaching"] },
+  { name: "Dominican Republic", code: "do", score: 62, momentum: 8, movedBy: "FPS voters", reasons: ["Aim culture", "Local scene", "Team play"] },
+  { name: "DR Congo", code: "cd", score: 62, momentum: -1, movedBy: "Community voters", reasons: ["Grassroots scene", "Online activity", "Rising talent"] },
+  { name: "Ecuador", code: "ec", score: 62, momentum: -4, movedBy: "MOBA voters", reasons: ["Macro sense", "Practice culture", "Mechanical growth"] },
+  { name: "Egypt", code: "eg", score: 62, momentum: 9, movedBy: "Mobile voters", reasons: ["Mobile access", "Young audience", "Fast growth"] },
+  { name: "El Salvador", code: "sv", score: 61, momentum: 3, movedBy: "Mobile voters", reasons: ["Mobile access", "Young audience", "Fast growth"] },
+  { name: "Equatorial Guinea", code: "gq", score: 61, momentum: -5, movedBy: "Infrastructure voters", reasons: ["Teams", "Events", "Coaching"] },
+  { name: "Eritrea", code: "er", score: 61, momentum: 0, movedBy: "MOBA voters", reasons: ["Macro sense", "Practice culture", "Mechanical growth"] },
+  { name: "Estonia", code: "ee", score: 61, momentum: 7, movedBy: "Strategy voters", reasons: ["Patience", "Decision making", "Preparation"] },
+  { name: "Eswatini", code: "sz", score: 61, momentum: 4, movedBy: "Momentum voters", reasons: ["Breakout players", "Fan energy", "Recent form"] },
+  { name: "Ethiopia", code: "et", score: 61, momentum: 9, movedBy: "Community voters", reasons: ["Grassroots scene", "Online activity", "Rising talent"] },
+  { name: "Falkland Islands", code: "fk", score: 60, momentum: 5, movedBy: "Community voters", reasons: ["Grassroots scene", "Online activity", "Rising talent"] },
+  { name: "Faroe Islands", code: "fo", score: 60, momentum: 3, movedBy: "Infrastructure voters", reasons: ["Teams", "Events", "Coaching"] },
+  { name: "Fiji", code: "fj", score: 60, momentum: 4, movedBy: "Infrastructure voters", reasons: ["Teams", "Events", "Coaching"] },
+  { name: "French Guiana", code: "gf", score: 60, momentum: 0, movedBy: "Momentum voters", reasons: ["Breakout players", "Fan energy", "Recent form"] },
+  { name: "French Polynesia", code: "pf", score: 60, momentum: 4, movedBy: "Mobile voters", reasons: ["Mobile access", "Young audience", "Fast growth"] },
+  { name: "French Southern Territories", code: "tf", score: 60, momentum: 3, movedBy: "FPS voters", reasons: ["Aim culture", "Local scene", "Team play"] },
+  { name: "Gabon", code: "ga", score: 59, momentum: 3, movedBy: "Momentum voters", reasons: ["Breakout players", "Fan energy", "Recent form"] },
+  { name: "Gambia", code: "gm", score: 59, momentum: -5, movedBy: "Strategy voters", reasons: ["Patience", "Decision making", "Preparation"] },
+  { name: "Georgia", code: "ge", score: 59, momentum: 2, movedBy: "Mobile voters", reasons: ["Mobile access", "Young audience", "Fast growth"] },
+  { name: "Ghana", code: "gh", score: 59, momentum: -3, movedBy: "FPS voters", reasons: ["Aim culture", "Local scene", "Team play"] },
+  { name: "Gibraltar", code: "gi", score: 59, momentum: 1, movedBy: "Mobile voters", reasons: ["Mobile access", "Young audience", "Fast growth"] },
+  { name: "Greece", code: "gr", score: 59, momentum: -1, movedBy: "MOBA voters", reasons: ["Macro sense", "Practice culture", "Mechanical growth"] },
+  { name: "Greenland", code: "gl", score: 58, momentum: -3, movedBy: "Infrastructure voters", reasons: ["Teams", "Events", "Coaching"] },
+  { name: "Grenada", code: "gd", score: 58, momentum: 4, movedBy: "MOBA voters", reasons: ["Macro sense", "Practice culture", "Mechanical growth"] },
+  { name: "Guadeloupe", code: "gp", score: 58, momentum: -4, movedBy: "Mobile voters", reasons: ["Mobile access", "Young audience", "Fast growth"] },
+  { name: "Guam", code: "gu", score: 58, momentum: -3, movedBy: "Community voters", reasons: ["Grassroots scene", "Online activity", "Rising talent"] },
+  { name: "Guatemala", code: "gt", score: 58, momentum: -5, movedBy: "Momentum voters", reasons: ["Breakout players", "Fan energy", "Recent form"] },
+  { name: "Guernsey", code: "gg", score: 58, momentum: 2, movedBy: "FPS voters", reasons: ["Aim culture", "Local scene", "Team play"] },
+  { name: "Guinea", code: "gn", score: 57, momentum: 9, movedBy: "Community voters", reasons: ["Grassroots scene", "Online activity", "Rising talent"] },
+  { name: "Guinea-Bissau", code: "gw", score: 57, momentum: 7, movedBy: "Mobile voters", reasons: ["Mobile access", "Young audience", "Fast growth"] },
+  { name: "Guyana", code: "gy", score: 57, momentum: -1, movedBy: "MOBA voters", reasons: ["Macro sense", "Practice culture", "Mechanical growth"] },
+  { name: "Haiti", code: "ht", score: 57, momentum: 7, movedBy: "Infrastructure voters", reasons: ["Teams", "Events", "Coaching"] },
+  { name: "Heard Island and McDonald Islands", code: "hm", score: 57, momentum: 2, movedBy: "Mobile voters", reasons: ["Mobile access", "Young audience", "Fast growth"] },
+  { name: "Honduras", code: "hn", score: 57, momentum: 6, movedBy: "FPS voters", reasons: ["Aim culture", "Local scene", "Team play"] },
+  { name: "Hong Kong", code: "hk", score: 56, momentum: -2, movedBy: "Strategy voters", reasons: ["Patience", "Decision making", "Preparation"] },
+  { name: "Hungary", code: "hu", score: 56, momentum: -1, movedBy: "Momentum voters", reasons: ["Breakout players", "Fan energy", "Recent form"] },
+  { name: "Iceland", code: "is", score: 56, momentum: 1, movedBy: "MOBA voters", reasons: ["Macro sense", "Practice culture", "Mechanical growth"] },
+  { name: "Indonesia", code: "id", score: 56, momentum: 2, movedBy: "Community voters", reasons: ["Grassroots scene", "Online activity", "Rising talent"] },
+  { name: "Iran", code: "ir", score: 56, momentum: 0, movedBy: "Mobile voters", reasons: ["Mobile access", "Young audience", "Fast growth"] },
+  { name: "Iraq", code: "iq", score: 56, momentum: -2, movedBy: "Momentum voters", reasons: ["Breakout players", "Fan energy", "Recent form"] },
+  { name: "Ireland", code: "ie", score: 55, momentum: 8, movedBy: "Infrastructure voters", reasons: ["Teams", "Events", "Coaching"] },
+  { name: "Isle of Man", code: "im", score: 55, momentum: 3, movedBy: "Community voters", reasons: ["Grassroots scene", "Online activity", "Rising talent"] },
+  { name: "Israel", code: "il", score: 55, momentum: 1, movedBy: "Community voters", reasons: ["Grassroots scene", "Online activity", "Rising talent"] },
+  { name: "Italy", code: "it", score: 55, momentum: -4, movedBy: "Community voters", reasons: ["Grassroots scene", "Online activity", "Rising talent"] },
+  { name: "Jamaica", code: "jm", score: 55, momentum: -2, movedBy: "MOBA voters", reasons: ["Macro sense", "Practice culture", "Mechanical growth"] },
+  { name: "Jersey", code: "je", score: 54, momentum: 5, movedBy: "Momentum voters", reasons: ["Breakout players", "Fan energy", "Recent form"] },
+  { name: "Jordan", code: "jo", score: 54, momentum: 6, movedBy: "Strategy voters", reasons: ["Patience", "Decision making", "Preparation"] },
+  { name: "Kazakhstan", code: "kz", score: 54, momentum: 2, movedBy: "Mobile voters", reasons: ["Mobile access", "Young audience", "Fast growth"] },
+  { name: "Kenya", code: "ke", score: 54, momentum: 0, movedBy: "Infrastructure voters", reasons: ["Teams", "Events", "Coaching"] },
+  { name: "Kiribati", code: "ki", score: 54, momentum: -2, movedBy: "FPS voters", reasons: ["Aim culture", "Local scene", "Team play"] },
+  { name: "Kuwait", code: "kw", score: 54, momentum: -4, movedBy: "Community voters", reasons: ["Grassroots scene", "Online activity", "Rising talent"] },
+  { name: "Kyrgyzstan", code: "kg", score: 53, momentum: 9, movedBy: "Infrastructure voters", reasons: ["Teams", "Events", "Coaching"] },
+  { name: "Laos", code: "la", score: 53, momentum: -1, movedBy: "FPS voters", reasons: ["Aim culture", "Local scene", "Team play"] },
+  { name: "Latvia", code: "lv", score: 53, momentum: 3, movedBy: "MOBA voters", reasons: ["Macro sense", "Practice culture", "Mechanical growth"] },
+  { name: "Lebanon", code: "lb", score: 53, momentum: 4, movedBy: "Infrastructure voters", reasons: ["Teams", "Events", "Coaching"] },
+  { name: "Lesotho", code: "ls", score: 53, momentum: -4, movedBy: "Infrastructure voters", reasons: ["Teams", "Events", "Coaching"] },
+  { name: "Liberia", code: "lr", score: 53, momentum: 9, movedBy: "Strategy voters", reasons: ["Patience", "Decision making", "Preparation"] },
+  { name: "Libya", code: "ly", score: 52, momentum: 1, movedBy: "MOBA voters", reasons: ["Macro sense", "Practice culture", "Mechanical growth"] },
+  { name: "Liechtenstein", code: "li", score: 52, momentum: -1, movedBy: "MOBA voters", reasons: ["Macro sense", "Practice culture", "Mechanical growth"] },
+  { name: "Lithuania", code: "lt", score: 52, momentum: 3, movedBy: "MOBA voters", reasons: ["Macro sense", "Practice culture", "Mechanical growth"] },
+  { name: "Luxembourg", code: "lu", score: 52, momentum: 7, movedBy: "Mobile voters", reasons: ["Mobile access", "Young audience", "Fast growth"] },
+  { name: "Macao", code: "mo", score: 52, momentum: -3, movedBy: "MOBA voters", reasons: ["Macro sense", "Practice culture", "Mechanical growth"] },
+  { name: "Madagascar", code: "mg", score: 52, momentum: 4, movedBy: "Momentum voters", reasons: ["Breakout players", "Fan energy", "Recent form"] },
+  { name: "Malawi", code: "mw", score: 51, momentum: 8, movedBy: "FPS voters", reasons: ["Aim culture", "Local scene", "Team play"] },
+  { name: "Malaysia", code: "my", score: 51, momentum: 0, movedBy: "FPS voters", reasons: ["Aim culture", "Local scene", "Team play"] },
+  { name: "Maldives", code: "mv", score: 51, momentum: 7, movedBy: "Mobile voters", reasons: ["Mobile access", "Young audience", "Fast growth"] },
+  { name: "Mali", code: "ml", score: 51, momentum: 8, movedBy: "FPS voters", reasons: ["Aim culture", "Local scene", "Team play"] },
+  { name: "Malta", code: "mt", score: 51, momentum: 3, movedBy: "Momentum voters", reasons: ["Breakout players", "Fan energy", "Recent form"] },
+  { name: "Marshall Islands", code: "mh", score: 51, momentum: -2, movedBy: "Momentum voters", reasons: ["Breakout players", "Fan energy", "Recent form"] },
+  { name: "Martinique", code: "mq", score: 50, momentum: -4, movedBy: "Community voters", reasons: ["Grassroots scene", "Online activity", "Rising talent"] },
+  { name: "Mauritania", code: "mr", score: 50, momentum: 0, movedBy: "FPS voters", reasons: ["Aim culture", "Local scene", "Team play"] },
+  { name: "Mauritius", code: "mu", score: 50, momentum: -5, movedBy: "Mobile voters", reasons: ["Mobile access", "Young audience", "Fast growth"] },
+  { name: "Mayotte", code: "yt", score: 50, momentum: 2, movedBy: "FPS voters", reasons: ["Aim culture", "Local scene", "Team play"] },
+  { name: "Micronesia", code: "fm", score: 50, momentum: -1, movedBy: "Community voters", reasons: ["Grassroots scene", "Online activity", "Rising talent"] },
+  { name: "Moldova", code: "md", score: 50, momentum: 7, movedBy: "Infrastructure voters", reasons: ["Teams", "Events", "Coaching"] },
+  { name: "Monaco", code: "mc", score: 49, momentum: 5, movedBy: "MOBA voters", reasons: ["Macro sense", "Practice culture", "Mechanical growth"] },
+  { name: "Mongolia", code: "mn", score: 49, momentum: 9, movedBy: "Infrastructure voters", reasons: ["Teams", "Events", "Coaching"] },
+  { name: "Montenegro", code: "me", score: 49, momentum: -2, movedBy: "Infrastructure voters", reasons: ["Teams", "Events", "Coaching"] },
+  { name: "Montserrat", code: "ms", score: 49, momentum: -4, movedBy: "Strategy voters", reasons: ["Patience", "Decision making", "Preparation"] },
+  { name: "Morocco", code: "ma", score: 49, momentum: 3, movedBy: "MOBA voters", reasons: ["Macro sense", "Practice culture", "Mechanical growth"] },
+  { name: "Mozambique", code: "mz", score: 49, momentum: 4, movedBy: "Momentum voters", reasons: ["Breakout players", "Fan energy", "Recent form"] },
+  { name: "Myanmar", code: "mm", score: 48, momentum: -4, movedBy: "Community voters", reasons: ["Grassroots scene", "Online activity", "Rising talent"] },
+  { name: "Namibia", code: "na", score: 48, momentum: -2, movedBy: "FPS voters", reasons: ["Aim culture", "Local scene", "Team play"] },
+  { name: "Nauru", code: "nr", score: 48, momentum: 5, movedBy: "Infrastructure voters", reasons: ["Teams", "Events", "Coaching"] },
+  { name: "Nepal", code: "np", score: 48, momentum: 0, movedBy: "Infrastructure voters", reasons: ["Teams", "Events", "Coaching"] },
+  { name: "New Caledonia", code: "nc", score: 48, momentum: 7, movedBy: "Strategy voters", reasons: ["Patience", "Decision making", "Preparation"] },
+  { name: "Nicaragua", code: "ni", score: 48, momentum: -4, movedBy: "Infrastructure voters", reasons: ["Teams", "Events", "Coaching"] },
+  { name: "Niger", code: "ne", score: 47, momentum: 0, movedBy: "Strategy voters", reasons: ["Patience", "Decision making", "Preparation"] },
+  { name: "Niue", code: "nu", score: 47, momentum: 4, movedBy: "Community voters", reasons: ["Grassroots scene", "Online activity", "Rising talent"] },
+  { name: "Norfolk Island", code: "nf", score: 47, momentum: 5, movedBy: "Strategy voters", reasons: ["Patience", "Decision making", "Preparation"] },
+  { name: "North Korea", code: "kp", score: 47, momentum: 0, movedBy: "Infrastructure voters", reasons: ["Teams", "Events", "Coaching"] },
+  { name: "North Macedonia", code: "mk", score: 47, momentum: 0, movedBy: "Community voters", reasons: ["Grassroots scene", "Online activity", "Rising talent"] },
+  { name: "Northern Mariana Islands", code: "mp", score: 47, momentum: 1, movedBy: "Strategy voters", reasons: ["Patience", "Decision making", "Preparation"] },
+  { name: "Norway", code: "no", score: 46, momentum: 6, movedBy: "Community voters", reasons: ["Grassroots scene", "Online activity", "Rising talent"] },
+  { name: "Oman", code: "om", score: 46, momentum: 8, movedBy: "Community voters", reasons: ["Grassroots scene", "Online activity", "Rising talent"] },
+  { name: "Pakistan", code: "pk", score: 46, momentum: -5, movedBy: "Mobile voters", reasons: ["Mobile access", "Young audience", "Fast growth"] },
+  { name: "Palau", code: "pw", score: 46, momentum: 2, movedBy: "Mobile voters", reasons: ["Mobile access", "Young audience", "Fast growth"] },
+  { name: "Palestine", code: "ps", score: 46, momentum: 6, movedBy: "Infrastructure voters", reasons: ["Teams", "Events", "Coaching"] },
+  { name: "Panama", code: "pa", score: 45, momentum: -2, movedBy: "Strategy voters", reasons: ["Patience", "Decision making", "Preparation"] },
+  { name: "Papua New Guinea", code: "pg", score: 45, momentum: 2, movedBy: "Community voters", reasons: ["Grassroots scene", "Online activity", "Rising talent"] },
+  { name: "Paraguay", code: "py", score: 45, momentum: -3, movedBy: "Infrastructure voters", reasons: ["Teams", "Events", "Coaching"] },
+  { name: "Peru", code: "pe", score: 45, momentum: -2, movedBy: "FPS voters", reasons: ["Aim culture", "Local scene", "Team play"] },
+  { name: "Philippines", code: "ph", score: 45, momentum: 8, movedBy: "FPS voters", reasons: ["Aim culture", "Local scene", "Team play"] },
+  { name: "Pitcairn", code: "pn", score: 45, momentum: -3, movedBy: "Momentum voters", reasons: ["Breakout players", "Fan energy", "Recent form"] },
+  { name: "Portugal", code: "pt", score: 44, momentum: 1, movedBy: "Community voters", reasons: ["Grassroots scene", "Online activity", "Rising talent"] },
+  { name: "Puerto Rico", code: "pr", score: 44, momentum: -4, movedBy: "MOBA voters", reasons: ["Macro sense", "Practice culture", "Mechanical growth"] },
+  { name: "Qatar", code: "qa", score: 44, momentum: -2, movedBy: "Community voters", reasons: ["Grassroots scene", "Online activity", "Rising talent"] },
+  { name: "Republic of the Congo", code: "cg", score: 44, momentum: 9, movedBy: "Community voters", reasons: ["Grassroots scene", "Online activity", "Rising talent"] },
+  { name: "Romania", code: "ro", score: 44, momentum: 4, movedBy: "Strategy voters", reasons: ["Patience", "Decision making", "Preparation"] },
+  { name: "Russia", code: "ru", score: 44, momentum: 8, movedBy: "FPS voters", reasons: ["Aim culture", "Local scene", "Team play"] },
+  { name: "Rwanda", code: "rw", score: 43, momentum: 0, movedBy: "Momentum voters", reasons: ["Breakout players", "Fan energy", "Recent form"] },
+  { name: "Réunion", code: "re", score: 43, momentum: 7, movedBy: "Infrastructure voters", reasons: ["Teams", "Events", "Coaching"] },
+  { name: "Saint Barthélemy", code: "bl", score: 43, momentum: 7, movedBy: "Mobile voters", reasons: ["Mobile access", "Young audience", "Fast growth"] },
+  { name: "Saint Helena", code: "sh", score: 43, momentum: -5, movedBy: "Strategy voters", reasons: ["Patience", "Decision making", "Preparation"] },
+  { name: "Saint Kitts and Nevis", code: "kn", score: 43, momentum: 3, movedBy: "Mobile voters", reasons: ["Mobile access", "Young audience", "Fast growth"] },
+  { name: "Saint Lucia", code: "lc", score: 43, momentum: 8, movedBy: "Strategy voters", reasons: ["Patience", "Decision making", "Preparation"] },
+  { name: "Saint Martin (French part)", code: "mf", score: 42, momentum: -5, movedBy: "Infrastructure voters", reasons: ["Teams", "Events", "Coaching"] },
+  { name: "Saint Pierre and Miquelon", code: "pm", score: 42, momentum: 8, movedBy: "Mobile voters", reasons: ["Mobile access", "Young audience", "Fast growth"] },
+  { name: "Saint Vincent and the Grenadines", code: "vc", score: 42, momentum: 6, movedBy: "Mobile voters", reasons: ["Mobile access", "Young audience", "Fast growth"] },
+  { name: "Samoa", code: "ws", score: 42, momentum: 2, movedBy: "Momentum voters", reasons: ["Breakout players", "Fan energy", "Recent form"] },
+  { name: "San Marino", code: "sm", score: 42, momentum: 2, movedBy: "MOBA voters", reasons: ["Macro sense", "Practice culture", "Mechanical growth"] },
+  { name: "Sao Tome and Principe", code: "st", score: 42, momentum: 9, movedBy: "Community voters", reasons: ["Grassroots scene", "Online activity", "Rising talent"] },
+  { name: "Senegal", code: "sn", score: 41, momentum: 7, movedBy: "Mobile voters", reasons: ["Mobile access", "Young audience", "Fast growth"] },
+  { name: "Serbia", code: "rs", score: 41, momentum: 1, movedBy: "FPS voters", reasons: ["Aim culture", "Local scene", "Team play"] },
+  { name: "Seychelles", code: "sc", score: 41, momentum: 6, movedBy: "Mobile voters", reasons: ["Mobile access", "Young audience", "Fast growth"] },
+  { name: "Sierra Leone", code: "sl", score: 41, momentum: 4, movedBy: "Community voters", reasons: ["Grassroots scene", "Online activity", "Rising talent"] },
+  { name: "Singapore", code: "sg", score: 41, momentum: 5, movedBy: "MOBA voters", reasons: ["Macro sense", "Practice culture", "Mechanical growth"] },
+  { name: "Sint Maarten (Dutch part)", code: "sx", score: 41, momentum: -3, movedBy: "Infrastructure voters", reasons: ["Teams", "Events", "Coaching"] },
+  { name: "Slovakia", code: "sk", score: 40, momentum: 4, movedBy: "Mobile voters", reasons: ["Mobile access", "Young audience", "Fast growth"] },
+  { name: "Slovenia", code: "si", score: 40, momentum: -1, movedBy: "MOBA voters", reasons: ["Macro sense", "Practice culture", "Mechanical growth"] },
+  { name: "Solomon Islands", code: "sb", score: 40, momentum: 9, movedBy: "Community voters", reasons: ["Grassroots scene", "Online activity", "Rising talent"] },
+  { name: "Somalia", code: "so", score: 40, momentum: 4, movedBy: "Momentum voters", reasons: ["Breakout players", "Fan energy", "Recent form"] },
+  { name: "South Georgia and the South Sandwich Islands", code: "gs", score: 40, momentum: 8, movedBy: "Momentum voters", reasons: ["Breakout players", "Fan energy", "Recent form"] },
+  { name: "South Sudan", code: "ss", score: 40, momentum: 3, movedBy: "FPS voters", reasons: ["Aim culture", "Local scene", "Team play"] },
+  { name: "Sri Lanka", code: "lk", score: 39, momentum: 6, movedBy: "Strategy voters", reasons: ["Patience", "Decision making", "Preparation"] },
+  { name: "Sudan", code: "sd", score: 39, momentum: 5, movedBy: "Momentum voters", reasons: ["Breakout players", "Fan energy", "Recent form"] },
+  { name: "Suriname", code: "sr", score: 39, momentum: 3, movedBy: "Infrastructure voters", reasons: ["Teams", "Events", "Coaching"] },
+  { name: "Svalbard and Jan Mayen", code: "sj", score: 39, momentum: -5, movedBy: "Infrastructure voters", reasons: ["Teams", "Events", "Coaching"] },
+  { name: "Switzerland", code: "ch", score: 39, momentum: -2, movedBy: "Infrastructure voters", reasons: ["Teams", "Events", "Coaching"] },
+  { name: "Syria", code: "sy", score: 39, momentum: -3, movedBy: "MOBA voters", reasons: ["Macro sense", "Practice culture", "Mechanical growth"] },
+  { name: "Taiwan", code: "tw", score: 38, momentum: -1, movedBy: "Mobile voters", reasons: ["Mobile access", "Young audience", "Fast growth"] },
+  { name: "Tajikistan", code: "tj", score: 38, momentum: 6, movedBy: "FPS voters", reasons: ["Aim culture", "Local scene", "Team play"] },
+  { name: "Tanzania", code: "tz", score: 38, momentum: -5, movedBy: "FPS voters", reasons: ["Aim culture", "Local scene", "Team play"] },
+  { name: "Thailand", code: "th", score: 38, momentum: 2, movedBy: "MOBA voters", reasons: ["Macro sense", "Practice culture", "Mechanical growth"] },
+  { name: "Timor-Leste", code: "tl", score: 38, momentum: 0, movedBy: "Momentum voters", reasons: ["Breakout players", "Fan energy", "Recent form"] },
+  { name: "Togo", code: "tg", score: 37, momentum: 1, movedBy: "Momentum voters", reasons: ["Breakout players", "Fan energy", "Recent form"] },
+  { name: "Tokelau", code: "tk", score: 37, momentum: -1, movedBy: "Community voters", reasons: ["Grassroots scene", "Online activity", "Rising talent"] },
+  { name: "Tonga", code: "to", score: 37, momentum: -3, movedBy: "Infrastructure voters", reasons: ["Teams", "Events", "Coaching"] },
+  { name: "Trinidad and Tobago", code: "tt", score: 37, momentum: -2, movedBy: "Mobile voters", reasons: ["Mobile access", "Young audience", "Fast growth"] },
+  { name: "Tunisia", code: "tn", score: 37, momentum: -4, movedBy: "Community voters", reasons: ["Grassroots scene", "Online activity", "Rising talent"] },
+  { name: "Turkmenistan", code: "tm", score: 37, momentum: 9, movedBy: "Strategy voters", reasons: ["Patience", "Decision making", "Preparation"] },
+  { name: "Turks and Caicos Islands", code: "tc", score: 36, momentum: -5, movedBy: "Mobile voters", reasons: ["Mobile access", "Young audience", "Fast growth"] },
+  { name: "Tuvalu", code: "tv", score: 36, momentum: 8, movedBy: "FPS voters", reasons: ["Aim culture", "Local scene", "Team play"] },
+  { name: "U.S. Minor Outlying Islands", code: "um", score: 36, momentum: 4, movedBy: "Strategy voters", reasons: ["Patience", "Decision making", "Preparation"] },
+  { name: "U.S. Virgin Islands", code: "vi", score: 36, momentum: 0, movedBy: "FPS voters", reasons: ["Aim culture", "Local scene", "Team play"] },
+  { name: "Uganda", code: "ug", score: 36, momentum: 3, movedBy: "Strategy voters", reasons: ["Patience", "Decision making", "Preparation"] },
+  { name: "Ukraine", code: "ua", score: 36, momentum: 1, movedBy: "Infrastructure voters", reasons: ["Teams", "Events", "Coaching"] },
+  { name: "United Arab Emirates", code: "ae", score: 35, momentum: 9, movedBy: "Momentum voters", reasons: ["Breakout players", "Fan energy", "Recent form"] },
+  { name: "Uruguay", code: "uy", score: 35, momentum: 0, movedBy: "Community voters", reasons: ["Grassroots scene", "Online activity", "Rising talent"] },
+  { name: "Uzbekistan", code: "uz", score: 35, momentum: 4, movedBy: "FPS voters", reasons: ["Aim culture", "Local scene", "Team play"] },
+  { name: "Vanuatu", code: "vu", score: 35, momentum: -3, movedBy: "Strategy voters", reasons: ["Patience", "Decision making", "Preparation"] },
+  { name: "Vatican City", code: "va", score: 35, momentum: -2, movedBy: "Strategy voters", reasons: ["Patience", "Decision making", "Preparation"] },
+  { name: "Venezuela", code: "ve", score: 35, momentum: -4, movedBy: "Strategy voters", reasons: ["Patience", "Decision making", "Preparation"] },
+  { name: "Vietnam", code: "vn", score: 34, momentum: 9, movedBy: "Community voters", reasons: ["Grassroots scene", "Online activity", "Rising talent"] },
+  { name: "Wallis and Futuna", code: "wf", score: 34, momentum: 8, movedBy: "Strategy voters", reasons: ["Patience", "Decision making", "Preparation"] },
+  { name: "Western Sahara", code: "eh", score: 34, momentum: 9, movedBy: "Community voters", reasons: ["Grassroots scene", "Online activity", "Rising talent"] },
+  { name: "Yemen", code: "ye", score: 34, momentum: 6, movedBy: "Community voters", reasons: ["Grassroots scene", "Online activity", "Rising talent"] },
+  { name: "Zambia", code: "zm", score: 34, momentum: 8, movedBy: "Mobile voters", reasons: ["Mobile access", "Young audience", "Fast growth"] },
+  { name: "Zimbabwe", code: "zw", score: 34, momentum: 9, movedBy: "Strategy voters", reasons: ["Patience", "Decision making", "Preparation"] },
+  { name: "Åland Islands", code: "ax", score: 33, momentum: 3, movedBy: "FPS voters", reasons: ["Aim culture", "Local scene", "Team play"] },
 ];
 
 
@@ -149,10 +388,91 @@ function pageThemeStyles() {
 }
 
 
+
+function rankWheelStops(total: number) {
+  return [1, 5, 10, 25, 50, 75, 100, 125, 150, 175, 200, total]
+    .filter((rank, index, ranks) => rank <= total && ranks.indexOf(rank) === index);
+}
+
+function RankWheel({
+  total,
+  draggedName,
+  targetIndex,
+  setTargetIndex,
+  onDropRank,
+}: {
+  total: number;
+  draggedName: string | null;
+  targetIndex: number | null;
+  setTargetIndex: (index: number | null) => void;
+  onDropRank: (index: number) => void;
+}) {
+  if (!draggedName) return null;
+
+  const ranks = rankWheelStops(total);
+  const radius = 226;
+
+  return (
+    <div
+      className="fixed bottom-0 left-0 z-[95] h-[320px] w-[320px]"
+      onDragOver={(event) => event.preventDefault()}
+      onDragLeave={(event) => {
+        if (event.currentTarget === event.target) setTargetIndex(null);
+      }}
+    >
+      <div className="absolute bottom-0 left-0 h-[300px] w-[300px] rounded-tr-full border-r border-t border-[#ff2fa8]/40 bg-white/92 shadow-[0_24px_80px_rgba(15,23,42,0.20)] backdrop-blur-xl" />
+      <div className="absolute bottom-5 left-5 h-[238px] w-[238px] rounded-tr-full border-r border-t border-[#19d3cf]/25" />
+      <div className="absolute bottom-9 left-9 h-[170px] w-[170px] rounded-tr-full border-r border-t border-[#ff2fa8]/20" />
+
+      <div className="absolute bottom-7 left-7 max-w-[155px]">
+        <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#19d3cf]">Rank Wheel</p>
+        <p className="mt-1 text-sm font-black text-[#111827]">{draggedName}</p>
+        <p className="mt-1 text-xs font-black text-[#ff2fa8]">
+          {targetIndex === null ? "Hover a rank" : `Drop to #${targetIndex + 1}`}
+        </p>
+      </div>
+
+      {ranks.map((rank, index) => {
+        const angle = ranks.length === 1 ? 45 : 7 + (index / (ranks.length - 1)) * 76;
+        const radians = (angle * Math.PI) / 180;
+        const left = 22 + Math.cos(radians) * radius;
+        const bottom = 20 + Math.sin(radians) * radius;
+        const active = targetIndex === rank - 1;
+
+        return (
+          <button
+            key={rank}
+            type="button"
+            onDragOver={(event) => {
+              event.preventDefault();
+              setTargetIndex(rank - 1);
+            }}
+            onDragEnter={() => setTargetIndex(rank - 1)}
+            onDrop={(event) => {
+              event.preventDefault();
+              onDropRank(rank - 1);
+            }}
+            className={`absolute grid h-11 w-11 -translate-x-1/2 translate-y-1/2 place-items-center rounded-full border text-xs font-black transition-all duration-200 ${
+              active
+                ? "scale-110 border-[#ff2fa8] bg-[#ff2fa8] text-white shadow-lg shadow-[#ff2fa8]/25"
+                : "border-[#19d3cf]/35 bg-white text-[#111827] hover:border-[#19d3cf] hover:text-[#19d3cf]"
+            }`}
+            style={{ left, bottom }}
+            aria-label={`Move ${draggedName} to rank ${rank}`}
+          >
+            {rank}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
 export default function LiveRankingsPage() {
   const [selectedGame, setSelectedGame] = useState("CS2");
   const [countries, setCountries] = useState(initialCountries);
   const [draggedName, setDraggedName] = useState<string | null>(null);
+  const [wheelTargetIndex, setWheelTargetIndex] = useState<number | null>(null);
   const [activity, setActivity] = useState([
     "Brazil surged after 42 FPS votes.",
     "Denmark defended #1 with tactical votes.",
@@ -184,7 +504,7 @@ export default function LiveRankingsPage() {
     ].slice(0, 6));
   }
 
-  function handleDrop(event: DragEvent<HTMLDivElement>, targetIndex: number) {
+  function handleDrop(event: DragEvent<HTMLTableRowElement>, targetIndex: number) {
     event.preventDefault();
 
     if (!draggedName) return;
@@ -192,6 +512,16 @@ export default function LiveRankingsPage() {
     const fromIndex = countries.findIndex((country) => country.name === draggedName);
     moveCountry(fromIndex, targetIndex);
     setDraggedName(null);
+    setWheelTargetIndex(null);
+  }
+
+  function dropCountryToRank(targetIndex: number) {
+    if (!draggedName) return;
+
+    const fromIndex = countries.findIndex((country) => country.name === draggedName);
+    moveCountry(fromIndex, targetIndex);
+    setDraggedName(null);
+    setWheelTargetIndex(null);
   }
 
   return (
@@ -199,6 +529,13 @@ export default function LiveRankingsPage() {
       <RankingsBackground />
       <style>{pageThemeStyles()}</style>
       <SkillAtlasHeader active="Rankings" />
+      <RankWheel
+        total={countries.length}
+        draggedName={draggedName}
+        targetIndex={wheelTargetIndex}
+        setTargetIndex={setWheelTargetIndex}
+        onDropRank={dropCountryToRank}
+      />
 
       <section className="relative z-10 mx-auto max-w-7xl px-8 pb-16 pt-[150px]">
         <div className="mb-6 rounded-3xl border border-[#ff2fa8]/45 bg-white/92 p-6 shadow-sm backdrop-blur">
@@ -236,16 +573,16 @@ export default function LiveRankingsPage() {
           </div>
 
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[1080px] border-collapse text-left">
+            <table className="w-full min-w-[1040px] border-collapse text-left">
               <thead>
                 <tr className="border-b border-gray-200 text-[11px] uppercase tracking-[0.16em] text-gray-500">
-                  <th className="px-5 py-4 font-black">Rank</th>
-                  <th className="px-5 py-4 font-black">Country</th>
-                  <th className="px-5 py-4 font-black">Live Score</th>
-                  <th className="px-5 py-4 font-black">Momentum</th>
-                  <th className="px-5 py-4 font-black">Moved By</th>
-                  <th className="px-5 py-4 font-black">Why</th>
-                  <th className="px-5 py-4 font-black">Move</th>
+                  <th className="px-4 py-3 font-black">Rank</th>
+                  <th className="px-4 py-3 font-black">Country</th>
+                  <th className="px-4 py-3 font-black">Live Score</th>
+                  <th className="px-4 py-3 font-black">Momentum</th>
+                  <th className="px-4 py-3 font-black">Moved By</th>
+                  <th className="px-4 py-3 font-black">Why</th>
+                  <th className="px-4 py-3 font-black">Move</th>
                 </tr>
               </thead>
 
@@ -257,33 +594,37 @@ export default function LiveRankingsPage() {
                     onDragStart={() => setDraggedName(country.name)}
                     onDragOver={(event) => event.preventDefault()}
                     onDrop={(event) => handleDrop(event, index)}
-                    className={`h-[88px] cursor-grab border-b border-gray-200/80 transition-all duration-300 active:cursor-grabbing ${
+                    onDragEnd={() => {
+                      setDraggedName(null);
+                      setWheelTargetIndex(null);
+                    }}
+                    className={`h-[52px] cursor-grab border-b border-gray-200/80 transition-all duration-300 active:cursor-grabbing ${
                       draggedName === country.name ? "bg-[#19d3cf]/15 opacity-70" : "hover:bg-[#19d3cf]/5"
                     }`}
                   >
-                    <td className="whitespace-nowrap px-5 py-4 text-lg font-black text-[#ff2fa8]">#{index + 1}</td>
-                    <td className="whitespace-nowrap px-5 py-4">
+                    <td className="whitespace-nowrap px-4 py-2 text-base font-black text-[#ff2fa8]">#{index + 1}</td>
+                    <td className="whitespace-nowrap px-4 py-2">
                       <div className="flex items-center gap-3">
-                        <span className="grid h-8 w-8 shrink-0 place-items-center overflow-hidden rounded-xl bg-gray-50 shadow-inner">
+                        <span className="grid h-6 w-6 shrink-0 place-items-center overflow-hidden rounded-lg bg-gray-50 shadow-inner">
                           <img src={`https://flagcdn.com/w80/${country.code}.png`} alt={`${country.name} flag`} className="h-full w-full object-cover" />
                         </span>
-                        <span className="font-black">{country.name}</span>
+                        <span className="text-sm font-black">{country.name}</span>
                       </div>
                     </td>
-                    <td className="whitespace-nowrap px-5 py-4">
-                      <span className="rounded-full bg-[#19d3cf]/12 px-3 py-1 text-sm font-black text-[#19d3cf]">{country.score}</span>
+                    <td className="whitespace-nowrap px-4 py-2">
+                      <span className="rounded-full bg-[#19d3cf]/12 px-2.5 py-0.5 text-xs font-black text-[#19d3cf]">{country.score}</span>
                     </td>
-                    <td className={`whitespace-nowrap px-5 py-4 text-sm font-black ${country.momentum >= 0 ? "text-[#19d3cf]" : "text-[#ff2fa8]"}`}>
+                    <td className={`whitespace-nowrap px-4 py-2 text-xs font-black ${country.momentum >= 0 ? "text-[#19d3cf]" : "text-[#ff2fa8]"}`}>
                       {country.momentum >= 0 ? `▲ ${country.momentum}` : `▼ ${Math.abs(country.momentum)}`}
                     </td>
-                    <td className="whitespace-nowrap px-5 py-4 text-sm font-black text-gray-700">{country.movedBy}</td>
-                    <td className="px-5 py-4 text-sm font-black text-gray-700">
-                      <span className="block max-w-[360px] truncate">{country.reasons.join(" · ")}</span>
+                    <td className="whitespace-nowrap px-4 py-2 text-xs font-black text-gray-700">{country.movedBy}</td>
+                    <td className="px-4 py-2 text-xs font-black text-gray-700">
+                      <span className="block max-w-[430px] truncate">{country.reasons.join(" · ")}</span>
                     </td>
-                    <td className="whitespace-nowrap px-5 py-4">
+                    <td className="whitespace-nowrap px-4 py-2">
                       <div className="flex gap-2">
-                        <button type="button" onClick={() => moveCountry(index, index - 1)} className="rounded-full border border-[#19d3cf]/35 px-3 py-1 text-xs font-black text-[#19d3cf]">↑</button>
-                        <button type="button" onClick={() => moveCountry(index, index + 1)} className="rounded-full border border-[#ff2fa8]/35 px-3 py-1 text-xs font-black text-[#ff2fa8]">↓</button>
+                        <button type="button" onClick={() => moveCountry(index, index - 1)} className="rounded-full border border-[#19d3cf]/35 px-2.5 py-0.5 text-xs font-black text-[#19d3cf]">↑</button>
+                        <button type="button" onClick={() => moveCountry(index, index + 1)} className="rounded-full border border-[#ff2fa8]/35 px-2.5 py-0.5 text-xs font-black text-[#ff2fa8]">↓</button>
                       </div>
                     </td>
                   </tr>
