@@ -727,7 +727,7 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
         }
 
         header nav > a:last-child {
-          transform: translateX(-18px);
+          transform: translateX(18px);
         }
 
         header nav .skillatlas-rankings-dropdown {
