@@ -486,8 +486,8 @@ function RankWheel({
               event.preventDefault();
               onDropRank(rank - 1);
             }}
-            className={`absolute border-0 bg-transparent p-0 text-[1.55rem] font-black leading-none transition-all duration-[420ms] ease-[cubic-bezier(0.16,1,0.3,1)] ${
-              active ? "text-[#ff2fa8] drop-shadow-[0_8px_18px_rgba(255,47,168,0.34)]" : "text-[#111827]"
+            className={`absolute border-0 bg-transparent p-0 text-[1.55rem] font-black leading-none tracking-[-0.08em] transition-all duration-[420ms] ease-[cubic-bezier(0.16,1,0.3,1)] ${
+              active ? "text-[#ff2fa8]" : "text-[#19d3cf]"
             }`}
             style={{
               left,
@@ -495,6 +495,10 @@ function RankWheel({
               opacity,
               transform: `translate(-50%, 50%) scale(${scale})`,
               transformOrigin: "center",
+              WebkitTextStroke: active ? "0.75px rgba(255,255,255,0.96)" : "0.65px rgba(15,23,42,0.72)",
+              textShadow: active
+                ? "0 0 2px rgba(255,255,255,0.95), 0 0 13px rgba(255,47,168,0.70), 0 8px 18px rgba(15,23,42,0.28)"
+                : "0 0 2px rgba(255,255,255,0.88), 0 0 12px rgba(25,211,207,0.68), 0 6px 14px rgba(15,23,42,0.22)",
             }}
             aria-label={`Move ${draggedName} to rank ${rank}`}
           >
