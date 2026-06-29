@@ -1,8 +1,8 @@
 "use client";
 
 import Image from "next/image";
-import type { DragEvent } from "react";
-import { useEffect, useMemo, useState } from "react";
+import type { DragEvent as ReactDragEvent } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 type LiveCountry = {
   name: string;
@@ -380,6 +380,22 @@ function pageThemeStyles() {
       color: rgb(248, 250, 252);
     }
 
+    @keyframes skillatlas-rank-wheel-enter {
+      0% {
+        opacity: 0;
+        transform: translate(-18px, 18px) scale(0.78);
+      }
+
+      100% {
+        opacity: 1;
+        transform: translate(0, 0) scale(1);
+      }
+    }
+
+    .skillatlas-rank-wheel {
+      animation: skillatlas-rank-wheel-enter 220ms cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+
     html.skillatlas-dark .rankings-shell > div:first-child {
       opacity: 0.58;
       filter: brightness(0.72) saturate(1.25);
@@ -389,55 +405,61 @@ function pageThemeStyles() {
 
 
 
-function rankWheelStops(total: number) {
-  return [1, 5, 10, 25, 50, 75, 100, 125, 150, 175, 200, total]
-    .filter((rank, index, ranks) => rank <= total && ranks.indexOf(rank) === index);
+function visibleRankWindow(total: number, activeIndex: number) {
+  const visibleCount = Math.min(20, total);
+  const start = Math.max(0, Math.min(total - visibleCount, activeIndex - Math.floor(visibleCount / 2)));
+
+  return Array.from({ length: visibleCount }, (_, index) => start + index + 1);
 }
 
 function RankWheel({
   total,
   draggedName,
+  draggedIndex,
   targetIndex,
   setTargetIndex,
   onDropRank,
 }: {
   total: number;
   draggedName: string | null;
+  draggedIndex: number | null;
   targetIndex: number | null;
   setTargetIndex: (index: number | null) => void;
   onDropRank: (index: number) => void;
 }) {
   if (!draggedName) return null;
 
-  const ranks = rankWheelStops(total);
-  const radius = 226;
+  const activeIndex = Math.max(0, Math.min(total - 1, targetIndex ?? draggedIndex ?? 0));
+  const activeRank = activeIndex + 1;
+  const ranks = visibleRankWindow(total, activeIndex);
+  const activeWindowIndex = ranks.indexOf(activeRank);
+  const radius = 154;
 
   return (
     <div
-      className="fixed bottom-0 left-0 z-[95] h-[320px] w-[320px]"
-      onDragOver={(event) => event.preventDefault()}
+      className="skillatlas-rank-wheel fixed bottom-0 left-0 z-[95] h-[190px] w-[190px] overflow-visible"
+      onDragOver={(event) => {
+                      event.preventDefault();
+                      setWheelTargetIndex(index);
+                    }}
+                    onDragEnter={() => setWheelTargetIndex(index)}
       onDragLeave={(event) => {
-        if (event.currentTarget === event.target) setTargetIndex(null);
+        if (event.currentTarget === event.target) setTargetIndex(draggedIndex);
       }}
     >
-      <div className="absolute bottom-0 left-0 h-[300px] w-[300px] rounded-tr-full border-r border-t border-[#ff2fa8]/40 bg-white/92 shadow-[0_24px_80px_rgba(15,23,42,0.20)] backdrop-blur-xl" />
-      <div className="absolute bottom-5 left-5 h-[238px] w-[238px] rounded-tr-full border-r border-t border-[#19d3cf]/25" />
-      <div className="absolute bottom-9 left-9 h-[170px] w-[170px] rounded-tr-full border-r border-t border-[#ff2fa8]/20" />
-
-      <div className="absolute bottom-7 left-7 max-w-[155px]">
-        <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#19d3cf]">Rank Wheel</p>
-        <p className="mt-1 text-sm font-black text-[#111827]">{draggedName}</p>
-        <p className="mt-1 text-xs font-black text-[#ff2fa8]">
-          {targetIndex === null ? "Hover a rank" : `Drop to #${targetIndex + 1}`}
-        </p>
-      </div>
+      <div className="absolute bottom-0 left-0 h-[148px] w-[148px] rounded-tr-full border-r border-t border-[#ff2fa8]/35 bg-white/72 shadow-[0_18px_58px_rgba(15,23,42,0.18)] backdrop-blur-xl" />
+      <div className="absolute bottom-0 left-0 h-[112px] w-[112px] rounded-tr-full border-r border-t border-[#19d3cf]/22" />
+      <div className="absolute bottom-0 left-0 h-[76px] w-[76px] rounded-tr-full border-r border-t border-[#ff2fa8]/16" />
 
       {ranks.map((rank, index) => {
-        const angle = ranks.length === 1 ? 45 : 7 + (index / (ranks.length - 1)) * 76;
+        const angle = ranks.length === 1 ? 45 : 86 - (index / (ranks.length - 1)) * 78;
         const radians = (angle * Math.PI) / 180;
-        const left = 22 + Math.cos(radians) * radius;
-        const bottom = 20 + Math.sin(radians) * radius;
-        const active = targetIndex === rank - 1;
+        const left = 2 + Math.cos(radians) * radius;
+        const bottom = 2 + Math.sin(radians) * radius;
+        const distanceFromActive = activeWindowIndex === -1 ? Math.abs(index - ranks.length / 2) : Math.abs(index - activeWindowIndex);
+        const active = rank === activeRank;
+        const scale = active ? 1.72 : Math.max(0.68, 1.06 - distanceFromActive * 0.045);
+        const opacity = active ? 1 : Math.max(0.34, 0.88 - distanceFromActive * 0.055);
 
         return (
           <button
@@ -452,12 +474,15 @@ function RankWheel({
               event.preventDefault();
               onDropRank(rank - 1);
             }}
-            className={`absolute grid h-11 w-11 -translate-x-1/2 translate-y-1/2 place-items-center rounded-full border text-xs font-black transition-all duration-200 ${
-              active
-                ? "scale-110 border-[#ff2fa8] bg-[#ff2fa8] text-white shadow-lg shadow-[#ff2fa8]/25"
-                : "border-[#19d3cf]/35 bg-white text-[#111827] hover:border-[#19d3cf] hover:text-[#19d3cf]"
+            className={`absolute border-0 bg-transparent p-0 font-black leading-none transition-all duration-500 ease-out ${
+              active ? "text-2xl text-[#ff2fa8] drop-shadow-[0_6px_16px_rgba(255,47,168,0.28)]" : "text-[10px] text-[#111827]"
             }`}
-            style={{ left, bottom }}
+            style={{
+              left,
+              bottom,
+              opacity,
+              transform: `translate(-50%, 50%) scale(${scale})`,
+            }}
             aria-label={`Move ${draggedName} to rank ${rank}`}
           >
             {rank}
@@ -473,6 +498,8 @@ export default function LiveRankingsPage() {
   const [countries, setCountries] = useState(initialCountries);
   const [draggedName, setDraggedName] = useState<string | null>(null);
   const [wheelTargetIndex, setWheelTargetIndex] = useState<number | null>(null);
+  const autoScrollVelocityRef = useRef(0);
+  const autoScrollFrameRef = useRef<number | null>(null);
   const [activity, setActivity] = useState([
     "Brazil surged after 42 FPS votes.",
     "Denmark defended #1 with tactical votes.",
@@ -480,8 +507,68 @@ export default function LiveRankingsPage() {
   ]);
 
   const leader = countries[0];
+  const draggedIndex = draggedName ? countries.findIndex((country) => country.name === draggedName) : null;
 
   const liveScore = useMemo(() => countries.reduce((sum, country, index) => sum + country.score - index, 0), [countries]);
+
+  useEffect(() => {
+    if (!draggedName) {
+      autoScrollVelocityRef.current = 0;
+
+      if (autoScrollFrameRef.current !== null) {
+        window.cancelAnimationFrame(autoScrollFrameRef.current);
+        autoScrollFrameRef.current = null;
+      }
+
+      return;
+    }
+
+    const edgeZone = 150;
+    const maxVelocity = 28;
+
+    const updateVelocity = (event: globalThis.DragEvent) => {
+      const y = event.clientY;
+      const viewportHeight = window.innerHeight;
+
+      if (y < edgeZone) {
+        const intensity = Math.min(1, (edgeZone - y) / edgeZone);
+        autoScrollVelocityRef.current = -(5 + intensity * maxVelocity);
+        return;
+      }
+
+      if (y > viewportHeight - edgeZone) {
+        const intensity = Math.min(1, (y - (viewportHeight - edgeZone)) / edgeZone);
+        autoScrollVelocityRef.current = 5 + intensity * maxVelocity;
+        return;
+      }
+
+      autoScrollVelocityRef.current = 0;
+    };
+
+    const tick = () => {
+      const velocity = autoScrollVelocityRef.current;
+
+      if (velocity !== 0) {
+        window.scrollBy({ top: velocity, left: 0, behavior: "auto" });
+      }
+
+      autoScrollFrameRef.current = window.requestAnimationFrame(tick);
+    };
+
+    window.addEventListener("dragover", updateVelocity);
+    autoScrollFrameRef.current = window.requestAnimationFrame(tick);
+
+    return () => {
+      window.removeEventListener("dragover", updateVelocity);
+      autoScrollVelocityRef.current = 0;
+
+      if (autoScrollFrameRef.current !== null) {
+        window.cancelAnimationFrame(autoScrollFrameRef.current);
+        autoScrollFrameRef.current = null;
+      }
+    };
+  }, [draggedName]);
+
 
   function moveCountry(fromIndex: number, toIndex: number) {
     if (fromIndex === toIndex || toIndex < 0 || toIndex >= countries.length) return;
@@ -504,7 +591,7 @@ export default function LiveRankingsPage() {
     ].slice(0, 6));
   }
 
-  function handleDrop(event: DragEvent<HTMLTableRowElement>, targetIndex: number) {
+  function handleDrop(event: ReactDragEvent<HTMLTableRowElement>, targetIndex: number) {
     event.preventDefault();
 
     if (!draggedName) return;
@@ -532,6 +619,7 @@ export default function LiveRankingsPage() {
       <RankWheel
         total={countries.length}
         draggedName={draggedName}
+        draggedIndex={draggedIndex}
         targetIndex={wheelTargetIndex}
         setTargetIndex={setWheelTargetIndex}
         onDropRank={dropCountryToRank}
@@ -591,7 +679,10 @@ export default function LiveRankingsPage() {
                   <tr
                     key={country.name}
                     draggable
-                    onDragStart={() => setDraggedName(country.name)}
+                    onDragStart={() => {
+                      setDraggedName(country.name);
+                      setWheelTargetIndex(index);
+                    }}
                     onDragOver={(event) => event.preventDefault()}
                     onDrop={(event) => handleDrop(event, index)}
                     onDragEnd={() => {
