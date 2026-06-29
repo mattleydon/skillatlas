@@ -452,14 +452,26 @@ function RankWheel({
   }
 
   function numberStroke(distance: number) {
-    if (distance <= 3) return "0.75px rgba(15,23,42,0.92)";
-    return "0.55px rgba(15,23,42,0.72)";
+    if (distance === 0) return "1.35px rgba(255,255,255,0.98)";
+    if (distance <= 3) return "0.85px rgba(15,23,42,0.94)";
+    return "0.55px rgba(15,23,42,0.74)";
   }
 
   function numberShadow(distance: number) {
-    if (distance === 0) return "0 0 2px rgba(255,255,255,0.86), 0 0 13px rgba(255,47,168,0.44), 0 7px 16px rgba(15,23,42,0.26)";
-    if (distance <= 3) return "0 0 2px rgba(255,255,255,0.72), 0 0 9px rgba(255,47,168,0.20), 0 5px 12px rgba(15,23,42,0.22)";
-    return "0 0 2px rgba(255,255,255,0.62), 0 4px 10px rgba(15,23,42,0.22)";
+    if (distance === 0) {
+      return [
+        "1.5px 0 0 rgba(15,23,42,0.92)",
+        "-1.5px 0 0 rgba(15,23,42,0.92)",
+        "0 1.5px 0 rgba(15,23,42,0.92)",
+        "0 -1.5px 0 rgba(15,23,42,0.92)",
+        "0 0 7px rgba(255,255,255,0.95)",
+        "0 0 18px rgba(255,47,168,0.82)",
+        "0 10px 26px rgba(15,23,42,0.44)",
+      ].join(", ");
+    }
+
+    if (distance <= 3) return "0 0 2px rgba(255,255,255,0.72), 0 0 9px rgba(255,47,168,0.20), 0 5px 12px rgba(15,23,42,0.24)";
+    return "0 0 2px rgba(255,255,255,0.62), 0 4px 10px rgba(15,23,42,0.24)";
   }
 
   return (
@@ -505,16 +517,18 @@ function RankWheel({
               event.preventDefault();
               onDropRank(rank - 1);
             }}
-            className="absolute border-0 bg-transparent p-0 text-[1.55rem] font-black leading-none tracking-[-0.08em] transition-all duration-[420ms] ease-[cubic-bezier(0.16,1,0.3,1)]"
+            className="absolute border-0 bg-transparent p-0 font-black leading-none tracking-[-0.08em] transition-all duration-[420ms] ease-[cubic-bezier(0.16,1,0.3,1)]"
             style={{
               left,
               bottom,
               color: numberColour(distanceFromActive),
-              opacity,
+              fontSize: active ? "2.15rem" : "1.45rem",
+              opacity: active ? 1 : opacity,
               transform: `translate(-50%, 50%) scale(${scale})`,
               transformOrigin: "center",
               WebkitTextStroke: numberStroke(distanceFromActive),
               textShadow: numberShadow(distanceFromActive),
+              filter: active ? "saturate(1.2) contrast(1.12)" : "none",
             }}
             aria-label={`Move ${draggedName} to rank ${rank}`}
           >
