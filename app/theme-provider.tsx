@@ -115,6 +115,13 @@ function setupRankingsDropdown() {
   const navs = Array.from(document.querySelectorAll<HTMLElement>("header nav"));
 
   navs.forEach((nav) => {
+    const profilesLinks = Array.from(nav.querySelectorAll<HTMLAnchorElement>('a[href="/profiles"], a[href^="/profiles"]'));
+    profilesLinks.forEach((link) => {
+      if (link.textContent?.trim() === "Profiles") {
+        link.textContent = "Players";
+      }
+    });
+
     const directUserRankingsLinks = Array.from(nav.querySelectorAll<HTMLAnchorElement>("a[href]")).filter((link) => {
       const text = link.textContent?.trim().toLowerCase() ?? "";
       return text === "user rankings" && !link.closest(".skillatlas-rankings-dropdown");
@@ -141,7 +148,7 @@ function setupRankingsDropdown() {
     trigger.type = "button";
     trigger.className = rankingsLink.className;
     trigger.classList.add("skillatlas-rankings-trigger");
-    trigger.innerHTML = '<span>Rankings</span><span class="skillatlas-rankings-chevron" aria-hidden="true">⌄</span>';
+    trigger.innerHTML = '<span>Rankings</span>';
     trigger.setAttribute("aria-haspopup", "true");
     trigger.setAttribute("aria-expanded", "false");
 
@@ -152,7 +159,7 @@ function setupRankingsDropdown() {
     const items = [
       { label: "Rankings", href: "/", description: "General country rankings" },
       { label: "User Rankings", href: "/user-rankings", description: "Community country votes" },
-      { label: "Live Rankings", href: "/live-rankings", description: "Drag countries in real time" },
+      { label: "Live Rankings", href: "/live-rankings", description: "Rank countries in real time" },
     ];
 
     items.forEach((item) => {
@@ -720,6 +727,10 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
         }
 
 
+        header nav {
+          justify-content: space-between !important;
+        }
+
         header nav .skillatlas-rankings-dropdown {
           position: relative;
           display: inline-flex;
@@ -728,10 +739,18 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
           min-height: 44px;
         }
 
+        header nav .skillatlas-rankings-dropdown::after {
+          content: "";
+          position: absolute;
+          left: -36px;
+          right: -36px;
+          top: 100%;
+          height: 26px;
+        }
+
         header nav .skillatlas-rankings-trigger {
           display: inline-flex;
           align-items: center;
-          gap: 6px;
           border: 0;
           background: transparent;
           color: inherit;
@@ -746,29 +765,14 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
           color: var(--skillatlas-turquoise) !important;
         }
 
-        header nav .skillatlas-rankings-chevron {
-          display: inline-block;
-          color: var(--skillatlas-pink);
-          font-size: 0.92em;
-          font-weight: 950;
-          transform: translateY(-1px);
-          transition: transform 180ms ease;
-        }
-
-        header nav .skillatlas-rankings-dropdown:hover .skillatlas-rankings-chevron,
-        header nav .skillatlas-rankings-dropdown:focus-within .skillatlas-rankings-chevron,
-        header nav .skillatlas-rankings-trigger[aria-expanded="true"] .skillatlas-rankings-chevron {
-          transform: translateY(-1px) rotate(180deg);
-        }
-
         header nav .skillatlas-rankings-menu {
           pointer-events: none;
           position: absolute;
           left: 50%;
-          top: calc(100% + 10px);
+          top: calc(100% + 4px);
           z-index: 80;
           width: 232px;
-          transform: translateX(-50%) translateY(-8px) scale(0.98);
+          transform: translateX(-50%) translateY(-6px) scale(0.98);
           overflow: hidden;
           border: 1px solid rgba(255, 47, 168, 0.28);
           border-radius: 20px;

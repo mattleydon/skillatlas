@@ -816,7 +816,7 @@ function ProfileCard({ profile, selected, onSelect }: { profile: PlayerProfile; 
   );
 }
 
-export default function ProfilesPage() {
+export default function PlayersPage() {
   const [scrolled, setScrolled] = useState(false);
   const [search, setSearch] = useState("");
   const [selectedGame, setSelectedGame] = useState<Game>("All");
@@ -1016,14 +1016,14 @@ export default function ProfilesPage() {
               ["Rankings", "/"],
               ["World Map", "/world-map"],
               ["Countries", "/countries"],
-              ["Profiles", "/profiles"],
+              ["Players", "/profiles"],
               ["User Rankings", "/user-rankings"],
               ["About", "/about"],
             ].map(([item, href]) => (
               <a
                 key={item}
                 className={`font-semibold transition-all duration-300 ${
-                  item === "Profiles" ? "text-[#19d3cf]" : "text-gray-700 hover:text-[#19d3cf]"
+                  item === "Players" ? "text-[#19d3cf]" : "text-gray-700 hover:text-[#19d3cf]"
                 } ${scrolled ? "text-sm" : "text-[1rem]"}`}
                 href={href}
               >
@@ -1036,7 +1036,7 @@ export default function ProfilesPage() {
 
       <section className="relative z-10 mx-auto max-w-7xl px-8 pb-16 pt-[150px]">
         <div className="mb-6 rounded-3xl border border-[#ff2fa8]/45 bg-white/92 p-6 shadow-sm backdrop-blur">
-          <p className="mb-2 text-xs font-black uppercase tracking-[0.28em] text-[#19d3cf]">Profiles</p>
+          <p className="mb-2 text-xs font-black uppercase tracking-[0.28em] text-[#19d3cf]">Players</p>
           <div className="grid gap-5 lg:grid-cols-[1.25fr_0.75fr] lg:items-end">
             <div>
               <h1 className="mb-2 text-xl font-black tracking-tight">Discover the player types behind every gaming nation.</h1>
