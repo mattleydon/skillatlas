@@ -52,11 +52,6 @@ const siteAreas = [
     href: "/live-rankings",
   },
   {
-    name: "Players",
-    description: "Player archetypes, roles, and eventually real user-created SkillAtlas profiles.",
-    href: "/profiles",
-  },
-  {
     name: "World Map",
     description: "A visual globe layer for exploring country strength by game and geography.",
     href: "/world-map",
@@ -65,6 +60,11 @@ const siteAreas = [
     name: "Countries",
     description: "Country profile cards with rankings, strengths, weaknesses, identities, and gaming fingerprints.",
     href: "/countries",
+  },
+  {
+    name: "Players",
+    description: "Player archetypes, roles, and eventually real user-created SkillAtlas profiles.",
+    href: "/profiles",
   },
 ];
 
@@ -239,7 +239,7 @@ export default function AboutPage() {
               </p>
             </div>
 
-            <div className="rounded-3xl border border-[#19d3cf]/30 bg-[#19d3cf]/8 p-5">
+            <div className="rounded-3xl border border-[#19d3cf]/30 bg-[#19d3cf]/8 p-5 lg:mt-8">
               <p className="mb-2 text-[11px] font-black uppercase tracking-[0.24em] text-[#ff2fa8]">The simple idea</p>
               <p className="text-xl font-black leading-tight">
                 Every country has a gaming fingerprint. SkillAtlas is here to map it.
