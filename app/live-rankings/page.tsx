@@ -406,7 +406,7 @@ function pageThemeStyles() {
 
 
 function visibleRankWindow(total: number, activeIndex: number) {
-  const visibleCount = Math.min(20, total);
+  const visibleCount = Math.min(17, total);
   const start = Math.max(0, Math.min(total - visibleCount, activeIndex - Math.floor(visibleCount / 2)));
 
   return Array.from({ length: visibleCount }, (_, index) => start + index + 1);
@@ -433,29 +433,37 @@ function RankWheel({
   const activeRank = activeIndex + 1;
   const ranks = visibleRankWindow(total, activeIndex);
   const activeWindowIndex = ranks.indexOf(activeRank);
-  const radius = 154;
+  const radius = 158;
+
+  function sizeForDistance(distance: number) {
+    if (distance === 0) return 1;
+    if (distance === 1) return 0.67;
+    if (distance === 2) return 0.5;
+    if (distance === 3) return 0.33;
+    return 0.25;
+  }
 
   return (
     <div
-      className="skillatlas-rank-wheel fixed bottom-0 left-0 z-[95] h-[190px] w-[190px] overflow-visible"
+      className="skillatlas-rank-wheel fixed bottom-0 left-0 z-[95] h-[188px] w-[188px] overflow-visible"
       onDragOver={(event) => event.preventDefault()}
       onDragLeave={(event) => {
         if (event.currentTarget === event.target) setTargetIndex(draggedIndex);
       }}
     >
-      <div className="absolute bottom-0 left-0 h-[148px] w-[148px] rounded-tr-full border-r border-t border-[#ff2fa8]/35 bg-white/72 shadow-[0_18px_58px_rgba(15,23,42,0.18)] backdrop-blur-xl" />
-      <div className="absolute bottom-0 left-0 h-[112px] w-[112px] rounded-tr-full border-r border-t border-[#19d3cf]/22" />
-      <div className="absolute bottom-0 left-0 h-[76px] w-[76px] rounded-tr-full border-r border-t border-[#ff2fa8]/16" />
+      <div className="absolute bottom-0 left-0 h-[146px] w-[146px] rounded-tr-full border-r border-t border-[#ff2fa8]/30 bg-white/62 shadow-[0_18px_58px_rgba(15,23,42,0.16)] backdrop-blur-xl" />
+      <div className="absolute bottom-0 left-0 h-[104px] w-[104px] rounded-tr-full border-r border-t border-[#19d3cf]/20" />
+      <div className="absolute bottom-0 left-0 h-[66px] w-[66px] rounded-tr-full border-r border-t border-[#ff2fa8]/14" />
 
       {ranks.map((rank, index) => {
-        const angle = ranks.length === 1 ? 45 : 86 - (index / (ranks.length - 1)) * 78;
+        const angle = ranks.length === 1 ? 45 : 88 - (index / (ranks.length - 1)) * 82;
         const radians = (angle * Math.PI) / 180;
-        const left = 2 + Math.cos(radians) * radius;
-        const bottom = 2 + Math.sin(radians) * radius;
-        const distanceFromActive = activeWindowIndex === -1 ? Math.abs(index - ranks.length / 2) : Math.abs(index - activeWindowIndex);
+        const left = 0 + Math.cos(radians) * radius;
+        const bottom = 0 + Math.sin(radians) * radius;
+        const distanceFromActive = activeWindowIndex === -1 ? Math.abs(index - Math.floor(ranks.length / 2)) : Math.abs(index - activeWindowIndex);
         const active = rank === activeRank;
-        const scale = active ? 1.72 : Math.max(0.68, 1.06 - distanceFromActive * 0.045);
-        const opacity = active ? 1 : Math.max(0.34, 0.88 - distanceFromActive * 0.055);
+        const scale = sizeForDistance(distanceFromActive);
+        const opacity = active ? 1 : Math.max(0.42, 0.84 - distanceFromActive * 0.06);
 
         return (
           <button
@@ -470,14 +478,15 @@ function RankWheel({
               event.preventDefault();
               onDropRank(rank - 1);
             }}
-            className={`absolute border-0 bg-transparent p-0 font-black leading-none transition-all duration-500 ease-out ${
-              active ? "text-2xl text-[#ff2fa8] drop-shadow-[0_6px_16px_rgba(255,47,168,0.28)]" : "text-[10px] text-[#111827]"
+            className={`absolute border-0 bg-transparent p-0 text-[2.05rem] font-black leading-none transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+              active ? "text-[#ff2fa8] drop-shadow-[0_7px_18px_rgba(255,47,168,0.30)]" : "text-[#111827]"
             }`}
             style={{
               left,
               bottom,
               opacity,
               transform: `translate(-50%, 50%) scale(${scale})`,
+              transformOrigin: "center",
             }}
             aria-label={`Move ${draggedName} to rank ${rank}`}
           >
@@ -679,13 +688,17 @@ export default function LiveRankingsPage() {
                       setDraggedName(country.name);
                       setWheelTargetIndex(index);
                     }}
-                    onDragOver={(event) => event.preventDefault()}
+                    onDragOver={(event) => {
+                      event.preventDefault();
+                      setWheelTargetIndex(index);
+                    }}
+                    onDragEnter={() => setWheelTargetIndex(index)}
                     onDrop={(event) => handleDrop(event, index)}
                     onDragEnd={() => {
                       setDraggedName(null);
                       setWheelTargetIndex(null);
                     }}
-                    className={`h-[52px] cursor-grab border-b border-gray-200/80 transition-all duration-300 active:cursor-grabbing ${
+                    className={`h-[52px] cursor-grab border-b border-gray-200/80 transition-all duration-300 ease-out active:cursor-grabbing ${
                       draggedName === country.name ? "bg-[#19d3cf]/15 opacity-70" : "hover:bg-[#19d3cf]/5"
                     }`}
                   >
