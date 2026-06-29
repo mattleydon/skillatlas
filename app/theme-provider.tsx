@@ -110,8 +110,87 @@ function normaliseHref(path: string) {
   return cleanPath.endsWith("/") && cleanPath.length > 1 ? cleanPath.slice(0, -1) : cleanPath;
 }
 
+
+function setupRankingsDropdown() {
+  const navs = Array.from(document.querySelectorAll<HTMLElement>("header nav"));
+
+  navs.forEach((nav) => {
+    const directUserRankingsLinks = Array.from(nav.querySelectorAll<HTMLAnchorElement>("a[href]")).filter((link) => {
+      const text = link.textContent?.trim().toLowerCase() ?? "";
+      return text === "user rankings" && !link.closest(".skillatlas-rankings-dropdown");
+    });
+
+    directUserRankingsLinks.forEach((link) => link.remove());
+
+    const existingDropdown = nav.querySelector<HTMLElement>(".skillatlas-rankings-dropdown");
+    if (existingDropdown) return;
+
+    const rankingsLink = Array.from(nav.querySelectorAll<HTMLAnchorElement>("a[href]")).find((link) => {
+      const text = link.textContent?.trim().toLowerCase() ?? "";
+      const href = normaliseHref(link.getAttribute("href") ?? "");
+      return text === "rankings" && href === "/";
+    });
+
+    if (!rankingsLink) return;
+
+    const wrapper = document.createElement("div");
+    wrapper.className = "skillatlas-rankings-dropdown";
+    wrapper.setAttribute("data-skillatlas-rankings-dropdown", "true");
+
+    const trigger = document.createElement("button");
+    trigger.type = "button";
+    trigger.className = rankingsLink.className;
+    trigger.classList.add("skillatlas-rankings-trigger");
+    trigger.innerHTML = '<span>Rankings</span><span class="skillatlas-rankings-chevron" aria-hidden="true">⌄</span>';
+    trigger.setAttribute("aria-haspopup", "true");
+    trigger.setAttribute("aria-expanded", "false");
+
+    const menu = document.createElement("div");
+    menu.className = "skillatlas-rankings-menu";
+    menu.setAttribute("role", "menu");
+
+    const items = [
+      { label: "Rankings", href: "/", description: "General country rankings" },
+      { label: "User Rankings", href: "/user-rankings", description: "Community country votes" },
+      { label: "Live Rankings", href: "/live-rankings", description: "Drag countries in real time" },
+    ];
+
+    items.forEach((item) => {
+      const anchor = document.createElement("a");
+      anchor.href = item.href;
+      anchor.className = "skillatlas-rankings-menu-item";
+      anchor.setAttribute("role", "menuitem");
+      anchor.innerHTML = `<span>${item.label}</span><small>${item.description}</small>`;
+      menu.appendChild(anchor);
+    });
+
+    wrapper.append(trigger, menu);
+    rankingsLink.replaceWith(wrapper);
+
+    wrapper.addEventListener("mouseenter", () => trigger.setAttribute("aria-expanded", "true"));
+    wrapper.addEventListener("mouseleave", () => trigger.setAttribute("aria-expanded", "false"));
+    wrapper.addEventListener("focusin", () => trigger.setAttribute("aria-expanded", "true"));
+    wrapper.addEventListener("focusout", () => {
+      window.setTimeout(() => {
+        if (!wrapper.contains(document.activeElement)) {
+          trigger.setAttribute("aria-expanded", "false");
+        }
+      }, 0);
+    });
+
+    trigger.addEventListener("click", () => {
+      const open = trigger.getAttribute("aria-expanded") === "true";
+      trigger.setAttribute("aria-expanded", open ? "false" : "true");
+    });
+  });
+}
+
 function updateActiveHeaderNavigation() {
+  setupRankingsDropdown();
+
   const currentPath = normaliseHref(window.location.pathname);
+  const rankingPaths = ["/", "/user-rankings", "/live-rankings"];
+
   const links = Array.from(document.querySelectorAll<HTMLAnchorElement>("header nav a[href]"));
 
   links.forEach((link) => {
@@ -122,6 +201,23 @@ function updateActiveHeaderNavigation() {
 
     link.classList.toggle("skillatlas-active-nav", isActive);
     link.setAttribute("aria-current", isActive ? "page" : "false");
+  });
+
+  const dropdowns = Array.from(document.querySelectorAll<HTMLElement>(".skillatlas-rankings-dropdown"));
+  dropdowns.forEach((dropdown) => {
+    const trigger = dropdown.querySelector<HTMLElement>(".skillatlas-rankings-trigger");
+    const menuItems = Array.from(dropdown.querySelectorAll<HTMLAnchorElement>(".skillatlas-rankings-menu-item"));
+
+    const rankingsActive = rankingPaths.includes(currentPath);
+    trigger?.classList.toggle("skillatlas-active-nav", rankingsActive);
+    trigger?.setAttribute("aria-current", rankingsActive ? "page" : "false");
+
+    menuItems.forEach((item) => {
+      const itemPath = normaliseHref(item.getAttribute("href") ?? "");
+      const itemActive = itemPath === currentPath || (itemPath !== "/" && currentPath.startsWith(itemPath));
+      item.classList.toggle("skillatlas-active-nav", itemActive);
+      item.setAttribute("aria-current", itemActive ? "page" : "false");
+    });
   });
 }
 
@@ -621,6 +717,154 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
 
         header nav a[aria-current="page"] {
           color: var(--skillatlas-turquoise) !important;
+        }
+
+
+        header nav .skillatlas-rankings-dropdown {
+          position: relative;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          min-height: 44px;
+        }
+
+        header nav .skillatlas-rankings-trigger {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          border: 0;
+          background: transparent;
+          color: inherit;
+          cursor: pointer;
+          font-family: inherit;
+          font-weight: 700;
+          line-height: 1;
+          padding: 0;
+        }
+
+        header nav .skillatlas-rankings-trigger.skillatlas-active-nav {
+          color: var(--skillatlas-turquoise) !important;
+        }
+
+        header nav .skillatlas-rankings-chevron {
+          display: inline-block;
+          color: var(--skillatlas-pink);
+          font-size: 0.92em;
+          font-weight: 950;
+          transform: translateY(-1px);
+          transition: transform 180ms ease;
+        }
+
+        header nav .skillatlas-rankings-dropdown:hover .skillatlas-rankings-chevron,
+        header nav .skillatlas-rankings-dropdown:focus-within .skillatlas-rankings-chevron,
+        header nav .skillatlas-rankings-trigger[aria-expanded="true"] .skillatlas-rankings-chevron {
+          transform: translateY(-1px) rotate(180deg);
+        }
+
+        header nav .skillatlas-rankings-menu {
+          pointer-events: none;
+          position: absolute;
+          left: 50%;
+          top: calc(100% + 10px);
+          z-index: 80;
+          width: 232px;
+          transform: translateX(-50%) translateY(-8px) scale(0.98);
+          overflow: hidden;
+          border: 1px solid rgba(255, 47, 168, 0.28);
+          border-radius: 20px;
+          background:
+            linear-gradient(135deg, rgba(25,211,207,0.10), rgba(255,47,168,0.10)),
+            rgba(255,255,255,0.98);
+          box-shadow: 0 22px 50px rgba(15, 23, 42, 0.16);
+          opacity: 0;
+          padding: 8px;
+          transition:
+            opacity 170ms ease,
+            transform 170ms ease;
+          backdrop-filter: blur(18px);
+        }
+
+        header nav .skillatlas-rankings-dropdown:hover .skillatlas-rankings-menu,
+        header nav .skillatlas-rankings-dropdown:focus-within .skillatlas-rankings-menu,
+        header nav .skillatlas-rankings-trigger[aria-expanded="true"] + .skillatlas-rankings-menu {
+          pointer-events: auto;
+          opacity: 1;
+          transform: translateX(-50%) translateY(0) scale(1);
+        }
+
+        header nav .skillatlas-rankings-menu::before {
+          content: "";
+          position: absolute;
+          left: 50%;
+          top: -6px;
+          width: 12px;
+          height: 12px;
+          border-left: 1px solid rgba(255, 47, 168, 0.28);
+          border-top: 1px solid rgba(255, 47, 168, 0.28);
+          background: rgba(255,255,255,0.98);
+          transform: translateX(-50%) rotate(45deg);
+        }
+
+        header nav .skillatlas-rankings-menu-item {
+          position: relative;
+          display: block;
+          border-radius: 14px;
+          padding: 10px 12px;
+          text-decoration: none;
+          transition:
+            background-color 160ms ease,
+            color 160ms ease,
+            transform 160ms ease;
+        }
+
+        header nav .skillatlas-rankings-menu-item:hover {
+          transform: translateX(2px);
+          background: rgba(25, 211, 207, 0.10);
+        }
+
+        header nav .skillatlas-rankings-menu-item span {
+          display: block;
+          color: #111827;
+          font-size: 13px;
+          font-weight: 950;
+        }
+
+        header nav .skillatlas-rankings-menu-item small {
+          display: block;
+          margin-top: 3px;
+          color: #64748b;
+          font-size: 10px;
+          font-weight: 800;
+          letter-spacing: 0.03em;
+        }
+
+        header nav .skillatlas-rankings-menu-item.skillatlas-active-nav {
+          background: rgba(25, 211, 207, 0.14);
+        }
+
+        header nav .skillatlas-rankings-menu-item.skillatlas-active-nav span {
+          color: var(--skillatlas-turquoise);
+        }
+
+        html.skillatlas-dark header nav .skillatlas-rankings-menu {
+          border-color: rgba(255, 47, 168, 0.34);
+          background:
+            linear-gradient(135deg, rgba(25,211,207,0.10), rgba(255,47,168,0.10)),
+            rgba(39,51,65,0.98);
+          box-shadow: 0 24px 54px rgba(0,0,0,0.26);
+        }
+
+        html.skillatlas-dark header nav .skillatlas-rankings-menu::before {
+          background: rgba(39,51,65,0.98);
+          border-color: rgba(255, 47, 168, 0.34);
+        }
+
+        html.skillatlas-dark header nav .skillatlas-rankings-menu-item span {
+          color: var(--skillatlas-text-dark);
+        }
+
+        html.skillatlas-dark header nav .skillatlas-rankings-menu-item small {
+          color: var(--skillatlas-muted-dark);
         }
 
         ::view-transition-group(root) {
