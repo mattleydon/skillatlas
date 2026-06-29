@@ -406,7 +406,7 @@ function pageThemeStyles() {
 
 
 function visibleRankWindow(total: number, activeIndex: number) {
-  const visibleCount = Math.min(17, total);
+  const visibleCount = Math.min(11, total);
   const start = Math.max(0, Math.min(total - visibleCount, activeIndex - Math.floor(visibleCount / 2)));
 
   return Array.from({ length: visibleCount }, (_, index) => start + index + 1);
@@ -433,7 +433,7 @@ function RankWheel({
   const activeRank = activeIndex + 1;
   const ranks = visibleRankWindow(total, activeIndex);
   const activeWindowIndex = ranks.indexOf(activeRank);
-  const radius = 158;
+  const radius = 242;
 
   function sizeForDistance(distance: number) {
     if (distance === 0) return 1;
@@ -445,25 +445,33 @@ function RankWheel({
 
   return (
     <div
-      className="skillatlas-rank-wheel fixed bottom-0 left-0 z-[95] h-[188px] w-[188px] overflow-visible"
+      className="skillatlas-rank-wheel fixed bottom-0 left-0 z-[95] h-[238px] w-[238px] overflow-visible"
       onDragOver={(event) => event.preventDefault()}
       onDragLeave={(event) => {
         if (event.currentTarget === event.target) setTargetIndex(draggedIndex);
       }}
     >
-      <div className="absolute bottom-0 left-0 h-[146px] w-[146px] rounded-tr-full border-r border-t border-[#ff2fa8]/30 bg-white/62 shadow-[0_18px_58px_rgba(15,23,42,0.16)] backdrop-blur-xl" />
-      <div className="absolute bottom-0 left-0 h-[104px] w-[104px] rounded-tr-full border-r border-t border-[#19d3cf]/20" />
-      <div className="absolute bottom-0 left-0 h-[66px] w-[66px] rounded-tr-full border-r border-t border-[#ff2fa8]/14" />
+      <div
+        className="absolute bottom-0 left-0 h-[154px] w-[154px] rounded-tr-full border-r border-t border-[#ff2fa8]/35 backdrop-blur-xl"
+        style={{
+          background:
+            "radial-gradient(circle at 22% 86%, rgba(25,211,207,0.34), transparent 42%), radial-gradient(circle at 92% 14%, rgba(255,47,168,0.28), transparent 46%), linear-gradient(135deg, rgba(255,255,255,0.72), rgba(255,255,255,0.30))",
+          boxShadow: "0 18px 58px rgba(15,23,42,0.18), inset 0 0 38px rgba(25,211,207,0.14)",
+        }}
+      />
+      <div className="absolute bottom-0 left-0 h-[116px] w-[116px] rounded-tr-full border-r border-t border-[#19d3cf]/28" />
+      <div className="absolute bottom-0 left-0 h-[74px] w-[74px] rounded-tr-full border-r border-t border-[#ff2fa8]/18" />
+      <div className="absolute bottom-[18px] left-[18px] h-[92px] w-[92px] rounded-tr-full bg-gradient-to-tr from-[#19d3cf]/10 to-[#ff2fa8]/10 blur-xl" />
 
       {ranks.map((rank, index) => {
-        const angle = ranks.length === 1 ? 45 : 88 - (index / (ranks.length - 1)) * 82;
+        const angle = ranks.length === 1 ? 45 : 87 - (index / (ranks.length - 1)) * 82;
         const radians = (angle * Math.PI) / 180;
         const left = 0 + Math.cos(radians) * radius;
         const bottom = 0 + Math.sin(radians) * radius;
         const distanceFromActive = activeWindowIndex === -1 ? Math.abs(index - Math.floor(ranks.length / 2)) : Math.abs(index - activeWindowIndex);
         const active = rank === activeRank;
         const scale = sizeForDistance(distanceFromActive);
-        const opacity = active ? 1 : Math.max(0.42, 0.84 - distanceFromActive * 0.06);
+        const opacity = active ? 1 : Math.max(0.34, 0.86 - distanceFromActive * 0.085);
 
         return (
           <button
@@ -478,8 +486,8 @@ function RankWheel({
               event.preventDefault();
               onDropRank(rank - 1);
             }}
-            className={`absolute border-0 bg-transparent p-0 text-[2.05rem] font-black leading-none transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-              active ? "text-[#ff2fa8] drop-shadow-[0_7px_18px_rgba(255,47,168,0.30)]" : "text-[#111827]"
+            className={`absolute border-0 bg-transparent p-0 text-[2rem] font-black leading-none transition-all duration-[420ms] ease-[cubic-bezier(0.16,1,0.3,1)] ${
+              active ? "text-[#ff2fa8] drop-shadow-[0_8px_18px_rgba(255,47,168,0.34)]" : "text-[#111827]"
             }`}
             style={{
               left,
@@ -535,6 +543,23 @@ export default function LiveRankingsPage() {
       const y = event.clientY;
       const viewportHeight = window.innerHeight;
 
+      const hoveredElement = document.elementFromPoint(event.clientX, event.clientY) as HTMLElement | null;
+      const hoveredRow = hoveredElement?.closest("[data-rank-index]") as HTMLElement | null;
+
+      if (hoveredRow?.dataset.rankIndex) {
+        setWheelTargetIndex(Number(hoveredRow.dataset.rankIndex));
+      } else {
+        const tableBody = document.querySelector<HTMLElement>("[data-live-rankings-body]");
+        const firstRow = tableBody?.querySelector<HTMLElement>("[data-rank-index]");
+        const bodyRect = tableBody?.getBoundingClientRect();
+        const rowHeight = firstRow?.getBoundingClientRect().height ?? 52;
+
+        if (bodyRect && rowHeight > 0 && event.clientY >= bodyRect.top && event.clientY <= bodyRect.bottom) {
+          const approximateIndex = Math.max(0, Math.min(countries.length - 1, Math.floor((event.clientY - bodyRect.top) / rowHeight)));
+          setWheelTargetIndex(approximateIndex);
+        }
+      }
+
       if (y < edgeZone) {
         const intensity = Math.min(1, (edgeZone - y) / edgeZone);
         autoScrollVelocityRef.current = -(5 + intensity * maxVelocity);
@@ -572,7 +597,7 @@ export default function LiveRankingsPage() {
         autoScrollFrameRef.current = null;
       }
     };
-  }, [draggedName]);
+  }, [countries.length, draggedName]);
 
 
   function moveCountry(fromIndex: number, toIndex: number) {
@@ -679,10 +704,11 @@ export default function LiveRankingsPage() {
                 </tr>
               </thead>
 
-              <tbody>
+              <tbody data-live-rankings-body>
                 {countries.map((country, index) => (
                   <tr
                     key={country.name}
+                    data-rank-index={index}
                     draggable
                     onDragStart={() => {
                       setDraggedName(country.name);
