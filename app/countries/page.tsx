@@ -573,7 +573,7 @@ function CountryCard({ country, selected, onSelect }: { country: CountryProfile;
         </div>
       </div>
 
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap justify-center gap-2">
         {country.strengths.slice(0, 3).map((strength) => (
           <span key={strength} className="rounded-full border border-[#19d3cf]/25 bg-[#19d3cf]/8 px-3 py-1 text-[11px] font-black text-gray-700">
             {strength}
@@ -592,7 +592,7 @@ export default function CountriesPage() {
   const [selectedCountryId, setSelectedCountryId] = useState(countries[0].id);
   const [featuredCountryId, setFeaturedCountryId] = useState(countries[0].id);
   const [featuredLocked, setFeaturedLocked] = useState(false);
-  const [featuredTransitioning, setFeaturedTransitioning] = useState(false);
+  const [featuredTransitionPhase, setFeaturedTransitionPhase] = useState<"idle" | "out" | "in">("idle");
   const [atlasView, setAtlasView] = useState<"cards" | "rankings">("cards");
   const countryIdentityRef = useRef<HTMLElement | null>(null);
 
@@ -647,23 +647,32 @@ export default function CountriesPage() {
   useEffect(() => {
     if (featuredLocked || featuredPool.length <= 1) return;
 
-    const showTimer = window.setTimeout(() => {
-      setFeaturedTransitioning(true);
+    let swapTimer: number | undefined;
+    let settleTimer: number | undefined;
 
-      const transitionTimer = window.setTimeout(() => {
+    const showTimer = window.setTimeout(() => {
+      setFeaturedTransitionPhase("out");
+
+      swapTimer = window.setTimeout(() => {
         setFeaturedCountryId((currentId) => {
           const currentIndex = featuredPool.findIndex((country) => country.id === currentId);
           const nextIndex = currentIndex >= 0 ? (currentIndex + 1) % featuredPool.length : 0;
           return featuredPool[nextIndex]?.id ?? featuredPool[0].id;
         });
 
-        setFeaturedTransitioning(false);
-      }, 3000);
+        setFeaturedTransitionPhase("in");
 
-      return () => window.clearTimeout(transitionTimer);
+        settleTimer = window.setTimeout(() => {
+          setFeaturedTransitionPhase("idle");
+        }, 1500);
+      }, 1500);
     }, 6000);
 
-    return () => window.clearTimeout(showTimer);
+    return () => {
+      window.clearTimeout(showTimer);
+      if (swapTimer) window.clearTimeout(swapTimer);
+      if (settleTimer) window.clearTimeout(settleTimer);
+    };
   }, [featuredCountryId, featuredLocked, featuredPool]);
 
   const featuredCountry = countries.find((country) => country.id === featuredCountryId) ?? featuredPool[0] ?? countries[0];
@@ -671,6 +680,8 @@ export default function CountriesPage() {
 
   function selectCountry(countryId: string, scrollToIdentity = false) {
     setSelectedCountryId(countryId);
+    setFeaturedLocked(false);
+    setFeaturedTransitionPhase("idle");
 
     if (scrollToIdentity) {
       window.setTimeout(() => {
@@ -681,7 +692,7 @@ export default function CountriesPage() {
 
   function lockFeaturedCountry() {
     setFeaturedLocked(true);
-    setFeaturedTransitioning(false);
+    setFeaturedTransitionPhase("idle");
     setSelectedCountryId(featuredCountry.id);
 
     window.setTimeout(() => {
@@ -701,6 +712,42 @@ export default function CountriesPage() {
           -webkit-line-clamp: 3;
           -webkit-box-orient: vertical;
           overflow: hidden;
+        }
+
+        @keyframes skillatlas-featured-out {
+          0% {
+            opacity: 1;
+            transform: translateX(0) scale(1);
+            filter: blur(0);
+          }
+
+          100% {
+            opacity: 0;
+            transform: translateX(26px) scale(0.965);
+            filter: blur(3px);
+          }
+        }
+
+        @keyframes skillatlas-featured-in {
+          0% {
+            opacity: 0;
+            transform: translateX(-32px) scale(0.965);
+            filter: blur(3px);
+          }
+
+          100% {
+            opacity: 1;
+            transform: translateX(0) scale(1);
+            filter: blur(0);
+          }
+        }
+
+        .skillatlas-featured-card-out {
+          animation: skillatlas-featured-out 1500ms cubic-bezier(0.65, 0, 0.35, 1) both;
+        }
+
+        .skillatlas-featured-card-in {
+          animation: skillatlas-featured-in 1500ms cubic-bezier(0.16, 1, 0.3, 1) both;
         }
 
         html.skillatlas-dark .countries-shell [class*="bg-white"] {
@@ -814,7 +861,7 @@ export default function CountriesPage() {
               ))}
             </div>
 
-            <div className="mt-3 flex flex-wrap gap-2">
+            <div className="mt-3 flex flex-wrap justify-center gap-2">
               {categories.map((category) => (
                 <button
                   key={category}
@@ -849,14 +896,18 @@ export default function CountriesPage() {
           </div>
         </div>
 
-        <section className="mb-6 grid gap-5 xl:grid-cols-[0.95fr_1.05fr]">
+        <section className="mb-6 grid items-start gap-5 xl:grid-cols-[0.95fr_1.05fr]">
           <button
             type="button"
             onClick={lockFeaturedCountry}
-            className="relative overflow-hidden rounded-3xl border border-[#ff2fa8]/45 bg-white/92 p-6 text-left shadow-sm backdrop-blur transition-all duration-300 hover:-translate-y-1 hover:border-[#19d3cf]/70 hover:shadow-lg"
+            className="relative self-start overflow-hidden rounded-3xl border border-[#ff2fa8]/45 bg-white/92 p-6 text-left shadow-sm backdrop-blur transition-all duration-300 hover:-translate-y-1 hover:border-[#19d3cf]/70 hover:shadow-lg"
           >
-            <div className={`relative transition-all duration-[3000ms] ease-in-out ${
-              featuredTransitioning ? "translate-y-2 opacity-0 blur-sm" : "translate-y-0 opacity-100 blur-0"
+            <div className={`relative flex h-full flex-col justify-start ${
+              featuredTransitionPhase === "out"
+                ? "skillatlas-featured-card-out"
+                : featuredTransitionPhase === "in"
+                  ? "skillatlas-featured-card-in"
+                  : ""
             }`}>
               <p className="mb-2 text-[11px] font-black uppercase tracking-[0.24em] text-[#19d3cf]">Featured Nation</p>
               <div className="mb-4 flex items-start justify-between gap-4">
@@ -946,10 +997,7 @@ export default function CountriesPage() {
         <section className="mb-6 overflow-hidden rounded-3xl border border-[#ff2fa8]/45 bg-white/92 shadow-sm backdrop-blur">
           <div className="border-b border-[#ff2fa8]/20 p-5">
             <div className="flex flex-wrap items-center justify-between gap-4">
-              <div>
-                <p className="text-[11px] font-black uppercase tracking-[0.24em] text-[#19d3cf]">Country Atlas</p>
-                <h2 className="text-xl font-black">Gaming nations as characters.</h2>
-              </div>
+              <p className="text-[11px] font-black uppercase tracking-[0.24em] text-[#19d3cf]">Country Atlas</p>
 
               <div className="flex rounded-full border border-gray-200 bg-white/70 p-1">
                 <button
@@ -968,7 +1016,7 @@ export default function CountriesPage() {
                     atlasView === "rankings" ? "bg-[#ff2fa8] text-white shadow-lg shadow-[#ff2fa8]/20" : "text-gray-600 hover:text-[#ff2fa8]"
                   }`}
                 >
-                  Rankings
+                  Table
                 </button>
               </div>
             </div>
