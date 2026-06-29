@@ -593,6 +593,7 @@ export default function CountriesPage() {
   const [featuredCountryId, setFeaturedCountryId] = useState(countries[0].id);
   const [featuredLocked, setFeaturedLocked] = useState(false);
   const [featuredTransitioning, setFeaturedTransitioning] = useState(false);
+  const [atlasView, setAtlasView] = useState<"cards" | "rankings">("cards");
   const countryIdentityRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
@@ -629,20 +630,19 @@ export default function CountriesPage() {
       .sort((a, b) => a.rank - b.rank);
   }, [search, selectedCategory, selectedRegion]);
 
-  const featuredPool = useMemo(() => {
-    const pool = filteredCountries.length ? filteredCountries : countries;
-    return pool.slice(0, Math.min(pool.length, 8));
-  }, [filteredCountries]);
+  const featuredPool = useMemo(
+    () =>
+      countries.filter((country) =>
+        ["denmark", "south-korea", "china", "usa", "brazil", "france", "sweden", "japan"].includes(country.id)
+      ),
+    []
+  );
 
   useEffect(() => {
     if (filteredCountries[0]) {
       setSelectedCountryId(filteredCountries[0].id);
-
-      if (!featuredLocked) {
-        setFeaturedCountryId(filteredCountries[0].id);
-      }
     }
-  }, [selectedCategory, selectedRegion, search, filteredCountries, featuredLocked]);
+  }, [selectedCategory, selectedRegion, search, filteredCountries]);
 
   useEffect(() => {
     if (featuredLocked || featuredPool.length <= 1) return;
@@ -671,15 +671,22 @@ export default function CountriesPage() {
 
   function selectCountry(countryId: string, scrollToIdentity = false) {
     setSelectedCountryId(countryId);
-    setFeaturedCountryId(countryId);
-    setFeaturedLocked(true);
-    setFeaturedTransitioning(false);
 
     if (scrollToIdentity) {
       window.setTimeout(() => {
         countryIdentityRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
       }, 50);
     }
+  }
+
+  function lockFeaturedCountry() {
+    setFeaturedLocked(true);
+    setFeaturedTransitioning(false);
+    setSelectedCountryId(featuredCountry.id);
+
+    window.setTimeout(() => {
+      countryIdentityRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 50);
   }
   const topMover = filteredCountries.reduce((best, country) => (country.trend > best.trend ? country : best), filteredCountries[0] ?? countries[0]);
   const averageScore = Math.round(filteredCountries.reduce((sum, country) => sum + country.dominanceScore, 0) / Math.max(filteredCountries.length, 1));
@@ -785,19 +792,18 @@ export default function CountriesPage() {
         </div>
 
         <div className="mb-6 grid gap-5 xl:grid-cols-[1.25fr_0.75fr]">
-          <div className="rounded-3xl border border-[#ff2fa8]/40 bg-white/88 p-4 shadow-sm backdrop-blur">
-            <div className="mb-4 flex items-center justify-between gap-4">
+          <div className="rounded-3xl border border-[#ff2fa8]/40 bg-white/88 p-3 shadow-sm backdrop-blur">
+            <div className="mb-2 flex items-center justify-between gap-4">
               <p className="text-[11px] font-black uppercase tracking-[0.24em] text-gray-500">Region Filters</p>
-              <p className="text-xs font-black text-[#19d3cf]">{filteredCountries.length} countries shown</p>
             </div>
 
-            <div className="flex flex-wrap gap-3">
+            <div className="flex flex-wrap gap-2">
               {regions.map((region) => (
                 <button
                   key={region}
                   type="button"
                   onClick={() => setSelectedRegion(region)}
-                  className={`rounded-full border px-4 py-2 text-sm font-black transition-all duration-300 ${
+                  className={`rounded-full border px-3.5 py-1.5 text-sm font-black transition-all duration-300 ${
                     selectedRegion === region
                       ? "border-[#19d3cf] bg-[#19d3cf] text-white shadow-lg shadow-[#19d3cf]/20"
                       : "border-gray-200 bg-white/70 text-gray-700 hover:border-[#19d3cf]/60 hover:text-[#19d3cf]"
@@ -808,13 +814,13 @@ export default function CountriesPage() {
               ))}
             </div>
 
-            <div className="mt-4 flex flex-wrap gap-2">
+            <div className="mt-3 flex flex-wrap gap-2">
               {categories.map((category) => (
                 <button
                   key={category}
                   type="button"
                   onClick={() => setSelectedCategory(category)}
-                  className={`rounded-full border px-3 py-1.5 text-xs font-black transition-all duration-300 ${
+                  className={`rounded-full border px-3 py-1 text-xs font-black transition-all duration-300 ${
                     selectedCategory === category
                       ? "border-[#ff2fa8] bg-[#ff2fa8] text-white shadow-lg shadow-[#ff2fa8]/20"
                       : "border-gray-200 bg-white/70 text-gray-700 hover:border-[#ff2fa8]/60 hover:text-[#ff2fa8]"
@@ -827,24 +833,28 @@ export default function CountriesPage() {
           </div>
 
           <div className="grid gap-3 sm:grid-cols-3 xl:grid-cols-1">
-            <div className="rounded-3xl border border-[#ff2fa8]/40 bg-white/88 p-4 shadow-sm backdrop-blur">
+            <div className="rounded-3xl border border-[#ff2fa8]/40 bg-white/88 p-3 shadow-sm backdrop-blur">
               <p className="text-[10px] font-black uppercase tracking-[0.22em] text-gray-500">Average Score</p>
-              <p className="mt-1 text-2xl font-black text-[#19d3cf]">{averageScore}</p>
+              <p className="text-xl font-black text-[#19d3cf]">{averageScore}</p>
             </div>
-            <div className="rounded-3xl border border-[#ff2fa8]/40 bg-white/88 p-4 shadow-sm backdrop-blur">
+            <div className="rounded-3xl border border-[#ff2fa8]/40 bg-white/88 p-3 shadow-sm backdrop-blur">
               <p className="text-[10px] font-black uppercase tracking-[0.22em] text-gray-500">Top Mover</p>
-              <p className="mt-1 truncate text-lg font-black">{topMover?.name}</p>
+              <p className="truncate text-base font-black">{topMover?.name}</p>
               <p className={`text-xs font-black ${trendClass(topMover?.trend ?? 0)}`}>{trendLabel(topMover?.trend ?? 0)}</p>
             </div>
-            <div className="rounded-3xl border border-[#ff2fa8]/40 bg-white/88 p-4 shadow-sm backdrop-blur">
+            <div className="rounded-3xl border border-[#ff2fa8]/40 bg-white/88 p-3 shadow-sm backdrop-blur">
               <p className="text-[10px] font-black uppercase tracking-[0.22em] text-gray-500">Current Lens</p>
-              <p className="mt-1 text-base font-black text-[#ff2fa8]">{selectedCategory}</p>
+              <p className="truncate text-sm font-black text-[#ff2fa8]">{selectedCategory}</p>
             </div>
           </div>
         </div>
 
         <section className="mb-6 grid gap-5 xl:grid-cols-[0.95fr_1.05fr]">
-          <div className="relative overflow-hidden rounded-3xl border border-[#ff2fa8]/45 bg-white/92 p-6 shadow-sm backdrop-blur">
+          <button
+            type="button"
+            onClick={lockFeaturedCountry}
+            className="relative overflow-hidden rounded-3xl border border-[#ff2fa8]/45 bg-white/92 p-6 text-left shadow-sm backdrop-blur transition-all duration-300 hover:-translate-y-1 hover:border-[#19d3cf]/70 hover:shadow-lg"
+          >
             <div className={`relative transition-all duration-[3000ms] ease-in-out ${
               featuredTransitioning ? "translate-y-2 opacity-0 blur-sm" : "translate-y-0 opacity-100 blur-0"
             }`}>
@@ -889,7 +899,7 @@ export default function CountriesPage() {
                 ))}
               </div>
             </div>
-          </div>
+          </button>
 
           <section ref={countryIdentityRef} className="scroll-mt-28 rounded-3xl border border-[#ff2fa8]/45 bg-white/92 p-6 shadow-sm backdrop-blur">
             <p className="mb-2 text-[11px] font-black uppercase tracking-[0.24em] text-[#ff2fa8]">Country Identity</p>
@@ -933,78 +943,98 @@ export default function CountriesPage() {
           </section>
         </section>
 
-        <section className="mb-6 rounded-3xl border border-[#ff2fa8]/45 bg-white/92 p-5 shadow-sm backdrop-blur">
-          <div className="mb-5 flex items-center justify-between gap-4">
-            <div>
-              <p className="text-[11px] font-black uppercase tracking-[0.24em] text-[#19d3cf]">Country Card Atlas</p>
-              <h2 className="text-xl font-black">Gaming nations as characters.</h2>
+        <section className="mb-6 overflow-hidden rounded-3xl border border-[#ff2fa8]/45 bg-white/92 shadow-sm backdrop-blur">
+          <div className="border-b border-[#ff2fa8]/20 p-5">
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <div>
+                <p className="text-[11px] font-black uppercase tracking-[0.24em] text-[#19d3cf]">Country Atlas</p>
+                <h2 className="text-xl font-black">Gaming nations as characters.</h2>
+              </div>
+
+              <div className="flex rounded-full border border-gray-200 bg-white/70 p-1">
+                <button
+                  type="button"
+                  onClick={() => setAtlasView("cards")}
+                  className={`rounded-full px-5 py-2 text-xs font-black transition-all duration-300 ${
+                    atlasView === "cards" ? "bg-[#19d3cf] text-white shadow-lg shadow-[#19d3cf]/20" : "text-gray-600 hover:text-[#19d3cf]"
+                  }`}
+                >
+                  Cards
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setAtlasView("rankings")}
+                  className={`rounded-full px-5 py-2 text-xs font-black transition-all duration-300 ${
+                    atlasView === "rankings" ? "bg-[#ff2fa8] text-white shadow-lg shadow-[#ff2fa8]/20" : "text-gray-600 hover:text-[#ff2fa8]"
+                  }`}
+                >
+                  Rankings
+                </button>
+              </div>
             </div>
-            <p className="hidden text-sm font-black text-gray-500 md:block">Click a card to inspect its identity.</p>
           </div>
 
-          {filteredCountries.length ? (
-            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-              {filteredCountries.map((country) => (
-                <CountryCard
-                  key={country.id}
-                  country={country}
-                  selected={selectedCountry.id === country.id}
-                  onSelect={() => selectCountry(country.id, true)}
-                />
-              ))}
+          {atlasView === "cards" ? (
+            <div className="p-5">
+              {filteredCountries.length ? (
+                <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                  {filteredCountries.map((country) => (
+                    <CountryCard
+                      key={country.id}
+                      country={country}
+                      selected={selectedCountry.id === country.id}
+                      onSelect={() => selectCountry(country.id, true)}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <div className="rounded-3xl border border-dashed border-[#ff2fa8]/45 bg-white/70 p-10 text-center">
+                  <p className="text-lg font-black">No countries match that filter yet.</p>
+                  <p className="mt-2 text-sm font-semibold text-gray-500">Try clearing the search or switching back to World / All.</p>
+                </div>
+              )}
             </div>
           ) : (
-            <div className="rounded-3xl border border-dashed border-[#ff2fa8]/45 bg-white/70 p-10 text-center">
-              <p className="text-lg font-black">No countries match that filter yet.</p>
-              <p className="mt-2 text-sm font-semibold text-gray-500">Try clearing the search or switching back to World / All.</p>
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[940px] border-collapse text-left">
+                <thead>
+                  <tr className="border-b border-gray-200 text-[11px] uppercase tracking-[0.16em] text-gray-500">
+                    <th className="px-5 py-4 font-black">Rank</th>
+                    <th className="px-5 py-4 font-black">Country</th>
+                    <th className="px-5 py-4 font-black">Region</th>
+                    <th className="px-5 py-4 font-black">Best Game</th>
+                    <th className="px-5 py-4 font-black">Score</th>
+                    <th className="px-5 py-4 font-black">Trend</th>
+                    <th className="px-5 py-4 font-black">Identity</th>
+                    <th className="px-5 py-4 font-black">1Y Score</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredCountries.slice(0, 16).map((country) => (
+                    <tr key={country.id} className="border-b border-gray-200/80 transition-colors hover:bg-[#19d3cf]/5">
+                      <td className="px-5 py-4 text-lg font-black text-[#ff2fa8]">#{country.rank}</td>
+                      <td className="px-5 py-4">
+                        <button type="button" onClick={() => selectCountry(country.id, true)} className="flex items-center gap-3 text-left">
+                          <span className="text-2xl">{country.flag}</span>
+                          <span className="font-black">{country.name}</span>
+                        </button>
+                      </td>
+                      <td className="px-5 py-4 text-sm font-bold text-gray-600">{country.region}</td>
+                      <td className="px-5 py-4 text-sm font-black">{country.bestGame}</td>
+                      <td className="px-5 py-4">
+                        <span className="rounded-full bg-[#19d3cf]/12 px-3 py-1 text-sm font-black text-[#19d3cf]">{country.dominanceScore}</span>
+                      </td>
+                      <td className={`px-5 py-4 text-sm font-black ${trendClass(country.trend)}`}>{trendLabel(country.trend)}</td>
+                      <td className="px-5 py-4 text-sm font-black text-gray-700">{country.identity}</td>
+                      <td className="px-5 py-4">
+                        <Sparkline values={country.oneYearScore} />
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           )}
-        </section>
-
-        <section className="overflow-hidden rounded-3xl border border-[#ff2fa8]/45 bg-white/92 shadow-sm backdrop-blur">
-          <div className="border-b border-[#ff2fa8]/20 p-5">
-            <p className="text-[11px] font-black uppercase tracking-[0.24em] text-[#19d3cf]">Compact Country Rankings</p>
-          </div>
-
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[940px] border-collapse text-left">
-              <thead>
-                <tr className="border-b border-gray-200 text-[11px] uppercase tracking-[0.16em] text-gray-500">
-                  <th className="px-5 py-4 font-black">Rank</th>
-                  <th className="px-5 py-4 font-black">Country</th>
-                  <th className="px-5 py-4 font-black">Region</th>
-                  <th className="px-5 py-4 font-black">Best Game</th>
-                  <th className="px-5 py-4 font-black">Score</th>
-                  <th className="px-5 py-4 font-black">Trend</th>
-                  <th className="px-5 py-4 font-black">Identity</th>
-                  <th className="px-5 py-4 font-black">1Y Score</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredCountries.slice(0, 16).map((country) => (
-                  <tr key={country.id} className="border-b border-gray-200/80 transition-colors hover:bg-[#19d3cf]/5">
-                    <td className="px-5 py-4 text-lg font-black text-[#ff2fa8]">#{country.rank}</td>
-                    <td className="px-5 py-4">
-                      <button type="button" onClick={() => selectCountry(country.id, true)} className="flex items-center gap-3 text-left">
-                        <span className="text-2xl">{country.flag}</span>
-                        <span className="font-black">{country.name}</span>
-                      </button>
-                    </td>
-                    <td className="px-5 py-4 text-sm font-bold text-gray-600">{country.region}</td>
-                    <td className="px-5 py-4 text-sm font-black">{country.bestGame}</td>
-                    <td className="px-5 py-4">
-                      <span className="rounded-full bg-[#19d3cf]/12 px-3 py-1 text-sm font-black text-[#19d3cf]">{country.dominanceScore}</span>
-                    </td>
-                    <td className={`px-5 py-4 text-sm font-black ${trendClass(country.trend)}`}>{trendLabel(country.trend)}</td>
-                    <td className="px-5 py-4 text-sm font-black text-gray-700">{country.identity}</td>
-                    <td className="px-5 py-4">
-                      <Sparkline values={country.oneYearScore} />
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
         </section>
       </section>
     </main>
