@@ -383,12 +383,29 @@ function pageThemeStyles() {
     @keyframes skillatlas-rank-wheel-enter {
       0% {
         opacity: 0;
-        transform: translate(-18px, 18px) scale(0.78);
+        transform: translate(-16px, 16px) scale(0.08);
+      }
+
+      70% {
+        opacity: 1;
+        transform: translate(0, 0) scale(1.04);
       }
 
       100% {
         opacity: 1;
         transform: translate(0, 0) scale(1);
+      }
+    }
+
+    @keyframes skillatlas-rank-wheel-exit {
+      0% {
+        opacity: 1;
+        transform: translate(0, 0) scale(1);
+      }
+
+      100% {
+        opacity: 0;
+        transform: translate(-18px, 18px) scale(0.08);
       }
     }
 
@@ -399,7 +416,16 @@ function pageThemeStyles() {
         radial-gradient(circle at 92% 14%, rgba(255,47,168,0.28), transparent 46%),
         linear-gradient(135deg, rgba(255,255,255,0.72), rgba(255,255,255,0.30));
       --wheel-glass-shadow: 0 18px 58px rgba(15,23,42,0.18), inset 0 0 38px rgba(25,211,207,0.14);
-      animation: skillatlas-rank-wheel-enter 220ms cubic-bezier(0.16, 1, 0.3, 1) both;
+      transform-origin: left bottom;
+      will-change: transform, opacity;
+    }
+
+    .skillatlas-rank-wheel-entering {
+      animation: skillatlas-rank-wheel-enter 210ms cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+
+    .skillatlas-rank-wheel-exiting {
+      animation: skillatlas-rank-wheel-exit 165ms cubic-bezier(0.7, 0, 0.84, 0) both;
     }
 
     html.skillatlas-dark .skillatlas-rank-wheel {
@@ -434,6 +460,7 @@ function RankWheel({
   targetIndex,
   setTargetIndex,
   onDropRank,
+  phase,
 }: {
   total: number;
   draggedName: string | null;
@@ -441,8 +468,9 @@ function RankWheel({
   targetIndex: number | null;
   setTargetIndex: (index: number | null) => void;
   onDropRank: (index: number) => void;
+  phase: "entering" | "exiting";
 }) {
-  if (!draggedName) return null;
+  if (!draggedName && phase !== "exiting") return null;
 
   const activeIndex = Math.max(0, Math.min(total - 1, targetIndex ?? draggedIndex ?? 0));
   const activeRank = activeIndex + 1;
@@ -474,7 +502,7 @@ function RankWheel({
 
   return (
     <div
-      className="skillatlas-rank-wheel fixed bottom-0 left-0 z-[95] h-[208px] w-[208px] overflow-visible"
+      className={`skillatlas-rank-wheel skillatlas-rank-wheel-${phase} fixed bottom-0 left-0 z-[95] h-[208px] w-[208px] overflow-visible`}
       onDragOver={(event) => event.preventDefault()}
       onDragLeave={(event) => {
         if (event.currentTarget === event.target) setTargetIndex(draggedIndex);
@@ -542,8 +570,11 @@ export default function LiveRankingsPage() {
   const [countries, setCountries] = useState(initialCountries);
   const [draggedName, setDraggedName] = useState<string | null>(null);
   const [wheelTargetIndex, setWheelTargetIndex] = useState<number | null>(null);
+  const [wheelVisible, setWheelVisible] = useState(false);
+  const [wheelPhase, setWheelPhase] = useState<"entering" | "exiting">("entering");
   const autoScrollVelocityRef = useRef(0);
   const autoScrollFrameRef = useRef<number | null>(null);
+  const wheelExitTimerRef = useRef<number | null>(null);
   const [activity, setActivity] = useState([
     "Brazil surged after 42 FPS votes.",
     "Denmark defended #1 with tactical votes.",
@@ -551,7 +582,9 @@ export default function LiveRankingsPage() {
   ]);
 
   const leader = countries[0];
-  const draggedIndex = draggedName ? countries.findIndex((country) => country.name === draggedName) : null;
+  const draggedIndex = draggedName
+    ? countries.findIndex((country) => country.name === draggedName)
+    : wheelTargetIndex;
 
   const liveScore = useMemo(() => countries.reduce((sum, country, index) => sum + country.score - index, 0), [countries]);
 
@@ -630,6 +663,40 @@ export default function LiveRankingsPage() {
     };
   }, [countries.length, draggedName]);
 
+  useEffect(() => {
+    return () => {
+      if (wheelExitTimerRef.current !== null) {
+        window.clearTimeout(wheelExitTimerRef.current);
+      }
+    };
+  }, []);
+
+
+  function openRankWheel(index: number) {
+    if (wheelExitTimerRef.current !== null) {
+      window.clearTimeout(wheelExitTimerRef.current);
+      wheelExitTimerRef.current = null;
+    }
+
+    setWheelTargetIndex(index);
+    setWheelVisible(true);
+    setWheelPhase("entering");
+  }
+
+  function closeRankWheel() {
+    setWheelPhase("exiting");
+
+    if (wheelExitTimerRef.current !== null) {
+      window.clearTimeout(wheelExitTimerRef.current);
+    }
+
+    wheelExitTimerRef.current = window.setTimeout(() => {
+      setWheelVisible(false);
+      setDraggedName(null);
+      setWheelTargetIndex(null);
+      wheelExitTimerRef.current = null;
+    }, 170);
+  }
 
   function moveCountry(fromIndex: number, toIndex: number) {
     if (fromIndex === toIndex || toIndex < 0 || toIndex >= countries.length) return;
@@ -659,8 +726,7 @@ export default function LiveRankingsPage() {
 
     const fromIndex = countries.findIndex((country) => country.name === draggedName);
     moveCountry(fromIndex, targetIndex);
-    setDraggedName(null);
-    setWheelTargetIndex(null);
+    closeRankWheel();
   }
 
   function dropCountryToRank(targetIndex: number) {
@@ -668,8 +734,7 @@ export default function LiveRankingsPage() {
 
     const fromIndex = countries.findIndex((country) => country.name === draggedName);
     moveCountry(fromIndex, targetIndex);
-    setDraggedName(null);
-    setWheelTargetIndex(null);
+    closeRankWheel();
   }
 
   return (
@@ -677,14 +742,17 @@ export default function LiveRankingsPage() {
       <RankingsBackground />
       <style>{pageThemeStyles()}</style>
       <SkillAtlasHeader active="Rankings" />
-      <RankWheel
-        total={countries.length}
-        draggedName={draggedName}
-        draggedIndex={draggedIndex}
-        targetIndex={wheelTargetIndex}
-        setTargetIndex={setWheelTargetIndex}
-        onDropRank={dropCountryToRank}
-      />
+      {wheelVisible ? (
+        <RankWheel
+          total={countries.length}
+          draggedName={draggedName}
+          draggedIndex={draggedIndex}
+          targetIndex={wheelTargetIndex}
+          setTargetIndex={setWheelTargetIndex}
+          onDropRank={dropCountryToRank}
+          phase={wheelPhase}
+        />
+      ) : null}
 
       <section className="relative z-10 mx-auto max-w-7xl px-8 pb-16 pt-[150px]">
         <div className="mb-6 rounded-3xl border border-[#ff2fa8]/45 bg-white/92 p-6 shadow-sm backdrop-blur">
@@ -743,7 +811,7 @@ export default function LiveRankingsPage() {
                     draggable
                     onDragStart={() => {
                       setDraggedName(country.name);
-                      setWheelTargetIndex(index);
+                      openRankWheel(index);
                     }}
                     onDragOver={(event) => {
                       event.preventDefault();
@@ -751,10 +819,7 @@ export default function LiveRankingsPage() {
                     }}
                     onDragEnter={() => setWheelTargetIndex(index)}
                     onDrop={(event) => handleDrop(event, index)}
-                    onDragEnd={() => {
-                      setDraggedName(null);
-                      setWheelTargetIndex(null);
-                    }}
+                    onDragEnd={closeRankWheel}
                     className={`h-[52px] cursor-grab border-b border-gray-200/80 transition-all duration-300 ease-out active:cursor-grabbing ${
                       draggedName === country.name ? "bg-[#19d3cf]/15 opacity-70" : "hover:bg-[#19d3cf]/5"
                     }`}
