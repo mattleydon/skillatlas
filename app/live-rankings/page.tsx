@@ -570,6 +570,7 @@ export default function LiveRankingsPage() {
   const [countries, setCountries] = useState(initialCountries);
   const [draggedName, setDraggedName] = useState<string | null>(null);
   const [wheelTargetIndex, setWheelTargetIndex] = useState<number | null>(null);
+  const [hoveredRankIndex, setHoveredRankIndex] = useState<number | null>(null);
   const [wheelVisible, setWheelVisible] = useState(false);
   const [wheelPhase, setWheelPhase] = useState<"entering" | "exiting">("entering");
   const autoScrollVelocityRef = useRef(0);
@@ -611,7 +612,9 @@ export default function LiveRankingsPage() {
       const hoveredRow = hoveredElement?.closest("[data-rank-index]") as HTMLElement | null;
 
       if (hoveredRow?.dataset.rankIndex) {
-        setWheelTargetIndex(Number(hoveredRow.dataset.rankIndex));
+        const nextIndex = Number(hoveredRow.dataset.rankIndex);
+        setWheelTargetIndex(nextIndex);
+        setHoveredRankIndex(nextIndex);
       } else {
         const tableBody = document.querySelector<HTMLElement>("[data-live-rankings-body]");
         const firstRow = tableBody?.querySelector<HTMLElement>("[data-rank-index]");
@@ -621,6 +624,7 @@ export default function LiveRankingsPage() {
         if (bodyRect && rowHeight > 0 && event.clientY >= bodyRect.top && event.clientY <= bodyRect.bottom) {
           const approximateIndex = Math.max(0, Math.min(countries.length - 1, Math.floor((event.clientY - bodyRect.top) / rowHeight)));
           setWheelTargetIndex(approximateIndex);
+          setHoveredRankIndex(approximateIndex);
         }
       }
 
@@ -679,6 +683,7 @@ export default function LiveRankingsPage() {
     }
 
     setWheelTargetIndex(index);
+    setHoveredRankIndex(index);
     setWheelVisible(true);
     setWheelPhase("entering");
   }
@@ -694,6 +699,7 @@ export default function LiveRankingsPage() {
       setWheelVisible(false);
       setDraggedName(null);
       setWheelTargetIndex(null);
+      setHoveredRankIndex(null);
       wheelExitTimerRef.current = null;
     }, 170);
   }
@@ -816,15 +822,19 @@ export default function LiveRankingsPage() {
                     onDragOver={(event) => {
                       event.preventDefault();
                       setWheelTargetIndex(index);
+                      setHoveredRankIndex(index);
                     }}
-                    onDragEnter={() => setWheelTargetIndex(index)}
+                    onDragEnter={() => {
+                      setWheelTargetIndex(index);
+                      setHoveredRankIndex(index);
+                    }}
                     onDrop={(event) => handleDrop(event, index)}
                     onDragEnd={closeRankWheel}
                     className={`h-[52px] cursor-grab border-b border-gray-200/80 transition-all duration-300 ease-out active:cursor-grabbing ${
-                      draggedName === country.name ? "bg-[#19d3cf]/15 opacity-70" : "hover:bg-[#19d3cf]/5"
+                      draggedName && hoveredRankIndex === index ? "bg-[#19d3cf]/15" : "hover:bg-[#19d3cf]/5"
                     }`}
                   >
-                    <td className="whitespace-nowrap px-4 py-2 text-base font-black text-[#ff2fa8]">#{index + 1}</td>
+                    <td className={`whitespace-nowrap px-4 py-2 text-base font-black text-[#ff2fa8] ${draggedName === country.name && hoveredRankIndex !== index ? "opacity-45" : ""}`}>#{index + 1}</td>
                     <td className="whitespace-nowrap px-4 py-2">
                       <div className="flex items-center gap-3">
                         <span className="grid h-6 w-6 shrink-0 place-items-center overflow-hidden rounded-lg bg-gray-50 shadow-inner">
