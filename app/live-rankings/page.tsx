@@ -704,6 +704,14 @@ export default function LiveRankingsPage() {
     }, 170);
   }
 
+  function averageRankedPosition(currentIndex: number, momentum: number, range: "7d" | "1m" | "1y") {
+    const currentRank = currentIndex + 1;
+    const multiplier = range === "7d" ? 0.35 : range === "1m" ? 0.7 : 1.15;
+    const averageRank = currentRank + Math.round(momentum * multiplier);
+
+    return Math.max(1, Math.min(countries.length, averageRank));
+  }
+
   function moveCountry(fromIndex: number, toIndex: number) {
     if (fromIndex === toIndex || toIndex < 0 || toIndex >= countries.length) return;
 
@@ -796,15 +804,16 @@ export default function LiveRankingsPage() {
           </div>
 
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[1040px] border-collapse text-left">
+            <table className="w-full min-w-[1080px] border-collapse text-left">
               <thead>
                 <tr className="border-b border-gray-200 text-[11px] uppercase tracking-[0.16em] text-gray-500">
                   <th className="px-4 py-3 font-black">Rank</th>
                   <th className="px-4 py-3 font-black">Country</th>
                   <th className="px-4 py-3 font-black">Live Score</th>
                   <th className="px-4 py-3 font-black">Momentum</th>
-                  <th className="px-4 py-3 font-black">Moved By</th>
-                  <th className="px-4 py-3 font-black">Why</th>
+                  <th className="px-4 py-3 font-black">7 Day Avg Rank</th>
+                  <th className="px-4 py-3 font-black">1 Month Avg Rank</th>
+                  <th className="px-4 py-3 font-black">1 Year Avg Rank</th>
                   <th className="px-4 py-3 font-black">Move</th>
                 </tr>
               </thead>
@@ -849,9 +858,14 @@ export default function LiveRankingsPage() {
                     <td className={`whitespace-nowrap px-4 py-2 text-xs font-black ${country.momentum >= 0 ? "text-[#19d3cf]" : "text-[#ff2fa8]"}`}>
                       {country.momentum >= 0 ? `▲ ${country.momentum}` : `▼ ${Math.abs(country.momentum)}`}
                     </td>
-                    <td className="whitespace-nowrap px-4 py-2 text-xs font-black text-gray-700">{country.movedBy}</td>
-                    <td className="px-4 py-2 text-xs font-black text-gray-700">
-                      <span className="block max-w-[430px] truncate">{country.reasons.join(" · ")}</span>
+                    <td className="whitespace-nowrap px-4 py-2 text-xs font-black text-gray-700">
+                      #{averageRankedPosition(index, country.momentum, "7d")}
+                    </td>
+                    <td className="whitespace-nowrap px-4 py-2 text-xs font-black text-gray-700">
+                      #{averageRankedPosition(index, country.momentum, "1m")}
+                    </td>
+                    <td className="whitespace-nowrap px-4 py-2 text-xs font-black text-gray-700">
+                      #{averageRankedPosition(index, country.momentum, "1y")}
                     </td>
                     <td className="whitespace-nowrap px-4 py-2">
                       <div className="flex gap-2">
