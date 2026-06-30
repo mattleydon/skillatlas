@@ -411,6 +411,9 @@ function pageThemeStyles() {
 
     .skillatlas-rank-wheel {
       --wheel-number-default: #111827;
+      --wheel-fade-bg:
+        radial-gradient(circle at 20% 80%, rgba(255,255,255,0.88), rgba(255,255,255,0.66) 34%, rgba(255,255,255,0.34) 58%, transparent 76%);
+      --wheel-fade-shadow: 0 0 46px rgba(255,255,255,0.70);
       --wheel-glass-bg:
         radial-gradient(circle at 22% 86%, rgba(25,211,207,0.34), transparent 42%),
         radial-gradient(circle at 92% 14%, rgba(255,47,168,0.28), transparent 46%),
@@ -430,6 +433,9 @@ function pageThemeStyles() {
 
     html.skillatlas-dark .skillatlas-rank-wheel {
       --wheel-number-default: rgba(248,250,252,0.92);
+      --wheel-fade-bg:
+        radial-gradient(circle at 20% 80%, rgba(15,23,42,0.70), rgba(15,23,42,0.52) 34%, rgba(15,23,42,0.28) 58%, transparent 76%);
+      --wheel-fade-shadow: 0 0 48px rgba(0,0,0,0.38);
       --wheel-glass-bg:
         radial-gradient(circle at 20% 88%, rgba(25,211,207,0.30), transparent 44%),
         radial-gradient(circle at 92% 12%, rgba(255,47,168,0.28), transparent 48%),
@@ -508,6 +514,13 @@ function RankWheel({
         if (event.currentTarget === event.target) setTargetIndex(draggedIndex);
       }}
     >
+      <div
+        className="pointer-events-none absolute -bottom-10 -left-10 h-[230px] w-[230px] rounded-tr-full backdrop-blur-[1.5px]"
+        style={{
+          background: "var(--wheel-fade-bg)",
+          boxShadow: "var(--wheel-fade-shadow)",
+        }}
+      />
       <div
         className="absolute bottom-0 left-0 h-[103px] w-[103px] rounded-tr-full border-r border-t border-[#ff2fa8]/35 backdrop-blur-xl"
         style={{
