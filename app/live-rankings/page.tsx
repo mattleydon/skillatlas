@@ -393,7 +393,22 @@ function pageThemeStyles() {
     }
 
     .skillatlas-rank-wheel {
+      --wheel-number-default: #111827;
+      --wheel-glass-bg:
+        radial-gradient(circle at 22% 86%, rgba(25,211,207,0.34), transparent 42%),
+        radial-gradient(circle at 92% 14%, rgba(255,47,168,0.28), transparent 46%),
+        linear-gradient(135deg, rgba(255,255,255,0.72), rgba(255,255,255,0.30));
+      --wheel-glass-shadow: 0 18px 58px rgba(15,23,42,0.18), inset 0 0 38px rgba(25,211,207,0.14);
       animation: skillatlas-rank-wheel-enter 220ms cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+
+    html.skillatlas-dark .skillatlas-rank-wheel {
+      --wheel-number-default: rgba(248,250,252,0.92);
+      --wheel-glass-bg:
+        radial-gradient(circle at 20% 88%, rgba(25,211,207,0.30), transparent 44%),
+        radial-gradient(circle at 92% 12%, rgba(255,47,168,0.28), transparent 48%),
+        linear-gradient(135deg, rgba(32,43,55,0.84), rgba(15,23,42,0.46));
+      --wheel-glass-shadow: 0 18px 58px rgba(0,0,0,0.32), inset 0 0 42px rgba(25,211,207,0.12);
     }
 
     html.skillatlas-dark .rankings-shell > div:first-child {
@@ -448,30 +463,13 @@ function RankWheel({
     if (distance === 1) return "rgba(255,47,168,0.72)";
     if (distance === 2) return "rgba(255,47,168,0.48)";
     if (distance === 3) return "rgba(255,47,168,0.30)";
-    return "#111827";
+    return "var(--wheel-number-default)";
   }
 
-  function numberStroke(distance: number) {
-    if (distance === 0) return "1.35px rgba(255,255,255,0.98)";
-    if (distance <= 3) return "0.85px rgba(15,23,42,0.94)";
-    return "0.55px rgba(15,23,42,0.74)";
-  }
-
-  function numberShadow(distance: number) {
-    if (distance === 0) {
-      return [
-        "1.5px 0 0 rgba(15,23,42,0.92)",
-        "-1.5px 0 0 rgba(15,23,42,0.92)",
-        "0 1.5px 0 rgba(15,23,42,0.92)",
-        "0 -1.5px 0 rgba(15,23,42,0.92)",
-        "0 0 7px rgba(255,255,255,0.95)",
-        "0 0 18px rgba(255,47,168,0.82)",
-        "0 10px 26px rgba(15,23,42,0.44)",
-      ].join(", ");
-    }
-
-    if (distance <= 3) return "0 0 2px rgba(255,255,255,0.72), 0 0 9px rgba(255,47,168,0.20), 0 5px 12px rgba(15,23,42,0.24)";
-    return "0 0 2px rgba(255,255,255,0.62), 0 4px 10px rgba(15,23,42,0.24)";
+  function numberGlow(distance: number) {
+    if (distance === 0) return "drop-shadow(0 0 14px rgba(255,47,168,0.62)) drop-shadow(0 8px 18px rgba(15,23,42,0.22))";
+    if (distance <= 3) return "drop-shadow(0 0 8px rgba(255,47,168,0.22))";
+    return "none";
   }
 
   return (
@@ -485,9 +483,8 @@ function RankWheel({
       <div
         className="absolute bottom-0 left-0 h-[154px] w-[154px] rounded-tr-full border-r border-t border-[#ff2fa8]/35 backdrop-blur-xl"
         style={{
-          background:
-            "radial-gradient(circle at 22% 86%, rgba(25,211,207,0.34), transparent 42%), radial-gradient(circle at 92% 14%, rgba(255,47,168,0.28), transparent 46%), linear-gradient(135deg, rgba(255,255,255,0.72), rgba(255,255,255,0.30))",
-          boxShadow: "0 18px 58px rgba(15,23,42,0.18), inset 0 0 38px rgba(25,211,207,0.14)",
+          background: "var(--wheel-glass-bg)",
+          boxShadow: "var(--wheel-glass-shadow)",
         }}
       />
       <div className="absolute bottom-0 left-0 h-[116px] w-[116px] rounded-tr-full border-r border-t border-[#19d3cf]/28" />
@@ -526,9 +523,9 @@ function RankWheel({
               opacity: active ? 1 : opacity,
               transform: `translate(-50%, 50%) scale(${scale})`,
               transformOrigin: "center",
-              WebkitTextStroke: numberStroke(distanceFromActive),
-              textShadow: numberShadow(distanceFromActive),
-              filter: active ? "saturate(1.2) contrast(1.12)" : "none",
+              WebkitTextStroke: "0",
+              textShadow: "none",
+              filter: `${active ? "saturate(1.25) contrast(1.08)" : "none"} ${numberGlow(distanceFromActive)}`,
             }}
             aria-label={`Move ${draggedName} to rank ${rank}`}
           >
