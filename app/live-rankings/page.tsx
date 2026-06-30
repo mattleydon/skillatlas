@@ -415,7 +415,7 @@ function pageThemeStyles() {
         radial-gradient(circle at 22% 86%, rgba(25,211,207,0.34), transparent 42%),
         radial-gradient(circle at 92% 14%, rgba(255,47,168,0.28), transparent 46%),
         linear-gradient(135deg, rgba(255,255,255,0.72), rgba(255,255,255,0.30));
-      --wheel-glass-shadow: 0 18px 58px rgba(15,23,42,0.18), inset 0 0 38px rgba(25,211,207,0.14);
+      --wheel-glass-shadow: 0 12px 38px rgba(15,23,42,0.18), inset 0 0 25px rgba(25,211,207,0.14);
       transform-origin: left bottom;
       will-change: transform, opacity;
     }
@@ -434,7 +434,7 @@ function pageThemeStyles() {
         radial-gradient(circle at 20% 88%, rgba(25,211,207,0.30), transparent 44%),
         radial-gradient(circle at 92% 12%, rgba(255,47,168,0.28), transparent 48%),
         linear-gradient(135deg, rgba(32,43,55,0.84), rgba(15,23,42,0.46));
-      --wheel-glass-shadow: 0 18px 58px rgba(0,0,0,0.32), inset 0 0 42px rgba(25,211,207,0.12);
+      --wheel-glass-shadow: 0 12px 38px rgba(0,0,0,0.32), inset 0 0 28px rgba(25,211,207,0.12);
     }
 
     html.skillatlas-dark .rankings-shell > div:first-child {
@@ -476,7 +476,7 @@ function RankWheel({
   const activeRank = activeIndex + 1;
   const ranks = visibleRankWindow(total, activeIndex);
   const activeWindowIndex = ranks.indexOf(activeRank);
-  const radius = 198;
+  const radius = 132;
 
   function sizeForDistance(distance: number) {
     if (distance === 0) return 1;
@@ -495,29 +495,29 @@ function RankWheel({
   }
 
   function numberGlow(distance: number) {
-    if (distance === 0) return "drop-shadow(0 0 14px rgba(255,47,168,0.62)) drop-shadow(0 8px 18px rgba(15,23,42,0.22))";
+    if (distance === 0) return "drop-shadow(0 0 9px rgba(255,47,168,0.62)) drop-shadow(0 5px 12px rgba(15,23,42,0.22))";
     if (distance <= 3) return "drop-shadow(0 0 8px rgba(255,47,168,0.22))";
     return "none";
   }
 
   return (
     <div
-      className={`skillatlas-rank-wheel skillatlas-rank-wheel-${phase} fixed bottom-0 left-0 z-[95] h-[208px] w-[208px] overflow-visible`}
+      className={`skillatlas-rank-wheel skillatlas-rank-wheel-${phase} fixed bottom-0 left-0 z-[95] h-[138px] w-[138px] overflow-visible`}
       onDragOver={(event) => event.preventDefault()}
       onDragLeave={(event) => {
         if (event.currentTarget === event.target) setTargetIndex(draggedIndex);
       }}
     >
       <div
-        className="absolute bottom-0 left-0 h-[154px] w-[154px] rounded-tr-full border-r border-t border-[#ff2fa8]/35 backdrop-blur-xl"
+        className="absolute bottom-0 left-0 h-[103px] w-[103px] rounded-tr-full border-r border-t border-[#ff2fa8]/35 backdrop-blur-xl"
         style={{
           background: "var(--wheel-glass-bg)",
           boxShadow: "var(--wheel-glass-shadow)",
         }}
       />
-      <div className="absolute bottom-0 left-0 h-[116px] w-[116px] rounded-tr-full border-r border-t border-[#19d3cf]/28" />
-      <div className="absolute bottom-0 left-0 h-[74px] w-[74px] rounded-tr-full border-r border-t border-[#ff2fa8]/18" />
-      <div className="absolute bottom-[18px] left-[18px] h-[92px] w-[92px] rounded-tr-full bg-gradient-to-tr from-[#19d3cf]/10 to-[#ff2fa8]/10 blur-xl" />
+      <div className="absolute bottom-0 left-0 h-[77px] w-[77px] rounded-tr-full border-r border-t border-[#19d3cf]/28" />
+      <div className="absolute bottom-0 left-0 h-[49px] w-[49px] rounded-tr-full border-r border-t border-[#ff2fa8]/18" />
+      <div className="absolute bottom-[12px] left-[12px] h-[61px] w-[61px] rounded-tr-full bg-gradient-to-tr from-[#19d3cf]/10 to-[#ff2fa8]/10 blur-xl" />
 
       {ranks.map((rank, index) => {
         const angle = ranks.length === 1 ? 45 : 87 - (index / (ranks.length - 1)) * 82;
@@ -547,7 +547,7 @@ function RankWheel({
               left,
               bottom,
               color: numberColour(distanceFromActive),
-              fontSize: active ? "2.15rem" : "1.45rem",
+              fontSize: active ? "1.43rem" : "0.97rem",
               opacity: active ? 1 : opacity,
               transform: `translate(-50%, 50%) scale(${scale})`,
               transformOrigin: "center",
