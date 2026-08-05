@@ -88,6 +88,7 @@ function renderCommentBody(body: string) {
 
 function displayPathName(pathname: string) {
   if (pathname === "/") return "Rankings";
+  if (pathname === "/forum") return "Forum";
 
   return pathname
     .split("/")
@@ -110,6 +111,37 @@ function normaliseHref(path: string) {
   return cleanPath.endsWith("/") && cleanPath.length > 1 ? cleanPath.slice(0, -1) : cleanPath;
 }
 
+
+
+function setupForumNavigation() {
+  const navs = Array.from(document.querySelectorAll<HTMLElement>("header nav"));
+
+  navs.forEach((nav) => {
+    const existingForumLink = Array.from(nav.querySelectorAll<HTMLAnchorElement>("a[href]")).find((link) => {
+      return normaliseHref(link.getAttribute("href") ?? "") === "/forum";
+    });
+
+    if (existingForumLink) {
+      existingForumLink.textContent = "Forum";
+      return;
+    }
+
+    const aboutLink = Array.from(nav.querySelectorAll<HTMLAnchorElement>("a[href]")).find((link) => {
+      const href = normaliseHref(link.getAttribute("href") ?? "");
+      const text = link.textContent?.trim().toLowerCase() ?? "";
+      return href === "/about" || text === "about";
+    });
+
+    if (!aboutLink) return;
+
+    const forumLink = document.createElement("a");
+    forumLink.href = "/forum";
+    forumLink.textContent = "Forum";
+    forumLink.className = aboutLink.className;
+
+    aboutLink.before(forumLink);
+  });
+}
 
 function setupRankingsDropdown() {
   const navs = Array.from(document.querySelectorAll<HTMLElement>("header nav"));
@@ -225,6 +257,7 @@ function alignHeaderNavigationToThemeToggle() {
 }
 
 function updateActiveHeaderNavigation() {
+  setupForumNavigation();
   setupRankingsDropdown();
 
   const currentPath = normaliseHref(window.location.pathname);
