@@ -117,139 +117,84 @@ function setupForumNavigation() {
   const navs = Array.from(document.querySelectorAll<HTMLElement>("header nav"));
 
   navs.forEach((nav) => {
-    const links = Array.from(nav.querySelectorAll<HTMLAnchorElement>("a[href]"));
+    const existingLinks = Array.from(nav.querySelectorAll<HTMLAnchorElement>("a[href]"));
+    const referenceLink =
+      existingLinks.find((link) => normaliseHref(link.getAttribute("href") ?? "") === "/about") ??
+      existingLinks[0];
 
-    links.forEach((link) => {
-      const text = link.textContent?.trim().toLowerCase() ?? "";
-      const href = normaliseHref(link.getAttribute("href") ?? "");
+    if (!referenceLink) return;
 
-      if (text === "profiles" || href === "/profiles") {
-        link.textContent = "Players";
-      }
-    });
+    const baseLinkClass = referenceLink.className;
+    const desiredSignature = "rankings|world-map|countries|players|forum|about";
 
-    const standaloneUserRankingsLinks = Array.from(nav.querySelectorAll<HTMLAnchorElement>("a[href]")).filter((link) => {
-      const text = link.textContent?.trim().toLowerCase() ?? "";
-      const href = normaliseHref(link.getAttribute("href") ?? "");
+    if (nav.dataset.skillatlasNavSignature === desiredSignature) {
+      const currentForum = nav.querySelector<HTMLAnchorElement>('a[href="/forum"]');
+      const currentUserRankings = Array.from(nav.children).some((child) => {
+        return child instanceof HTMLAnchorElement && normaliseHref(child.getAttribute("href") ?? "") === "/user-rankings";
+      });
 
-      return (
-        (text === "user rankings" || href === "/user-rankings") &&
-        !link.closest(".skillatlas-rankings-dropdown")
-      );
-    });
-
-    standaloneUserRankingsLinks.forEach((link) => link.remove());
-
-    const forumLinks = Array.from(nav.querySelectorAll<HTMLAnchorElement>("a[href]")).filter((link) => {
-      const text = link.textContent?.trim().toLowerCase() ?? "";
-      const href = normaliseHref(link.getAttribute("href") ?? "");
-
-      return text === "forum" || href === "/forum";
-    });
-
-    forumLinks.slice(1).forEach((link) => link.remove());
-
-    const existingForumLink = forumLinks[0];
-
-    if (existingForumLink) {
-      existingForumLink.href = "/forum";
-      existingForumLink.textContent = "Forum";
+      if (currentForum && !currentUserRankings) return;
     }
 
-    const aboutLink = Array.from(nav.querySelectorAll<HTMLAnchorElement>("a[href]")).find((link) => {
-      const text = link.textContent?.trim().toLowerCase() ?? "";
-      const href = normaliseHref(link.getAttribute("href") ?? "");
+    const createNavLink = (label: string, href: string) => {
+      const link = document.createElement("a");
+      link.href = href;
+      link.textContent = label;
+      link.className = baseLinkClass;
+      return link;
+    };
 
-      return text === "about" || href === "/about";
-    });
+    const rankingsWrapper = document.createElement("div");
+    rankingsWrapper.className = "skillatlas-rankings-dropdown";
+    rankingsWrapper.setAttribute("data-skillatlas-rankings-dropdown", "true");
 
-    if (!aboutLink) return;
+    const rankingsTrigger = createNavLink("Rankings", "/");
+    rankingsTrigger.classList.add("skillatlas-rankings-trigger");
+    rankingsTrigger.setAttribute("aria-haspopup", "true");
+    rankingsTrigger.innerHTML = "<span>Rankings</span>";
 
-    let forumLink = existingForumLink;
+    const rankingsMenu = document.createElement("div");
+    rankingsMenu.className = "skillatlas-rankings-menu";
+    rankingsMenu.setAttribute("role", "menu");
 
-    if (!forumLink) {
-      forumLink = document.createElement("a");
-      forumLink.href = "/forum";
-      forumLink.textContent = "Forum";
-      forumLink.className = aboutLink.className;
-    }
-
-    if (forumLink.nextElementSibling !== aboutLink) {
-      aboutLink.before(forumLink);
-    }
-  });
-}
-
-function setupRankingsDropdown() {
-  const navs = Array.from(document.querySelectorAll<HTMLElement>("header nav"));
-
-  navs.forEach((nav) => {
-    const profilesLinks = Array.from(nav.querySelectorAll<HTMLAnchorElement>('a[href="/profiles"], a[href^="/profiles"]'));
-    profilesLinks.forEach((link) => {
-      if (link.textContent?.trim() === "Profiles") {
-        link.textContent = "Players";
-      }
-    });
-
-    const directUserRankingsLinks = Array.from(nav.querySelectorAll<HTMLAnchorElement>("a[href]")).filter((link) => {
-      const text = link.textContent?.trim().toLowerCase() ?? "";
-      return text === "user rankings" && !link.closest(".skillatlas-rankings-dropdown");
-    });
-
-    directUserRankingsLinks.forEach((link) => link.remove());
-
-    const existingDropdown = nav.querySelector<HTMLElement>(".skillatlas-rankings-dropdown");
-    if (existingDropdown) return;
-
-    const rankingsLink = Array.from(nav.querySelectorAll<HTMLAnchorElement>("a[href]")).find((link) => {
-      const text = link.textContent?.trim().toLowerCase() ?? "";
-      const href = normaliseHref(link.getAttribute("href") ?? "");
-      return text === "rankings" && href === "/";
-    });
-
-    if (!rankingsLink) return;
-
-    const wrapper = document.createElement("div");
-    wrapper.className = "skillatlas-rankings-dropdown";
-    wrapper.setAttribute("data-skillatlas-rankings-dropdown", "true");
-
-    const trigger = document.createElement("a");
-    trigger.href = "/";
-    trigger.className = rankingsLink.className;
-    trigger.classList.add("skillatlas-rankings-trigger");
-    trigger.innerHTML = '<span>Rankings</span>';
-    trigger.setAttribute("aria-haspopup", "true");
-
-    const menu = document.createElement("div");
-    menu.className = "skillatlas-rankings-menu";
-    menu.setAttribute("role", "menu");
-
-    const items = [
+    const rankingItems = [
       { label: "Rankings", href: "/", description: "General country rankings" },
       { label: "User Rankings", href: "/user-rankings", description: "Community country votes" },
       { label: "Live Rankings", href: "/live-rankings", description: "Rank countries in real time" },
     ];
 
-    items.forEach((item) => {
-      const anchor = document.createElement("a");
-      anchor.href = item.href;
-      anchor.className = "skillatlas-rankings-menu-item";
-      anchor.setAttribute("role", "menuitem");
-      anchor.innerHTML = `<span>${item.label}</span><small>${item.description}</small>`;
-      menu.appendChild(anchor);
+    rankingItems.forEach((item) => {
+      const link = document.createElement("a");
+      link.href = item.href;
+      link.className = "skillatlas-rankings-menu-item";
+      link.setAttribute("role", "menuitem");
+      link.innerHTML = `<span>${item.label}</span><small>${item.description}</small>`;
+      rankingsMenu.appendChild(link);
     });
 
-    wrapper.append(trigger, menu);
-    rankingsLink.replaceWith(wrapper);
+    rankingsWrapper.append(rankingsTrigger, rankingsMenu);
 
-    wrapper.addEventListener("focusout", () => {
-      window.setTimeout(() => {
-        if (!wrapper.contains(document.activeElement)) {
-          trigger.blur();
-        }
-      }, 0);
-    });
+    const worldMapLink = createNavLink("World Map", "/world-map");
+    const countriesLink = createNavLink("Countries", "/countries");
+    const playersLink = createNavLink("Players", "/profiles");
+    const forumLink = createNavLink("Forum", "/forum");
+    const aboutLink = createNavLink("About", "/about");
+
+    nav.replaceChildren(
+      rankingsWrapper,
+      worldMapLink,
+      countriesLink,
+      playersLink,
+      forumLink,
+      aboutLink
+    );
+
+    nav.dataset.skillatlasNavSignature = desiredSignature;
   });
+}
+
+function setupRankingsDropdown() {
+  setupForumNavigation();
 }
 
 
@@ -294,7 +239,6 @@ function alignHeaderNavigationToThemeToggle() {
 }
 
 function updateActiveHeaderNavigation() {
-  setupRankingsDropdown();
   setupForumNavigation();
 
   const currentPath = normaliseHref(window.location.pathname);
