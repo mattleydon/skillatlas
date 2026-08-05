@@ -117,29 +117,66 @@ function setupForumNavigation() {
   const navs = Array.from(document.querySelectorAll<HTMLElement>("header nav"));
 
   navs.forEach((nav) => {
-    const existingForumLink = Array.from(nav.querySelectorAll<HTMLAnchorElement>("a[href]")).find((link) => {
-      return normaliseHref(link.getAttribute("href") ?? "") === "/forum";
+    const links = Array.from(nav.querySelectorAll<HTMLAnchorElement>("a[href]"));
+
+    links.forEach((link) => {
+      const text = link.textContent?.trim().toLowerCase() ?? "";
+      const href = normaliseHref(link.getAttribute("href") ?? "");
+
+      if (text === "profiles" || href === "/profiles") {
+        link.textContent = "Players";
+      }
     });
 
+    const standaloneUserRankingsLinks = Array.from(nav.querySelectorAll<HTMLAnchorElement>("a[href]")).filter((link) => {
+      const text = link.textContent?.trim().toLowerCase() ?? "";
+      const href = normaliseHref(link.getAttribute("href") ?? "");
+
+      return (
+        (text === "user rankings" || href === "/user-rankings") &&
+        !link.closest(".skillatlas-rankings-dropdown")
+      );
+    });
+
+    standaloneUserRankingsLinks.forEach((link) => link.remove());
+
+    const forumLinks = Array.from(nav.querySelectorAll<HTMLAnchorElement>("a[href]")).filter((link) => {
+      const text = link.textContent?.trim().toLowerCase() ?? "";
+      const href = normaliseHref(link.getAttribute("href") ?? "");
+
+      return text === "forum" || href === "/forum";
+    });
+
+    forumLinks.slice(1).forEach((link) => link.remove());
+
+    const existingForumLink = forumLinks[0];
+
     if (existingForumLink) {
+      existingForumLink.href = "/forum";
       existingForumLink.textContent = "Forum";
-      return;
     }
 
     const aboutLink = Array.from(nav.querySelectorAll<HTMLAnchorElement>("a[href]")).find((link) => {
-      const href = normaliseHref(link.getAttribute("href") ?? "");
       const text = link.textContent?.trim().toLowerCase() ?? "";
-      return href === "/about" || text === "about";
+      const href = normaliseHref(link.getAttribute("href") ?? "");
+
+      return text === "about" || href === "/about";
     });
 
     if (!aboutLink) return;
 
-    const forumLink = document.createElement("a");
-    forumLink.href = "/forum";
-    forumLink.textContent = "Forum";
-    forumLink.className = aboutLink.className;
+    let forumLink = existingForumLink;
 
-    aboutLink.before(forumLink);
+    if (!forumLink) {
+      forumLink = document.createElement("a");
+      forumLink.href = "/forum";
+      forumLink.textContent = "Forum";
+      forumLink.className = aboutLink.className;
+    }
+
+    if (forumLink.nextElementSibling !== aboutLink) {
+      aboutLink.before(forumLink);
+    }
   });
 }
 
@@ -257,8 +294,8 @@ function alignHeaderNavigationToThemeToggle() {
 }
 
 function updateActiveHeaderNavigation() {
-  setupForumNavigation();
   setupRankingsDropdown();
+  setupForumNavigation();
 
   const currentPath = normaliseHref(window.location.pathname);
   const rankingPaths = ["/", "/user-rankings", "/live-rankings"];
