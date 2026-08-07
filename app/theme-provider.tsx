@@ -7,8 +7,6 @@ import { usePathname } from "next/navigation";
 import { createClient } from "@supabase/supabase-js";
 
 const THEME_KEY = "skillatlas-theme";
-const LIGHT_TITLE_LOGO_SRC = "/skillatlas-title.png";
-const DARK_TITLE_LOGO_SRC = "/skillatlas-title-dark.png";
 
 type PageComment = {
   id: string;
@@ -102,213 +100,11 @@ function displayPathName(pathname: string) {
     .join(" / ");
 }
 
-function normaliseHref(path: string) {
-  if (!path) return "/";
-  const withoutOrigin = path.replace(/^https?:\/\/[^/]+/i, "");
-  const cleanPath = withoutOrigin.split("?")[0].split("#")[0];
-
-  if (!cleanPath || cleanPath === "") return "/";
-  return cleanPath.endsWith("/") && cleanPath.length > 1 ? cleanPath.slice(0, -1) : cleanPath;
-}
-
-
-
-function setupForumNavigation() {
-  const navs = Array.from(document.querySelectorAll<HTMLElement>("header nav"));
-
-  navs.forEach((nav) => {
-    const existingLinks = Array.from(nav.querySelectorAll<HTMLAnchorElement>("a[href]"));
-    const referenceLink =
-      existingLinks.find((link) => normaliseHref(link.getAttribute("href") ?? "") === "/about") ??
-      existingLinks[0];
-
-    if (!referenceLink) return;
-
-    const baseLinkClass = referenceLink.className;
-    const desiredSignature = "rankings|world-map|countries|players|forum|about";
-
-    if (nav.dataset.skillatlasNavSignature === desiredSignature) {
-      const currentForum = nav.querySelector<HTMLAnchorElement>('a[href="/forum"]');
-      const currentUserRankings = Array.from(nav.children).some((child) => {
-        return child instanceof HTMLAnchorElement && normaliseHref(child.getAttribute("href") ?? "") === "/user-rankings";
-      });
-
-      if (currentForum && !currentUserRankings) return;
-    }
-
-    const createNavLink = (label: string, href: string) => {
-      const link = document.createElement("a");
-      link.href = href;
-      link.textContent = label;
-      link.className = baseLinkClass;
-      return link;
-    };
-
-    const rankingsWrapper = document.createElement("div");
-    rankingsWrapper.className = "skillatlas-rankings-dropdown";
-    rankingsWrapper.setAttribute("data-skillatlas-rankings-dropdown", "true");
-
-    const rankingsTrigger = createNavLink("Rankings", "/");
-    rankingsTrigger.classList.add("skillatlas-rankings-trigger");
-    rankingsTrigger.setAttribute("aria-haspopup", "true");
-    rankingsTrigger.innerHTML = "<span>Rankings</span>";
-
-    const rankingsMenu = document.createElement("div");
-    rankingsMenu.className = "skillatlas-rankings-menu";
-    rankingsMenu.setAttribute("role", "menu");
-
-    const rankingItems = [
-      { label: "Rankings", href: "/", description: "General country rankings" },
-      { label: "User Rankings", href: "/user-rankings", description: "Community country votes" },
-      { label: "Live Rankings", href: "/live-rankings", description: "Rank countries in real time" },
-    ];
-
-    rankingItems.forEach((item) => {
-      const link = document.createElement("a");
-      link.href = item.href;
-      link.className = "skillatlas-rankings-menu-item";
-      link.setAttribute("role", "menuitem");
-      link.innerHTML = `<span>${item.label}</span><small>${item.description}</small>`;
-      rankingsMenu.appendChild(link);
-    });
-
-    rankingsWrapper.append(rankingsTrigger, rankingsMenu);
-
-    const worldMapLink = createNavLink("World Map", "/world-map");
-    const countriesLink = createNavLink("Countries", "/countries");
-    const playersLink = createNavLink("Players", "/profiles");
-    const forumLink = createNavLink("Forum", "/forum");
-    const aboutLink = createNavLink("About", "/about");
-
-    nav.replaceChildren(
-      rankingsWrapper,
-      worldMapLink,
-      countriesLink,
-      playersLink,
-      forumLink,
-      aboutLink
-    );
-
-    nav.dataset.skillatlasNavSignature = desiredSignature;
-  });
-}
-
-function setupRankingsDropdown() {
-  setupForumNavigation();
-}
-
-
-function alignHeaderNavigationToThemeToggle() {
-  const switchButton = document.querySelector<HTMLElement>(".skillatlas-theme-switch");
-  const navs = Array.from(document.querySelectorAll<HTMLElement>("header nav"));
-
-  navs.forEach((nav) => {
-    const items = Array.from(nav.children).filter((child): child is HTMLElement => child instanceof HTMLElement);
-
-    items.forEach((item) => {
-      item.style.transform = "";
-    });
-
-    if (!switchButton || items.length < 2) return;
-
-    const switchRect = switchButton.getBoundingClientRect();
-
-    if (switchRect.width <= 0) return;
-
-    const switchCentre = switchRect.left + switchRect.width / 2;
-    const itemRects = items.map((item) => item.getBoundingClientRect());
-    const itemWidths = itemRects.map((rect) => rect.width);
-    const firstLeft = itemRects[0].left;
-    const lastWidth = itemWidths[itemWidths.length - 1] ?? 0;
-    const lastLeft = switchCentre - lastWidth / 2;
-    const totalItemWidth = itemWidths.reduce((sum, width) => sum + width, 0);
-    const availableGapSpace = Math.max(0, lastLeft + lastWidth - firstLeft - totalItemWidth);
-    const equalGap = availableGapSpace / Math.max(items.length - 1, 1);
-
-    let nextLeft = firstLeft;
-
-    items.forEach((item, index) => {
-      const rect = itemRects[index];
-      const targetLeft = index === items.length - 1 ? lastLeft : nextLeft;
-      const offset = targetLeft - rect.left;
-
-      item.style.transform = `translateX(${offset.toFixed(2)}px)`;
-      nextLeft = targetLeft + itemWidths[index] + equalGap;
-    });
-  });
-}
-
-function updateActiveHeaderNavigation() {
-  setupForumNavigation();
-
-  const currentPath = normaliseHref(window.location.pathname);
-  const rankingPaths = ["/", "/user-rankings", "/live-rankings"];
-
-  const links = Array.from(document.querySelectorAll<HTMLAnchorElement>("header nav a[href]"));
-
-  links.forEach((link) => {
-    const linkPath = normaliseHref(link.getAttribute("href") ?? "");
-    const isRankings = currentPath === "/" && linkPath === "/";
-    const isOtherPage = linkPath !== "/" && currentPath.startsWith(linkPath);
-    const isActive = isRankings || isOtherPage;
-
-    link.classList.toggle("skillatlas-active-nav", isActive);
-    link.setAttribute("aria-current", isActive ? "page" : "false");
-  });
-
-  const dropdowns = Array.from(document.querySelectorAll<HTMLElement>(".skillatlas-rankings-dropdown"));
-  dropdowns.forEach((dropdown) => {
-    const trigger = dropdown.querySelector<HTMLElement>(".skillatlas-rankings-trigger");
-    const menuItems = Array.from(dropdown.querySelectorAll<HTMLAnchorElement>(".skillatlas-rankings-menu-item"));
-
-    const rankingsActive = rankingPaths.includes(currentPath);
-    trigger?.classList.toggle("skillatlas-active-nav", rankingsActive);
-    trigger?.setAttribute("aria-current", rankingsActive ? "page" : "false");
-
-    menuItems.forEach((item) => {
-      const itemPath = normaliseHref(item.getAttribute("href") ?? "");
-      const itemActive = itemPath === currentPath || (itemPath !== "/" && currentPath.startsWith(itemPath));
-      item.classList.toggle("skillatlas-active-nav", itemActive);
-      item.setAttribute("aria-current", itemActive ? "page" : "false");
-    });
-  });
-
-  window.requestAnimationFrame(alignHeaderNavigationToThemeToggle);
-}
-
-function isSkillAtlasTitleImage(image: HTMLImageElement) {
-  const alt = image.getAttribute("alt")?.toLowerCase() ?? "";
-  const src = image.getAttribute("src") ?? "";
-  const currentSrc = image.currentSrc ?? "";
-
-  return (
-    alt.includes("skillatlas title") ||
-    src.includes("skillatlas-title") ||
-    currentSrc.includes("skillatlas-title")
-  );
-}
-
-function swapTitleLogos(darkMode: boolean) {
-  const targetSrc = darkMode ? DARK_TITLE_LOGO_SRC : LIGHT_TITLE_LOGO_SRC;
-  const images = Array.from(document.querySelectorAll<HTMLImageElement>("img")).filter(isSkillAtlasTitleImage);
-
-  images.forEach((image) => {
-    const currentRawSrc = image.getAttribute("src") ?? "";
-    const currentSrc = image.currentSrc || currentRawSrc;
-
-    if (currentRawSrc.includes(targetSrc) || currentSrc.includes(targetSrc)) return;
-
-    image.removeAttribute("srcset");
-    image.src = targetSrc;
-  });
-}
-
 function applyTheme(darkMode: boolean) {
   document.documentElement.classList.add("skillatlas-theme-freeze");
   document.documentElement.classList.toggle("skillatlas-dark", darkMode);
   document.documentElement.style.colorScheme = darkMode ? "dark" : "light";
   window.localStorage.setItem(THEME_KEY, darkMode ? "dark" : "light");
-  swapTitleLogos(darkMode);
   window.dispatchEvent(new CustomEvent("skillatlas-theme-change", { detail: { darkMode } }));
 
   window.setTimeout(() => {
@@ -353,7 +149,6 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
 
     setDarkMode(shouldUseDark);
     applyTheme(shouldUseDark);
-    window.setTimeout(() => swapTitleLogos(shouldUseDark), 0);
     setReady(true);
   }, []);
 
@@ -366,36 +161,6 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
     window.addEventListener("scroll", handleScroll, { passive: true });
 
     return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
-  useEffect(() => {
-    updateActiveHeaderNavigation();
-
-    const observer = new MutationObserver(() => {
-      updateActiveHeaderNavigation();
-      swapTitleLogos(document.documentElement.classList.contains("skillatlas-dark"));
-    });
-
-    observer.observe(document.body, { childList: true, subtree: true });
-
-    window.addEventListener("popstate", updateActiveHeaderNavigation);
-    window.addEventListener("resize", updateActiveHeaderNavigation);
-    window.addEventListener("skillatlas-theme-change", updateActiveHeaderNavigation);
-
-    const handleClick = () => {
-      window.setTimeout(updateActiveHeaderNavigation, 0);
-      window.setTimeout(updateActiveHeaderNavigation, 120);
-    };
-
-    document.addEventListener("click", handleClick);
-
-    return () => {
-      observer.disconnect();
-      window.removeEventListener("popstate", updateActiveHeaderNavigation);
-      window.removeEventListener("resize", updateActiveHeaderNavigation);
-      window.removeEventListener("skillatlas-theme-change", updateActiveHeaderNavigation);
-      document.removeEventListener("click", handleClick);
-    };
   }, []);
 
   useEffect(() => {
@@ -768,16 +533,16 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
           filter: drop-shadow(0 0 34px rgba(25, 211, 207, 0.08));
         }
 
-        header nav a.skillatlas-active-nav {
+        header .skillatlas-desktop-nav a.skillatlas-active-nav {
           color: var(--skillatlas-turquoise) !important;
         }
 
-        header nav a[aria-current="page"] {
+        header .skillatlas-desktop-nav a[aria-current="page"] {
           color: var(--skillatlas-turquoise) !important;
         }
 
 
-        header nav {
+        header .skillatlas-desktop-nav {
           flex: 1 1 auto !important;
           justify-content: space-between !important;
           margin-left: clamp(12px, 2.2vw, 38px) !important;
@@ -785,7 +550,7 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
           max-width: none !important;
         }
 
-        header nav .skillatlas-rankings-dropdown {
+        header .skillatlas-desktop-nav .skillatlas-rankings-dropdown {
           position: relative;
           display: inline-flex;
           align-items: center;
@@ -793,7 +558,7 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
           min-height: 44px;
         }
 
-        header nav .skillatlas-rankings-dropdown::after {
+        header .skillatlas-desktop-nav .skillatlas-rankings-dropdown::after {
           content: "";
           position: absolute;
           left: -54px;
@@ -802,7 +567,7 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
           height: 46px;
         }
 
-        header nav .skillatlas-rankings-trigger {
+        header .skillatlas-desktop-nav .skillatlas-rankings-trigger {
           display: inline-flex;
           align-items: center;
           border: 0;
@@ -816,11 +581,11 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
           text-decoration: none;
         }
 
-        header nav .skillatlas-rankings-trigger.skillatlas-active-nav {
+        header .skillatlas-desktop-nav .skillatlas-rankings-trigger.skillatlas-active-nav {
           color: var(--skillatlas-turquoise) !important;
         }
 
-        header nav .skillatlas-rankings-menu {
+        header .skillatlas-desktop-nav .skillatlas-rankings-menu {
           pointer-events: none;
           position: absolute;
           left: 50%;
@@ -843,15 +608,15 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
           backdrop-filter: blur(18px);
         }
 
-        header nav .skillatlas-rankings-dropdown:hover .skillatlas-rankings-menu,
-        header nav .skillatlas-rankings-dropdown:focus-within .skillatlas-rankings-menu,
-        header nav .skillatlas-rankings-trigger:focus + .skillatlas-rankings-menu {
+        header .skillatlas-desktop-nav .skillatlas-rankings-dropdown:hover .skillatlas-rankings-menu,
+        header .skillatlas-desktop-nav .skillatlas-rankings-dropdown:focus-within .skillatlas-rankings-menu,
+        header .skillatlas-desktop-nav .skillatlas-rankings-trigger:focus + .skillatlas-rankings-menu {
           pointer-events: auto;
           opacity: 1;
           transform: translateX(-50%) translateY(0) scale(1);
         }
 
-        header nav .skillatlas-rankings-menu::before {
+        header .skillatlas-desktop-nav .skillatlas-rankings-menu::before {
           content: "";
           position: absolute;
           left: 50%;
@@ -864,7 +629,7 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
           transform: translateX(-50%) rotate(45deg);
         }
 
-        header nav .skillatlas-rankings-menu-item {
+        header .skillatlas-desktop-nav .skillatlas-rankings-menu-item {
           position: relative;
           display: block;
           border-radius: 14px;
@@ -876,19 +641,19 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
             transform 160ms ease;
         }
 
-        header nav .skillatlas-rankings-menu-item:hover {
+        header .skillatlas-desktop-nav .skillatlas-rankings-menu-item:hover {
           transform: translateX(2px);
           background: rgba(25, 211, 207, 0.10);
         }
 
-        header nav .skillatlas-rankings-menu-item span {
+        header .skillatlas-desktop-nav .skillatlas-rankings-menu-item span {
           display: block;
           color: #111827;
           font-size: 13px;
           font-weight: 950;
         }
 
-        header nav .skillatlas-rankings-menu-item small {
+        header .skillatlas-desktop-nav .skillatlas-rankings-menu-item small {
           display: block;
           margin-top: 3px;
           color: #64748b;
@@ -897,15 +662,15 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
           letter-spacing: 0.03em;
         }
 
-        header nav .skillatlas-rankings-menu-item.skillatlas-active-nav {
+        header .skillatlas-desktop-nav .skillatlas-rankings-menu-item.skillatlas-active-nav {
           background: rgba(25, 211, 207, 0.14);
         }
 
-        header nav .skillatlas-rankings-menu-item.skillatlas-active-nav span {
+        header .skillatlas-desktop-nav .skillatlas-rankings-menu-item.skillatlas-active-nav span {
           color: var(--skillatlas-turquoise);
         }
 
-        html.skillatlas-dark header nav .skillatlas-rankings-menu {
+        html.skillatlas-dark header .skillatlas-desktop-nav .skillatlas-rankings-menu {
           border-color: rgba(255, 47, 168, 0.34);
           background:
             linear-gradient(135deg, rgba(25,211,207,0.10), rgba(255,47,168,0.10)),
@@ -913,16 +678,16 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
           box-shadow: 0 24px 54px rgba(0,0,0,0.26);
         }
 
-        html.skillatlas-dark header nav .skillatlas-rankings-menu::before {
+        html.skillatlas-dark header .skillatlas-desktop-nav .skillatlas-rankings-menu::before {
           background: rgba(39,51,65,0.98);
           border-color: rgba(255, 47, 168, 0.34);
         }
 
-        html.skillatlas-dark header nav .skillatlas-rankings-menu-item span {
+        html.skillatlas-dark header .skillatlas-desktop-nav .skillatlas-rankings-menu-item span {
           color: var(--skillatlas-text-dark);
         }
 
-        html.skillatlas-dark header nav .skillatlas-rankings-menu-item small {
+        html.skillatlas-dark header .skillatlas-desktop-nav .skillatlas-rankings-menu-item small {
           color: var(--skillatlas-muted-dark);
         }
 
@@ -1686,6 +1451,12 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
             top: 12px;
           }
 
+          .skillatlas-theme-switch[data-skillatlas-hidden="false"] {
+            pointer-events: auto !important;
+            opacity: 1 !important;
+            transform: none !important;
+          }
+
           .skillatlas-live-chat {
             right: 16px;
             bottom: 16px;
@@ -1705,6 +1476,7 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
       <button
         type="button"
         onClick={toggleTheme}
+        data-skillatlas-hidden={hideToggle ? "true" : "false"}
         className={`skillatlas-theme-switch ${
           ready && !headerShrunk && !hideToggle ? "opacity-100" : "pointer-events-none -translate-y-2 opacity-0"
         }`}

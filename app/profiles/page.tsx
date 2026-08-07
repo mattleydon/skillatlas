@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 type Game = "All" | "CS2" | "League of Legends" | "Valorant" | "Fortnite" | "Rocket League" | "Chess";
@@ -817,7 +816,6 @@ function ProfileCard({ profile, selected, onSelect }: { profile: PlayerProfile; 
 }
 
 export default function PlayersPage() {
-  const [scrolled, setScrolled] = useState(false);
   const [search, setSearch] = useState("");
   const [selectedGame, setSelectedGame] = useState<Game>("All");
   const [selectedRole, setSelectedRole] = useState<Role>("All Roles");
@@ -828,14 +826,6 @@ export default function PlayersPage() {
   const [featuredTransitionPhase, setFeaturedTransitionPhase] = useState<"idle" | "out" | "in">("idle");
   const [atlasView, setAtlasView] = useState<"cards" | "table">("cards");
   const profileIdentityRef = useRef<HTMLElement | null>(null);
-
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 24);
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
 
   const filteredProfiles = useMemo(() => {
     const normalisedSearch = search.trim().toLowerCase();
@@ -994,45 +984,6 @@ export default function PlayersPage() {
           filter: brightness(0.72) saturate(1.25);
         }
       `}</style>
-
-      <header
-        className={`fixed left-0 right-0 top-0 z-50 border-b border-[#ff2fa8]/25 bg-white/95 backdrop-blur transition-all duration-300 ${
-          scrolled ? "h-[72px]" : "h-[126px]"
-        }`}
-      >
-        <div className="mx-auto flex h-full max-w-7xl items-center px-8">
-          <div className="mr-14 flex shrink-0 items-center gap-5">
-            <a href="/space-invaders" className={`relative shrink-0 transition-all duration-300 ${scrolled ? "h-11 w-11" : "h-24 w-24"}`}>
-              <Image src="/skillatlas-logo.png" alt="SkillAtlas logo" fill className="object-contain" priority />
-            </a>
-
-            <a href="/" className={`relative shrink-0 transition-all duration-300 ${scrolled ? "h-7 w-44" : "h-14 w-80"}`}>
-              <Image src="/skillatlas-title.png" alt="SkillAtlas title" fill className="object-contain object-left" priority />
-            </a>
-          </div>
-
-          <nav className="hidden flex-1 items-center justify-around md:flex">
-            {[
-              ["Rankings", "/"],
-              ["World Map", "/world-map"],
-              ["Countries", "/countries"],
-              ["Players", "/profiles"],
-              ["User Rankings", "/user-rankings"],
-              ["About", "/about"],
-            ].map(([item, href]) => (
-              <a
-                key={item}
-                className={`font-semibold transition-all duration-300 ${
-                  item === "Players" ? "text-[#19d3cf]" : "text-gray-700 hover:text-[#19d3cf]"
-                } ${scrolled ? "text-sm" : "text-[1rem]"}`}
-                href={href}
-              >
-                {item}
-              </a>
-            ))}
-          </nav>
-        </div>
-      </header>
 
       <section className="relative z-10 mx-auto max-w-7xl px-8 pb-16 pt-[150px]">
         <div className="mb-6 rounded-3xl border border-[#ff2fa8]/45 bg-white/92 p-6 shadow-sm backdrop-blur">

@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import type { DragEvent as ReactDragEvent } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 
@@ -264,60 +263,6 @@ const initialCountries: LiveCountry[] = [
   { name: "Zimbabwe", code: "zw", score: 34, momentum: 9, movedBy: "Strategy voters", reasons: ["Patience", "Decision making", "Preparation"] },
   { name: "Åland Islands", code: "ax", score: 33, momentum: 3, movedBy: "FPS voters", reasons: ["Aim culture", "Local scene", "Team play"] },
 ];
-
-
-function SkillAtlasHeader({ active }: { active: "Rankings" | "World Map" | "Countries" | "Profiles" | "About" }) {
-  const [scrolled, setScrolled] = useState(false);
-
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 24);
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
-  return (
-    <header
-      className={`fixed left-0 right-0 top-0 z-50 border-b border-[#ff2fa8]/25 bg-white/95 backdrop-blur transition-all duration-300 ${
-        scrolled ? "h-[72px]" : "h-[126px]"
-      }`}
-    >
-      <div className="mx-auto flex h-full max-w-7xl items-center px-8">
-        <div className="mr-14 flex shrink-0 items-center gap-5">
-          <a href="/space-invaders" className={`relative shrink-0 transition-all duration-300 ${scrolled ? "h-11 w-11" : "h-24 w-24"}`}>
-            <Image src="/skillatlas-logo.png" alt="SkillAtlas logo" fill className="object-contain" priority />
-          </a>
-
-          <a href="/" className={`relative shrink-0 transition-all duration-300 ${scrolled ? "h-7 w-44" : "h-14 w-80"}`}>
-            <Image src="/skillatlas-title.png" alt="SkillAtlas title" fill className="object-contain object-left" priority />
-          </a>
-        </div>
-
-        <nav className="hidden flex-1 items-center justify-around md:flex">
-          {[
-            ["Rankings", "/"],
-            ["World Map", "/world-map"],
-            ["Countries", "/countries"],
-            ["Profiles", "/profiles"],
-            ["About", "/about"],
-          ].map(([item, href]) => (
-            <a
-              key={item}
-              className={`font-semibold transition-all duration-300 ${
-                item === active ? "text-[#19d3cf]" : "text-gray-700 hover:text-[#19d3cf]"
-              } ${scrolled ? "text-sm" : "text-[1rem]"}`}
-              href={href}
-            >
-              {item}
-            </a>
-          ))}
-        </nav>
-      </div>
-    </header>
-  );
-}
-
 
 
 function RankingsBackground() {
@@ -768,7 +713,6 @@ export default function LiveRankingsPage() {
     <main className="rankings-shell relative min-h-screen overflow-hidden bg-[#F8FAFC] text-[#111827] transition-colors duration-300">
       <RankingsBackground />
       <style>{pageThemeStyles()}</style>
-      <SkillAtlasHeader active="Rankings" />
       {wheelVisible ? (
         <RankWheel
           total={countries.length}
