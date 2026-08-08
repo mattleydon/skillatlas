@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 const periods = ["7 Days", "1 Month", "1 Year"] as const;
@@ -184,21 +183,12 @@ function buildTop100(game: Game): RankingRow[] {
 }
 
 export default function Home() {
-  const [scrolled, setScrolled] = useState(false);
   const [statsIndex, setStatsIndex] = useState(0);
   const [statsVisible, setStatsVisible] = useState(true);
   const [gameTitleVisible, setGameTitleVisible] = useState(true);
   const [manualStatsGame, setManualStatsGame] = useState<Game | null>(null);
   const [selectedGame, setSelectedGame] = useState<Game>("CS2");
   const [selectedPeriod, setSelectedPeriod] = useState<Period>("7 Days");
-
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 24);
-    onScroll();
-
-    window.addEventListener("scroll", onScroll);
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
 
   useEffect(() => {
     if (manualStatsGame) return;
@@ -229,48 +219,6 @@ export default function Home() {
   return (
     <main className="relative min-h-screen overflow-hidden bg-[#F8FAFC] text-[#111827]">
       <RotatingGlobeBackground />
-
-      <header
-        className={`fixed left-0 right-0 top-0 z-50 border-b border-[#ff2fa8]/25 bg-white/95 backdrop-blur transition-all duration-300 ${
-          scrolled ? "h-[72px]" : "h-[126px]"
-        }`}
-      >
-        <div className="mx-auto flex h-full max-w-7xl items-center px-8">
-          <div className="mr-14 flex shrink-0 items-center gap-5">
-            <a
-              href="/space-invaders"
-              className={`relative shrink-0 transition-all duration-300 ${
-                scrolled ? "h-11 w-11" : "h-24 w-24"
-              }`}
-            >
-              <Image src="/skillatlas-logo.png" alt="SkillAtlas logo" fill className="object-contain" priority />
-            </a>
-
-            <a
-              href="/"
-              className={`relative shrink-0 transition-all duration-300 ${
-                scrolled ? "h-7 w-44" : "h-14 w-80"
-              }`}
-            >
-              <Image src="/skillatlas-title.png" alt="SkillAtlas title" fill className="object-contain object-left" priority />
-            </a>
-          </div>
-
-          <nav className="hidden flex-1 items-center justify-around md:flex">
-            {["Rankings", "World Map", "Countries", "Profiles", "User Rankings", "About"].map((item) => (
-              <a
-                key={item}
-                className={`font-semibold text-gray-700 transition-all duration-300 hover:text-[#19d3cf] ${
-                  scrolled ? "text-sm" : "text-[1rem]"
-                }`}
-                href={item === "Rankings" ? "/" : `/${item.toLowerCase().replace(" ", "-")}`}
-              >
-                {item}
-              </a>
-            ))}
-          </nav>
-        </div>
-      </header>
 
       <section className="relative z-10 mx-auto max-w-7xl px-8 pb-8 pt-[150px]">
         <div className="mb-6 rounded-3xl border border-[#ff2fa8]/45 bg-white/92 p-6 shadow-sm backdrop-blur">

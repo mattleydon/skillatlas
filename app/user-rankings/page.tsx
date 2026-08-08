@@ -1,7 +1,6 @@
 "use client";
 
-import Image from "next/image";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 
 type VoteCountry = {
   name: string;
@@ -25,60 +24,6 @@ const countries: VoteCountry[] = [
   { name: "Sweden", code: "se", gameScores: { CS2: 91, "League of Legends": 79, Valorant: 81, Fortnite: 70, "Rocket League": 78, Chess: 83 }, trend: -2, voters: 874, reasons: ["CS legacy", "LAN history", "Mechanical tradition"], sparkline: [94, 93, 92, 92, 91, 90, 91, 91] },
   { name: "Japan", code: "jp", gameScores: { CS2: 74, "League of Legends": 78, Valorant: 88, Fortnite: 76, "Rocket League": 70, Chess: 90 }, trend: 3, voters: 968, reasons: ["Fighting roots", "Precision", "Arcade culture"], sparkline: [80, 82, 84, 86, 87, 88, 89, 90] },
 ];
-
-
-function SkillAtlasHeader({ active }: { active: "Rankings" | "World Map" | "Countries" | "Profiles" | "About" }) {
-  const [scrolled, setScrolled] = useState(false);
-
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 24);
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
-  return (
-    <header
-      className={`fixed left-0 right-0 top-0 z-50 border-b border-[#ff2fa8]/25 bg-white/95 backdrop-blur transition-all duration-300 ${
-        scrolled ? "h-[72px]" : "h-[126px]"
-      }`}
-    >
-      <div className="mx-auto flex h-full max-w-7xl items-center px-8">
-        <div className="mr-14 flex shrink-0 items-center gap-5">
-          <a href="/space-invaders" className={`relative shrink-0 transition-all duration-300 ${scrolled ? "h-11 w-11" : "h-24 w-24"}`}>
-            <Image src="/skillatlas-logo.png" alt="SkillAtlas logo" fill className="object-contain" priority />
-          </a>
-
-          <a href="/" className={`relative shrink-0 transition-all duration-300 ${scrolled ? "h-7 w-44" : "h-14 w-80"}`}>
-            <Image src="/skillatlas-title.png" alt="SkillAtlas title" fill className="object-contain object-left" priority />
-          </a>
-        </div>
-
-        <nav className="hidden flex-1 items-center justify-around md:flex">
-          {[
-            ["Rankings", "/"],
-            ["World Map", "/world-map"],
-            ["Countries", "/countries"],
-            ["Profiles", "/profiles"],
-            ["About", "/about"],
-          ].map(([item, href]) => (
-            <a
-              key={item}
-              className={`font-semibold transition-all duration-300 ${
-                item === active ? "text-[#19d3cf]" : "text-gray-700 hover:text-[#19d3cf]"
-              } ${scrolled ? "text-sm" : "text-[1rem]"}`}
-              href={href}
-            >
-              {item}
-            </a>
-          ))}
-        </nav>
-      </div>
-    </header>
-  );
-}
-
 
 
 function RankingsBackground() {
@@ -176,8 +121,6 @@ export default function UserRankingsPage() {
     <main className="rankings-shell relative min-h-screen overflow-hidden bg-[#F8FAFC] text-[#111827] transition-colors duration-300">
       <RankingsBackground />
       <style>{pageThemeStyles()}</style>
-      <SkillAtlasHeader active="Rankings" />
-
       <section className="relative z-10 mx-auto max-w-7xl px-8 pb-16 pt-[150px]">
         <div className="mb-6 rounded-3xl border border-[#ff2fa8]/45 bg-white/92 p-6 shadow-sm backdrop-blur">
           <p className="mb-2 text-xs font-black uppercase tracking-[0.28em] text-[#19d3cf]">User Rankings</p>
