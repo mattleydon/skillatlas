@@ -2,8 +2,9 @@
 
 import type { PointerEvent } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { GAME_IDS as gameOrder, GAME_LABELS as gameLabels, type GameId as GameKey } from "@/constants/games";
+import { clamp } from "@/lib/math";
 
-type GameKey = "cs2" | "league" | "valorant" | "fortnite" | "rocketLeague" | "chess";
 type HeatMode = "ranking" | "emerging" | "loser";
 type LonLat = [number, number];
 
@@ -56,22 +57,11 @@ const CANVAS_SIZE = 900;
 const CENTER = CANVAS_SIZE / 2;
 const GLOBE_RADIUS = 360;
 
-const gameLabels: Record<GameKey, string> = {
-  cs2: "CS2",
-  league: "League of Legends",
-  valorant: "Valorant",
-  fortnite: "Fortnite",
-  rocketLeague: "Rocket League",
-  chess: "Chess",
-};
-
 const heatModes: { id: HeatMode; label: string; description: string }[] = [
   { id: "ranking", label: "Ranking", description: "Overall ranking for countries for each game." },
   { id: "emerging", label: "Biggest Gainer", description: "Ranking for countries that have moved up in overall ranking the most over all-time." },
   { id: "loser", label: "Biggest Loser", description: "Ranking for countries that have moved down in overall ranking the most over all-time." },
 ];
-
-const gameOrder: GameKey[] = ["cs2", "league", "valorant", "fortnite", "rocketLeague", "chess"];
 
 const gameData: Record<GameKey, CountryPerformance[]> = {
   cs2: [
@@ -133,10 +123,6 @@ type RankedCountry = {
   rankMoveAllTime: number;
   rankingStrength: number;
 };
-
-function clamp(value: number, min: number, max: number) {
-  return Math.max(min, Math.min(max, value));
-}
 
 function normaliseName(name: string) {
   return name.toLowerCase().replace(/[^a-z0-9]/g, "");
@@ -408,7 +394,7 @@ function drawCountryBubbleLabel(ctx: CanvasRenderingContext2D, label: string, x:
   }
 
   const lineHeight = fontSize + 4;
-  const bubbleWidth = Math.min(maxBubbleWidth, Math.max(minBubbleWidth, Math.ceil(widestLine + horizontalPadding * 2)));
+  const bubbleWidth = clamp(Math.ceil(widestLine + horizontalPadding * 2), minBubbleWidth, maxBubbleWidth);
   const bubbleHeight = Math.max(30, Math.ceil(lines.length * lineHeight + verticalPadding * 2));
   const bubbleX = clamp(x - bubbleWidth / 2, 12, CANVAS_SIZE - bubbleWidth - 12);
   const bubbleY = clamp(y - bubbleHeight / 2, 12, CANVAS_SIZE - bubbleHeight - 12);
@@ -1079,7 +1065,7 @@ function countryNameTextClass(name: string) {
 function sevenDayRankDelta(row: RankedCountry) {
   if (row.performance) {
     const direction = row.performance.rankMoveAllTime >= 0 ? 1 : -1;
-    const size = Math.min(6, Math.max(1, Math.round(Math.abs(row.performance.rankMoveAllTime) / 9)));
+    const size = clamp(Math.round(Math.abs(row.performance.rankMoveAllTime) / 9), 1, 6);
     return direction * size;
   }
 

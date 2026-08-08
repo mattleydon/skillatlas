@@ -3,40 +3,31 @@
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
-
-const rankingItems = [
-  { label: "Rankings", href: "/", description: "General country rankings" },
-  { label: "User Rankings", href: "/user-rankings", description: "Community country votes" },
-  { label: "Live Rankings", href: "/live-rankings", description: "Rank countries in real time" },
-] as const;
-
-const navigationItems = [
-  { label: "World Map", href: "/world-map" },
-  { label: "Countries", href: "/countries" },
-  { label: "Players", href: "/profiles" },
-  { label: "Forum", href: "/forum" },
-  { label: "About", href: "/about" },
-] as const;
+import {
+  PRIMARY_NAV_ITEMS as navigationItems,
+  RANKING_NAV_ITEMS as rankingItems,
+  ROUTES,
+} from "@/constants/routes";
 
 const rankingPaths = new Set<string>(rankingItems.map((item) => item.href));
 const mobileMenuId = "skillatlas-mobile-navigation";
 const mobileRankingsMenuId = "skillatlas-mobile-rankings-navigation";
 
 function normalisePath(pathname: string) {
-  if (!pathname || pathname === "/") return "/";
+  if (!pathname || pathname === ROUTES.rankings) return ROUTES.rankings;
   return pathname.endsWith("/") ? pathname.slice(0, -1) : pathname;
 }
 
 function pathIsActive(pathname: string, href: string) {
-  if (href === "/") return pathname === "/";
+  if (href === ROUTES.rankings) return pathname === ROUTES.rankings;
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
 export default function SiteHeader() {
-  const pathname = normalisePath(usePathname() || "/");
-  const hidden = pathname.startsWith("/space-invaders");
+  const pathname = normalisePath(usePathname() || ROUTES.rankings);
+  const hidden = pathname.startsWith(ROUTES.spaceInvaders);
   const rankingsActive = rankingPaths.has(pathname);
-  const mobileRankingsDefaultOpen = pathname === "/user-rankings" || pathname === "/live-rankings";
+  const mobileRankingsDefaultOpen = pathname === ROUTES.userRankings || pathname === ROUTES.liveRankings;
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileRankingsOpen, setMobileRankingsOpen] = useState(mobileRankingsDefaultOpen);
@@ -192,7 +183,7 @@ export default function SiteHeader() {
       <div className="mx-auto flex h-full max-w-7xl items-center px-4 pr-[124px] sm:px-6 sm:pr-[124px] min-[901px]:pr-[164px] xl:px-8 xl:pr-8">
         <div className="flex min-w-0 shrink-0 items-center gap-3 xl:mr-14 xl:gap-5">
           <a
-            href="/space-invaders"
+            href={ROUTES.spaceInvaders}
             className={`relative shrink-0 transition-all duration-300 ${
               scrolled ? "h-10 w-10 xl:h-11 xl:w-11" : "h-14 w-14 xl:h-24 xl:w-24"
             }`}
@@ -208,7 +199,7 @@ export default function SiteHeader() {
           </a>
 
           <a
-            href="/"
+            href={ROUTES.rankings}
             className={`relative hidden min-w-0 shrink-0 transition-all duration-300 min-[360px]:block ${
               scrolled
                 ? "h-6 w-28 sm:w-40 xl:h-7 xl:w-44"
@@ -237,7 +228,7 @@ export default function SiteHeader() {
         >
           <div className="skillatlas-rankings-dropdown" data-skillatlas-rankings-dropdown="true">
             <a
-              href="/"
+              href={ROUTES.rankings}
               className={`${linkClassName} skillatlas-rankings-trigger ${rankingsActive ? "skillatlas-active-nav" : ""}`}
               aria-haspopup="true"
               aria-current={rankingsActive ? "page" : undefined}

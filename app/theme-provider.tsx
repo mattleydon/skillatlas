@@ -5,6 +5,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { flushSync } from "react-dom";
 import { usePathname } from "next/navigation";
 import { createClient } from "@supabase/supabase-js";
+import { ROUTES } from "@/constants/routes";
 
 const THEME_KEY = "skillatlas-theme";
 const LIGHT_TITLE_LOGO_SRC = "/skillatlas-title.png";
@@ -87,8 +88,8 @@ function renderCommentBody(body: string) {
 }
 
 function displayPathName(pathname: string) {
-  if (pathname === "/") return "Rankings";
-  if (pathname === "/forum") return "Forum";
+  if (pathname === ROUTES.rankings) return "Rankings";
+  if (pathname === ROUTES.forum) return "Forum";
 
   return pathname
     .split("/")
@@ -152,7 +153,7 @@ type ViewTransitionDocument = Document & {
 
 export default function ThemeProvider({ children }: { children: ReactNode }) {
   const pathname = usePathname();
-  const isSkillInvadersPage = pathname?.startsWith("/space-invaders") ?? false;
+  const isSkillInvadersPage = pathname?.startsWith(ROUTES.spaceInvaders) ?? false;
   const hideToggle = isSkillInvadersPage;
   const hideLiveChat = isSkillInvadersPage;
 
@@ -164,7 +165,7 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
   const [comments, setComments] = useState<PageComment[]>([]);
   const [commentsLoading, setCommentsLoading] = useState(false);
   const [commentsError, setCommentsError] = useState("");
-  const currentPagePath = pathname || "/";
+  const currentPagePath = pathname || ROUTES.rankings;
   const currentPageName = useMemo(() => displayPathName(currentPagePath), [currentPagePath]);
   const commentsEndRef = useRef<HTMLDivElement | null>(null);
   const commentEditorRef = useRef<HTMLDivElement | null>(null);
