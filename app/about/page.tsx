@@ -244,7 +244,7 @@ export default function AboutPage() {
               <p className="mb-2 text-[11px] font-black uppercase tracking-[0.24em] text-[#19d3cf]">How the site works</p>
               <h2 className="text-2xl font-black">The SkillAtlas ecosystem.</h2>
             </div>
-            <p className="max-w-3xl whitespace-nowrap text-sm font-semibold leading-relaxed text-gray-600">
+            <p className="max-w-3xl text-sm font-semibold leading-relaxed text-gray-600">
               Each page answers one question: where does gaming skill come from?
             </p>
           </div>
