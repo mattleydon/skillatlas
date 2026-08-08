@@ -4662,6 +4662,25 @@ function CountryCard({ country, selected, onSelect }: { country: CountryProfile;
   );
 }
 
+function filterCountries(search: string, selectedRegion: Region, selectedCategory: Category) {
+  return countries
+    .filter((country) => (selectedRegion === "World" ? true : country.region === selectedRegion))
+    .filter((country) => categoryMatch(country, selectedCategory))
+    .filter((country) =>
+      matchesSearchQuery(search, [
+        country.name,
+        country.region,
+        country.bestGame,
+        country.identity,
+        country.aura,
+        country.primaryGenre,
+        country.description,
+        ...country.strengths,
+      ])
+    )
+    .sort((a, b) => a.rank - b.rank);
+}
+
 export default function CountriesPage() {
   const [search, setSearch] = useState("");
   const [selectedRegion, setSelectedRegion] = useState<Region>("World");
@@ -4673,24 +4692,10 @@ export default function CountriesPage() {
   const [atlasView, setAtlasView] = useState<"cards" | "rankings">("cards");
   const countryIdentityRef = useRef<HTMLElement | null>(null);
 
-  const filteredCountries = useMemo(() => {
-    return countries
-      .filter((country) => (selectedRegion === "World" ? true : country.region === selectedRegion))
-      .filter((country) => categoryMatch(country, selectedCategory))
-      .filter((country) =>
-        matchesSearchQuery(search, [
-          country.name,
-          country.region,
-          country.bestGame,
-          country.identity,
-          country.aura,
-          country.primaryGenre,
-          country.description,
-          ...country.strengths,
-        ])
-      )
-      .sort((a, b) => a.rank - b.rank);
-  }, [search, selectedCategory, selectedRegion]);
+  const filteredCountries = useMemo(
+    () => filterCountries(search, selectedRegion, selectedCategory),
+    [search, selectedCategory, selectedRegion]
+  );
 
   const featuredPool = useMemo(
     () =>
@@ -4699,12 +4704,6 @@ export default function CountriesPage() {
       ),
     []
   );
-
-  useEffect(() => {
-    if (filteredCountries[0]) {
-      setSelectedCountryId(filteredCountries[0].id);
-    }
-  }, [selectedCategory, selectedRegion, search, filteredCountries]);
 
   useEffect(() => {
     if (featuredLocked || featuredPool.length <= 1) return;
@@ -4750,6 +4749,27 @@ export default function CountriesPage() {
         countryIdentityRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
       }, 50);
     }
+  }
+
+  function updateFilters(nextSearch: string, nextRegion: Region, nextCategory: Category) {
+    const firstCountry = filterCountries(nextSearch, nextRegion, nextCategory)[0];
+
+    if (firstCountry) setSelectedCountryId(firstCountry.id);
+  }
+
+  function updateSearch(nextSearch: string) {
+    setSearch(nextSearch);
+    updateFilters(nextSearch, selectedRegion, selectedCategory);
+  }
+
+  function updateRegion(nextRegion: Region) {
+    setSelectedRegion(nextRegion);
+    updateFilters(search, nextRegion, selectedCategory);
+  }
+
+  function updateCategory(nextCategory: Category) {
+    setSelectedCategory(nextCategory);
+    updateFilters(search, selectedRegion, nextCategory);
   }
 
   function lockFeaturedCountry() {
@@ -4859,7 +4879,7 @@ export default function CountriesPage() {
               label="Search countries"
               placeholder="Search country, game, identity..."
               value={search}
-              onValueChange={setSearch}
+              onValueChange={updateSearch}
             />
           </div>
         </div>
@@ -4876,7 +4896,7 @@ export default function CountriesPage() {
                   <button
                     key={region}
                     type="button"
-                    onClick={() => setSelectedRegion(region)}
+                    onClick={() => updateRegion(region)}
                     className={`rounded-full border px-3.5 py-1.5 text-sm font-black transition-all duration-300 ${
                       selectedRegion === region
                         ? "border-[#19d3cf] bg-[#19d3cf] text-white shadow-lg shadow-[#19d3cf]/20"
@@ -4893,7 +4913,7 @@ export default function CountriesPage() {
                   <button
                     key={category}
                     type="button"
-                    onClick={() => setSelectedCategory(category)}
+                    onClick={() => updateCategory(category)}
                     className={`rounded-full border px-3 py-1 text-xs font-black transition-all duration-300 ${
                       selectedCategory === category
                         ? "border-[#ff2fa8] bg-[#ff2fa8] text-white shadow-lg shadow-[#ff2fa8]/20"

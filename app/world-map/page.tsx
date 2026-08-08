@@ -602,6 +602,7 @@ export default function WorldMapPage() {
   const velocityRef = useRef({ lat: 0, lon: 0.028 });
   const dragRef = useRef<{ pointerId: number; lastX: number; lastY: number; moved: boolean } | null>(null);
   const latestRef = useRef({ features, selectedGame, heatMode, selectedCountryKey, darkMode });
+  const selectedGameRef = useRef<GameKey>("cs2");
   const rowByNameRef = useRef<Map<string, RankedCountry>>(new Map());
   const rankingListRef = useRef<HTMLDivElement | null>(null);
   const rankingRowRefs = useRef<Map<string, HTMLButtonElement>>(new Map());
@@ -630,6 +631,15 @@ export default function WorldMapPage() {
   const selectedRow = rowByName.get(selectedCountryKey) ?? top100Rows[0];
   const selectedHeatRank = selectedRow ? heatRankByName.get(selectedRow.normalisedName) ?? selectedRow.rank : 0;
   const activeHeatMode = heatModes.find((mode) => mode.id === heatMode) ?? heatModes[0];
+
+  function focusCountry(row: RankedCountry) {
+    rotationRef.current = {
+      lat: clamp(row.feature.centroid.lat * 0.45, -44, 44),
+      lon: -row.feature.centroid.lon,
+    };
+
+    velocityRef.current = { lat: 0, lon: 0 };
+  }
 
   useEffect(() => {
     rowByNameRef.current = rowByName;
@@ -663,13 +673,6 @@ export default function WorldMapPage() {
   }, [features, selectedGame, heatMode, selectedCountryKey, darkMode]);
 
   useEffect(() => {
-    if (!selectedCountryKey && top100Rows[0]) {
-      setSelectedCountryKey(top100Rows[0].normalisedName);
-      focusCountry(top100Rows[0]);
-    }
-  }, [selectedCountryKey, top100Rows]);
-
-  useEffect(() => {
     const syncTheme = () => {
       setDarkMode(document.documentElement.classList.contains("skillatlas-dark"));
     };
@@ -694,7 +697,26 @@ export default function WorldMapPage() {
           .filter((feature): feature is PreparedFeature => Boolean(feature));
 
         if (!cancelled) {
+          const initialGame = selectedGameRef.current;
+          const initialRows = buildRankingRows(
+            prepared,
+            initialGame,
+            buildPerformanceMap(gameData[initialGame])
+          );
+          const firstCountry = gameData[initialGame][0];
+          const firstGeoName = normaliseName(firstCountry.geoNames[0]);
+          const targetRow =
+            initialRows.find((row) => row.normalisedName === firstGeoName) ?? initialRows[0];
+
           setFeatures(prepared);
+          if (targetRow) {
+            setSelectedCountryKey(targetRow.normalisedName);
+            rotationRef.current = {
+              lat: clamp(targetRow.feature.centroid.lat * 0.45, -44, 44),
+              lon: -targetRow.feature.centroid.lon,
+            };
+            velocityRef.current = { lat: 0, lon: 0 };
+          }
           setLoadState("ready");
         }
       } catch {
@@ -708,17 +730,6 @@ export default function WorldMapPage() {
       cancelled = true;
     };
   }, []);
-
-  useEffect(() => {
-    const firstCountry = gameData[selectedGame][0];
-    const firstGeoName = normaliseName(firstCountry.geoNames[0]);
-    const targetRow = rankingRows.find((row) => row.normalisedName === firstGeoName) ?? top100Rows[0];
-
-    if (targetRow) {
-      setSelectedCountryKey(targetRow.normalisedName);
-      focusCountry(targetRow);
-    }
-  }, [selectedGame]);
 
   useEffect(() => {
     let frame = 0;
@@ -750,18 +761,24 @@ export default function WorldMapPage() {
     return () => cancelAnimationFrame(frame);
   }, []);
 
-  function focusCountry(row: RankedCountry) {
-    rotationRef.current = {
-      lat: clamp(row.feature.centroid.lat * 0.45, -44, 44),
-      lon: -row.feature.centroid.lon,
-    };
-
-    velocityRef.current = { lat: 0, lon: 0 };
-  }
-
   function selectRow(row: RankedCountry) {
     setSelectedCountryKey(row.normalisedName);
     focusCountry(row);
+  }
+
+  function selectGame(game: GameKey) {
+    selectedGameRef.current = game;
+    setSelectedGame(game);
+
+    const nextRows = buildRankingRows(features, game, buildPerformanceMap(gameData[game]));
+    const firstCountry = gameData[game][0];
+    const firstGeoName = normaliseName(firstCountry.geoNames[0]);
+    const targetRow = nextRows.find((row) => row.normalisedName === firstGeoName) ?? nextRows[0];
+
+    if (targetRow) {
+      setSelectedCountryKey(targetRow.normalisedName);
+      focusCountry(targetRow);
+    }
   }
 
   function handlePointerDown(event: PointerEvent<HTMLCanvasElement>) {
@@ -874,7 +891,7 @@ export default function WorldMapPage() {
               {gameOrder.map((game) => (
                 <button
                   key={game}
-                  onClick={() => setSelectedGame(game)}
+                  onClick={() => selectGame(game)}
                   className={`rounded-2xl border px-4 py-3 text-left text-sm font-black transition-all duration-300 ${
                     selectedGame === game
                       ? "border-[#19d3cf] bg-[#19d3cf] text-white shadow-md"
