@@ -2,6 +2,7 @@
 
 import type { DragEvent as ReactDragEvent } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
+import Sparkline from "@/app/components/sparkline";
 
 type LiveCountry = {
   name: string;
@@ -274,25 +275,6 @@ function RankingsBackground() {
       <div className="absolute inset-x-0 top-[250px] h-px bg-[#ff2fa8]/25" />
       <div className="absolute inset-0 opacity-[0.18] [background-image:linear-gradient(rgba(15,23,42,0.32)_1px,transparent_1px),linear-gradient(90deg,rgba(15,23,42,0.32)_1px,transparent_1px)] [background-size:96px_96px]" />
     </div>
-  );
-}
-
-function Sparkline({ values }: { values: number[] }) {
-  const points = values
-    .map((value, index) => {
-      const x = (index / Math.max(values.length - 1, 1)) * 100;
-      const min = Math.min(...values);
-      const max = Math.max(...values);
-      const range = Math.max(max - min, 1);
-      const y = 34 - ((value - min) / range) * 28;
-      return `${x},${y}`;
-    })
-    .join(" ");
-
-  return (
-    <svg viewBox="0 0 100 38" className="h-9 w-28 overflow-visible" aria-hidden="true">
-      <polyline fill="none" stroke="#19d3cf" strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" points={points} />
-    </svg>
   );
 }
 

@@ -20,6 +20,7 @@ const navigationItems = [
 
 const rankingPaths = new Set<string>(rankingItems.map((item) => item.href));
 const mobileMenuId = "skillatlas-mobile-navigation";
+const mobileRankingsMenuId = "skillatlas-mobile-rankings-navigation";
 
 function normalisePath(pathname: string) {
   if (!pathname || pathname === "/") return "/";
@@ -34,15 +35,29 @@ function pathIsActive(pathname: string, href: string) {
 export default function SiteHeader() {
   const pathname = normalisePath(usePathname() || "/");
   const hidden = pathname.startsWith("/space-invaders");
+  const rankingsActive = rankingPaths.has(pathname);
+  const mobileRankingsDefaultOpen = pathname === "/user-rankings" || pathname === "/live-rankings";
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [mobileRankingsOpen, setMobileRankingsOpen] = useState(mobileRankingsDefaultOpen);
   const desktopNavRef = useRef<HTMLElement | null>(null);
   const headerRef = useRef<HTMLElement | null>(null);
   const mobileMenuButtonRef = useRef<HTMLButtonElement | null>(null);
 
   const closeMobileMenu = useCallback(() => {
     setMobileMenuOpen(false);
-  }, []);
+    setMobileRankingsOpen(mobileRankingsDefaultOpen);
+  }, [mobileRankingsDefaultOpen]);
+
+  const toggleMobileMenu = useCallback(() => {
+    if (mobileMenuOpen) {
+      closeMobileMenu();
+      return;
+    }
+
+    setMobileRankingsOpen(mobileRankingsDefaultOpen);
+    setMobileMenuOpen(true);
+  }, [closeMobileMenu, mobileMenuOpen, mobileRankingsDefaultOpen]);
 
   useEffect(() => {
     if (hidden) return;
@@ -163,7 +178,6 @@ export default function SiteHeader() {
 
   if (hidden) return null;
 
-  const rankingsActive = rankingPaths.has(pathname);
   const linkClassName = `font-semibold text-gray-700 transition-all duration-300 hover:text-[#19d3cf] ${
     scrolled ? "text-sm" : "text-[1rem]"
   }`;
@@ -274,7 +288,7 @@ export default function SiteHeader() {
           aria-label={mobileMenuOpen ? "Close navigation menu" : "Open navigation menu"}
           aria-controls={mobileMenuId}
           aria-expanded={mobileMenuOpen}
-          onClick={() => setMobileMenuOpen((open) => !open)}
+          onClick={toggleMobileMenu}
         >
           <span className="relative block h-4 w-5" aria-hidden="true">
             <span
@@ -310,31 +324,54 @@ export default function SiteHeader() {
               rankingsActive ? "skillatlas-mobile-section-active" : ""
             }`}
           >
-            <div className="skillatlas-mobile-section-label flex items-center justify-between px-3 py-2 text-xs font-black uppercase tracking-[0.18em]">
+            <button
+              type="button"
+              className="skillatlas-mobile-section-label flex w-full items-center justify-between px-3 py-2 text-left text-xs font-black uppercase tracking-[0.18em]"
+              aria-controls={mobileRankingsMenuId}
+              aria-expanded={mobileRankingsOpen}
+              tabIndex={mobileMenuOpen ? 0 : -1}
+              onClick={() => setMobileRankingsOpen((open) => !open)}
+            >
               <span>Rankings</span>
-              <span className="h-1.5 w-1.5 rounded-full bg-[#19d3cf]" aria-hidden="true" />
-            </div>
+              <svg
+                viewBox="0 0 16 16"
+                className={`h-4 w-4 text-[#19d3cf] transition-transform duration-300 ${mobileRankingsOpen ? "rotate-180" : "rotate-0"}`}
+                aria-hidden="true"
+              >
+                <path d="m4 6 4 4 4-4" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
+              </svg>
+            </button>
 
-            <div className="grid gap-1">
-              {rankingItems.map((item) => {
-                const active = pathIsActive(pathname, item.href);
+            <div
+              id={mobileRankingsMenuId}
+              aria-hidden={!mobileRankingsOpen}
+              className={`grid transition-[grid-template-rows,opacity] duration-300 ease-out ${
+                mobileRankingsOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
+              }`}
+            >
+              <div className="overflow-hidden">
+                <div className="grid gap-1">
+                  {rankingItems.map((item) => {
+                    const active = pathIsActive(pathname, item.href);
 
-                return (
-                  <a
-                    key={item.href}
-                    href={item.href}
-                    tabIndex={mobileMenuOpen ? 0 : -1}
-                    className={`skillatlas-mobile-nav-link skillatlas-mobile-ranking-link flex items-center justify-between rounded-xl px-3 py-2.5 text-sm font-extrabold ${
-                      active ? "skillatlas-active-nav skillatlas-mobile-nav-link-active" : ""
-                    }`}
-                    aria-current={active ? "page" : undefined}
-                    onClick={closeMobileMenu}
-                  >
-                    <span>{item.label}</span>
-                    {active && <span className="h-1.5 w-1.5 rounded-full bg-[#ff2fa8]" aria-hidden="true" />}
-                  </a>
-                );
-              })}
+                    return (
+                      <a
+                        key={item.href}
+                        href={item.href}
+                        tabIndex={mobileMenuOpen && mobileRankingsOpen ? 0 : -1}
+                        className={`skillatlas-mobile-nav-link skillatlas-mobile-ranking-link flex items-center justify-between rounded-xl px-3 py-2.5 text-sm font-extrabold ${
+                          active ? "skillatlas-active-nav skillatlas-mobile-nav-link-active" : ""
+                        }`}
+                        aria-current={active ? "page" : undefined}
+                        onClick={closeMobileMenu}
+                      >
+                        <span>{item.label}</span>
+                        {active && <span className="h-1.5 w-1.5 rounded-full bg-[#ff2fa8]" aria-hidden="true" />}
+                      </a>
+                    );
+                  })}
+                </div>
+              </div>
             </div>
           </div>
 

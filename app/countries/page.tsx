@@ -1,6 +1,10 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import AtlasViewToggle from "@/app/components/atlas-view-toggle";
+import SearchBar from "@/app/components/search-bar";
+import Sparkline from "@/app/components/sparkline";
+import StatsCard from "@/app/components/stats-card";
 
 type Region =
   | "World"
@@ -4578,25 +4582,6 @@ function categoryMatch(country: CountryProfile, category: Category) {
   return true;
 }
 
-function Sparkline({ values }: { values: number[] }) {
-  const points = values
-    .map((value, index) => {
-      const x = (index / Math.max(values.length - 1, 1)) * 100;
-      const min = Math.min(...values);
-      const max = Math.max(...values);
-      const range = Math.max(max - min, 1);
-      const y = 34 - ((value - min) / range) * 28;
-      return `${x},${y}`;
-    })
-    .join(" ");
-
-  return (
-    <svg viewBox="0 0 100 38" className="h-9 w-28 overflow-visible" aria-hidden="true">
-      <polyline fill="none" stroke="#19d3cf" strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" points={points} />
-    </svg>
-  );
-}
-
 function CountriesBackground() {
   return (
     <div className="pointer-events-none absolute inset-0 overflow-hidden">
@@ -4887,16 +4872,12 @@ export default function CountriesPage() {
               </p>
             </div>
 
-            <label className="relative block">
-              <span className="sr-only">Search countries</span>
-              <input
-                value={search}
-                onChange={(event) => setSearch(event.target.value)}
-                placeholder="Search country, game, identity..."
-                className="h-14 w-full rounded-2xl border border-[#19d3cf]/35 bg-white/90 px-5 pr-12 text-sm font-bold outline-none transition-all duration-300 placeholder:text-gray-400 focus:border-[#19d3cf] focus:shadow-[0_0_0_4px_rgba(25,211,207,0.14)]"
-              />
-              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-lg text-[#ff2fa8]">⌕</span>
-            </label>
+            <SearchBar
+              label="Search countries"
+              placeholder="Search country, game, identity..."
+              value={search}
+              onValueChange={setSearch}
+            />
           </div>
         </div>
 
@@ -4944,19 +4925,16 @@ export default function CountriesPage() {
           </div>
 
           <div className="grid gap-3 sm:grid-cols-3 xl:grid-cols-1">
-            <div className="rounded-3xl border border-[#ff2fa8]/40 bg-white/88 p-3 shadow-sm backdrop-blur">
-              <p className="text-[10px] font-black uppercase tracking-[0.22em] text-gray-500">Average Score</p>
+            <StatsCard label="Average Score">
               <p className="text-xl font-black text-[#19d3cf]">{averageScore}</p>
-            </div>
-            <div className="rounded-3xl border border-[#ff2fa8]/40 bg-white/88 p-3 shadow-sm backdrop-blur">
-              <p className="text-[10px] font-black uppercase tracking-[0.22em] text-gray-500">Top Mover</p>
+            </StatsCard>
+            <StatsCard label="Top Mover">
               <p className="truncate text-base font-black">{topMover?.name}</p>
               <p className={`text-xs font-black ${trendClass(topMover?.trend ?? 0)}`}>{trendLabel(topMover?.trend ?? 0)}</p>
-            </div>
-            <div className="rounded-3xl border border-[#ff2fa8]/40 bg-white/88 p-3 shadow-sm backdrop-blur">
-              <p className="text-[10px] font-black uppercase tracking-[0.22em] text-gray-500">Current Lens</p>
+            </StatsCard>
+            <StatsCard label="Current Lens">
               <p className="truncate text-sm font-black text-[#ff2fa8]">{selectedCategory}</p>
-            </div>
+            </StatsCard>
           </div>
         </div>
 
@@ -5090,26 +5068,12 @@ export default function CountriesPage() {
             <div className="flex flex-wrap items-center justify-between gap-4">
               <p className="text-[11px] font-black uppercase tracking-[0.24em] text-[#19d3cf]">Country Atlas</p>
 
-              <div className="flex rounded-full border border-gray-200 bg-white/70 p-1">
-                <button
-                  type="button"
-                  onClick={() => setAtlasView("cards")}
-                  className={`rounded-full px-5 py-2 text-xs font-black transition-all duration-300 ${
-                    atlasView === "cards" ? "bg-[#19d3cf] text-white shadow-lg shadow-[#19d3cf]/20" : "text-gray-600 hover:text-[#19d3cf]"
-                  }`}
-                >
-                  Cards
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setAtlasView("rankings")}
-                  className={`rounded-full px-5 py-2 text-xs font-black transition-all duration-300 ${
-                    atlasView === "rankings" ? "bg-[#ff2fa8] text-white shadow-lg shadow-[#ff2fa8]/20" : "text-gray-600 hover:text-[#ff2fa8]"
-                  }`}
-                >
-                  Table
-                </button>
-              </div>
+              <AtlasViewToggle
+                value={atlasView}
+                cardsValue="cards"
+                tableValue="rankings"
+                onChange={setAtlasView}
+              />
             </div>
           </div>
 
