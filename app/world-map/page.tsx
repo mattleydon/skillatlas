@@ -934,7 +934,7 @@ export default function WorldMapPage() {
             </div>
           </aside>
 
-          <section className="relative min-w-0 min-h-[790px] overflow-hidden rounded-3xl border border-[#ff2fa8]/40 bg-white/88 shadow-sm backdrop-blur">
+          <section className="relative min-w-0 overflow-hidden rounded-3xl border border-[#ff2fa8]/40 bg-white/88 pb-5 pt-[76px] shadow-sm backdrop-blur md:min-h-[790px] md:pb-0 md:pt-0">
             <div className="absolute left-6 right-6 top-5 z-20">
               <p className="text-[11px] font-black uppercase tracking-[0.22em] text-[#19d3cf]">{gameLabels[selectedGame]}</p>
               <p className="mt-1 max-w-full text-sm font-semibold leading-snug text-gray-500">
@@ -942,7 +942,7 @@ export default function WorldMapPage() {
               </p>
             </div>
 
-            <div className="absolute inset-x-0 top-[38px] flex justify-center overflow-hidden">
+            <div className="relative flex justify-center overflow-hidden md:absolute md:inset-x-0 md:top-[38px]">
               <div className={`relative aspect-square w-full max-w-[560px] origin-center transition-transform duration-300 ${zoomed ? "scale-[1.45]" : "scale-100"}`}>
                 <canvas
                   ref={canvasRef}
@@ -964,7 +964,7 @@ export default function WorldMapPage() {
               )}
             </div>
 
-            <div className="absolute bottom-5 left-6 right-6 top-[610px] z-20 grid grid-rows-2 gap-3 md:grid-cols-3">
+            <div className="relative z-20 mx-4 mt-4 grid auto-rows-[120px] grid-cols-2 gap-3 sm:mx-6 md:absolute md:bottom-5 md:left-6 md:right-6 md:top-[610px] md:mx-0 md:mt-0 md:auto-rows-auto md:grid-cols-3 md:grid-rows-2">
               <MiniStat label="Selected" value={selectedRow?.name ?? "Loading"} compact />
               <MiniStat label="Rank" value={selectedRow ? `#${selectedHeatRank}` : "-"} compact />
               <MiniStat label="Score" value={selectedRow ? `${selectedRow.score}` : "-"} compact />
