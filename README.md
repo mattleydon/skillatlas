@@ -1,36 +1,71 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# SkillAtlas
 
-## Getting Started
+SkillAtlas is a country-based gaming and esports atlas for exploring rankings, countries, players, and community discussion. The current product is a responsive MVP with light and dark themes.
 
-First, run the development server:
+## Core pages
+
+| Page | Route |
+| --- | --- |
+| Rankings | `/` |
+| World Map | `/world-map` |
+| Countries | `/countries` |
+| Players | `/profiles` |
+| Forum | `/forum` |
+| User Rankings | `/user-rankings` |
+| Live Rankings | `/live-rankings` |
+| About | `/about` |
+
+## Tech stack
+
+- Next.js 16 with the App Router
+- React 19 and TypeScript
+- Tailwind CSS 4
+- Supabase for page comments
+- Vercel for deployment
+- npm with `package-lock.json`
+
+## Run locally
+
+Use a current Node.js LTS release and npm.
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000). To enable Supabase-backed page comments, add these values to `.env.local`:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```dotenv
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+The rest of the site can run without those optional comment settings.
 
-## Learn More
+## Build
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+npm run build
+npm run start
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Run `npm run lint` for the configured ESLint checks.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Project structure
 
-## Deploy on Vercel
+```text
+app/                 App Router pages, shared layout, theme, and global styles
+public/              Static SkillAtlas images and brand assets
+package.json         Project scripts and dependencies
+next.config.ts       Next.js configuration
+postcss.config.mjs   Tailwind/PostCSS configuration
+tsconfig.json        TypeScript configuration
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Deployment
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+SkillAtlas uses Vercel's standard Next.js deployment flow and does not require a custom `vercel.json`. Connect the repository to a Vercel project, use the default `npm run build` command, and configure the Supabase environment variables in Vercel when page comments are required. Pull requests can use Vercel preview deployments before changes reach the production branch.
+
+## MVP scope
+
+The initial SkillAtlas release focuses on country-level rankings, discovery, and community features. States, provinces, cities, and districts are future expansion areas and are intentionally outside the current MVP.
