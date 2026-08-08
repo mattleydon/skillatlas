@@ -19,6 +19,7 @@ const navigationItems = [
 ] as const;
 
 const rankingPaths = new Set<string>(rankingItems.map((item) => item.href));
+const mobileMenuId = "skillatlas-mobile-navigation";
 
 function normalisePath(pathname: string) {
   if (!pathname || pathname === "/") return "/";
@@ -34,7 +35,14 @@ export default function SiteHeader() {
   const pathname = normalisePath(usePathname() || "/");
   const hidden = pathname.startsWith("/space-invaders");
   const [scrolled, setScrolled] = useState(false);
-  const navRef = useRef<HTMLElement | null>(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const desktopNavRef = useRef<HTMLElement | null>(null);
+  const headerRef = useRef<HTMLElement | null>(null);
+  const mobileMenuButtonRef = useRef<HTMLButtonElement | null>(null);
+
+  const closeMobileMenu = useCallback(() => {
+    setMobileMenuOpen(false);
+  }, []);
 
   useEffect(() => {
     if (hidden) return;
@@ -47,8 +55,50 @@ export default function SiteHeader() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [hidden]);
 
+  useEffect(() => {
+    closeMobileMenu();
+  }, [closeMobileMenu, pathname]);
+
+  useEffect(() => {
+    if (!mobileMenuOpen) return;
+
+    const handleKeyDown = (event: globalThis.KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+
+      closeMobileMenu();
+      mobileMenuButtonRef.current?.focus();
+    };
+
+    const handlePointerDown = (event: PointerEvent) => {
+      const target = event.target;
+
+      if (target instanceof Node && !headerRef.current?.contains(target)) {
+        closeMobileMenu();
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    document.addEventListener("pointerdown", handlePointerDown);
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      document.removeEventListener("pointerdown", handlePointerDown);
+    };
+  }, [closeMobileMenu, mobileMenuOpen]);
+
+  useEffect(() => {
+    const desktopQuery = window.matchMedia("(min-width: 1280px)");
+    const handleDesktopChange = () => {
+      if (desktopQuery.matches) closeMobileMenu();
+    };
+
+    desktopQuery.addEventListener("change", handleDesktopChange);
+
+    return () => desktopQuery.removeEventListener("change", handleDesktopChange);
+  }, [closeMobileMenu]);
+
   const alignNavigationToThemeToggle = useCallback(() => {
-    const nav = navRef.current;
+    const nav = desktopNavRef.current;
 
     if (!nav) return;
 
@@ -60,7 +110,7 @@ export default function SiteHeader() {
       item.style.transform = "";
     });
 
-    if (!window.matchMedia("(min-width: 768px)").matches || items.length < 2) return;
+    if (!window.matchMedia("(min-width: 1280px)").matches || items.length < 2) return;
 
     const switchButton = document.querySelector<HTMLElement>(".skillatlas-theme-switch");
 
@@ -120,23 +170,24 @@ export default function SiteHeader() {
 
   return (
     <header
+      ref={headerRef}
       className={`fixed left-0 right-0 top-0 z-50 border-b border-[#ff2fa8]/25 bg-white/95 backdrop-blur transition-all duration-300 ${
-        scrolled ? "h-[72px]" : "h-[126px]"
+        scrolled ? "h-[68px] xl:h-[72px]" : "h-[80px] xl:h-[126px]"
       }`}
     >
-      <div className="mx-auto flex h-full max-w-7xl items-center px-8">
-        <div className="mr-14 flex shrink-0 items-center gap-5">
+      <div className="mx-auto flex h-full max-w-7xl items-center px-4 pr-[124px] sm:px-6 sm:pr-[124px] min-[901px]:pr-[164px] xl:px-8 xl:pr-8">
+        <div className="flex min-w-0 shrink-0 items-center gap-3 xl:mr-14 xl:gap-5">
           <a
             href="/space-invaders"
             className={`relative shrink-0 transition-all duration-300 ${
-              scrolled ? "h-11 w-11" : "h-24 w-24"
+              scrolled ? "h-10 w-10 xl:h-11 xl:w-11" : "h-14 w-14 xl:h-24 xl:w-24"
             }`}
           >
             <Image
               src="/skillatlas-logo.png"
               alt="SkillAtlas logo"
               fill
-              sizes={scrolled ? "44px" : "96px"}
+              sizes={scrolled ? "(min-width: 1280px) 44px, 40px" : "(min-width: 1280px) 96px, 56px"}
               className="object-contain"
               priority
             />
@@ -144,22 +195,32 @@ export default function SiteHeader() {
 
           <a
             href="/"
-            className={`relative shrink-0 transition-all duration-300 ${
-              scrolled ? "h-7 w-44" : "h-14 w-80"
+            className={`relative hidden min-w-0 shrink-0 transition-all duration-300 min-[360px]:block ${
+              scrolled
+                ? "h-6 w-28 sm:w-40 xl:h-7 xl:w-44"
+                : "h-8 w-28 sm:w-48 xl:h-14 xl:w-80"
             }`}
           >
             <Image
               src="/skillatlas-title.png"
               alt="SkillAtlas title"
               fill
-              sizes={scrolled ? "176px" : "320px"}
+              sizes={
+                scrolled
+                  ? "(min-width: 1280px) 176px, (min-width: 640px) 160px, 112px"
+                  : "(min-width: 1280px) 320px, (min-width: 640px) 192px, 112px"
+              }
               className="object-contain object-left"
               priority
             />
           </a>
         </div>
 
-        <nav ref={navRef} className="hidden flex-1 items-center justify-around md:flex" aria-label="Primary navigation">
+        <nav
+          ref={desktopNavRef}
+          className="skillatlas-desktop-nav hidden flex-1 items-center justify-around xl:flex"
+          aria-label="Primary navigation"
+        >
           <div className="skillatlas-rankings-dropdown" data-skillatlas-rankings-dropdown="true">
             <a
               href="/"
@@ -204,6 +265,100 @@ export default function SiteHeader() {
               </a>
             );
           })}
+        </nav>
+
+        <button
+          ref={mobileMenuButtonRef}
+          type="button"
+          className="skillatlas-mobile-menu-button absolute right-[76px] top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-2xl min-[901px]:right-[116px] xl:hidden"
+          aria-label={mobileMenuOpen ? "Close navigation menu" : "Open navigation menu"}
+          aria-controls={mobileMenuId}
+          aria-expanded={mobileMenuOpen}
+          onClick={() => setMobileMenuOpen((open) => !open)}
+        >
+          <span className="relative block h-4 w-5" aria-hidden="true">
+            <span
+              className={`absolute left-0 top-1/2 h-0.5 w-5 rounded-full bg-[#19d3cf] transition-transform duration-300 ${
+                mobileMenuOpen ? "rotate-45" : "-translate-y-1.5"
+              }`}
+            />
+            <span
+              className={`skillatlas-mobile-menu-middle absolute left-0 top-1/2 h-0.5 w-5 rounded-full bg-[#2f3a46] transition-opacity duration-200 ${
+                mobileMenuOpen ? "opacity-0" : "opacity-100"
+              }`}
+            />
+            <span
+              className={`absolute left-0 top-1/2 h-0.5 w-5 rounded-full bg-[#ff2fa8] transition-transform duration-300 ${
+                mobileMenuOpen ? "-rotate-45" : "translate-y-1.5"
+              }`}
+            />
+          </span>
+        </button>
+
+        <nav
+          id={mobileMenuId}
+          className={`skillatlas-mobile-nav absolute left-3 right-3 top-full mt-3 max-h-[calc(100vh-96px)] origin-top-right overflow-y-auto rounded-3xl p-3 shadow-2xl transition-[opacity,transform] duration-300 ease-out sm:left-auto sm:right-5 sm:w-[380px] min-[901px]:right-14 xl:hidden ${
+            mobileMenuOpen
+              ? "pointer-events-auto translate-y-0 scale-100 opacity-100"
+              : "pointer-events-none -translate-y-2 scale-95 opacity-0"
+          }`}
+          aria-label="Mobile navigation"
+          aria-hidden={!mobileMenuOpen}
+        >
+          <div
+            className={`skillatlas-mobile-rankings rounded-2xl border p-2 ${
+              rankingsActive ? "skillatlas-mobile-section-active" : ""
+            }`}
+          >
+            <div className="skillatlas-mobile-section-label flex items-center justify-between px-3 py-2 text-xs font-black uppercase tracking-[0.18em]">
+              <span>Rankings</span>
+              <span className="h-1.5 w-1.5 rounded-full bg-[#19d3cf]" aria-hidden="true" />
+            </div>
+
+            <div className="grid gap-1">
+              {rankingItems.map((item) => {
+                const active = pathIsActive(pathname, item.href);
+
+                return (
+                  <a
+                    key={item.href}
+                    href={item.href}
+                    tabIndex={mobileMenuOpen ? 0 : -1}
+                    className={`skillatlas-mobile-nav-link skillatlas-mobile-ranking-link flex items-center justify-between rounded-xl px-3 py-2.5 text-sm font-extrabold ${
+                      active ? "skillatlas-active-nav skillatlas-mobile-nav-link-active" : ""
+                    }`}
+                    aria-current={active ? "page" : undefined}
+                    onClick={closeMobileMenu}
+                  >
+                    <span>{item.label}</span>
+                    {active && <span className="h-1.5 w-1.5 rounded-full bg-[#ff2fa8]" aria-hidden="true" />}
+                  </a>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="mt-2 grid gap-1">
+            {navigationItems.map((item) => {
+              const active = pathIsActive(pathname, item.href);
+
+              return (
+                <a
+                  key={item.href}
+                  href={item.href}
+                  tabIndex={mobileMenuOpen ? 0 : -1}
+                  className={`skillatlas-mobile-nav-link flex items-center justify-between rounded-2xl px-4 py-3 text-sm font-black ${
+                    active ? "skillatlas-active-nav skillatlas-mobile-nav-link-active" : ""
+                  }`}
+                  aria-current={active ? "page" : undefined}
+                  onClick={closeMobileMenu}
+                >
+                  <span>{item.label}</span>
+                  {active && <span className="h-2 w-2 rounded-full bg-[#ff2fa8]" aria-hidden="true" />}
+                </a>
+              );
+            })}
+          </div>
         </nav>
       </div>
     </header>
