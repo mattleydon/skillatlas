@@ -23,3 +23,7 @@ export const PRIMARY_NAV_ITEMS = [
   { label: "Forum", href: ROUTES.forum },
   { label: "About", href: ROUTES.about },
 ] as const;
+
+export function countryRoute(countryId: string) {
+  return `${ROUTES.countries}/${encodeURIComponent(countryId)}`;
+}
