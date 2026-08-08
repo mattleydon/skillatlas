@@ -51,7 +51,7 @@ type Metric = {
   isTopTen: boolean;
 };
 
-const WORLD_GEOJSON_URL = "https://raw.githubusercontent.com/johan/world.geo.json/master/countries.geo.json";
+const WORLD_GEOJSON_URL = "/data/world-countries-110m.geo.json";
 
 const CANVAS_SIZE = 900;
 const CENTER = CANVAS_SIZE / 2;
@@ -603,6 +603,7 @@ export default function WorldMapPage() {
   const dragRef = useRef<{ pointerId: number; lastX: number; lastY: number; moved: boolean } | null>(null);
   const latestRef = useRef({ features, selectedGame, heatMode, selectedCountryKey, darkMode });
   const rowByNameRef = useRef<Map<string, RankedCountry>>(new Map());
+  const rankingListRef = useRef<HTMLDivElement | null>(null);
   const rankingRowRefs = useRef<Map<string, HTMLButtonElement>>(new Map());
 
   const activeCountries = gameData[selectedGame];
@@ -635,8 +636,26 @@ export default function WorldMapPage() {
   }, [rowByName]);
 
   useEffect(() => {
+    const rankingList = rankingListRef.current;
     const rowElement = rankingRowRefs.current.get(selectedCountryKey);
-    rowElement?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+
+    if (!rankingList || !rowElement) return;
+
+    const listRect = rankingList.getBoundingClientRect();
+    const rowRect = rowElement.getBoundingClientRect();
+    const edgePadding = 12;
+
+    if (rowRect.top < listRect.top + edgePadding) {
+      rankingList.scrollTo({
+        top: rankingList.scrollTop - (listRect.top + edgePadding - rowRect.top),
+        behavior: "smooth",
+      });
+    } else if (rowRect.bottom > listRect.bottom - edgePadding) {
+      rankingList.scrollTo({
+        top: rankingList.scrollTop + (rowRect.bottom - (listRect.bottom - edgePadding)),
+        behavior: "smooth",
+      });
+    }
   }, [selectedCountryKey]);
 
   useEffect(() => {
@@ -952,7 +971,7 @@ export default function WorldMapPage() {
             <div className="min-w-0 overflow-hidden rounded-3xl border border-[#ff2fa8]/40 bg-white/92 p-5 shadow-sm backdrop-blur">
               <p className="mb-4 text-[11px] font-black uppercase tracking-[0.22em] text-[#19d3cf]">Top 100 Countries</p>
 
-              <div className="max-h-[360px] min-w-0 space-y-3 overflow-y-auto pr-1">
+              <div ref={rankingListRef} className="max-h-[360px] min-w-0 space-y-3 overflow-y-auto pr-1">
                 {top100Rows.map((row, index) => (
                   <button
                     key={row.normalisedName}
