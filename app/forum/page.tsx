@@ -1,7 +1,6 @@
 "use client";
 
-import Image from "next/image";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 
 /* ================= TYPES ================= */
 
@@ -112,67 +111,11 @@ function statusStyle(status: ForumPost["status"]) {
   return "text-gray-500";
 }
 
-/* ================= HEADER ================= */
-
-function Header({ scrolled }: { scrolled: boolean }) {
-  const nav = [
-    ["Rankings", "/"],
-    ["World Map", "/world-map"],
-    ["Countries", "/countries"],
-    ["Players", "/profiles"],
-    ["Forum", "/forum"],
-    ["About", "/about"],
-  ];
-
-  return (
-    <header
-      className={`fixed top-0 left-0 right-0 z-50 bg-white border-b border-pink-200 transition-all ${
-        scrolled ? "h-[70px]" : "h-[120px]"
-      }`}
-    >
-      <div className="max-w-7xl mx-auto flex items-center h-full px-8">
-        <div className="flex items-center gap-4">
-          <div className="relative h-14 w-14">
-            <Image src="/skillatlas-logo.png" alt="logo" fill />
-          </div>
-          <div className="relative h-8 w-40">
-            <Image src="/skillatlas-title.png" alt="title" fill />
-          </div>
-        </div>
-
-        <nav className="flex-1 flex justify-around ml-10">
-          {nav.map(([label, href]) => (
-            <a
-              key={label}
-              href={href}
-              className={`font-semibold ${
-                label === "Forum"
-                  ? "text-[#19d3cf]"
-                  : "text-gray-700 hover:text-[#19d3cf]"
-              }`}
-            >
-              {label}
-            </a>
-          ))}
-        </nav>
-      </div>
-    </header>
-  );
-}
-
 /* ================= PAGE ================= */
 
 export default function ForumPage() {
-  const [scrolled, setScrolled] = useState(false);
   const [category, setCategory] = useState<CategoryId>("all");
   const [search, setSearch] = useState("");
-
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 20);
-    onScroll();
-    window.addEventListener("scroll", onScroll);
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
 
   const filtered = useMemo(() => {
     return posts.filter((p) => {
@@ -187,9 +130,7 @@ export default function ForumPage() {
 
   return (
     <main className="min-h-screen bg-gray-50 text-gray-900">
-      <Header scrolled={scrolled} />
-
-      <div className="max-w-7xl mx-auto px-8 pt-[140px] pb-16">
+      <div className="max-w-7xl mx-auto px-8 pt-[150px] pb-16">
         {/* HERO */}
         <div className="bg-white border border-pink-200 rounded-3xl p-6 mb-6">
           <h1 className="text-3xl font-black mb-2">
