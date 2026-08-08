@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { ROUTES } from "@/constants/routes";
 
 type FAQItem = {
   question: string;
@@ -38,32 +39,32 @@ const siteAreas = [
   {
     name: "Rankings",
     description: "The homepage. A general country leaderboard showing who is currently strongest across games and why.",
-    href: "/",
+    href: ROUTES.rankings,
   },
   {
     name: "User Rankings",
     description: "Community voting by game. Players decide which countries deserve to rise or fall.",
-    href: "/user-rankings",
+    href: ROUTES.userRankings,
   },
   {
     name: "Live Rankings",
     description: "A real-time ranking sandbox where users can move countries up and down the leaderboard.",
-    href: "/live-rankings",
+    href: ROUTES.liveRankings,
   },
   {
     name: "World Map",
     description: "A visual globe layer for exploring country strength by game and geography.",
-    href: "/world-map",
+    href: ROUTES.worldMap,
   },
   {
     name: "Countries",
     description: "Country profile cards with rankings, strengths, weaknesses, identities, and gaming fingerprints.",
-    href: "/countries",
+    href: ROUTES.countries,
   },
   {
     name: "Players",
     description: "Player archetypes, roles, and eventually real user-created SkillAtlas profiles.",
-    href: "/profiles",
+    href: ROUTES.players,
   },
 ];
 

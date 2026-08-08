@@ -2,6 +2,8 @@
 
 import { useMemo, useState } from "react";
 import Sparkline from "@/app/components/sparkline";
+import { GAMES as games } from "@/constants/games";
+import { clamp } from "@/lib/math";
 
 type VoteCountry = {
   name: string;
@@ -12,8 +14,6 @@ type VoteCountry = {
   reasons: string[];
   sparkline: number[];
 };
-
-const games = ["CS2", "League of Legends", "Valorant", "Fortnite", "Rocket League", "Chess"];
 
 const countries: VoteCountry[] = [
   { name: "Denmark", code: "dk", gameScores: { CS2: 98, "League of Legends": 77, Valorant: 82, Fortnite: 71, "Rocket League": 84, Chess: 80 }, trend: 2, voters: 1420, reasons: ["Elite CS systems", "Tactical culture", "Team cohesion"], sparkline: [88, 90, 91, 93, 94, 96, 97, 98] },
@@ -94,7 +94,7 @@ export default function UserRankingsPage() {
 
   function vote(countryName: string, direction: 1 | -1) {
     setLocalVotes((votes) => {
-      const nextValue = Math.max(-8, Math.min(8, (votes[countryName] ?? 0) + direction));
+      const nextValue = clamp((votes[countryName] ?? 0) + direction, -8, 8);
       return { ...votes, [countryName]: nextValue };
     });
   }

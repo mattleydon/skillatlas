@@ -1,12 +1,10 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { GAMES as games, type Game } from "@/constants/games";
 
 const periods = ["7 Days", "1 Month", "1 Year"] as const;
 type Period = (typeof periods)[number];
-
-const games = ["CS2", "League of Legends", "Valorant", "Fortnite", "Rocket League", "Chess"] as const;
-type Game = (typeof games)[number];
 
 type Direction = "up" | "down";
 

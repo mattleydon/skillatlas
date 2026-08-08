@@ -5,8 +5,11 @@ import AtlasViewToggle from "@/app/components/atlas-view-toggle";
 import SearchBar from "@/app/components/search-bar";
 import Sparkline from "@/app/components/sparkline";
 import StatsCard from "@/app/components/stats-card";
+import { GAMES, type Game as RankedGame } from "@/constants/games";
+import { trendClass, trendLabel } from "@/lib/ranking-display";
+import { matchesSearchQuery } from "@/lib/search";
 
-type Game = "All" | "CS2" | "League of Legends" | "Valorant" | "Fortnite" | "Rocket League" | "Chess";
+type Game = "All" | RankedGame;
 type Role =
   | "All Roles"
   | "IGL"
@@ -54,7 +57,7 @@ type PlayerProfile = {
   oneYearScore: number[];
 };
 
-const games: Game[] = ["All", "CS2", "League of Legends", "Valorant", "Fortnite", "Rocket League", "Chess"];
+const games: Game[] = ["All", ...GAMES];
 
 const roles: Role[] = [
   "All Roles",
@@ -688,18 +691,6 @@ const profiles: PlayerProfile[] = [
   }
 ];
 
-function trendLabel(trend: number) {
-  if (trend > 0) return `▲ ${trend}`;
-  if (trend < 0) return `▼ ${Math.abs(trend)}`;
-  return "—";
-}
-
-function trendClass(trend: number) {
-  if (trend > 0) return "text-[#19d3cf]";
-  if (trend < 0) return "text-[#ff2fa8]";
-  return "text-gray-500";
-}
-
 function PlayerAvatar({ profile, size = "md" }: { profile: PlayerProfile; size?: "sm" | "md" | "lg" | "xl" }) {
   const initials = profile.handle.slice(0, 2).toUpperCase();
   const sizeClass =
@@ -813,16 +804,12 @@ export default function PlayersPage() {
   const profileIdentityRef = useRef<HTMLElement | null>(null);
 
   const filteredProfiles = useMemo(() => {
-    const normalisedSearch = search.trim().toLowerCase();
-
     return profiles
       .filter((profile) => (selectedGame === "All" ? true : profile.game === selectedGame))
       .filter((profile) => (selectedRole === "All Roles" ? true : profile.role === selectedRole))
       .filter((profile) => (selectedIdentity === "All Identities" ? true : profile.identity === selectedIdentity))
-      .filter((profile) => {
-        if (!normalisedSearch) return true;
-
-        return [
+      .filter((profile) =>
+        matchesSearchQuery(search, [
           profile.handle,
           profile.realName,
           profile.country,
@@ -834,11 +821,8 @@ export default function PlayersPage() {
           profile.summary,
           profile.playstyle,
           ...profile.strengths,
-        ]
-          .join(" ")
-          .toLowerCase()
-          .includes(normalisedSearch);
-      })
+        ])
+      )
       .sort((a, b) => a.rank - b.rank);
   }, [search, selectedGame, selectedIdentity, selectedRole]);
 

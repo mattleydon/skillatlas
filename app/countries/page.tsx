@@ -5,6 +5,8 @@ import AtlasViewToggle from "@/app/components/atlas-view-toggle";
 import SearchBar from "@/app/components/search-bar";
 import Sparkline from "@/app/components/sparkline";
 import StatsCard from "@/app/components/stats-card";
+import { trendClass, trendLabel } from "@/lib/ranking-display";
+import { matchesSearchQuery } from "@/lib/search";
 
 type Region =
   | "World"
@@ -4558,18 +4560,6 @@ const countries: CountryProfile[] = [
   }
 ];
 
-function trendLabel(trend: number) {
-  if (trend > 0) return `▲ ${trend}`;
-  if (trend < 0) return `▼ ${Math.abs(trend)}`;
-  return "—";
-}
-
-function trendClass(trend: number) {
-  if (trend > 0) return "text-[#19d3cf]";
-  if (trend < 0) return "text-[#ff2fa8]";
-  return "text-gray-500";
-}
-
 function categoryMatch(country: CountryProfile, category: Category) {
   if (category === "All") return true;
   if (category === "Top Ranked") return country.rank <= 8;
@@ -4684,15 +4674,11 @@ export default function CountriesPage() {
   const countryIdentityRef = useRef<HTMLElement | null>(null);
 
   const filteredCountries = useMemo(() => {
-    const normalisedSearch = search.trim().toLowerCase();
-
     return countries
       .filter((country) => (selectedRegion === "World" ? true : country.region === selectedRegion))
       .filter((country) => categoryMatch(country, selectedCategory))
-      .filter((country) => {
-        if (!normalisedSearch) return true;
-
-        return [
+      .filter((country) =>
+        matchesSearchQuery(search, [
           country.name,
           country.region,
           country.bestGame,
@@ -4701,11 +4687,8 @@ export default function CountriesPage() {
           country.primaryGenre,
           country.description,
           ...country.strengths,
-        ]
-          .join(" ")
-          .toLowerCase()
-          .includes(normalisedSearch);
-      })
+        ])
+      )
       .sort((a, b) => a.rank - b.rank);
   }, [search, selectedCategory, selectedRegion]);
 

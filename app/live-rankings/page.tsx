@@ -3,6 +3,8 @@
 import type { DragEvent as ReactDragEvent } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import Sparkline from "@/app/components/sparkline";
+import { GAMES } from "@/constants/games";
+import { clamp } from "@/lib/math";
 
 type LiveCountry = {
   name: string;
@@ -381,7 +383,7 @@ function pageThemeStyles() {
 
 function visibleRankWindow(total: number, activeIndex: number) {
   const visibleCount = Math.min(11, total);
-  const start = Math.max(0, Math.min(total - visibleCount, activeIndex - Math.floor(visibleCount / 2)));
+  const start = clamp(activeIndex - Math.floor(visibleCount / 2), 0, total - visibleCount);
 
   return Array.from({ length: visibleCount }, (_, index) => start + index + 1);
 }
@@ -405,7 +407,7 @@ function RankWheel({
 }) {
   if (!draggedName && phase !== "exiting") return null;
 
-  const activeIndex = Math.max(0, Math.min(total - 1, targetIndex ?? draggedIndex ?? 0));
+  const activeIndex = clamp(targetIndex ?? draggedIndex ?? 0, 0, total - 1);
   const activeRank = activeIndex + 1;
   const ranks = visibleRankWindow(total, activeIndex);
   const activeWindowIndex = ranks.indexOf(activeRank);
@@ -562,7 +564,7 @@ export default function LiveRankingsPage() {
         const rowHeight = firstRow?.getBoundingClientRect().height ?? 52;
 
         if (bodyRect && rowHeight > 0 && event.clientY >= bodyRect.top && event.clientY <= bodyRect.bottom) {
-          const approximateIndex = Math.max(0, Math.min(countries.length - 1, Math.floor((event.clientY - bodyRect.top) / rowHeight)));
+          const approximateIndex = clamp(Math.floor((event.clientY - bodyRect.top) / rowHeight), 0, countries.length - 1);
           setWheelTargetIndex(approximateIndex);
           setHoveredRankIndex(approximateIndex);
         }
@@ -649,7 +651,7 @@ export default function LiveRankingsPage() {
     const multiplier = range === "7d" ? 0.35 : range === "1m" ? 0.7 : 1.15;
     const averageRank = currentRank + Math.round(momentum * multiplier);
 
-    return Math.max(1, Math.min(countries.length, averageRank));
+    return clamp(averageRank, 1, countries.length);
   }
 
   function moveCountry(fromIndex: number, toIndex: number) {
@@ -725,7 +727,7 @@ export default function LiveRankingsPage() {
                 onChange={(event) => setSelectedGame(event.target.value)}
                 className="h-14 w-full rounded-2xl border border-[#19d3cf]/35 bg-white/90 px-5 text-sm font-bold outline-none transition-all duration-300 focus:border-[#19d3cf] focus:shadow-[0_0_0_4px_rgba(25,211,207,0.14)]"
               >
-                {["CS2", "League of Legends", "Valorant", "Fortnite", "Rocket League", "Chess"].map((game) => (
+                {GAMES.map((game) => (
                   <option key={game} value={game}>{game}</option>
                 ))}
               </select>
