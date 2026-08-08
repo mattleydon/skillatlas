@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
 type Enemy = { id: number; x: number; y: number; cells: number[] };
@@ -75,8 +76,8 @@ export default function SpaceInvaders() {
   const nextId = useRef(1000);
   const speed = useRef(START_SPEED);
   const spawnRate = useRef(START_SPAWN_RATE);
-  const lastSpawn = useRef(Date.now());
-  const lastTick = useRef(Date.now());
+  const lastSpawn = useRef(0);
+  const lastTick = useRef(0);
   const enemyFireChance = useRef(0.012);
   const comboRef = useRef(0);
   const multiplierRef = useRef(1);
@@ -132,6 +133,10 @@ export default function SpaceInvaders() {
   }
 
   useEffect(() => {
+    const now = Date.now();
+    lastSpawn.current = now;
+    lastTick.current = now;
+
     const timer = window.setTimeout(() => setIntro(false), 1700);
     return () => window.clearTimeout(timer);
   }, []);
@@ -311,7 +316,7 @@ export default function SpaceInvaders() {
 
       <section className="relative h-screen w-full overflow-hidden">
         <div className="absolute left-8 top-8 z-20 rounded-2xl bg-white/90 p-4 backdrop-blur">
-          <a href="/" className="text-sm font-bold text-[#ff2fa8]">← Rankings</a>
+          <Link href="/" className="text-sm font-bold text-[#ff2fa8]">← Rankings</Link>
           <h1 className="mt-3 text-3xl font-black">SkillInvaders</h1>
           <p className="mt-1 text-sm text-gray-500">Move with ← → and shoot with Space.</p>
 

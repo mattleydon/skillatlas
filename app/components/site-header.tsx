@@ -29,16 +29,24 @@ export default function SiteHeader() {
   const rankingsActive = rankingPaths.has(pathname);
   const mobileRankingsDefaultOpen = pathname === ROUTES.userRankings || pathname === ROUTES.liveRankings;
   const [scrolled, setScrolled] = useState(false);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [mobileRankingsOpen, setMobileRankingsOpen] = useState(mobileRankingsDefaultOpen);
+  const [mobileMenuPath, setMobileMenuPath] = useState<string | null>(null);
+  const [mobileRankingsState, setMobileRankingsState] = useState({
+    pathname,
+    open: mobileRankingsDefaultOpen,
+  });
   const desktopNavRef = useRef<HTMLElement | null>(null);
   const headerRef = useRef<HTMLElement | null>(null);
   const mobileMenuButtonRef = useRef<HTMLButtonElement | null>(null);
+  const mobileMenuOpen = mobileMenuPath === pathname;
+  const mobileRankingsOpen =
+    mobileRankingsState.pathname === pathname
+      ? mobileRankingsState.open
+      : mobileRankingsDefaultOpen;
 
   const closeMobileMenu = useCallback(() => {
-    setMobileMenuOpen(false);
-    setMobileRankingsOpen(mobileRankingsDefaultOpen);
-  }, [mobileRankingsDefaultOpen]);
+    setMobileMenuPath(null);
+    setMobileRankingsState({ pathname, open: mobileRankingsDefaultOpen });
+  }, [mobileRankingsDefaultOpen, pathname]);
 
   const toggleMobileMenu = useCallback(() => {
     if (mobileMenuOpen) {
@@ -46,9 +54,9 @@ export default function SiteHeader() {
       return;
     }
 
-    setMobileRankingsOpen(mobileRankingsDefaultOpen);
-    setMobileMenuOpen(true);
-  }, [closeMobileMenu, mobileMenuOpen, mobileRankingsDefaultOpen]);
+    setMobileRankingsState({ pathname, open: mobileRankingsDefaultOpen });
+    setMobileMenuPath(pathname);
+  }, [closeMobileMenu, mobileMenuOpen, mobileRankingsDefaultOpen, pathname]);
 
   useEffect(() => {
     if (hidden) return;
@@ -60,10 +68,6 @@ export default function SiteHeader() {
 
     return () => window.removeEventListener("scroll", handleScroll);
   }, [hidden]);
-
-  useEffect(() => {
-    closeMobileMenu();
-  }, [closeMobileMenu, pathname]);
 
   useEffect(() => {
     if (!mobileMenuOpen) return;
@@ -321,7 +325,9 @@ export default function SiteHeader() {
               aria-controls={mobileRankingsMenuId}
               aria-expanded={mobileRankingsOpen}
               tabIndex={mobileMenuOpen ? 0 : -1}
-              onClick={() => setMobileRankingsOpen((open) => !open)}
+              onClick={() =>
+                setMobileRankingsState({ pathname, open: !mobileRankingsOpen })
+              }
             >
               <span>Rankings</span>
               <svg

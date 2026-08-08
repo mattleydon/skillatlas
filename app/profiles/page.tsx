@@ -791,6 +791,29 @@ function ProfileCard({ profile, selected, onSelect }: { profile: PlayerProfile; 
   );
 }
 
+function filterProfiles(search: string, selectedGame: Game, selectedRole: Role, selectedIdentity: Identity) {
+  return profiles
+    .filter((profile) => (selectedGame === "All" ? true : profile.game === selectedGame))
+    .filter((profile) => (selectedRole === "All Roles" ? true : profile.role === selectedRole))
+    .filter((profile) => (selectedIdentity === "All Identities" ? true : profile.identity === selectedIdentity))
+    .filter((profile) =>
+      matchesSearchQuery(search, [
+        profile.handle,
+        profile.realName,
+        profile.country,
+        profile.game,
+        profile.role,
+        profile.identity,
+        profile.aura,
+        profile.bestMap,
+        profile.summary,
+        profile.playstyle,
+        ...profile.strengths,
+      ])
+    )
+    .sort((a, b) => a.rank - b.rank);
+}
+
 export default function PlayersPage() {
   const [search, setSearch] = useState("");
   const [selectedGame, setSelectedGame] = useState<Game>("All");
@@ -803,36 +826,12 @@ export default function PlayersPage() {
   const [atlasView, setAtlasView] = useState<"cards" | "table">("cards");
   const profileIdentityRef = useRef<HTMLElement | null>(null);
 
-  const filteredProfiles = useMemo(() => {
-    return profiles
-      .filter((profile) => (selectedGame === "All" ? true : profile.game === selectedGame))
-      .filter((profile) => (selectedRole === "All Roles" ? true : profile.role === selectedRole))
-      .filter((profile) => (selectedIdentity === "All Identities" ? true : profile.identity === selectedIdentity))
-      .filter((profile) =>
-        matchesSearchQuery(search, [
-          profile.handle,
-          profile.realName,
-          profile.country,
-          profile.game,
-          profile.role,
-          profile.identity,
-          profile.aura,
-          profile.bestMap,
-          profile.summary,
-          profile.playstyle,
-          ...profile.strengths,
-        ])
-      )
-      .sort((a, b) => a.rank - b.rank);
-  }, [search, selectedGame, selectedIdentity, selectedRole]);
+  const filteredProfiles = useMemo(
+    () => filterProfiles(search, selectedGame, selectedRole, selectedIdentity),
+    [search, selectedGame, selectedIdentity, selectedRole]
+  );
 
   const featuredPool = useMemo(() => profiles.slice(0, 8), []);
-
-  useEffect(() => {
-    if (filteredProfiles[0]) {
-      setSelectedProfileId(filteredProfiles[0].id);
-    }
-  }, [filteredProfiles, selectedGame, selectedRole, selectedIdentity, search]);
 
   useEffect(() => {
     if (featuredLocked || featuredPool.length <= 1) return;
@@ -880,6 +879,32 @@ export default function PlayersPage() {
         profileIdentityRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
       }, 50);
     }
+  }
+
+  function updateFilters(nextSearch: string, nextGame: Game, nextRole: Role, nextIdentity: Identity) {
+    const firstProfile = filterProfiles(nextSearch, nextGame, nextRole, nextIdentity)[0];
+
+    if (firstProfile) setSelectedProfileId(firstProfile.id);
+  }
+
+  function updateSearch(nextSearch: string) {
+    setSearch(nextSearch);
+    updateFilters(nextSearch, selectedGame, selectedRole, selectedIdentity);
+  }
+
+  function updateGame(nextGame: Game) {
+    setSelectedGame(nextGame);
+    updateFilters(search, nextGame, selectedRole, selectedIdentity);
+  }
+
+  function updateRole(nextRole: Role) {
+    setSelectedRole(nextRole);
+    updateFilters(search, selectedGame, nextRole, selectedIdentity);
+  }
+
+  function updateIdentity(nextIdentity: Identity) {
+    setSelectedIdentity(nextIdentity);
+    updateFilters(search, selectedGame, selectedRole, nextIdentity);
   }
 
   function lockFeaturedProfile() {
@@ -969,7 +994,7 @@ export default function PlayersPage() {
               label="Search profiles"
               placeholder="Search player, role, country, game..."
               value={search}
-              onValueChange={setSearch}
+              onValueChange={updateSearch}
             />
           </div>
         </div>
@@ -986,7 +1011,7 @@ export default function PlayersPage() {
                   <button
                     key={game}
                     type="button"
-                    onClick={() => setSelectedGame(game)}
+                    onClick={() => updateGame(game)}
                     className={`rounded-full border px-3.5 py-1.5 text-sm font-black transition-all duration-300 ${
                       selectedGame === game
                         ? "border-[#19d3cf] bg-[#19d3cf] text-white shadow-lg shadow-[#19d3cf]/20"
@@ -1003,7 +1028,7 @@ export default function PlayersPage() {
                   <button
                     key={role}
                     type="button"
-                    onClick={() => setSelectedRole(role)}
+                    onClick={() => updateRole(role)}
                     className={`rounded-full border px-3 py-1 text-xs font-black transition-all duration-300 ${
                       selectedRole === role
                         ? "border-[#ff2fa8] bg-[#ff2fa8] text-white shadow-lg shadow-[#ff2fa8]/20"
@@ -1020,7 +1045,7 @@ export default function PlayersPage() {
                   <button
                     key={identity}
                     type="button"
-                    onClick={() => setSelectedIdentity(identity)}
+                    onClick={() => updateIdentity(identity)}
                     className={`rounded-full border px-3 py-1 text-xs font-black transition-all duration-300 ${
                       selectedIdentity === identity
                         ? "border-[#19d3cf] bg-[#19d3cf] text-white shadow-lg shadow-[#19d3cf]/20"

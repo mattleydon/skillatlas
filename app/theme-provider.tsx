@@ -178,10 +178,13 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
     const prefersDark = window.matchMedia?.("(prefers-color-scheme: dark)").matches ?? false;
     const shouldUseDark = savedTheme ? savedTheme === "dark" : prefersDark;
 
-    setDarkMode(shouldUseDark);
-    applyTheme(shouldUseDark);
-    window.setTimeout(() => swapTitleLogos(shouldUseDark), 0);
-    setReady(true);
+    const frame = window.requestAnimationFrame(() => {
+      setDarkMode(shouldUseDark);
+      applyTheme(shouldUseDark);
+      setReady(true);
+    });
+
+    return () => window.cancelAnimationFrame(frame);
   }, []);
 
   useEffect(() => {
@@ -205,17 +208,20 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (hideLiveChat) {
-      setChatOpen(false);
-      return;
+      const frame = window.requestAnimationFrame(() => setChatOpen(false));
+      return () => window.cancelAnimationFrame(frame);
     }
 
     const client = pageCommentsClient;
 
     if (!client) {
-      setComments([]);
-      setCommentsLoading(false);
-      setCommentsError("Connect Supabase to make this comment section live for everyone. Use the base Project URL, not the /rest/v1 endpoint.");
-      return;
+      const frame = window.requestAnimationFrame(() => {
+        setComments([]);
+        setCommentsLoading(false);
+        setCommentsError("Connect Supabase to make this comment section live for everyone. Use the base Project URL, not the /rest/v1 endpoint.");
+      });
+
+      return () => window.cancelAnimationFrame(frame);
     }
 
     let mounted = true;
