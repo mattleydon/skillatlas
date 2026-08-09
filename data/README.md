@@ -34,20 +34,18 @@ optional and remains unset unless reliable data is added.
 
 ## Map coverage
 
-The 195 visible countries have complete map-selection coverage planned for the
+The 195 visible countries have complete polygon-based selection coverage in the
 2D atlas:
 
 - 167 have usable polygons in `public/data/world-countries-110m.geo.json`.
-- 15 without usable polygons are represented in
-  `public/data/world-country-markers-110m.geo.json`.
-- 13 further microstates use the sourced label positions in
-  `country-map-marker-overrides.ts`.
+- The remaining 28 use a minimal extract of Natural Earth 1:10m Admin 0
+  polygons in `public/data/world-microstates-10m.geo.json`.
 
-The marker override coordinates are Natural Earth 1:10m Admin 0 country
-`LABEL_X`/`LABEL_Y` values. Both Natural Earth sources are pinned to repository
-revision `ca96624a56bd078437bca8184e78163e5039ad19`. Natural Earth data is public
-domain. The marker layer and overrides provide points only; SkillAtlas does not
-invent polygon boundaries for countries missing at 1:110m.
+The 1:10m extract is pinned to Natural Earth vector repository revision
+`ca96624a56bd078437bca8184e78163e5039ad19`. Natural Earth data is public
+domain. The prior 1:110m tiny-country points and sourced label positions remain
+available as reference data, but the Countries atlas does not render them as
+visible country substitutes and does not invent polygon boundaries.
 
 ## References
 

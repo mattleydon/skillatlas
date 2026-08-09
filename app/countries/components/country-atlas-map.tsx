@@ -1,6 +1,8 @@
 "use client";
 
+import Link from "next/link";
 import {
+  useCallback,
   useEffect,
   useMemo,
   useRef,
@@ -9,13 +11,13 @@ import {
   type MouseEvent as ReactMouseEvent,
   type PointerEvent as ReactPointerEvent,
 } from "react";
-import { useRouter } from "next/navigation";
+import DataLabel from "@/app/components/intelligence-ui/data-label";
+import IntelligencePanel from "@/app/components/intelligence-ui/intelligence-panel";
 import { countryRoute } from "@/constants/routes";
 import {
   sovereignCountries,
   type CountryAtlasRecord,
 } from "@/data/countries";
-import { COUNTRY_MAP_MARKER_OVERRIDES } from "@/data/country-map-marker-overrides";
 import styles from "../countries.module.css";
 
 type LonLat = [number, number];
@@ -23,6 +25,10 @@ type LonLat = [number, number];
 type GeoGeometry =
   | { type: "Polygon"; coordinates: LonLat[][] }
   | { type: "MultiPolygon"; coordinates: LonLat[][][] };
+
+type LineGeometry =
+  | { type: "LineString"; coordinates: LonLat[] }
+  | { type: "MultiLineString"; coordinates: LonLat[][] };
 
 type GeoProperties = {
   ISO_A2?: string;
@@ -40,15 +46,20 @@ type PolygonFeature = {
   geometry: GeoGeometry | null;
 };
 
-type PointFeature = {
+type LineFeature = {
   type: "Feature";
-  properties: GeoProperties;
-  geometry: { type: "Point"; coordinates: LonLat } | null;
+  properties: Record<string, unknown>;
+  geometry: LineGeometry | null;
 };
 
 type GeoCollection<TFeature> = {
   type: "FeatureCollection";
   features: TFeature[];
+};
+
+type MapPoint = {
+  x: number;
+  y: number;
 };
 
 type MapBounds = {
@@ -62,50 +73,102 @@ type PreparedPolygon = {
   key: string;
   path: string;
   countryId?: string;
+  detailed: boolean;
+  hitStrokeWidth: number;
 };
 
-type PreparedMarker = {
+type MapTarget = {
   countryId: string;
-  point: { x: number; y: number };
-  source: "natural-earth" | "label-point";
-  hitRadius: number;
+  bounds: MapBounds;
 };
-
-type MapTarget =
-  | { kind: "polygon"; countryId: string; bounds: MapBounds }
-  | { kind: "marker"; countryId: string; point: { x: number; y: number } };
 
 type PreparedAtlas = {
   polygons: PreparedPolygon[];
-  markers: PreparedMarker[];
+  coastlines: string[];
   targets: Map<string, MapTarget>;
 };
 
-type ViewTransform = {
+type Camera = {
   scale: number;
   translateX: number;
   translateY: number;
+};
+
+type CameraMotion = "direct" | "zoom" | "travel";
+
+type PointerGesture = {
+  startCamera: Camera;
+  startClient: MapPoint;
+  pressedCountryId?: string;
+  moved: boolean;
+  hadMultiplePointers: boolean;
+  pinchDistance?: number;
+  pinchWorldAnchor?: MapPoint;
+};
+
+export type AtlasSelectionRequest = {
+  countryId: string;
+  revision: number;
 };
 
 type CountryAtlasMapProps = {
   selectedCountry?: CountryAtlasRecord;
   hoveredCountryId: string | null;
   relevantCountryIds?: ReadonlySet<string>;
-  focusRequest: number;
+  atlasSelectionRequest: AtlasSelectionRequest | null;
   onCountrySelect: (countryId: string) => void;
   onCountryHover: (countryId: string | null) => void;
 };
 
-const POLYGON_GEOJSON_URL = "/data/world-countries-110m.geo.json";
-const MARKER_GEOJSON_URL = "/data/world-country-markers-110m.geo.json";
+const BASE_GEOJSON_URL = "/data/world-countries-110m.geo.json";
+const MICROSTATE_GEOJSON_URL = "/data/world-microstates-10m.geo.json";
+const COASTLINE_GEOJSON_URL = "/data/world-coastline-110m.geo.json";
 const MAP_WIDTH = 1000;
 const MAP_HEIGHT = 520;
-const MIN_ZOOM = 1.55;
-const MAX_ZOOM = 6.2;
-const MARKER_ZOOM = 5.2;
-const MARKER_POINTER_RADIUS = 22;
-const IDENTITY_TRANSFORM: ViewTransform = {
-  scale: 1,
+const MAP_PADDING = 25;
+const MIN_CAMERA_SCALE = 1;
+const MAX_CAMERA_SCALE = 18;
+const CAMERA_ZOOM_STEP = 1.5;
+const DOUBLE_CLICK_EXPLORATION_SCALE = 2.4;
+const PAN_EDGE_FREEDOM = 44;
+const DRAG_THRESHOLD_PX = 5;
+const NATURAL_EARTH_X_MAX = Math.PI * 0.8707;
+
+function naturalEarthRaw(longitudeRadians: number, latitudeRadians: number) {
+  const latitudeSquared = latitudeRadians * latitudeRadians;
+  const latitudeFourth = latitudeSquared * latitudeSquared;
+
+  return {
+    x:
+      longitudeRadians *
+      (0.8707 -
+        0.131979 * latitudeSquared +
+        latitudeFourth *
+          (-0.013791 +
+            latitudeFourth * (0.003971 * latitudeSquared - 0.001529 * latitudeFourth))),
+    y:
+      latitudeRadians *
+      (1.007226 +
+        latitudeSquared *
+          (0.015085 +
+            latitudeFourth *
+              (-0.044475 + 0.028874 * latitudeSquared - 0.005916 * latitudeFourth))),
+  };
+}
+
+const NATURAL_EARTH_Y_MAX = naturalEarthRaw(0, Math.PI / 2).y;
+const NATURAL_EARTH_SCALE = Math.min(
+  (MAP_WIDTH - MAP_PADDING * 2) / (NATURAL_EARTH_X_MAX * 2),
+  (MAP_HEIGHT - MAP_PADDING * 2) / (NATURAL_EARTH_Y_MAX * 2)
+);
+const WORLD_BOUNDS: MapBounds = {
+  minX: MAP_WIDTH / 2 - NATURAL_EARTH_X_MAX * NATURAL_EARTH_SCALE,
+  minY: MAP_HEIGHT / 2 - NATURAL_EARTH_Y_MAX * NATURAL_EARTH_SCALE,
+  maxX: MAP_WIDTH / 2 + NATURAL_EARTH_X_MAX * NATURAL_EARTH_SCALE,
+  maxY: MAP_HEIGHT / 2 + NATURAL_EARTH_Y_MAX * NATURAL_EARTH_SCALE,
+};
+const WORLD_CAMERA: Camera = {
+  scale: MIN_CAMERA_SCALE,
   translateX: 0,
   translateY: 0,
 };
@@ -125,18 +188,77 @@ function normaliseName(name: string) {
   return name.toLowerCase().normalize("NFKD").replace(/[^a-z0-9]/g, "");
 }
 
-function projectPoint([longitude, latitude]: LonLat) {
+function clamp(value: number, minimum: number, maximum: number) {
+  return Math.min(maximum, Math.max(minimum, value));
+}
+
+function projectPoint([longitude, latitude]: LonLat): MapPoint {
+  const longitudeRadians = (longitude * Math.PI) / 180;
+  const latitudeRadians = (latitude * Math.PI) / 180;
+  const projected = naturalEarthRaw(longitudeRadians, latitudeRadians);
+
   return {
-    x: ((longitude + 180) / 360) * MAP_WIDTH,
-    y: ((90 - latitude) / 180) * MAP_HEIGHT,
+    x: MAP_WIDTH / 2 + projected.x * NATURAL_EARTH_SCALE,
+    y: MAP_HEIGHT / 2 - projected.y * NATURAL_EARTH_SCALE,
   };
 }
 
-function ringPath(ring: LonLat[]) {
+function unprojectPoint(point: MapPoint): LonLat | null {
+  const projectedX = (point.x - MAP_WIDTH / 2) / NATURAL_EARTH_SCALE;
+  const projectedY = (MAP_HEIGHT / 2 - point.y) / NATURAL_EARTH_SCALE;
+  let latitudeRadians = projectedY;
+
+  for (let iteration = 0; iteration < 25; iteration += 1) {
+    const latitudeSquared = latitudeRadians * latitudeRadians;
+    const latitudeFourth = latitudeSquared * latitudeSquared;
+    const value =
+      latitudeRadians *
+        (1.007226 +
+          latitudeSquared *
+            (0.015085 +
+              latitudeFourth *
+                (-0.044475 + 0.028874 * latitudeSquared - 0.005916 * latitudeFourth))) -
+      projectedY;
+    const derivative =
+      1.007226 +
+      latitudeSquared *
+        (0.015085 * 3 +
+          latitudeFourth *
+            (-0.044475 * 7 +
+              0.028874 * 9 * latitudeSquared -
+              0.005916 * 11 * latitudeFourth));
+    const delta = value / derivative;
+    latitudeRadians -= delta;
+    if (Math.abs(delta) <= 1e-8) break;
+  }
+
+  const latitudeSquared = latitudeRadians * latitudeRadians;
+  const longitudeRadians =
+    projectedX /
+    (0.8707 +
+      latitudeSquared *
+        (-0.131979 +
+          latitudeSquared *
+            (-0.013791 +
+              latitudeSquared *
+                latitudeSquared *
+                latitudeSquared *
+                (0.003971 - 0.001529 * latitudeSquared))));
+  const longitude = (longitudeRadians * 180) / Math.PI;
+  const latitude = (latitudeRadians * 180) / Math.PI;
+
+  if (!Number.isFinite(longitude) || Math.abs(longitude) > 180 || Math.abs(latitude) > 90) {
+    return null;
+  }
+
+  return [longitude, latitude];
+}
+
+function coordinatesPath(coordinates: LonLat[], closePath = false) {
   let path = "";
   let previousLongitude: number | null = null;
 
-  ring.forEach((coordinate) => {
+  coordinates.forEach((coordinate) => {
     const [longitude] = coordinate;
     const point = projectPoint(coordinate);
     const crossesDateLine =
@@ -146,7 +268,7 @@ function ringPath(ring: LonLat[]) {
     previousLongitude = longitude;
   });
 
-  return path ? `${path}Z` : "";
+  return path && closePath ? `${path}Z` : path;
 }
 
 function geometryCoordinates(geometry: GeoGeometry) {
@@ -156,20 +278,33 @@ function geometryCoordinates(geometry: GeoGeometry) {
 
 function featurePath(geometry: GeoGeometry) {
   const polygons = geometry.type === "Polygon" ? [geometry.coordinates] : geometry.coordinates;
-  return polygons.flatMap((polygon) => polygon.map(ringPath)).join("");
+  return polygons.flatMap((polygon) => polygon.map((ring) => coordinatesPath(ring, true))).join("");
+}
+
+function lineGeometryPath(geometry: LineGeometry) {
+  const lines = geometry.type === "LineString" ? [geometry.coordinates] : geometry.coordinates;
+  return lines.map((line) => coordinatesPath(line)).join("");
 }
 
 function featureBounds(geometry: GeoGeometry): MapBounds {
-  const points = geometryCoordinates(geometry).map(projectPoint);
-  return points.reduce(
-    (bounds, point) => ({
-      minX: Math.min(bounds.minX, point.x),
-      minY: Math.min(bounds.minY, point.y),
-      maxX: Math.max(bounds.maxX, point.x),
-      maxY: Math.max(bounds.maxY, point.y),
-    }),
-    { minX: Infinity, minY: Infinity, maxX: -Infinity, maxY: -Infinity }
-  );
+  return geometryCoordinates(geometry)
+    .map(projectPoint)
+    .reduce(
+      (bounds, point) => ({
+        minX: Math.min(bounds.minX, point.x),
+        minY: Math.min(bounds.minY, point.y),
+        maxX: Math.max(bounds.maxX, point.x),
+        maxY: Math.max(bounds.maxY, point.y),
+      }),
+      { minX: Infinity, minY: Infinity, maxX: -Infinity, maxY: -Infinity }
+    );
+}
+
+function boundsCenter(bounds: MapBounds): MapPoint {
+  return {
+    x: (bounds.minX + bounds.maxX) / 2,
+    y: (bounds.minY + bounds.maxY) / 2,
+  };
 }
 
 function countryForProperties(properties: GeoProperties) {
@@ -193,151 +328,218 @@ function countryForProperties(properties: GeoProperties) {
 }
 
 function prepareAtlas(
-  polygonCollection: GeoCollection<PolygonFeature>,
-  markerCollection: GeoCollection<PointFeature>
+  baseCollection: GeoCollection<PolygonFeature>,
+  microstateCollection: GeoCollection<PolygonFeature>,
+  coastlineCollection: GeoCollection<LineFeature>
 ): PreparedAtlas {
   const claimedCountryIds = new Set<string>();
   const targets = new Map<string, MapTarget>();
+  const prepared: PreparedPolygon[] = [];
 
-  const polygons = polygonCollection.features.flatMap((feature, index) => {
-    if (!feature.geometry) return [];
+  function addFeatures(collection: GeoCollection<PolygonFeature>, detailed: boolean) {
+    collection.features.forEach((feature, index) => {
+      if (!feature.geometry) return;
 
-    const name =
-      feature.properties.NAME ??
-      feature.properties.name ??
-      feature.properties.ADMIN ??
-      "Unknown";
-    const path = featurePath(feature.geometry);
-    if (!path) return [];
+      const name =
+        feature.properties.NAME ??
+        feature.properties.name ??
+        feature.properties.ADMIN ??
+        "Unknown";
+      const path = featurePath(feature.geometry);
+      if (!path) return;
 
-    const bounds = featureBounds(feature.geometry);
-    const country = countryForProperties(feature.properties);
-    const countryId = country && !claimedCountryIds.has(country.id) ? country.id : undefined;
+      const country = countryForProperties(feature.properties);
+      const countryId = country && !claimedCountryIds.has(country.id) ? country.id : undefined;
+      const bounds = featureBounds(feature.geometry);
 
-    if (countryId) {
-      claimedCountryIds.add(countryId);
-      targets.set(countryId, { kind: "polygon", countryId, bounds });
-    }
+      if (countryId) {
+        claimedCountryIds.add(countryId);
+        targets.set(countryId, { countryId, bounds });
+      }
 
-    return [
-      {
-        key: `${normaliseName(name)}-${index}`,
+      prepared.push({
+        key: `${detailed ? "detail" : "base"}-${normaliseName(name)}-${index}`,
         path,
         countryId,
-      },
-    ];
-  });
+        detailed,
+        hitStrokeWidth: 0,
+      });
+    });
+  }
 
-  const markers: PreparedMarker[] = [];
+  addFeatures(baseCollection, false);
+  addFeatures(microstateCollection, true);
 
-  markerCollection.features.forEach((feature) => {
-    if (!feature.geometry || feature.geometry.type !== "Point") return;
-    const country = countryForProperties(feature.properties);
-    if (!country || claimedCountryIds.has(country.id)) return;
+  const detailedTargets = prepared
+    .filter((feature) => feature.detailed && feature.countryId)
+    .map((feature) => {
+      const target = targets.get(feature.countryId!);
+      return target ? { countryId: feature.countryId!, center: boundsCenter(target.bounds) } : null;
+    })
+    .filter((target): target is { countryId: string; center: MapPoint } => Boolean(target));
 
-    const point = projectPoint(feature.geometry.coordinates);
-    claimedCountryIds.add(country.id);
-    targets.set(country.id, { kind: "marker", countryId: country.id, point });
-    markers.push({ countryId: country.id, point, source: "natural-earth", hitRadius: 0 });
-  });
+  const polygons = prepared.map((feature) => {
+    if (!feature.detailed || !feature.countryId) return feature;
+    const center = detailedTargets.find((target) => target.countryId === feature.countryId)?.center;
+    if (!center) return feature;
 
-  COUNTRY_MAP_MARKER_OVERRIDES.forEach((marker) => {
-    const country = countriesByCode.get(marker.countryCode);
-    if (!country || claimedCountryIds.has(country.id)) return;
-
-    const point = projectPoint([marker.longitude, marker.latitude]);
-    claimedCountryIds.add(country.id);
-    targets.set(country.id, { kind: "marker", countryId: country.id, point });
-    markers.push({ countryId: country.id, point, source: "label-point", hitRadius: 0 });
-  });
-
-  const collisionSafeMarkers = markers.map((marker) => {
-    const nearestMarkerDistance = markers.reduce((nearest, candidate) => {
-      if (candidate.countryId === marker.countryId) return nearest;
-      return Math.min(
-        nearest,
-        Math.hypot(candidate.point.x - marker.point.x, candidate.point.y - marker.point.y)
-      );
+    const nearestDistance = detailedTargets.reduce((nearest, candidate) => {
+      if (candidate.countryId === feature.countryId) return nearest;
+      return Math.min(nearest, Math.hypot(candidate.center.x - center.x, candidate.center.y - center.y));
     }, Infinity);
 
     return {
-      ...marker,
-      hitRadius: clamp(nearestMarkerDistance / 2 - 0.6, 2, 16),
+      ...feature,
+      hitStrokeWidth: clamp(nearestDistance * 0.7, 4, 14),
     };
   });
 
-  return { polygons, markers: collisionSafeMarkers, targets };
+  const coastlines = coastlineCollection.features
+    .map((feature) => (feature.geometry ? lineGeometryPath(feature.geometry) : ""))
+    .filter(Boolean);
+
+  return { polygons, coastlines, targets };
 }
 
-function clamp(value: number, minimum: number, maximum: number) {
-  return Math.min(maximum, Math.max(minimum, value));
-}
+function createGraticulePaths() {
+  const paths: string[] = [];
 
-function targetTransform(target: MapTarget): ViewTransform {
-  let centerX: number;
-  let centerY: number;
-  let scale: number;
-
-  if (target.kind === "marker") {
-    centerX = target.point.x;
-    centerY = target.point.y;
-    scale = MARKER_ZOOM;
-  } else {
-    const width = Math.max(1, target.bounds.maxX - target.bounds.minX);
-    const height = Math.max(1, target.bounds.maxY - target.bounds.minY);
-    centerX = (target.bounds.minX + target.bounds.maxX) / 2;
-    centerY = (target.bounds.minY + target.bounds.maxY) / 2;
-    scale = clamp(
-      Math.min((MAP_WIDTH * 0.46) / width, (MAP_HEIGHT * 0.56) / height),
-      MIN_ZOOM,
-      MAX_ZOOM
-    );
+  for (let longitude = -150; longitude <= 180; longitude += 30) {
+    const coordinates: LonLat[] = [];
+    for (let latitude = -84; latitude <= 84; latitude += 3) {
+      coordinates.push([longitude, latitude]);
+    }
+    paths.push(coordinatesPath(coordinates));
   }
+
+  for (let latitude = -75; latitude <= 75; latitude += 15) {
+    const coordinates: LonLat[] = [];
+    for (let longitude = -180; longitude <= 180; longitude += 3) {
+      coordinates.push([longitude, latitude]);
+    }
+    paths.push(coordinatesPath(coordinates));
+  }
+
+  return paths;
+}
+
+const GRATICULE_PATHS = createGraticulePaths();
+
+function clampCamera(camera: Camera): Camera {
+  const scale = clamp(camera.scale, MIN_CAMERA_SCALE, MAX_CAMERA_SCALE);
+  if (scale <= MIN_CAMERA_SCALE + 0.001) return WORLD_CAMERA;
+
+  const minimumX = MAP_WIDTH - WORLD_BOUNDS.maxX * scale - PAN_EDGE_FREEDOM;
+  const maximumX = -WORLD_BOUNDS.minX * scale + PAN_EDGE_FREEDOM;
+  const minimumY = MAP_HEIGHT - WORLD_BOUNDS.maxY * scale - PAN_EDGE_FREEDOM;
+  const maximumY = -WORLD_BOUNDS.minY * scale + PAN_EDGE_FREEDOM;
 
   return {
     scale,
-    translateX: MAP_WIDTH / 2 - centerX * scale,
-    translateY: MAP_HEIGHT / 2 - centerY * scale,
+    translateX: clamp(camera.translateX, minimumX, maximumX),
+    translateY: clamp(camera.translateY, minimumY, maximumY),
   };
+}
+
+function cameraAroundPoint(camera: Camera, requestedScale: number, point: MapPoint) {
+  const scale = clamp(requestedScale, MIN_CAMERA_SCALE, MAX_CAMERA_SCALE);
+  if (scale <= MIN_CAMERA_SCALE + 0.001) return WORLD_CAMERA;
+
+  const worldPoint = {
+    x: (point.x - camera.translateX) / camera.scale,
+    y: (point.y - camera.translateY) / camera.scale,
+  };
+
+  return clampCamera({
+    scale,
+    translateX: point.x - worldPoint.x * scale,
+    translateY: point.y - worldPoint.y * scale,
+  });
+}
+
+function cameraCenteredOnTarget(target: MapTarget, scale: number) {
+  const center = boundsCenter(target.bounds);
+  return clampCamera({
+    scale,
+    translateX: MAP_WIDTH / 2 - center.x * scale,
+    translateY: MAP_HEIGHT / 2 - center.y * scale,
+  });
+}
+
+function formatCoordinates([longitude, latitude]: LonLat) {
+  const latitudeDirection = latitude < -0.005 ? "S" : "N";
+  const longitudeDirection = longitude < -0.005 ? "W" : "E";
+  return `${Math.abs(latitude).toFixed(2)}°${latitudeDirection} ${Math.abs(longitude).toFixed(2)}°${longitudeDirection}`;
 }
 
 export default function CountryAtlasMap({
   selectedCountry,
   hoveredCountryId,
   relevantCountryIds,
-  focusRequest,
+  atlasSelectionRequest,
   onCountrySelect,
   onCountryHover,
 }: CountryAtlasMapProps) {
-  const router = useRouter();
-  const targetRefs = useRef(new Map<string, SVGElement>());
+  const svgRef = useRef<SVGSVGElement>(null);
+  const viewportRef = useRef<SVGGElement>(null);
+  const telemetryCoordinatesRef = useRef<HTMLSpanElement>(null);
+  const targetRefs = useRef(new Map<string, SVGPathElement>());
+  const cameraRef = useRef<Camera>(WORLD_CAMERA);
+  const cameraFrameRef = useRef<number | null>(null);
+  const pendingCameraRef = useRef<{ camera: Camera; motion: CameraMotion } | null>(null);
+  const pointersRef = useRef(new Map<number, MapPoint>());
+  const gestureRef = useRef<PointerGesture | null>(null);
+  const suppressClickRef = useRef(false);
+  const [camera, setCamera] = useState<Camera>(WORLD_CAMERA);
+  const [cameraMotion, setCameraMotion] = useState<CameraMotion>("direct");
   const [mapState, setMapState] = useState<
     | { status: "loading"; atlas: PreparedAtlas | null }
     | { status: "ready"; atlas: PreparedAtlas }
     | { status: "error"; atlas: PreparedAtlas | null }
   >({ status: "loading", atlas: null });
-  const [resetAtRequest, setResetAtRequest] = useState(0);
+
+  const commitCamera = useCallback((nextCamera: Camera, motion: CameraMotion) => {
+    const constrainedCamera = clampCamera(nextCamera);
+    cameraRef.current = constrainedCamera;
+    pendingCameraRef.current = { camera: constrainedCamera, motion };
+
+    if (cameraFrameRef.current !== null) return;
+    cameraFrameRef.current = window.requestAnimationFrame(() => {
+      const pending = pendingCameraRef.current;
+      cameraFrameRef.current = null;
+      pendingCameraRef.current = null;
+      if (!pending) return;
+      setCameraMotion(pending.motion);
+      setCamera(pending.camera);
+    });
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
 
     async function loadMap() {
       try {
-        const [polygonResponse, markerResponse] = await Promise.all([
-          fetch(POLYGON_GEOJSON_URL),
-          fetch(MARKER_GEOJSON_URL),
+        const [baseResponse, microstateResponse, coastlineResponse] = await Promise.all([
+          fetch(BASE_GEOJSON_URL),
+          fetch(MICROSTATE_GEOJSON_URL),
+          fetch(COASTLINE_GEOJSON_URL),
         ]);
 
-        if (!polygonResponse.ok || !markerResponse.ok) {
+        if (!baseResponse.ok || !microstateResponse.ok || !coastlineResponse.ok) {
           throw new Error("A local atlas data request failed.");
         }
 
-        const [polygonCollection, markerCollection] = (await Promise.all([
-          polygonResponse.json(),
-          markerResponse.json(),
-        ])) as [GeoCollection<PolygonFeature>, GeoCollection<PointFeature>];
+        const [baseCollection, microstateCollection, coastlineCollection] = (await Promise.all([
+          baseResponse.json(),
+          microstateResponse.json(),
+          coastlineResponse.json(),
+        ])) as [
+          GeoCollection<PolygonFeature>,
+          GeoCollection<PolygonFeature>,
+          GeoCollection<LineFeature>,
+        ];
 
-        const atlas = prepareAtlas(polygonCollection, markerCollection);
+        const atlas = prepareAtlas(baseCollection, microstateCollection, coastlineCollection);
         if (!cancelled) setMapState({ status: "ready", atlas });
       } catch {
         if (!cancelled) setMapState({ status: "error", atlas: null });
@@ -351,38 +553,88 @@ export default function CountryAtlasMap({
     };
   }, []);
 
-  const coverageCount = mapState.status === "ready" ? mapState.atlas.targets.size : 0;
-  const viewTransform = useMemo(() => {
-    if (
-      focusRequest === 0 ||
-      focusRequest === resetAtRequest ||
-      mapState.status !== "ready" ||
-      !selectedCountry
-    ) {
-      return IDENTITY_TRANSFORM;
+  useEffect(() => {
+    return () => {
+      if (cameraFrameRef.current !== null) {
+        window.cancelAnimationFrame(cameraFrameRef.current);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!atlasSelectionRequest || mapState.status !== "ready") return;
+
+    const frame = window.requestAnimationFrame(() => {
+      const currentCamera = cameraRef.current;
+      if (currentCamera.scale <= MIN_CAMERA_SCALE + 0.01) return;
+      const target = mapState.atlas.targets.get(atlasSelectionRequest.countryId);
+      if (target) {
+        commitCamera(cameraCenteredOnTarget(target, currentCamera.scale), "travel");
+      }
+    });
+
+    return () => window.cancelAnimationFrame(frame);
+  }, [atlasSelectionRequest, commitCamera, mapState]);
+
+  useEffect(() => {
+    if (mapState.status !== "ready") return;
+    const svg = svgRef.current;
+    if (!svg) return;
+    const mapElement: SVGSVGElement = svg;
+
+    function handleMapWheel(event: WheelEvent) {
+      event.preventDefault();
+      const point = clientPointToMap(mapElement, {
+        x: event.clientX,
+        y: event.clientY,
+      });
+      if (!point) return;
+
+      const currentCamera = cameraRef.current;
+      const factor = Math.exp(-event.deltaY * 0.0016);
+      commitCamera(
+        cameraAroundPoint(currentCamera, currentCamera.scale * factor, point),
+        "direct"
+      );
     }
 
-    const target = mapState.atlas.targets.get(selectedCountry.id);
-    return target ? targetTransform(target) : IDENTITY_TRANSFORM;
-  }, [focusRequest, mapState, resetAtRequest, selectedCountry]);
-  const isZoomed = viewTransform.scale > 1.01;
+    mapElement.addEventListener("wheel", handleMapWheel, { passive: false });
+    return () => mapElement.removeEventListener("wheel", handleMapWheel);
+  }, [commitCamera, mapState.status]);
+
+  const coverageCount = mapState.status === "ready" ? mapState.atlas.targets.size : 0;
+  const isWorldView = camera.scale <= MIN_CAMERA_SCALE + 0.01;
   const viewportTransform = useMemo(
     () =>
-      `matrix(${viewTransform.scale}, 0, 0, ${viewTransform.scale}, ${viewTransform.translateX}, ${viewTransform.translateY})`,
-    [viewTransform]
+      `matrix(${camera.scale}, 0, 0, ${camera.scale}, ${camera.translateX}, ${camera.translateY})`,
+    [camera]
   );
 
-  function registerTarget(countryId: string, node: SVGElement | null) {
+  function registerTarget(countryId: string, node: SVGPathElement | null) {
     if (node) targetRefs.current.set(countryId, node);
     else targetRefs.current.delete(countryId);
   }
 
-  function activateCountry(countryId: string) {
-    if (selectedCountry?.id === countryId && isZoomed) {
-      router.push(countryRoute(countryId));
-      return;
-    }
+  function clientPointToMap(svg: SVGSVGElement, clientPoint: MapPoint): MapPoint | null {
+    const screenMatrix = svg.getScreenCTM();
+    if (!screenMatrix) return null;
+    const point = new DOMPoint(clientPoint.x, clientPoint.y).matrixTransform(screenMatrix.inverse());
+    return { x: point.x, y: point.y };
+  }
 
+  function clientDeltaToMap(svg: SVGSVGElement, start: MapPoint, end: MapPoint) {
+    const startPoint = clientPointToMap(svg, start);
+    const endPoint = clientPointToMap(svg, end);
+    if (!startPoint || !endPoint) return { x: 0, y: 0 };
+    return { x: endPoint.x - startPoint.x, y: endPoint.y - startPoint.y };
+  }
+
+  function countryIdFromElement(target: EventTarget | null) {
+    if (!(target instanceof Element)) return undefined;
+    return target.closest<SVGElement>("[data-map-country]")?.dataset.mapCountry;
+  }
+
+  function selectCountry(countryId: string) {
     onCountrySelect(countryId);
   }
 
@@ -399,16 +651,16 @@ export default function CountryAtlasMap({
     const nextCountryId = orderedCountryIds[nextIndex];
     if (!nextCountryId) return;
 
-    activateCountry(nextCountryId);
+    selectCountry(nextCountryId);
     window.requestAnimationFrame(() => {
       targetRefs.current.get(nextCountryId)?.focus({ preventScroll: true });
     });
   }
 
-  function handleTargetKeyDown(event: KeyboardEvent<SVGElement>, countryId: string) {
+  function handleTargetKeyDown(event: KeyboardEvent<SVGPathElement>, countryId: string) {
     if (event.key === "Enter" || event.key === " ") {
       event.preventDefault();
-      activateCountry(countryId);
+      selectCountry(countryId);
     } else if (event.key === "ArrowRight" || event.key === "ArrowDown") {
       event.preventDefault();
       moveKeyboardSelection(countryId, 1);
@@ -424,98 +676,308 @@ export default function CountryAtlasMap({
     }
   }
 
-  function resetMap() {
-    setResetAtRequest(focusRequest);
-  }
-
   function targetLabel(country: CountryAtlasRecord) {
-    const active = selectedCountry?.id === country.id && isZoomed;
-    return `${country.name}. ${active ? "Selected. Activate again to open the country page." : "Select and focus this country."}`;
+    const selected = selectedCountry?.id === country.id;
+    return `${country.name}.${selected ? " Selected." : ""} Press Enter or Space to select. Use the map camera controls to explore geography.`;
   }
 
-  function nearestMarkerToPointer(
-    event: ReactMouseEvent<SVGSVGElement> | ReactPointerEvent<SVGSVGElement>
-  ) {
-    if (mapState.status !== "ready") return;
-
-    const svg = event.currentTarget;
-    const screenMatrix = svg.getScreenCTM();
-    if (!screenMatrix) return;
-
-    let nearestMarker: PreparedMarker | undefined;
-    let nearestDistance = Infinity;
-
-    mapState.atlas.markers.forEach((marker) => {
-      const viewX = marker.point.x * viewTransform.scale + viewTransform.translateX;
-      const viewY = marker.point.y * viewTransform.scale + viewTransform.translateY;
-      const screenX = screenMatrix.a * viewX + screenMatrix.c * viewY + screenMatrix.e;
-      const screenY = screenMatrix.b * viewX + screenMatrix.d * viewY + screenMatrix.f;
-      const distance = Math.hypot(
-        event.clientX - screenX,
-        event.clientY - screenY
-      );
-
-      if (distance < nearestDistance) {
-        nearestDistance = distance;
-        nearestMarker = marker;
-      }
-    });
-
-    return nearestDistance <= MARKER_POINTER_RADIUS ? nearestMarker : undefined;
+  function zoomAtPoint(point: MapPoint, factor: number, motion: CameraMotion) {
+    const currentCamera = cameraRef.current;
+    commitCamera(cameraAroundPoint(currentCamera, currentCamera.scale * factor, point), motion);
   }
 
-  function handleMapClickCapture(event: ReactMouseEvent<SVGSVGElement>) {
-    const marker = nearestMarkerToPointer(event);
-    if (!marker) return;
+  function zoomFromCenter(factor: number) {
+    zoomAtPoint({ x: MAP_WIDTH / 2, y: MAP_HEIGHT / 2 }, factor, "zoom");
+  }
 
+  function showWorldView() {
+    commitCamera(WORLD_CAMERA, "travel");
+  }
+
+  function handleDoubleClick(event: ReactMouseEvent<SVGSVGElement>) {
     event.preventDefault();
-    event.stopPropagation();
-    activateCountry(marker.countryId);
-  }
+    const point = clientPointToMap(event.currentTarget, {
+      x: event.clientX,
+      y: event.clientY,
+    });
+    if (!point) return;
 
-  function handleMapPointerMove(event: ReactPointerEvent<SVGSVGElement>) {
-    const marker = nearestMarkerToPointer(event);
-    if (marker) {
-      if (hoveredCountryId !== marker.countryId) onCountryHover(marker.countryId);
+    if (cameraRef.current.scale > MIN_CAMERA_SCALE + 0.01) {
+      commitCamera(WORLD_CAMERA, "travel");
       return;
     }
 
-    if (
-      hoveredCountryId &&
-      mapState.status === "ready" &&
-      mapState.atlas.markers.some((candidate) => candidate.countryId === hoveredCountryId)
-    ) {
-      onCountryHover(null);
+    commitCamera(
+      cameraAroundPoint(WORLD_CAMERA, DOUBLE_CLICK_EXPLORATION_SCALE, point),
+      "zoom"
+    );
+  }
+
+  function handleClickCapture(event: ReactMouseEvent<SVGSVGElement>) {
+    if (suppressClickRef.current) {
+      suppressClickRef.current = false;
+      event.preventDefault();
+      event.stopPropagation();
+      return;
+    }
+
+    const countryId = countryIdFromElement(event.target);
+    if (countryId) selectCountry(countryId);
+  }
+
+  function beginPinchGesture() {
+    const points = [...pointersRef.current.values()];
+    if (points.length < 2) return;
+
+    const first = points[0];
+    const second = points[1];
+    const midpoint = {
+      x: (first.x + second.x) / 2,
+      y: (first.y + second.y) / 2,
+    };
+    const midpointOnMap = svgRef.current ? clientPointToMap(svgRef.current, midpoint) : null;
+    if (!midpointOnMap) return;
+
+    const currentCamera = cameraRef.current;
+    gestureRef.current = {
+      startCamera: currentCamera,
+      startClient: midpoint,
+      moved: true,
+      hadMultiplePointers: true,
+      pinchDistance: Math.max(1, Math.hypot(second.x - first.x, second.y - first.y)),
+      pinchWorldAnchor: {
+        x: (midpointOnMap.x - currentCamera.translateX) / currentCamera.scale,
+        y: (midpointOnMap.y - currentCamera.translateY) / currentCamera.scale,
+      },
+    };
+    suppressClickRef.current = true;
+  }
+
+  function handlePointerDown(event: ReactPointerEvent<SVGSVGElement>) {
+    if (event.pointerType === "mouse" && event.button !== 0) return;
+    event.preventDefault();
+    if (event.pointerType === "touch" && telemetryCoordinatesRef.current) {
+      telemetryCoordinatesRef.current.textContent = "";
+    }
+    event.currentTarget.setPointerCapture(event.pointerId);
+    pointersRef.current.set(event.pointerId, { x: event.clientX, y: event.clientY });
+    event.currentTarget.classList.add(styles.mapSvgDragging);
+
+    if (pointersRef.current.size === 1) {
+      suppressClickRef.current = false;
+      gestureRef.current = {
+        startCamera: cameraRef.current,
+        startClient: { x: event.clientX, y: event.clientY },
+        pressedCountryId: countryIdFromElement(event.target),
+        moved: false,
+        hadMultiplePointers: false,
+      };
+    } else {
+      beginPinchGesture();
     }
   }
 
-  return (
-    <section className={`${styles.panel} ${styles.mapPanel} rounded-3xl`} aria-labelledby="atlas-map-title">
-      <div className="flex flex-col gap-3 border-b border-[#ff2fa8]/20 p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
-        <div>
-          <p className="text-[11px] font-black uppercase tracking-[0.24em] text-[#19d3cf]">
-            World Overview
-          </p>
-          <h2 id="atlas-map-title" className="mt-1 text-xl font-black tracking-tight">
-            2D Country Atlas
-          </h2>
-        </div>
+  function handlePointerMove(event: ReactPointerEvent<SVGSVGElement>) {
+    if (event.pointerType !== "touch") {
+      const countryId = countryIdFromElement(event.target) ?? null;
+      if (countryId !== hoveredCountryId) onCountryHover(countryId);
 
-        <div className="flex flex-wrap items-center gap-2">
-          <div
-            className={`${styles.selectedCountryLabel} rounded-full px-4 py-2 text-sm font-black`}
-            aria-live="polite"
-          >
-            <span className="mr-2 inline-block h-2 w-2 rounded-full bg-[#ff2fa8]" aria-hidden="true" />
-            {selectedCountry?.name ?? "Select a country"}
+      const mapPoint = clientPointToMap(event.currentTarget, {
+        x: event.clientX,
+        y: event.clientY,
+      });
+      const worldPoint = mapPoint
+        ? {
+            x: (mapPoint.x - cameraRef.current.translateX) / cameraRef.current.scale,
+            y: (mapPoint.y - cameraRef.current.translateY) / cameraRef.current.scale,
+          }
+        : null;
+      const coordinates = worldPoint ? unprojectPoint(worldPoint) : null;
+      if (telemetryCoordinatesRef.current) {
+        telemetryCoordinatesRef.current.textContent = coordinates
+          ? formatCoordinates(coordinates)
+          : "";
+      }
+    }
+
+    if (!pointersRef.current.has(event.pointerId)) return;
+    event.preventDefault();
+    pointersRef.current.set(event.pointerId, { x: event.clientX, y: event.clientY });
+    const gesture = gestureRef.current;
+    if (!gesture) return;
+
+    if (pointersRef.current.size >= 2) {
+      const points = [...pointersRef.current.values()];
+      const first = points[0];
+      const second = points[1];
+      const midpoint = {
+        x: (first.x + second.x) / 2,
+        y: (first.y + second.y) / 2,
+      };
+      const midpointOnMap = clientPointToMap(event.currentTarget, midpoint);
+      if (!midpointOnMap || !gesture.pinchDistance || !gesture.pinchWorldAnchor) return;
+
+      const distance = Math.max(1, Math.hypot(second.x - first.x, second.y - first.y));
+      const scale = clamp(
+        gesture.startCamera.scale * (distance / gesture.pinchDistance),
+        MIN_CAMERA_SCALE,
+        MAX_CAMERA_SCALE
+      );
+      commitCamera(
+        {
+          scale,
+          translateX: midpointOnMap.x - gesture.pinchWorldAnchor.x * scale,
+          translateY: midpointOnMap.y - gesture.pinchWorldAnchor.y * scale,
+        },
+        "direct"
+      );
+      return;
+    }
+
+    const currentPoint = { x: event.clientX, y: event.clientY };
+    const clientDistance = Math.hypot(
+      currentPoint.x - gesture.startClient.x,
+      currentPoint.y - gesture.startClient.y
+    );
+    if (!gesture.moved && clientDistance < DRAG_THRESHOLD_PX) return;
+    gesture.moved = true;
+    suppressClickRef.current = true;
+
+    const delta = clientDeltaToMap(event.currentTarget, gesture.startClient, currentPoint);
+    commitCamera(
+      {
+        ...gesture.startCamera,
+        translateX: gesture.startCamera.translateX + delta.x,
+        translateY: gesture.startCamera.translateY + delta.y,
+      },
+      "direct"
+    );
+  }
+
+  function finishPointer(event: ReactPointerEvent<SVGSVGElement>, allowSelection: boolean) {
+    const gesture = gestureRef.current;
+    pointersRef.current.delete(event.pointerId);
+
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+      event.currentTarget.releasePointerCapture(event.pointerId);
+    }
+
+    if (pointersRef.current.size === 1 && gesture?.hadMultiplePointers) {
+      const remainingPoint = [...pointersRef.current.values()][0];
+      gestureRef.current = {
+        startCamera: cameraRef.current,
+        startClient: remainingPoint,
+        moved: true,
+        hadMultiplePointers: true,
+      };
+      return;
+    }
+
+    if (pointersRef.current.size > 0) return;
+
+    event.currentTarget.classList.remove(styles.mapSvgDragging);
+    gestureRef.current = null;
+    if (gesture?.moved || gesture?.hadMultiplePointers) {
+      suppressClickRef.current = true;
+    }
+    if (
+      allowSelection &&
+      gesture &&
+      !gesture.moved &&
+      !gesture.hadMultiplePointers &&
+      gesture.pressedCountryId
+    ) {
+      selectCountry(gesture.pressedCountryId);
+    }
+  }
+
+  function handleMapKeyDown(event: KeyboardEvent<SVGSVGElement>) {
+    if (event.defaultPrevented) return;
+
+    if (event.key === "+" || event.key === "=") {
+      event.preventDefault();
+      zoomFromCenter(CAMERA_ZOOM_STEP);
+    } else if (event.key === "-") {
+      event.preventDefault();
+      zoomFromCenter(1 / CAMERA_ZOOM_STEP);
+    } else if (event.key === "0") {
+      event.preventDefault();
+      showWorldView();
+    }
+  }
+
+  const viewportMotionClass =
+    cameraMotion === "travel"
+      ? styles.mapViewportTravel
+      : cameraMotion === "zoom"
+        ? styles.mapViewportZoom
+        : styles.mapViewportDirect;
+
+  return (
+    <IntelligencePanel
+      as="section"
+      className={styles.mapPanel}
+      bodyClassName="flex min-h-0 flex-1 flex-col"
+      aria-labelledby="atlas-map-title"
+      header={
+        <div className="flex min-h-8 flex-wrap items-center justify-between gap-x-sa-3 gap-y-sa-1">
+          <div className={styles.mapContextLine} aria-live="polite">
+            {selectedCountry ? (
+              <>
+                <DataLabel as="span">{selectedCountry.name}</DataLabel>
+                <span className={styles.mapContextSeparator} aria-hidden="true">
+                  /
+                </span>
+                <Link href={countryRoute(selectedCountry.id)} className={styles.mapContextAction}>
+                  View Country <span aria-hidden="true">→</span>
+                </Link>
+              </>
+            ) : null}
           </div>
-          {isZoomed && (
-            <button type="button" onClick={resetMap} className={styles.resetMapButton}>
-              Reset map
+          <div className={styles.mapHeaderActions}>
+            <button
+              type="button"
+              aria-label="Zoom in"
+              title="Zoom in (+)"
+              onClick={() => zoomFromCenter(CAMERA_ZOOM_STEP)}
+              disabled={camera.scale >= MAX_CAMERA_SCALE - 0.01}
+              className={styles.mapCameraButton}
+            >
+              <span aria-hidden="true">+</span>
             </button>
-          )}
+            <button
+              type="button"
+              aria-label="Zoom out"
+              title="Zoom out (-)"
+              onClick={() => zoomFromCenter(1 / CAMERA_ZOOM_STEP)}
+              disabled={isWorldView}
+              className={styles.mapCameraButton}
+            >
+              <span aria-hidden="true">−</span>
+            </button>
+            <button
+              type="button"
+              aria-label="Show world view"
+              title="World view (0)"
+              onClick={showWorldView}
+              disabled={isWorldView}
+              className={styles.mapWorldButton}
+            >
+              <span aria-hidden="true">◎</span>
+            </button>
+          </div>
         </div>
-      </div>
+      }
+    >
+      <h2 id="atlas-map-title" className="sr-only">
+        Interactive country atlas
+      </h2>
+      <p id="atlas-map-instructions" className="sr-only">
+        Click or tap a country to select it. Drag to pan, use the mouse wheel or pinch to zoom,
+        and double-click to toggle between the world and exploration views. While a map country
+        is focused, use plus and minus to zoom or zero for the world view. The compact camera
+        controls provide the same actions for keyboard and assistive technology users.
+      </p>
 
       <div className={styles.mapFrame}>
         {mapState.status === "loading" && (
@@ -527,153 +989,132 @@ export default function CountryAtlasMap({
         )}
 
         {mapState.status === "ready" && (
-          <svg
-            viewBox={`0 0 ${MAP_WIDTH} ${MAP_HEIGHT}`}
-            className={styles.mapSvg}
-            role="group"
-            aria-label={`Interactive world atlas with ${coverageCount} country targets${selectedCountry ? `. ${selectedCountry.name} is active` : ""}`}
-            aria-describedby="atlas-map-instructions"
-            preserveAspectRatio="xMidYMid meet"
-            data-country-target-count={coverageCount}
-            onClickCapture={handleMapClickCapture}
-            onPointerMove={handleMapPointerMove}
-            onPointerLeave={() => onCountryHover(null)}
-          >
-            <defs>
-              <pattern id="country-atlas-grid" width="62.5" height="65" patternUnits="userSpaceOnUse">
-                <path d="M 62.5 0 L 0 0 0 65" className={styles.mapGridLine} fill="none" />
-              </pattern>
-              <linearGradient id="country-atlas-ocean" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0" className={styles.oceanStart} />
-                <stop offset="1" className={styles.oceanEnd} />
-              </linearGradient>
-              <clipPath id="country-atlas-clip">
-                <rect width={MAP_WIDTH} height={MAP_HEIGHT} rx="28" />
-              </clipPath>
-            </defs>
+          <>
+            <svg
+              ref={svgRef}
+              viewBox={`0 0 ${MAP_WIDTH} ${MAP_HEIGHT}`}
+              className={styles.mapSvg}
+              role="group"
+              aria-label={`Interactive world atlas with ${coverageCount} country targets${selectedCountry ? `. ${selectedCountry.name} is active` : ""}`}
+              aria-describedby="atlas-map-instructions"
+              preserveAspectRatio="xMidYMid meet"
+              data-country-target-count={coverageCount}
+              data-camera-scale={camera.scale.toFixed(4)}
+              onClickCapture={handleClickCapture}
+              onDoubleClick={handleDoubleClick}
+              onPointerDown={handlePointerDown}
+              onPointerMove={handlePointerMove}
+              onPointerUp={(event) => finishPointer(event, true)}
+              onPointerCancel={(event) => finishPointer(event, false)}
+              onPointerLeave={() => {
+                if (pointersRef.current.size === 0) onCountryHover(null);
+                if (telemetryCoordinatesRef.current) {
+                  telemetryCoordinatesRef.current.textContent = "";
+                }
+              }}
+              onKeyDown={handleMapKeyDown}
+            >
+              <defs>
+                <clipPath id="country-atlas-clip">
+                  <rect width={MAP_WIDTH} height={MAP_HEIGHT} />
+                </clipPath>
+              </defs>
 
-            <rect width={MAP_WIDTH} height={MAP_HEIGHT} rx="28" fill="url(#country-atlas-ocean)" />
-            <rect width={MAP_WIDTH} height={MAP_HEIGHT} rx="28" fill="url(#country-atlas-grid)" />
+              <rect width={MAP_WIDTH} height={MAP_HEIGHT} className={styles.mapSurface} />
 
-            <g clipPath="url(#country-atlas-clip)">
-              <g className={styles.mapViewport} style={{ transform: viewportTransform }}>
-                {mapState.atlas.polygons.map((feature) => {
-                  const country = feature.countryId
-                    ? countriesById.get(feature.countryId)
-                    : undefined;
-                  if (!country) {
+              <g clipPath="url(#country-atlas-clip)">
+                <g
+                  ref={viewportRef}
+                  className={`${styles.mapViewport} ${viewportMotionClass}`}
+                  style={{ transform: viewportTransform }}
+                >
+                  <g className={styles.graticule} aria-hidden="true">
+                    {GRATICULE_PATHS.map((path, index) => (
+                      <path key={index} d={path} vectorEffect="non-scaling-stroke" />
+                    ))}
+                  </g>
+
+                  <g className={styles.coastlineLayer} aria-hidden="true">
+                    {mapState.atlas.coastlines.map((path, index) => (
+                      <path key={index} d={path} vectorEffect="non-scaling-stroke" />
+                    ))}
+                  </g>
+
+                  {mapState.atlas.polygons.map((feature) => {
+                    const country = feature.countryId
+                      ? countriesById.get(feature.countryId)
+                      : undefined;
+                    if (!country) {
+                      return (
+                        <path
+                          key={feature.key}
+                          d={feature.path}
+                          className={`${styles.countryPath} ${styles.countryPathContext}`}
+                          vectorEffect="non-scaling-stroke"
+                          aria-hidden="true"
+                        />
+                      );
+                    }
+
+                    const active = selectedCountry?.id === country.id;
+                    const hovered = hoveredCountryId === country.id;
+                    const muted =
+                      relevantCountryIds &&
+                      !relevantCountryIds.has(country.id) &&
+                      !active &&
+                      !hovered;
+
                     return (
                       <path
                         key={feature.key}
+                        ref={(node) => registerTarget(country.id, node)}
                         d={feature.path}
-                        className={`${styles.countryPath} ${styles.countryPathContext}`}
+                        role="button"
+                        tabIndex={(selectedCountry?.id ?? orderedCountryIds[0]) === country.id ? 0 : -1}
+                        aria-label={targetLabel(country)}
+                        aria-pressed={active}
+                        data-map-country={country.id}
+                        data-target-source={feature.detailed ? "natural-earth-10m" : "natural-earth-110m"}
+                        className={`${styles.countryPath} ${styles.countryPathInteractive} ${hovered ? styles.countryPathHovered : ""} ${muted ? styles.mapTargetMuted : ""} ${active ? styles.countryPathSelected : ""}`}
+                        vectorEffect="non-scaling-stroke"
+                        onFocus={() => onCountryHover(country.id)}
+                        onBlur={() => onCountryHover(null)}
+                        onKeyDown={(event) => handleTargetKeyDown(event, country.id)}
+                      >
+                        <title>{country.name}</title>
+                      </path>
+                    );
+                  })}
+
+                  {mapState.atlas.polygons.map((feature) => {
+                    if (!feature.detailed || !feature.countryId || feature.hitStrokeWidth <= 0) {
+                      return null;
+                    }
+
+                    return (
+                      <path
+                        key={`${feature.key}-hit-area`}
+                        d={feature.path}
+                        data-map-country={feature.countryId}
+                        className={styles.microstateHitArea}
+                        style={{ strokeWidth: feature.hitStrokeWidth }}
                         vectorEffect="non-scaling-stroke"
                         aria-hidden="true"
                       />
                     );
-                  }
-
-                  const active = selectedCountry?.id === country.id;
-                  const hovered = hoveredCountryId === country.id;
-                  const muted =
-                    relevantCountryIds &&
-                    !relevantCountryIds.has(country.id) &&
-                    !active &&
-                    !hovered;
-
-                  return (
-                    <path
-                      key={feature.key}
-                      ref={(node) => registerTarget(country.id, node)}
-                      d={feature.path}
-                      role="button"
-                      tabIndex={selectedCountry?.id === country.id ? 0 : -1}
-                      aria-label={targetLabel(country)}
-                      aria-pressed={active}
-                      data-map-country={country.id}
-                      data-target-source="polygon"
-                      className={`${styles.countryPath} ${styles.countryPathInteractive} ${hovered ? styles.countryPathHovered : ""} ${muted ? styles.mapTargetMuted : ""} ${active ? styles.countryPathSelected : ""}`}
-                      vectorEffect="non-scaling-stroke"
-                      onClick={() => activateCountry(country.id)}
-                      onPointerEnter={() => onCountryHover(country.id)}
-                      onPointerLeave={() => onCountryHover(null)}
-                      onFocus={() => {
-                        onCountryHover(country.id);
-                      }}
-                      onBlur={() => onCountryHover(null)}
-                      onKeyDown={(event) => handleTargetKeyDown(event, country.id)}
-                    >
-                      <title>{country.name}</title>
-                    </path>
-                  );
-                })}
-
-                {mapState.atlas.markers.map((marker) => {
-                  const country = countriesById.get(marker.countryId);
-                  if (!country) return null;
-
-                  const active = selectedCountry?.id === country.id;
-                  const hovered = hoveredCountryId === country.id;
-                  const muted =
-                    relevantCountryIds &&
-                    !relevantCountryIds.has(country.id) &&
-                    !active &&
-                    !hovered;
-                  const hitRadius = marker.hitRadius / viewTransform.scale;
-                  const dotRadius =
-                    Math.min(4.5, marker.hitRadius * 0.58) /
-                    Math.sqrt(viewTransform.scale);
-
-                  return (
-                    <g
-                      key={country.id}
-                      ref={(node) => registerTarget(country.id, node)}
-                      role="button"
-                      tabIndex={selectedCountry?.id === country.id ? 0 : -1}
-                      aria-label={targetLabel(country)}
-                      aria-pressed={active}
-                      data-map-country={country.id}
-                      data-target-source={marker.source}
-                      className={`${styles.markerTarget} ${muted ? styles.mapTargetMuted : ""}`}
-                      transform={`translate(${marker.point.x} ${marker.point.y})`}
-                      onFocus={() => {
-                        onCountryHover(country.id);
-                      }}
-                      onBlur={() => onCountryHover(null)}
-                      onKeyDown={(event) => handleTargetKeyDown(event, country.id)}
-                    >
-                      <title>{country.name}</title>
-                      <circle r={hitRadius} className={styles.markerHitArea} />
-                      <circle r={Math.max(1, hitRadius - 0.7)} className={styles.markerFocusRing} />
-                      <circle
-                        r={dotRadius}
-                        className={`${styles.markerDot} ${hovered ? styles.markerDotHovered : ""} ${active ? styles.markerDotSelected : ""}`}
-                        vectorEffect="non-scaling-stroke"
-                      />
-                    </g>
-                  );
-                })}
+                  })}
+                </g>
               </g>
-            </g>
-          </svg>
+            </svg>
+
+            <div className={styles.mapTelemetry} aria-hidden="true">
+              <span>WORLD // NATURAL EARTH 1</span>
+              <span>Z {camera.scale.toFixed(2)}×</span>
+              <span ref={telemetryCoordinatesRef} className={styles.telemetryCoordinates} />
+            </div>
+          </>
         )}
       </div>
-
-      <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[#19d3cf]/15 px-5 py-4 text-xs font-bold text-gray-500 sm:px-6">
-        <p id="atlas-map-instructions">
-          Select once to focus. Select the active country again to open it.
-        </p>
-        <div className="flex items-center gap-4" aria-label="Map legend">
-          <span className="flex items-center gap-2">
-            <span className={`${styles.legendSwatch} ${styles.legendDefault}`} aria-hidden="true" />
-            Country
-          </span>
-          <span className="flex items-center gap-2">
-            <span className={`${styles.legendSwatch} ${styles.legendSelected}`} aria-hidden="true" />
-            Active
-          </span>
-        </div>
-      </div>
-    </section>
+    </IntelligencePanel>
   );
 }
