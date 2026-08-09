@@ -1,18 +1,27 @@
 "use client";
 
-import { useCallback, useEffect, useRef, type KeyboardEvent } from "react";
-import CountryFlag from "@/app/components/country-flag";
+import { useCallback, useEffect, useMemo, useRef, type KeyboardEvent } from "react";
+import CompactSelect, {
+  type CompactSelectOption,
+} from "@/app/components/intelligence-ui/compact-select";
+import DataLabel from "@/app/components/intelligence-ui/data-label";
+import IntelligencePanel from "@/app/components/intelligence-ui/intelligence-panel";
 import SearchBar from "@/app/components/search-bar";
 import type { CountryAtlasRecord } from "@/data/countries";
 import styles from "../countries.module.css";
+
+export type CountrySortMode = "alphabetical" | "overall-ranking" | "skill-score";
 
 type CountryAtlasSidebarProps = {
   countries: readonly CountryAtlasRecord[];
   totalCount: number;
   search: string;
-  activeCountryId: string;
+  sort: CountrySortMode;
+  sortOptions: readonly CompactSelectOption<CountrySortMode>[];
+  activeCountryId: string | null;
   hoveredCountryId: string | null;
   onSearchChange: (value: string) => void;
+  onSortChange: (value: CountrySortMode) => void;
   onCountryChange: (countryId: string) => void;
   onCountryHover: (countryId: string | null) => void;
 };
@@ -21,34 +30,56 @@ export default function CountryAtlasSidebar({
   countries,
   totalCount,
   search,
+  sort,
+  sortOptions,
   activeCountryId,
   hoveredCountryId,
   onSearchChange,
+  onSortChange,
   onCountryChange,
   onCountryHover,
 }: CountryAtlasSidebarProps) {
   const listRef = useRef<HTMLDivElement>(null);
   const rowRefs = useRef(new Map<string, HTMLButtonElement>());
+  const countryGroups = useMemo(() => {
+    if (sort !== "alphabetical") {
+      return [{ initial: null, countries: [...countries] }];
+    }
 
-  const keepRowVisible = useCallback((countryId: string) => {
+    return countries.reduce<Array<{ initial: string; countries: CountryAtlasRecord[] }>>(
+      (groups, country) => {
+        const initial = country.name.charAt(0).toLocaleUpperCase();
+        const currentGroup = groups.at(-1);
+        if (currentGroup?.initial === initial) currentGroup.countries.push(country);
+        else groups.push({ initial, countries: [country] });
+        return groups;
+      },
+      []
+    );
+  }, [countries, sort]);
+
+  const alignRowToTop = useCallback((countryId: string) => {
     const list = listRef.current;
     const row = rowRefs.current.get(countryId);
     if (!list || !row) return;
 
     const listRect = list.getBoundingClientRect();
     const rowRect = row.getBoundingClientRect();
+    const letterMarkerHeight =
+      row
+        .closest<HTMLElement>("[data-country-group]")
+        ?.querySelector<HTMLElement>("[data-letter-marker]")?.offsetHeight ?? 0;
+    const targetTop =
+      list.scrollTop + rowRect.top - listRect.top - letterMarkerHeight;
 
-    if (rowRect.top < listRect.top) {
-      list.scrollTo({ top: list.scrollTop - (listRect.top - rowRect.top) });
-    } else if (rowRect.bottom > listRect.bottom) {
-      list.scrollTo({ top: list.scrollTop + (rowRect.bottom - listRect.bottom) });
-    }
+    list.scrollTo({ top: Math.max(0, targetTop) });
   }, []);
 
   useEffect(() => {
-    const frame = window.requestAnimationFrame(() => keepRowVisible(activeCountryId));
+    if (!activeCountryId) return;
+    const frame = window.requestAnimationFrame(() => alignRowToTop(activeCountryId));
     return () => window.cancelAnimationFrame(frame);
-  }, [activeCountryId, countries, keepRowVisible]);
+  }, [activeCountryId, alignRowToTop, countries]);
 
   function moveToCountry(countryId: string) {
     onCountryChange(countryId);
@@ -56,7 +87,7 @@ export default function CountryAtlasSidebar({
     window.requestAnimationFrame(() => {
       const row = rowRefs.current.get(countryId);
       row?.focus({ preventScroll: true });
-      keepRowVisible(countryId);
+      alignRowToTop(countryId);
     });
   }
 
@@ -84,78 +115,100 @@ export default function CountryAtlasSidebar({
   }
 
   return (
-    <aside className={`${styles.panel} ${styles.sidebar} rounded-3xl`} aria-labelledby="country-atlas-title">
-      <div className="border-b border-[#ff2fa8]/20 p-5">
-        <p id="country-atlas-title" className="text-lg font-black tracking-tight">
-          Country Atlas
-        </p>
-        <div className={`${styles.countRows} mt-2`} aria-label={`${totalCount} countries`}>
-          <p className={`${styles.countEntrance} text-sm font-black text-[#19d3cf]`}>
-            <span className="text-xl">{totalCount}</span> Countries
+    <IntelligencePanel
+      as="aside"
+      className={styles.sidebar}
+      bodyClassName="flex min-h-0 flex-1 flex-col"
+      aria-labelledby="country-atlas-title"
+      header={
+        <div className="flex items-baseline justify-between gap-sa-3">
+          <h2 id="country-atlas-title" className="text-base font-bold tracking-tight">
+            Country Atlas
+          </h2>
+          <p
+            className={`${styles.countEntrance} font-sa-data text-xs font-bold text-sa-accent`}
+            aria-label={`${totalCount} countries`}
+          >
+            {totalCount} Countries
           </p>
         </div>
-      </div>
-
-      <div className="grid gap-4 border-b border-[#ff2fa8]/15 p-4">
+      }
+    >
+      <div className="grid gap-sa-3 border-b border-sa-border-subtle p-sa-3">
         <SearchBar
           label="Search countries"
           placeholder="Search countries..."
           value={search}
           onValueChange={onSearchChange}
+          variant="intelligence"
         />
 
-        <label>
-          <span className="mb-2 block text-[10px] font-black uppercase tracking-[0.2em] text-gray-500">
-            Sort By
-          </span>
-          <select aria-label="Sort countries" defaultValue="alphabetical" className={styles.selectControl}>
-            <option value="alphabetical">Alphabetical</option>
-          </select>
-        </label>
+        <CompactSelect
+          id="country-atlas-sort"
+          label="Sort By"
+          value={sort}
+          options={sortOptions}
+          onChange={onSortChange}
+        />
       </div>
 
-      <div className="flex min-h-0 flex-1 flex-col p-3">
-        <div className="flex items-center justify-between gap-3 px-2 pb-2">
-          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-500">
-            Countries
-          </p>
-          <p className="text-xs font-black text-[#ff2fa8]">{countries.length} visible</p>
-        </div>
-
+      <div className="flex min-h-0 flex-1 flex-col p-sa-2">
+        <DataLabel as="p" className="px-sa-2 pb-sa-1 pt-sa-1">
+          Countries
+        </DataLabel>
         <div
           ref={listRef}
           className={styles.countryList}
           role="listbox"
-          aria-label="Alphabetical country list"
+          aria-label="Country list"
         >
           {countries.length > 0 ? (
-            countries.map((country) => {
-              const active = country.id === activeCountryId;
-              const hovered = country.id === hoveredCountryId;
+            countryGroups.map((group) => (
+              <div
+                key={group.initial ?? "sorted-countries"}
+                data-country-group
+                role={group.initial ? "group" : "presentation"}
+                aria-label={group.initial ? `${group.initial} countries` : undefined}
+              >
+                {group.initial ? (
+                  <div
+                    className={styles.letterMarker}
+                    data-letter-marker
+                    aria-hidden="true"
+                  >
+                    {group.initial}
+                  </div>
+                ) : null}
+                {group.countries.map((country) => {
+                  const active = country.id === activeCountryId;
+                  const roving = country.id === (activeCountryId ?? countries[0]?.id);
+                  const hovered = country.id === hoveredCountryId;
 
-              return (
-                <button
-                  key={country.id}
-                  ref={(node) => {
-                    if (node) rowRefs.current.set(country.id, node);
-                    else rowRefs.current.delete(country.id);
-                  }}
-                  type="button"
-                  role="option"
-                  aria-selected={active}
-                  tabIndex={active ? 0 : -1}
-                  onClick={() => onCountryChange(country.id)}
-                  onKeyDown={(event) => handleListKeyDown(event, country.id)}
-                  onPointerEnter={() => onCountryHover(country.id)}
-                  onPointerLeave={() => onCountryHover(null)}
-                  className={`${styles.countryRow} ${active ? styles.countryRowActive : ""} ${hovered ? styles.countryRowHovered : ""}`}
-                >
-                  <CountryFlag country={country} size="sm" />
-                  <span className="min-w-0 flex-1 truncate text-sm font-black">{country.name}</span>
-                  <span className={styles.activeMarker} aria-hidden="true" />
-                </button>
-              );
-            })
+                  return (
+                    <button
+                      key={country.id}
+                      ref={(node) => {
+                        if (node) rowRefs.current.set(country.id, node);
+                        else rowRefs.current.delete(country.id);
+                      }}
+                      type="button"
+                      role="option"
+                      aria-selected={active}
+                      tabIndex={roving ? 0 : -1}
+                      onClick={() => onCountryChange(country.id)}
+                      onKeyDown={(event) => handleListKeyDown(event, country.id)}
+                      onPointerEnter={() => onCountryHover(country.id)}
+                      onPointerLeave={() => onCountryHover(null)}
+                      className={`${styles.countryRow} ${active ? styles.countryRowActive : ""} ${hovered ? styles.countryRowHovered : ""}`}
+                    >
+                      <span className="min-w-0 flex-1 truncate text-sm font-semibold">
+                        {country.name}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            ))
           ) : (
             <div className="px-3 py-8 text-center">
               <p className="text-sm font-black">No countries found</p>
@@ -164,6 +217,6 @@ export default function CountryAtlasSidebar({
           )}
         </div>
       </div>
-    </aside>
+    </IntelligencePanel>
   );
 }

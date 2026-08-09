@@ -1,6 +1,11 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import CompactSelect, {
+  type CompactSelectOption,
+} from "@/app/components/intelligence-ui/compact-select";
+import IntelligencePanel from "@/app/components/intelligence-ui/intelligence-panel";
+import SectionToolbar from "@/app/components/intelligence-ui/section-toolbar";
 import { matchesSearchQuery } from "@/lib/search";
 import {
   COUNTRY_ATLAS_REGIONS,
@@ -10,13 +15,41 @@ import {
   type CountryAtlasRegion,
 } from "@/data/countries";
 import CountryAtlasCard from "./components/country-atlas-card";
-import CountryAtlasMap from "./components/country-atlas-map";
-import CountryAtlasSidebar from "./components/country-atlas-sidebar";
+import CountryAtlasMap, {
+  type AtlasSelectionRequest,
+} from "./components/country-atlas-map";
+import CountryAtlasSidebar, {
+  type CountrySortMode,
+} from "./components/country-atlas-sidebar";
 import styles from "./countries.module.css";
 
 const alphabeticalCountries = [...sovereignCountries].sort((first, second) =>
   first.name.localeCompare(second.name)
 );
+
+const SORT_OPTIONS = [
+  { value: "alphabetical", label: "Alphabetical" },
+  { value: "overall-ranking", label: "Overall Ranking" },
+  { value: "skill-score", label: "Skill Score" },
+] as const satisfies readonly CompactSelectOption<CountrySortMode>[];
+
+const REGION_OPTIONS = COUNTRY_ATLAS_REGIONS.map((region) => ({
+  value: region,
+  label: region,
+})) satisfies readonly CompactSelectOption<CountryAtlasRegion>[];
+
+function sortCountries(
+  countries: readonly CountryAtlasRecord[],
+  sort: CountrySortMode
+) {
+  return [...countries].sort((first, second) => {
+    if (sort === "overall-ranking") return first.rank - second.rank;
+    if (sort === "skill-score") {
+      return second.dominanceScore - first.dominanceScore || first.name.localeCompare(second.name);
+    }
+    return first.name.localeCompare(second.name);
+  });
+}
 
 function filterCountries(search: string, region: CountryAtlasRegion) {
   return alphabeticalCountries
@@ -29,8 +62,6 @@ function filterCountries(search: string, region: CountryAtlasRegion) {
       ])
     );
 }
-
-const defaultCountryId = filterCountries("", "All")[0]?.id ?? "";
 
 function CountriesBackground() {
   return (
@@ -45,20 +76,29 @@ function CountriesBackground() {
 export default function CountriesAtlas() {
   const [search, setSearch] = useState("");
   const [region, setRegion] = useState<CountryAtlasRegion>("All");
-  const [activeCountryId, setActiveCountryId] = useState(defaultCountryId);
+  const [atlasSort, setAtlasSort] = useState<CountrySortMode>("alphabetical");
+  const [indexSort, setIndexSort] = useState<CountrySortMode>("overall-ranking");
+  const [activeCountryId, setActiveCountryId] = useState<string | null>(null);
   const [hoveredCountryId, setHoveredCountryId] = useState<string | null>(null);
-  const [mapFocusRequest, setMapFocusRequest] = useState(0);
+  const [atlasSelectionRequest, setAtlasSelectionRequest] =
+    useState<AtlasSelectionRequest | null>(null);
 
   const visibleCountries = useMemo(
     () => filterCountries(search, region),
     [region, search]
   );
+  const sidebarCountries = useMemo(
+    () => sortCountries(visibleCountries, atlasSort),
+    [atlasSort, visibleCountries]
+  );
+  const recordCountries = useMemo(
+    () => sortCountries(visibleCountries, indexSort),
+    [indexSort, visibleCountries]
+  );
 
-  const activeCountry =
-    visibleCountries.find((country) => country.id === activeCountryId) ??
-    visibleCountries[0] ??
-    sovereignCountries.find((country) => country.id === activeCountryId) ??
-    sovereignCountries[0];
+  const activeCountry = activeCountryId
+    ? sovereignCountries.find((country) => country.id === activeCountryId)
+    : undefined;
 
   const regionCountryIds = useMemo(
     () =>
@@ -74,7 +114,14 @@ export default function CountriesAtlas() {
 
   function selectCountry(countryId: string) {
     setActiveCountryId(countryId);
-    setMapFocusRequest((request) => request + 1);
+  }
+
+  function selectCountryFromAtlas(countryId: string) {
+    selectCountry(countryId);
+    setAtlasSelectionRequest((currentRequest) => ({
+      countryId,
+      revision: (currentRequest?.revision ?? 0) + 1,
+    }));
   }
 
   function selectCountryFromMap(countryId: string) {
@@ -88,10 +135,10 @@ export default function CountriesAtlas() {
 
   function keepSelectionVisible(nextCountries: readonly CountryAtlasRecord[]) {
     if (
-      nextCountries.length > 0 &&
+      activeCountryId &&
       !nextCountries.some((country) => country.id === activeCountryId)
     ) {
-      selectCountry(nextCountries[0].id);
+      setActiveCountryId(null);
     }
   }
 
@@ -108,35 +155,35 @@ export default function CountriesAtlas() {
   function resetFilters() {
     setSearch("");
     setRegion("All");
-    selectCountry(defaultCountryId);
+    setActiveCountryId(null);
   }
 
   return (
     <main className={`${styles.shell} relative min-h-screen overflow-hidden`}>
       <CountriesBackground />
 
-      <div className="relative z-10 mx-auto max-w-7xl px-4 pb-16 pt-[108px] sm:px-6 sm:pt-[116px] xl:px-8 xl:pt-[152px]">
-        <header className="mb-6 max-w-3xl">
-          <p className="mb-2 text-[11px] font-black uppercase tracking-[0.28em] text-[#19d3cf]">
+      <div className="relative z-10 mx-auto max-w-7xl px-4 pb-16 pt-[88px] sm:px-6 sm:pt-[92px] xl:px-8 xl:pt-[132px]">
+        <div className="mb-sa-2 max-w-4xl">
+          <p className="mb-sa-1 text-[11px] font-bold uppercase tracking-[0.2em] text-sa-accent">
             Countries
           </p>
-          <h1 className="text-3xl font-black tracking-tight sm:text-4xl">
+          <h1 className="text-[1.625rem] font-bold tracking-tight text-sa-text-primary sm:text-[1.75rem]">
             Browse the competitive world by country.
           </h1>
-          <p className="mt-3 max-w-2xl text-sm font-semibold leading-relaxed text-gray-600 sm:text-base">
-            A clear, country-level index of competitive achievement—built for fast atlas browsing.
-          </p>
-        </header>
+        </div>
 
         <section className={styles.atlasGrid} aria-label="Country atlas browser">
           <CountryAtlasSidebar
-            countries={visibleCountries}
+            countries={sidebarCountries}
             totalCount={SOVEREIGN_COUNTRY_COUNT}
             search={search}
-            activeCountryId={activeCountry?.id ?? ""}
+            sort={atlasSort}
+            sortOptions={SORT_OPTIONS}
+            activeCountryId={activeCountry?.id ?? null}
             hoveredCountryId={hoveredCountryId}
             onSearchChange={updateSearch}
-            onCountryChange={selectCountry}
+            onSortChange={setAtlasSort}
+            onCountryChange={selectCountryFromAtlas}
             onCountryHover={setHoveredCountryId}
           />
 
@@ -144,69 +191,71 @@ export default function CountriesAtlas() {
             selectedCountry={activeCountry}
             hoveredCountryId={hoveredCountryId}
             relevantCountryIds={regionCountryIds}
-            focusRequest={mapFocusRequest}
+            atlasSelectionRequest={atlasSelectionRequest}
             onCountrySelect={selectCountryFromMap}
             onCountryHover={setHoveredCountryId}
           />
         </section>
 
-        <section className={`${styles.panel} mt-6 overflow-hidden rounded-3xl`} aria-labelledby="country-cards-title">
-          <div className="flex flex-col gap-4 border-b border-[#ff2fa8]/20 p-5 sm:flex-row sm:items-end sm:justify-between sm:p-6">
-            <div>
-              <p className="text-[11px] font-black uppercase tracking-[0.24em] text-[#19d3cf]">
-                Country Index
-              </p>
-              <h2 id="country-cards-title" className="mt-1 text-xl font-black tracking-tight">
-                Highest achievements
-              </h2>
-              <p className="mt-1 text-sm font-semibold text-gray-500">
-                {visibleCountries.length} {visibleCountries.length === 1 ? "country" : "countries"} visible
-              </p>
-            </div>
-
-            <label className="w-full sm:w-64">
-              <span className="mb-2 block text-[10px] font-black uppercase tracking-[0.2em] text-gray-500">
-                Region
-              </span>
-              <select
-                aria-label="Region"
-                value={region}
-                onChange={(event) => updateRegion(event.target.value as CountryAtlasRegion)}
-                className={styles.selectControl}
-              >
-                {COUNTRY_ATLAS_REGIONS.map((regionOption) => (
-                  <option key={regionOption} value={regionOption}>
-                    {regionOption}
-                  </option>
-                ))}
-              </select>
-            </label>
-          </div>
-
-          <div className="p-4 sm:p-5 lg:p-6">
+        <IntelligencePanel
+          as="section"
+          className="mt-sa-4"
+          aria-labelledby="country-cards-title"
+          header={
+            <SectionToolbar
+              title="Country Index"
+              titleId="country-cards-title"
+              eyebrow="Country intelligence"
+              metadata={`${recordCountries.length} ${recordCountries.length === 1 ? "record" : "records"}`}
+              controls={
+                <>
+                  <CompactSelect
+                    id="country-index-sort"
+                    label="Sort By"
+                    value={indexSort}
+                    options={SORT_OPTIONS}
+                    onChange={setIndexSort}
+                  />
+                  <CompactSelect
+                    id="country-index-region"
+                    label="Region"
+                    value={region}
+                    options={REGION_OPTIONS}
+                    onChange={updateRegion}
+                  />
+                </>
+              }
+            />
+          }
+        >
+          <div className="p-sa-3 sm:p-sa-4">
             {visibleCountries.length > 0 ? (
-              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                {visibleCountries.map((country) => (
-                  <CountryAtlasCard key={country.id} country={country} />
+              <div className="grid gap-sa-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                {recordCountries.map((country) => (
+                  <CountryAtlasCard
+                    key={country.id}
+                    country={country}
+                    selected={country.id === activeCountry?.id}
+                  />
                 ))}
               </div>
             ) : (
-              <div className={`${styles.emptyState} rounded-3xl p-8 text-center sm:p-12`}>
-                <p className="text-lg font-black">No countries match this view.</p>
-                <p className="mt-2 text-sm font-semibold text-gray-500">
+              <div className={`${styles.emptyState} rounded-sa-panel p-8 text-center sm:p-12`}>
+                <p className="text-lg font-bold">No countries match this view.</p>
+                <p className="mt-2 text-sm font-semibold text-sa-text-muted">
                   Clear the search or return to all regions.
                 </p>
                 <button
                   type="button"
                   onClick={resetFilters}
-                  className="mt-5 rounded-full bg-[#19d3cf] px-5 py-2.5 text-sm font-black text-white transition-[filter,transform] duration-200 ease-in-out hover:-translate-y-0.5 hover:brightness-105 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#19d3cf]/25"
+                  className="mt-5 min-h-11 rounded-sa-control bg-sa-accent px-5 py-2.5 text-sm font-bold text-slate-950 transition-[filter,transform] duration-200 ease-sa-standard hover:-translate-y-0.5 hover:brightness-105 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-sa-accent/25"
                 >
                   Reset filters
                 </button>
               </div>
             )}
           </div>
-        </section>
+        </IntelligencePanel>
       </div>
     </main>
   );

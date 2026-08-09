@@ -1,6 +1,6 @@
 .shell {
-  background: #f8fafc;
-  color: #111827;
+  background: var(--sa-canvas);
+  color: var(--sa-text-primary);
   transition: background-color 260ms ease-in-out, color 260ms ease-in-out;
 }
 
@@ -15,9 +15,9 @@
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(circle at 18% 8%, rgba(25, 211, 207, 0.14), transparent 30%),
-    radial-gradient(circle at 84% 12%, rgba(255, 47, 168, 0.1), transparent 28%),
-    linear-gradient(180deg, #f8fafc 0%, #eef7fa 100%);
+    radial-gradient(circle at 18% 7%, rgba(25, 211, 207, 0.09), transparent 26%),
+    radial-gradient(circle at 84% 10%, rgba(255, 47, 168, 0.045), transparent 23%),
+    linear-gradient(180deg, var(--sa-canvas) 0%, var(--sa-surface-2) 100%);
 }
 
 .backgroundGrid {
@@ -27,12 +27,12 @@
     linear-gradient(rgba(15, 23, 42, 0.08) 1px, transparent 1px),
     linear-gradient(90deg, rgba(15, 23, 42, 0.08) 1px, transparent 1px);
   background-size: 96px 96px;
-  opacity: 0.24;
+  opacity: 0.18;
 }
 
 .backgroundMeridian {
   position: absolute;
-  top: 180px;
+  top: 150px;
   left: 50%;
   width: min(760px, 78vw);
   aspect-ratio: 1;
@@ -44,15 +44,12 @@
 .atlasGrid {
   display: grid;
   min-width: 0;
-  gap: 1.5rem;
-}
-
-.panel {
-  min-width: 0;
-  border: 1px solid rgba(255, 47, 168, 0.32);
-  background: rgba(255, 255, 255, 0.9);
-  box-shadow: 0 16px 48px rgba(15, 23, 42, 0.07);
-  backdrop-filter: blur(16px);
+  gap: 0;
+  overflow: hidden;
+  border: 1px solid var(--sa-border-subtle);
+  border-radius: 10px;
+  background: var(--sa-surface-1);
+  box-shadow: 0 18px 44px rgba(15, 23, 42, 0.07);
 }
 
 .sidebar {
@@ -60,13 +57,8 @@
   min-height: 0;
   flex-direction: column;
   overflow: hidden;
-}
-
-.countRows {
-  display: grid;
-  min-height: 28px;
-  align-content: start;
-  gap: 0.25rem;
+  border: 0;
+  border-radius: 0;
 }
 
 .countEntrance {
@@ -74,37 +66,30 @@
   animation: count-entrance 260ms ease-in-out both;
 }
 
-.selectControl {
-  width: 100%;
-  height: 48px;
-  appearance: none;
-  border: 1px solid rgba(25, 211, 207, 0.35);
-  border-radius: 16px;
-  background:
-    linear-gradient(45deg, transparent 50%, #19d3cf 50%) calc(100% - 18px) 20px / 5px 5px no-repeat,
-    linear-gradient(135deg, #19d3cf 50%, transparent 50%) calc(100% - 13px) 20px / 5px 5px no-repeat,
-    rgba(255, 255, 255, 0.9);
-  padding: 0 42px 0 14px;
-  color: #111827;
-  font-size: 0.875rem;
-  font-weight: 800;
-  outline: none;
-  transition: border-color 220ms ease-in-out, box-shadow 220ms ease-in-out;
-}
-
-.selectControl:focus-visible {
-  border-color: #19d3cf;
-  box-shadow: 0 0 0 4px rgba(25, 211, 207, 0.14);
-}
-
 .countryList {
   min-height: 0;
   max-height: 330px;
   overflow-y: auto;
   overscroll-behavior: contain;
-  padding-right: 0.25rem;
+  padding-right: var(--sa-space-1);
   scrollbar-color: rgba(25, 211, 207, 0.55) transparent;
   scrollbar-width: thin;
+}
+
+.letterMarker {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  margin: 0 var(--sa-space-1);
+  border-bottom: 1px solid var(--sa-border-subtle);
+  background: var(--sa-surface-1);
+  padding: 6px var(--sa-space-2) 3px;
+  color: var(--sa-accent);
+  font-family: var(--sa-font-data);
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 16px;
+  letter-spacing: 0.12em;
 }
 
 .countryList::-webkit-scrollbar {
@@ -119,13 +104,14 @@
 .countryRow {
   display: flex;
   width: 100%;
-  min-height: 48px;
+  min-height: 44px;
   align-items: center;
-  gap: 0.75rem;
-  border: 1px solid transparent;
-  border-radius: 14px;
-  padding: 0.45rem 0.55rem;
-  color: #334155;
+  gap: var(--sa-space-2);
+  border: 0;
+  border-left: 2px solid transparent;
+  border-radius: var(--sa-radius-sm);
+  padding: 0.35rem 0.625rem;
+  color: var(--sa-text-muted);
   text-align: left;
   transition:
     border-color 220ms ease-in-out,
@@ -135,15 +121,13 @@
 }
 
 .countryRow:hover {
-  border-color: rgba(25, 211, 207, 0.35);
   background: rgba(25, 211, 207, 0.06);
-  color: #111827;
+  color: var(--sa-text-primary);
 }
 
 .countryRowHovered {
-  border-color: rgba(25, 211, 207, 0.46);
   background: rgba(25, 211, 207, 0.08);
-  color: #111827;
+  color: var(--sa-text-primary);
 }
 
 .countryRow:focus-visible {
@@ -152,32 +136,24 @@
 }
 
 .countryRowActive {
-  border-color: rgba(25, 211, 207, 0.72);
-  background: linear-gradient(90deg, rgba(25, 211, 207, 0.14), rgba(255, 47, 168, 0.05));
-  color: #111827;
-}
-
-.activeMarker {
-  width: 7px;
-  height: 7px;
-  flex: 0 0 auto;
-  border-radius: 999px;
-  background: #ff2fa8;
-  opacity: 0;
-  transform: scale(0.7);
-  transition: opacity 220ms ease-in-out, transform 220ms ease-in-out;
-}
-
-.countryRowActive .activeMarker {
-  opacity: 1;
-  transform: scale(1);
+  border-left-color: var(--sa-border-active);
+  background: rgba(25, 211, 207, 0.11);
+  color: var(--sa-text-primary);
+  animation: country-row-arrival 280ms ease-in-out both;
 }
 
 .mapPanel {
   display: flex;
-  min-height: 410px;
+  min-height: 420px;
   flex-direction: column;
   overflow: hidden;
+  border: 0;
+  border-top: 1px solid var(--sa-border-subtle);
+  border-radius: 0;
+}
+
+.mapPanel > div:first-child {
+  padding: var(--sa-space-2) var(--sa-space-3);
 }
 
 .mapFrame {
@@ -188,27 +164,40 @@
   flex: 1;
   place-items: center;
   overflow: hidden;
-  padding: 1rem;
-  background:
-    radial-gradient(circle at 50% 50%, rgba(25, 211, 207, 0.1), transparent 54%),
-    rgba(248, 250, 252, 0.7);
+  background: var(--sa-surface-inset);
 }
 
 .mapSvg {
   display: block;
   width: 100%;
   height: 100%;
-  max-height: 520px;
   overflow: hidden;
-  touch-action: manipulation;
-  filter: drop-shadow(0 18px 26px rgba(15, 23, 42, 0.08));
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.mapSvgDragging {
+  cursor: grabbing;
 }
 
 .mapViewport {
   transform-box: view-box;
   transform-origin: 0 0;
-  transition: transform 250ms ease-in-out;
   will-change: transform;
+}
+
+.mapViewportDirect {
+  transition: none;
+}
+
+.mapViewportZoom {
+  transition: transform 260ms var(--sa-ease-standard);
+}
+
+.mapViewportTravel {
+  transition: transform var(--sa-motion-map) var(--sa-ease-standard);
 }
 
 .mapStatus {
@@ -217,33 +206,40 @@
   font-weight: 800;
 }
 
-.mapGridLine {
-  stroke: rgba(25, 211, 207, 0.16);
-  stroke-width: 1;
+.mapSurface {
+  fill: #e8f0f2;
 }
 
-.oceanStart {
-  stop-color: #f8fbfc;
+.graticule {
+  fill: none;
+  stroke: rgba(15, 118, 116, 0.11);
+  stroke-width: 0.48;
+  pointer-events: none;
 }
 
-.oceanEnd {
-  stop-color: #edf8f8;
+.coastlineLayer {
+  fill: none;
+  stroke: rgba(10, 151, 148, 0.78);
+  stroke-width: 0.94;
+  pointer-events: none;
 }
 
 .countryPath {
-  fill: rgba(25, 211, 207, 0.18);
-  stroke: rgba(47, 58, 70, 0.58);
-  stroke-width: 0.9;
+  fill: rgba(25, 211, 207, 0.09);
+  stroke: rgba(10, 151, 148, 0.42);
+  stroke-width: 0.58;
+  outline: 0;
   pointer-events: none;
+  paint-order: stroke fill;
   transition:
-    fill 240ms ease-in-out,
-    stroke 240ms ease-in-out,
-    opacity 240ms ease-in-out,
-    filter 240ms ease-in-out;
+    fill var(--sa-motion-standard) var(--sa-ease-standard),
+    stroke var(--sa-motion-standard) var(--sa-ease-standard),
+    opacity var(--sa-motion-standard) var(--sa-ease-standard),
+    filter var(--sa-motion-standard) var(--sa-ease-standard);
 }
 
 .countryPathContext {
-  opacity: 0.55;
+  opacity: 0.32;
 }
 
 .countryPathInteractive {
@@ -253,157 +249,189 @@
 
 .countryPathInteractive:hover,
 .countryPathHovered {
-  fill: rgba(25, 211, 207, 0.42);
-  stroke: #19d3cf;
+  fill: rgba(25, 211, 207, 0.34);
+  stroke: var(--sa-accent);
   stroke-width: 1.4;
+}
+
+.mapSvg [data-map-country]:focus {
+  outline: 0;
+  box-shadow: none;
 }
 
 .countryPathInteractive:focus-visible {
-  outline: none;
-  fill: rgba(25, 211, 207, 0.48);
-  stroke: #ffffff;
-  stroke-width: 2.4;
-  filter: drop-shadow(0 0 7px rgba(25, 211, 207, 0.38));
+  outline: 0;
+  fill: rgba(25, 211, 207, 0.5);
+  stroke: var(--sa-accent);
+  stroke-width: 2.2;
+  filter: drop-shadow(0 0 3px rgba(25, 211, 207, 0.42));
 }
 
 .mapTargetMuted {
-  opacity: 0.24;
+  opacity: 0.16;
 }
 
 .countryPathSelected {
-  fill: rgba(25, 211, 207, 0.76);
-  stroke: #0caeaa;
-  stroke-width: 2;
+  fill: rgba(25, 211, 207, 0.54);
+  stroke: var(--sa-accent);
+  stroke-width: 1.9;
   opacity: 1;
-  filter: drop-shadow(0 0 8px rgba(25, 211, 207, 0.28));
+  animation: selected-country-arrival 300ms ease-in-out both;
 }
 
-.markerTarget {
-  cursor: pointer;
-  opacity: 1;
-  pointer-events: none;
-  transition: opacity 240ms ease-in-out;
-}
-
-.markerTarget.mapTargetMuted {
-  opacity: 0.24;
-}
-
-.markerHitArea {
+.microstateHitArea {
   fill: transparent;
-  pointer-events: none;
-}
-
-.markerFocusRing {
-  fill: none;
   stroke: transparent;
-  stroke-width: 1.5;
-  pointer-events: none;
-  vector-effect: non-scaling-stroke;
+  pointer-events: stroke;
+  cursor: pointer;
 }
 
-.markerTarget:focus-visible {
+.mapHeaderActions {
+  display: flex;
+  min-width: 0;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--sa-space-1);
+}
+
+.mapContextLine {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: var(--sa-space-2);
+}
+
+.mapContextSeparator {
+  color: var(--sa-text-muted);
+  font-family: var(--sa-font-data);
+  font-size: 10px;
+  opacity: 0.55;
+}
+
+.mapCameraButton,
+.mapWorldButton,
+.mapContextAction {
+  display: inline-flex;
+  min-height: 32px;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--sa-radius-sm);
+  padding: 0 var(--sa-space-2);
+  font-family: var(--sa-font-data);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
   outline: none;
-}
-
-.markerTarget:focus-visible .markerFocusRing {
-  stroke: #ffffff;
-}
-
-.markerDot {
-  fill: #ff2fa8;
-  stroke: rgba(255, 255, 255, 0.95);
-  stroke-width: 1.4;
-  pointer-events: none;
   transition:
-    fill 240ms ease-in-out,
-    stroke 240ms ease-in-out,
-    filter 240ms ease-in-out;
+    border-color var(--sa-motion-fast) var(--sa-ease-standard),
+    background-color var(--sa-motion-fast) var(--sa-ease-standard),
+    color var(--sa-motion-fast) var(--sa-ease-standard);
 }
 
-.markerDotHovered {
-  fill: #19d3cf;
-  stroke: #0caeaa;
-  filter: drop-shadow(0 0 4px rgba(25, 211, 207, 0.36));
+.mapCameraButton,
+.mapWorldButton {
+  border: 1px solid var(--sa-border-subtle);
+  background: var(--sa-surface-2);
+  color: var(--sa-text-muted);
 }
 
-.markerDotSelected {
-  fill: #19d3cf;
-  stroke: #ffffff;
-  stroke-width: 2;
-  filter: drop-shadow(0 0 6px rgba(25, 211, 207, 0.48));
+.mapCameraButton {
+  width: 32px;
+  padding: 0;
+  font-size: 16px;
 }
 
-.selectedCountryLabel {
-  align-self: flex-start;
-  border: 1px solid rgba(25, 211, 207, 0.32);
+.mapWorldButton {
+  width: 32px;
+  padding: 0;
+  font-size: 15px;
+}
+
+.mapCameraButton:disabled,
+.mapWorldButton:disabled {
+  cursor: default;
+  opacity: 0.38;
+}
+
+.mapContextAction {
+  border: 1px solid transparent;
+  padding: 0;
+  color: var(--sa-accent);
+  font-size: 10px;
+  text-transform: uppercase;
+}
+
+.mapCameraButton:not(:disabled):hover,
+.mapWorldButton:not(:disabled):hover,
+.mapContextAction:hover {
+  border-color: var(--sa-border-active);
   background: rgba(25, 211, 207, 0.08);
-  color: #334155;
+  color: var(--sa-text-primary);
 }
 
-.resetMapButton {
-  min-height: 44px;
-  border: 1px solid rgba(255, 47, 168, 0.28);
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.74);
-  padding: 0.45rem 0.85rem;
-  color: #64748b;
-  font-size: 0.75rem;
-  font-weight: 900;
-  transition:
-    border-color 220ms ease-in-out,
-    color 220ms ease-in-out,
-    background-color 220ms ease-in-out;
+.mapCameraButton:focus-visible,
+.mapWorldButton:focus-visible,
+.mapContextAction:focus-visible {
+  box-shadow: 0 0 0 3px rgba(25, 211, 207, 0.2);
 }
 
-.resetMapButton:hover {
-  border-color: rgba(255, 47, 168, 0.58);
-  color: #ff2fa8;
+.mapTelemetry {
+  position: absolute;
+  bottom: var(--sa-space-1);
+  left: var(--sa-space-2);
+  display: flex;
+  max-width: calc(100% - var(--sa-space-4));
+  flex-wrap: wrap;
+  gap: var(--sa-space-1) var(--sa-space-3);
+  padding: 2px 0;
+  color: var(--sa-text-muted);
+  font-family: var(--sa-font-data);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  line-height: 1.35;
+  pointer-events: none;
 }
 
-.resetMapButton:focus-visible {
-  outline: none;
-  box-shadow: 0 0 0 4px rgba(255, 47, 168, 0.14);
-}
-
-.legendSwatch {
-  display: inline-block;
-  width: 14px;
-  height: 10px;
-  border-radius: 3px;
-}
-
-.legendDefault {
-  border: 1px solid rgba(47, 58, 70, 0.58);
-  background: rgba(25, 211, 207, 0.25);
-}
-
-.legendSelected {
-  border: 1px solid #0caeaa;
-  background: rgba(25, 211, 207, 0.76);
+.telemetryCoordinates:empty {
+  display: none;
 }
 
 .countryCard {
   min-width: 0;
-  border: 1px solid rgba(15, 23, 42, 0.1);
-  background: rgba(255, 255, 255, 0.72);
-  box-shadow: 0 7px 20px rgba(15, 23, 42, 0.04);
-  transition: border-color 220ms ease-in-out, box-shadow 220ms ease-in-out;
+  overflow: hidden;
+  transition:
+    border-color var(--sa-motion-standard) var(--sa-ease-standard),
+    background-color var(--sa-motion-standard) var(--sa-ease-standard),
+    box-shadow var(--sa-motion-standard) var(--sa-ease-standard);
 }
 
 .countryCard:hover {
-  border-color: rgba(25, 211, 207, 0.5);
-  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.07);
+  border-color: var(--sa-border-strong);
 }
 
-.achievement {
-  border: 1px solid rgba(25, 211, 207, 0.18);
-  background: rgba(25, 211, 207, 0.06);
+.countryCardSelected {
+  border-color: var(--sa-border-active);
+  background: color-mix(in srgb, var(--sa-surface-1) 92%, var(--sa-accent));
+  box-shadow: inset 3px 0 0 var(--sa-accent);
+}
+
+.trendPositive {
+  color: var(--sa-positive);
+}
+
+.trendNegative {
+  color: var(--sa-negative);
+}
+
+.trendNeutral {
+  color: var(--sa-chart-neutral);
 }
 
 .emptyState {
-  border: 1px dashed rgba(255, 47, 168, 0.42);
-  background: rgba(255, 255, 255, 0.62);
+  border: 1px dashed var(--sa-border-strong);
+  background: var(--sa-surface-2);
 }
 
 @keyframes count-entrance {
@@ -424,7 +452,6 @@
 
   .mapFrame {
     min-height: 370px;
-    padding: 1.5rem;
   }
 
   .countryList {
@@ -434,12 +461,23 @@
 
 @media (min-width: 1024px) {
   .atlasGrid {
-    grid-template-columns: minmax(240px, 0.3245fr) minmax(0, 1fr);
+    grid-template-columns: minmax(230px, 0.287fr) minmax(0, 1fr);
+    height: clamp(500px, calc(100dvh - 250px), 640px);
   }
 
   .sidebar,
   .mapPanel {
-    height: 680px;
+    height: auto;
+    min-height: 0;
+  }
+
+  .mapPanel {
+    border-top: 0;
+    border-left: 1px solid var(--sa-border-subtle);
+  }
+
+  .countryRow {
+    min-height: 40px;
   }
 
   .countryList {
@@ -448,8 +486,8 @@
 }
 
 :global(html.skillatlas-dark) .shell {
-  background: #2f3a46;
-  color: #e8eef7;
+  background: var(--sa-canvas);
+  color: var(--sa-text-primary);
 }
 
 :global(html.skillatlas-dark) .backgroundGlow {
@@ -465,99 +503,50 @@
     linear-gradient(90deg, rgba(203, 213, 225, 0.08) 1px, transparent 1px);
 }
 
-:global(html.skillatlas-dark) .panel {
-  border-color: rgba(255, 47, 168, 0.34);
-  background: rgba(53, 66, 80, 0.92);
-  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.16);
-}
-
-:global(html.skillatlas-dark) .selectControl {
-  border-color: rgba(25, 211, 207, 0.34);
-  background:
-    linear-gradient(45deg, transparent 50%, #19d3cf 50%) calc(100% - 18px) 20px / 5px 5px no-repeat,
-    linear-gradient(135deg, #19d3cf 50%, transparent 50%) calc(100% - 13px) 20px / 5px 5px no-repeat,
-    rgba(32, 43, 55, 0.94);
-  color: #e8eef7;
-}
-
 :global(html.skillatlas-dark) .countryRow {
-  color: #cbd5e1;
+  color: var(--sa-text-muted);
 }
 
 :global(html.skillatlas-dark) .countryRow:hover,
 :global(html.skillatlas-dark) .countryRowHovered,
 :global(html.skillatlas-dark) .countryRowActive {
-  color: #f8fafc;
+  color: var(--sa-text-primary);
 }
 
 :global(html.skillatlas-dark) .countryRowActive {
-  background: linear-gradient(90deg, rgba(25, 211, 207, 0.16), rgba(255, 47, 168, 0.08));
+  background: rgba(25, 211, 207, 0.13);
 }
 
 :global(html.skillatlas-dark) .mapFrame {
-  background:
-    radial-gradient(circle at 50% 50%, rgba(25, 211, 207, 0.1), transparent 54%),
-    rgba(32, 43, 55, 0.72);
+  background: #071521;
 }
 
-:global(html.skillatlas-dark) .oceanStart {
-  stop-color: #273341;
+:global(html.skillatlas-dark) .mapSurface {
+  fill: #071521;
 }
 
-:global(html.skillatlas-dark) .oceanEnd {
-  stop-color: #202b37;
+:global(html.skillatlas-dark) .graticule {
+  stroke: rgba(124, 233, 230, 0.11);
+}
+
+:global(html.skillatlas-dark) .coastlineLayer {
+  stroke: rgba(124, 233, 230, 0.76);
 }
 
 :global(html.skillatlas-dark) .countryPath {
-  fill: rgba(25, 211, 207, 0.19);
-  stroke: rgba(203, 213, 225, 0.5);
+  fill: rgba(25, 211, 207, 0.11);
+  stroke: rgba(124, 233, 230, 0.34);
 }
 
 :global(html.skillatlas-dark) .countryPathInteractive:hover,
 :global(html.skillatlas-dark) .countryPathHovered {
-  fill: rgba(25, 211, 207, 0.48);
+  fill: rgba(25, 211, 207, 0.44);
   stroke: #7ce9e6;
 }
 
 :global(html.skillatlas-dark) .countryPathSelected {
-  fill: rgba(25, 211, 207, 0.78);
+  fill: rgba(25, 211, 207, 0.5);
   stroke: #9af1ef;
-}
-
-:global(html.skillatlas-dark) .markerDot {
-  stroke: #202b37;
-}
-
-:global(html.skillatlas-dark) .markerDotHovered,
-:global(html.skillatlas-dark) .markerDotSelected {
-  fill: #19d3cf;
-  stroke: #e8eef7;
-}
-
-:global(html.skillatlas-dark) .selectedCountryLabel {
-  border-color: rgba(25, 211, 207, 0.38);
-  background: rgba(25, 211, 207, 0.1);
-  color: #e8eef7;
-}
-
-:global(html.skillatlas-dark) .resetMapButton {
-  border-color: rgba(255, 47, 168, 0.34);
-  background: rgba(32, 43, 55, 0.78);
-  color: #cbd5e1;
-}
-
-:global(html.skillatlas-dark) .countryCard {
-  border-color: rgba(203, 213, 225, 0.16);
-  background: rgba(39, 51, 65, 0.72);
-}
-
-:global(html.skillatlas-dark) .achievement {
-  border-color: rgba(25, 211, 207, 0.2);
-  background: rgba(25, 211, 207, 0.08);
-}
-
-:global(html.skillatlas-dark) .emptyState {
-  background: rgba(39, 51, 65, 0.65);
 }
 
 .placeholderBackLink {
@@ -586,14 +575,59 @@
   }
 
   .countryRow,
-  .activeMarker,
   .mapViewport,
   .countryPath,
-  .markerTarget,
-  .markerDot,
-  .countryCard,
-  .selectControl,
-  .resetMapButton {
+  .mapCameraButton,
+  .mapWorldButton,
+  .mapContextAction,
+  .countryCard {
     transition-duration: 0.01ms;
+  }
+
+  .countryRowActive,
+  .countryPathSelected {
+    animation: none;
+  }
+}
+
+@keyframes country-row-arrival {
+  from {
+    opacity: 0.74;
+    transform: translateX(-2px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes selected-country-arrival {
+  from {
+    opacity: 0.72;
+    filter: drop-shadow(0 0 4px rgba(25, 211, 207, 0.34));
+  }
+  to {
+    opacity: 1;
+    filter: none;
+  }
+}
+
+@media (max-width: 639px) {
+  .mapCameraButton {
+    width: 38px;
+  }
+
+  .mapCameraButton,
+  .mapWorldButton {
+    min-height: 38px;
+  }
+
+  .mapWorldButton {
+    width: 38px;
+  }
+
+  .mapTelemetry {
+    gap: var(--sa-space-1) var(--sa-space-2);
+    font-size: 8px;
   }
 }

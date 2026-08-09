@@ -1,120 +1,203 @@
-# SkillAtlas Style Guide
+# SkillAtlas Intelligence UI Style Guide
 
-This guide records the visual language already used across SkillAtlas. New work should extend these patterns instead of introducing a separate design system.
+This guide defines the canonical visual direction for SkillAtlas. The design system evolves the existing brand and product architecture; it does not replace working routes, navigation, light/dark mode, or product concepts.
 
-## Brand palette
+During the incremental migration, existing pages may still use older presentation patterns. New work and deliberately migrated pages should follow this guide instead of reproducing the legacy rounded-card system.
 
-| Colour | Value | Current use |
+## Design character
+
+SkillAtlas is a modern digital atlas and a global competitive gaming intelligence network.
+
+The interface should feel:
+
+- analytical
+- technological
+- precise
+- dense
+- contemporary
+- data-driven
+- globally connected
+
+It must not become:
+
+- literal military software
+- a retro terminal interface
+- cyberpunk
+- cluttered science fiction
+- a conventional oversized gaming dashboard
+
+Atmospheric map grids, geography, restrained glows, and technical metadata are appropriate when they support orientation or meaning. Decorative effects must not compete with the underlying information.
+
+## Core rule
+
+If information and interface chrome compete for space, the information should win.
+
+Maps, rankings, tables, charts, comparisons, and live/change indicators should occupy more visual space than their headings or containers. Prefer internal structure and alignment over wrapping every item in another card.
+
+## Brand and colour semantics
+
+The SkillAtlas brand colours remain unchanged:
+
+| Colour | Value | Canonical meaning |
 | --- | --- | --- |
-| Turquoise | `#19d3cf` | Primary accent, active navigation, positive movement, scores, focus rings, and primary selections |
-| Pink | `#ff2fa8` | Secondary accent, rank numbers, negative movement, structural borders, and alternate selections |
-| Light canvas | `#F8FAFC` to `#EEF7FA` | Page backgrounds and light atlas gradients |
-| Light surface | `#FFFFFF` | Cards, controls, menus, and table surfaces, usually with slight transparency |
-| Primary light text | `#111827` | Headings and high-emphasis content |
-| Dark canvas | `#2f3a46` | Main dark-mode background |
-| Dark surfaces | `#354250`, `#273341`, `#202b37` | Cards, controls, menus, and layered dark surfaces |
-| Primary dark text | `#e8eef7` | High-emphasis dark-mode text |
-| Muted dark text | `#cbd5e1` | Supporting dark-mode text |
+| Turquoise | `#19d3cf` | Active and selected states, positive movement, map geography, primary chart/data series, links, and focus |
+| Pink | `#ff2fa8` | Negative movement, alerts, exceptional change, and meaningful secondary signals |
+| Dark charcoal | `#2f3a46` | Primary dark-mode canvas |
+| Light canvas | `#F8FAFC` | Primary light-mode canvas |
 
-Use turquoise and pink at reduced opacity for borders, glows, chips, and background decoration. Reserve solid accent fills for selected controls and important actions so the interface does not become visually noisy.
+Pink is not the default structural border colour. Neutral borders define ordinary structure. Accent borders should indicate a meaningful state.
+
+Colour must not carry meaning alone. Pair movement and status colours with signs, arrows, labels, icons, position, or explanatory text.
 
 ## Light and dark modes
 
-- Every page and component must work in both modes.
-- Light mode uses a pale slate canvas, translucent white surfaces, dark slate text, and subtle shadows.
-- Dark mode uses layered charcoal surfaces rather than pure black, with pale slate text and softened borders.
-- Keep turquoise and pink recognisable in both modes; adjust opacity and surrounding contrast rather than replacing the brand colours.
-- Inputs, tables, menus, cards, charts, and overlays must all receive an intentional dark treatment.
-- Preserve the current theme toggle, stored preference, smooth theme transition, and light/dark title-logo swap.
-- Respect `prefers-reduced-motion` when adding transitions or animation.
+- Every migrated page and component must support both modes intentionally.
+- Light mode uses the light canvas, crisp white and pale-slate surfaces, dark primary text, and restrained shadows.
+- Dark mode uses layered charcoal surfaces rather than pure black.
+- Turquoise and pink retain the same semantic meanings in both modes.
+- Inputs, menus, tables, charts, overlays, and map legends require explicit theme treatment.
+- Preserve the existing theme toggle, stored preference, title-logo swap, and transition behavior.
+- The Intelligence UI semantic tokens in `app/globals.css` coexist with the legacy theme layer until pages adopt them explicitly.
 
-## Visual language
+## Geometry and surfaces
 
-SkillAtlas combines a clean atlas interface with a restrained gaming aesthetic:
+Canonical defaults:
 
-- Use soft turquoise and pink radial gradients, fine grid lines, globe/map motifs, and large low-opacity rings for atmosphere.
-- Keep decorative layers behind content and low contrast enough to preserve readability.
-- Use translucent panels and backdrop blur to create depth without heavy skeuomorphism.
-- Prefer crisp data presentation and clear hierarchy over excessive neon, glow, or animation.
-- Motion should support orientation: subtle fades, small translations, map movement, and the existing header shrink are appropriate.
+- panel radius: approximately `10px`
+- control radius: approximately `8px`
+- small radius: approximately `6px`
+- borders: thin `1px` rules
+- panel padding: generally `12-20px`
+- panel and layout gaps: generally `10-16px`
+- related regions: separate with internal dividers before adding nested cards
+- shadows: quiet and used only where elevation or layering is meaningful
 
-## Header and navigation
+Avoid pill shapes unless the semantic purpose genuinely calls for a pill, such as a compact status, live state, or short categorical badge. Buttons, filters, selects, tabs, search fields, metrics, and ordinary containers should not become pills by default.
 
-- Use one shared header/navigation implementation across every standard page.
-- The header remains fixed, uses a translucent blurred surface, and has a subtle pink bottom border.
-- Preserve the existing logo and title assets, their links, and the compact header state triggered by scrolling.
-- Keep the title readable and the theme toggle accessible at every viewport width.
-- Desktop navigation order is: `Rankings | World Map | Countries | Players | Forum | About`.
-- Rankings is the homepage and owns a dropdown containing `Rankings`, `User Rankings`, and `Live Rankings`.
-- Never show User Rankings or Live Rankings as separate top-level items.
-- Use the visible label `Players`, even though the current route is `/profiles`.
-- Forum links to `/forum`; About remains the final top-level item and should align beneath the theme control where the layout permits.
-- Active pages use turquoise text. Standard links use slate text with a turquoise hover state.
-- The Rankings dropdown uses a rounded, blurred card with a soft turquoise/pink wash, pink border, concise descriptions, and turquoise active state.
-- On compact layouts, replace the full navigation row with a menu that preserves the same order and Rankings hierarchy. Do not allow header content or controls to overflow horizontally.
-
-## Cards, borders, and surfaces
-
-- Use `rounded-3xl` for primary sections, hero panels, and large feature cards.
-- Use `rounded-2xl` for compact statistics, filters, search fields, and supporting panels.
-- Use fully rounded pills for tags, filters, scores, and small actions.
-- Primary panels typically use translucent white surfaces around 88-92% opacity, backdrop blur, and a subtle shadow.
-- Pink borders at roughly 35-45% opacity provide the main structural outline.
-- Turquoise borders identify focus, selection, or positive emphasis.
-- Neutral gray borders separate table rows, quiet controls, and nested content.
-- In dark mode, convert surfaces to layered charcoal and neutral borders to muted slate while retaining accent borders.
-- Interactive cards may lift slightly, strengthen their turquoise border, and gain a larger shadow on hover. Static cards should not move.
+Avoid large translucent SaaS cards, decorative structural pink borders, generous empty padding, nested bubbles, and sparse one-metric panels.
 
 ## Typography hierarchy
 
-The current interface uses a practical sans-serif stack: Arial, Helvetica, then the system sans-serif fallback.
+The primary interface remains a clean system sans-serif. Use the technical/data font stack selectively rather than making the entire site monospace.
 
-- Hero and page titles: bold or black, tightly tracked, generally `text-3xl` to `text-4xl` on larger screens.
-- Section titles: black weight with tight tracking, generally `text-lg` to `text-2xl`.
-- Key statistics and ranking values: black weight, sized for importance from `text-base` through `text-3xl`.
-- Eyebrows and data labels: `10-12px`, bold or black, uppercase, with wide letter spacing around `0.17em-0.28em`.
-- Body copy: usually `14-16px`, normal to semibold, with relaxed line height and muted slate colour.
-- Tags and metadata: `11-12px`, semibold or bold, concise, and readable without relying on colour alone.
-- Preserve hierarchy on mobile by reducing large headings slightly; do not shrink body text or controls below comfortable reading and interaction sizes.
+Approximate hierarchy:
 
-## Spacing and layout consistency
+| Role | Size |
+| --- | --- |
+| Page title | `32-40px` |
+| Section heading | `20-24px` |
+| Panel heading | `14-18px` |
+| Body and data | `13-15px` |
+| Technical label | `10-12px`, uppercase |
+| Major metric | `20-28px` |
 
-- Use the existing Tailwind spacing rhythm based on 4px increments.
-- Standard panel padding is commonly `p-5` or `p-6`; compact cards and controls use `p-3` or `p-4`.
-- Common grid and flex gaps are `gap-3` through `gap-6`.
-- Separate major sections with approximately `mb-6` and keep related labels, titles, and descriptions closer together.
-- Standard page content is centred in a `max-w-7xl` container.
-- Maintain consistent outer gutters. Reduce desktop padding on phones, but keep at least 16px between content and viewport edges.
-- Avoid one-off spacing values unless required by a map, chart, or fixed header interaction.
+Restrained monospace or semi-monospace treatment is appropriate for:
 
-## Hover, focus, and selected states
+- rankings
+- scores
+- percentages
+- timestamps
+- deltas
+- technical metadata
 
-- Use transitions around 160-300ms for colour, border, opacity, shadow, and small transforms.
-- Default hover emphasis is turquoise text or border. Pink is appropriate for secondary/alternate controls or negative actions.
-- Selected primary controls use a solid turquoise fill with white text and a soft turquoise shadow.
-- Selected alternate or time-period controls may use a solid pink fill with white text and a soft pink shadow.
-- Focused form controls use a turquoise border and a visible soft turquoise ring.
-- Table rows use a very light turquoise or neutral surface on hover.
-- Active, hover, focus, disabled, and selected states must remain distinguishable in both themes and must not depend on colour alone.
+Technical labels should be concise. Wide tracking may be used carefully, but labels should not create excessive vertical space.
 
-## Charts and ranking colours
+## Information density and layout
 
-- Turquoise represents positive movement, upward trends, strength, active scores, and favourable momentum.
-- Pink represents negative movement, downward trends, rank numbering, loss, or contrasting comparison data.
-- Neutral slate or gray represents baselines, inactive data, axes, supporting labels, and unchanged values.
-- Use turquoise for the primary line in neutral single-series charts.
-- In directional charts, use turquoise for rising data and pink for falling data; pair colour with arrows, signs, or labels.
-- Use subtle accent fills and glows behind data. Keep plotting areas and labels high contrast in both modes.
-- Apply the same meaning consistently across charts, tables, badges, and summary cards. Do not reverse positive and negative colours between pages.
-- Ranking order must remain legible without colour; position, numbers, labels, and movement indicators carry the primary meaning.
+- Use consistent alignment, dividers, columns, and compact toolbars to establish hierarchy.
+- Group related metrics into strips or grids instead of separate cards.
+- Keep headers proportionate to the data region they describe.
+- Prefer compact tables and lists where scanning is more useful than card browsing.
+- Do not manufacture density with irrelevant metadata or decorative charts.
+- Keep standard page gutters and the established responsive container behavior unless a map or data table requires a deliberate exception.
+- Preserve clear empty, loading, error, and selected states.
 
-## Responsive expectations
+## Controls and responsive density
 
-- Treat 390px, 768px, 1024px, and 1440px as practical review widths.
-- Start with a single-column mobile layout, then introduce multi-column grids at the existing `sm`, `md`, `lg`, and `xl` breakpoints when space permits.
-- Preserve the established desktop layout at 1024px and above unless a feature specifically requires another treatment.
-- Reflow metadata, filters, actions, and statistics instead of forcing fixed or minimum widths.
-- Search fields and primary controls should fill their container on narrow screens.
-- Wide tables, charts, and category rows need an intentional responsive treatment such as a compact card layout or polished, scrollbar-hidden horizontal region.
-- Prevent document-level horizontal overflow. Titles, tags, previews, activity details, statistics, and actions must remain reachable.
-- Touch targets should remain comfortably usable, and hover-only behavior must have keyboard and touch equivalents.
+- Desktop controls may use a compact `40px` height.
+- Touch and mobile controls should remain at least approximately `44px` where appropriate.
+- Search, selects, tabs, and filter controls should use consistent border, radius, label, focus, and disabled treatments.
+- Prefer a compact custom-styled native select over the browser-default visual treatment.
+- On narrow screens, reflow toolbars and metrics rather than forcing desktop proportions.
+- Never trade away readable text, keyboard focus, or comfortable touch targets merely to increase density.
+- Prevent document-level horizontal overflow at practical review widths of `390px`, `768px`, `1024px`, and `1440px`.
+
+## Data visualisation
+
+Prefer compact, purposeful visualisations such as:
+
+- sparklines
+- mini bars
+- signed deltas
+- trend indicators
+- ranking movement
+- historical movement
+- percentage distributions
+- timestamps
+- regional comparisons
+- live and status indicators
+
+Charts must communicate real information. Do not add decorative graphs or fabricate data to fill a panel.
+
+Turquoise is the primary neutral/positive series. Pink represents negative movement, alerts, or a meaningful secondary comparison. Neutral slate is used for baselines, axes, inactive data, and context.
+
+Ranking order must remain understandable through number, position, and text without relying on colour.
+
+## Maps and geographic interfaces
+
+- Geography is the primary visual content, not decoration.
+- Give map canvases more space than their headings, controls, or legends.
+- Use fine grid lines, restrained borders, and clear selected/hovered states.
+- Keep controls compact and group technical map metadata coherently.
+- Geographic travel may take longer than ordinary UI motion when the eye needs to follow the movement.
+- Preserve pointer, touch, and keyboard equivalents for map selection.
+- Never change map projection, hit testing, selection, zoom, or navigation behavior as an incidental consequence of a visual refactor.
+
+## Header and navigation
+
+- Continue using the single shared header implementation.
+- Preserve the logo/title assets, theme toggle, active-route styling, sticky and compact-scroll behavior, desktop navigation, and mobile menu behavior.
+- Desktop navigation order remains `Rankings | World Map | Countries | Players | Forum | About`.
+- The Rankings dropdown contains `Rankings`, `User Rankings`, and `Live Rankings`.
+- User Rankings and Live Rankings must not appear as separate top-level items.
+- Use `Players`, not `Profiles`, in visible navigation.
+- Any future Intelligence UI restyle of the header must be performed as a dedicated, regression-tested change rather than as a side effect of a page migration.
+
+## Interaction, focus, and selected states
+
+- Active and selected states use turquoise by default.
+- Positive deltas use turquoise; negative deltas use pink.
+- Hover should clarify interactivity without decorative lifting or oversized shadow changes.
+- Focus indicators must remain clearly visible in both modes.
+- Selected, hover, focus, disabled, live, and alert states must remain distinguishable without relying only on colour.
+- Keep control and map semantics available to keyboard and assistive-technology users.
+
+## Motion
+
+Canonical timings:
+
+| Motion | Duration |
+| --- | --- |
+| Fast feedback | `160ms` |
+| Standard interface change | `240ms` |
+| Navigation and menu change | `300ms` |
+| Geographic/map travel | approximately `400-500ms` |
+
+Use restrained ease-in-out motion. Movement should communicate navigation, change, live activity, or data updates.
+
+Avoid:
+
+- bounce
+- spring
+- elastic motion
+- decorative floating
+
+Respect `prefers-reduced-motion`. Reduced motion must not remove essential state feedback.
+
+## Incremental adoption
+
+- Do not apply the new semantic tokens globally to legacy page components.
+- A migrated page should adopt semantic tokens and validated shared primitives explicitly.
+- Create shared components from proven page usage rather than speculative APIs.
+- Preserve working functionality and responsive behavior while changing presentation.
+- Validate every migrated page in light and dark mode, with keyboard interaction, reduced motion, and the standard responsive review widths.
