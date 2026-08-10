@@ -188,9 +188,18 @@ export default function PlayersPage() {
     const ranked = [...scopedPlayers].sort(
       (left, right) => right.score - left.score || left.rank - right.rank,
     );
-    const biggestMover = [...scopedPlayers].sort(
-      (left, right) => Math.abs(right.trend) - Math.abs(left.trend),
-    )[0];
+    const biggestMover = [...ranked]
+      .filter((profile) => profile.trend > 0)
+      .sort(
+        (left, right) =>
+          right.trend - left.trend || left.rank - right.rank,
+      )[0];
+    const biggestFaller = [...ranked]
+      .filter((profile) => profile.trend < 0)
+      .sort(
+        (left, right) =>
+          left.trend - right.trend || left.rank - right.rank,
+      )[0];
 
     return {
       topPlayer: ranked[0],
@@ -199,17 +208,10 @@ export default function PlayersPage() {
           .slice(0, Math.min(10, ranked.length))
           .map((profile) => profile.country),
       ),
-      topGame:
-        selectedGame === "Overall"
-          ? mostCommonValue(
-              ranked
-                .slice(0, Math.min(10, ranked.length))
-                .map((profile) => gameDisplayName(profile.game)),
-            )
-          : gameDisplayName(selectedGame),
       biggestMover,
+      biggestFaller,
     };
-  }, [scopedPlayers, selectedGame]);
+  }, [scopedPlayers]);
 
   function handleSort(nextKey: SortKey) {
     if (sortKey === nextKey) {
@@ -315,18 +317,23 @@ export default function PlayersPage() {
             </p>
           </div>
           <div className="min-w-0 border-r border-sa-border-subtle px-sa-3 py-sa-3">
-            <DataLabel as="p">Top game</DataLabel>
-            <p className="mt-1 truncate text-sm font-black">
-              {summary.topGame || "—"}
-            </p>
-          </div>
-          <div className="min-w-0 px-sa-3 py-sa-3">
             <DataLabel as="p">Biggest mover</DataLabel>
             <p className="mt-1 flex items-center gap-2 truncate text-sm font-black">
               <span className="truncate">{summary.biggestMover?.handle ?? "—"}</span>
               {summary.biggestMover ? (
                 <span className={movementClass(summary.biggestMover.trend)}>
                   {movementLabel(summary.biggestMover.trend)}
+                </span>
+              ) : null}
+            </p>
+          </div>
+          <div className="min-w-0 px-sa-3 py-sa-3">
+            <DataLabel as="p">Biggest faller</DataLabel>
+            <p className="mt-1 flex items-center gap-2 truncate text-sm font-black">
+              <span className="truncate">{summary.biggestFaller?.handle ?? "—"}</span>
+              {summary.biggestFaller ? (
+                <span className={movementClass(summary.biggestFaller.trend)}>
+                  {movementLabel(summary.biggestFaller.trend)}
                 </span>
               ) : null}
             </p>
