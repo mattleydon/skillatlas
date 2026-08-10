@@ -234,7 +234,7 @@ export default function PlayersPage() {
     <main className="relative min-h-screen overflow-x-clip bg-sa-canvas text-sa-text-primary">
       <PlayersBackground />
 
-      <div className="relative mx-auto w-full max-w-[1600px] px-4 pb-7 pt-[88px] sm:px-6 sm:pt-[92px] lg:px-8 lg:pb-9 xl:pt-[132px]">
+      <div className="skillatlas-page-shell relative mx-auto w-full max-w-[1600px] px-4 pb-7 sm:px-6 lg:px-8 lg:pb-9">
         <IntelligencePanel
           as="section"
           aria-labelledby="elite-player-rankings-title"

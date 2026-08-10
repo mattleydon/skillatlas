@@ -108,3 +108,13 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+.skillatlas-page-shell {
+  padding-top: calc(80px + var(--sa-space-3));
+}
+
+@media (min-width: 1280px) {
+  .skillatlas-page-shell {
+    padding-top: calc(126px + var(--sa-space-3));
+  }
+}

@@ -1,7 +1,7 @@
 "use client";
 
 import type { ClipboardEvent, FormEvent, KeyboardEvent, ReactNode } from "react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { flushSync } from "react-dom";
 import { usePathname } from "next/navigation";
 import { createClient } from "@supabase/supabase-js";
@@ -151,10 +151,26 @@ type ViewTransitionDocument = Document & {
   };
 };
 
+type SkillAtlasThemeContextValue = {
+  darkMode: boolean;
+  toggleTheme: () => void;
+};
+
+const SkillAtlasThemeContext = createContext<SkillAtlasThemeContextValue | null>(null);
+
+export function useSkillAtlasTheme() {
+  const context = useContext(SkillAtlasThemeContext);
+
+  if (!context) {
+    throw new Error("useSkillAtlasTheme must be used within ThemeProvider");
+  }
+
+  return context;
+}
+
 export default function ThemeProvider({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const isSkillInvadersPage = pathname?.startsWith(ROUTES.spaceInvaders) ?? false;
-  const hideToggle = isSkillInvadersPage;
   const hideLiveChat = isSkillInvadersPage;
 
   const [darkMode, setDarkMode] = useState(true);
@@ -170,9 +186,6 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
   const commentsEndRef = useRef<HTMLDivElement | null>(null);
   const commentEditorRef = useRef<HTMLDivElement | null>(null);
   const savedEditorRangeRef = useRef<Range | null>(null);
-  const [ready, setReady] = useState(false);
-  const [headerShrunk, setHeaderShrunk] = useState(false);
-
   useEffect(() => {
     const savedTheme = window.localStorage.getItem(THEME_KEY);
     const shouldUseDark = savedTheme !== "light";
@@ -180,21 +193,9 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
     const frame = window.requestAnimationFrame(() => {
       setDarkMode(shouldUseDark);
       applyTheme(shouldUseDark);
-      setReady(true);
     });
 
     return () => window.cancelAnimationFrame(frame);
-  }, []);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setHeaderShrunk(window.scrollY > 24);
-    };
-
-    handleScroll();
-    window.addEventListener("scroll", handleScroll, { passive: true });
-
-    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   useEffect(() => {
@@ -288,7 +289,7 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
     commentsEndRef.current?.scrollIntoView({ block: "end" });
   }, [chatOpen, comments.length, commentsError]);
 
-  function setTheme(nextDarkMode: boolean) {
+  const setTheme = useCallback((nextDarkMode: boolean) => {
     const updateThemeNow = () => {
       flushSync(() => {
         setDarkMode(nextDarkMode);
@@ -312,11 +313,16 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
     }
 
     updateThemeNow();
-  }
+  }, []);
 
-  function toggleTheme() {
+  const toggleTheme = useCallback(() => {
     setTheme(!document.documentElement.classList.contains("skillatlas-dark"));
-  }
+  }, [setTheme]);
+
+  const themeContextValue = useMemo(
+    () => ({ darkMode, toggleTheme }),
+    [darkMode, toggleTheme]
+  );
 
   function editorIsEmpty() {
     const editor = commentEditorRef.current;
@@ -504,7 +510,7 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <>
+    <SkillAtlasThemeContext.Provider value={themeContextValue}>
       <style>{`
         :root {
           --skillatlas-charcoal: #2f3a46;
@@ -593,6 +599,33 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
           margin-left: clamp(12px, 2.2vw, 38px) !important;
           margin-right: clamp(6px, 1vw, 18px) !important;
           max-width: none !important;
+        }
+
+        @media (min-width: 1280px) {
+          header nav.skillatlas-desktop-nav {
+            display: grid !important;
+            flex: 0 0 700px !important;
+            width: 700px;
+            align-self: stretch;
+            grid-template-columns: repeat(6, minmax(0, 1fr));
+            align-items: center;
+            justify-items: center;
+            margin-left: auto !important;
+            margin-right: 0 !important;
+          }
+
+          header nav.skillatlas-desktop-nav > * {
+            min-width: 0;
+          }
+        }
+
+        .skillatlas-about-slot {
+          position: relative;
+          display: flex;
+          width: 100%;
+          height: 100%;
+          align-items: center;
+          justify-content: center;
         }
 
         header nav .skillatlas-rankings-dropdown {
@@ -935,10 +968,8 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
         }
 
         .skillatlas-theme-switch {
-          position: fixed;
-          right: 56px;
-          top: 12px;
-          z-index: 100;
+          position: relative;
+          flex: 0 0 auto;
           width: 46px;
           height: 24px;
           border-radius: 999px;
@@ -949,13 +980,36 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
             background-color 180ms ease,
             border-color 180ms ease,
             opacity 180ms ease,
-            transform 180ms ease,
             box-shadow 180ms ease;
         }
 
         .skillatlas-theme-switch:hover {
-          transform: translateY(-1px);
           border-color: var(--skillatlas-turquoise);
+        }
+
+        .skillatlas-theme-switch-desktop {
+          position: absolute;
+          left: 50%;
+          top: 12px;
+          z-index: 2;
+          transform: translateX(-50%);
+          transition:
+            top 300ms ease,
+            background-color 180ms ease,
+            border-color 180ms ease,
+            opacity 180ms ease,
+            box-shadow 180ms ease;
+        }
+
+        header[data-scrolled="true"] .skillatlas-theme-switch-desktop {
+          top: 0;
+        }
+
+        .skillatlas-theme-switch-mobile {
+          position: fixed;
+          right: 56px;
+          top: 12px;
+          z-index: 100;
         }
 
         .skillatlas-theme-track-icon {
@@ -1637,7 +1691,7 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
         }
 
         @media (max-width: 900px) {
-          .skillatlas-theme-switch {
+          .skillatlas-theme-switch-mobile {
             right: 18px;
             top: 12px;
           }
@@ -1657,20 +1711,6 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
           }
         }
       `}</style>
-
-      <button
-        type="button"
-        onClick={toggleTheme}
-        className={`skillatlas-theme-switch ${
-          ready && !headerShrunk && !hideToggle ? "opacity-100" : "pointer-events-none -translate-y-2 opacity-0"
-        }`}
-        aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
-        aria-pressed={darkMode}
-      >
-        <span className="skillatlas-theme-track-icon skillatlas-theme-sun">☀</span>
-        <span className="skillatlas-theme-track-icon skillatlas-theme-moon">☾</span>
-        <span className="skillatlas-theme-knob" />
-      </button>
 
       {!hideLiveChat && (
         <div className="skillatlas-live-chat">
@@ -1800,6 +1840,6 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
       )}
 
       {children}
-    </>
+    </SkillAtlasThemeContext.Provider>
   );
 }
