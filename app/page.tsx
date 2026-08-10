@@ -116,6 +116,39 @@ function RankingsBackground() {
   );
 }
 
+function RankingTableColumns({ scope }: { scope: CountryRankingScope }) {
+  const overall = scope === "Overall";
+
+  return (
+    <colgroup>
+      <col
+        className={`w-[14%] sm:w-[10%] md:w-[8%] lg:w-[7%] ${overall ? "xl:w-[6%]" : "xl:w-[7%]"}`}
+      />
+      <col
+        className={`w-[62%] sm:w-[52%] md:w-[31%] ${overall ? "lg:w-[25%] xl:w-[24%]" : "lg:w-[31%] xl:w-[31%]"}`}
+      />
+      <col
+        className={`hidden md:table-column md:w-[18%] ${overall ? "lg:w-[13%] xl:w-[12%]" : "lg:w-[16%] xl:w-[16%]"}`}
+      />
+      {overall ? (
+        <col className="hidden lg:table-column lg:w-[18%] xl:w-[16%]" />
+      ) : null}
+      <col
+        className={`w-[24%] sm:w-[20%] md:w-[15%] ${overall ? "lg:w-[13%] xl:w-[11%]" : "lg:w-[18%] xl:w-[18%]"}`}
+      />
+      {overall ? (
+        <col className="hidden xl:table-column xl:w-[11%]" />
+      ) : null}
+      <col
+        className={`hidden md:table-column md:w-[16%] ${overall ? "lg:w-[14%] xl:w-[11%]" : "lg:w-[16%] xl:w-[16%]"}`}
+      />
+      <col
+        className={`hidden sm:table-column sm:w-[18%] md:w-[12%] ${overall ? "lg:w-[10%] xl:w-[9%]" : "lg:w-[12%] xl:w-[12%]"}`}
+      />
+    </colgroup>
+  );
+}
+
 export default function RankingsPage() {
   const [search, setSearch] = useState("");
   const [selectedScope, setSelectedScope] =
@@ -367,10 +400,11 @@ export default function RankingsPage() {
           }
         >
           {visibleCountries.length ? (
-            <table className="w-full table-fixed border-collapse md:table-auto xl:table-fixed">
+            <table className="w-full table-fixed border-collapse">
               <caption className="sr-only">
                 Prototype global country rankings. Activate a column heading to sort.
               </caption>
+              <RankingTableColumns scope={selectedScope} />
               <thead className="border-b border-sa-border-subtle bg-sa-surface-2/75">
                 <tr>
                   <SortHeader
@@ -379,7 +413,6 @@ export default function RankingsPage() {
                     activeKey={sortKey}
                     direction={sortDirection}
                     onSort={handleSort}
-                    className={`w-14 sm:w-20 ${selectedScope === "Overall" ? "xl:w-[6%]" : "xl:w-[7%]"}`}
                   />
                   <SortHeader
                     label="Country"
@@ -387,18 +420,17 @@ export default function RankingsPage() {
                     activeKey={sortKey}
                     direction={sortDirection}
                     onSort={handleSort}
-                    className={selectedScope === "Overall" ? "xl:w-[24%]" : "xl:w-[36%]"}
                   />
                   <th
                     scope="col"
-                    className={`hidden px-sa-3 py-sa-3 text-left text-[10px] font-bold uppercase tracking-[0.14em] text-sa-text-technical md:table-cell ${selectedScope === "Overall" ? "xl:w-[12%]" : "xl:w-[18%]"}`}
+                    className="hidden px-sa-3 py-sa-3 text-left text-[10px] font-bold uppercase tracking-[0.14em] text-sa-text-technical md:table-cell"
                   >
                     Region
                   </th>
                   {selectedScope === "Overall" ? (
                     <th
                       scope="col"
-                      className="hidden px-sa-3 py-sa-3 text-left text-[10px] font-bold uppercase tracking-[0.14em] text-sa-text-technical lg:table-cell xl:w-[16%]"
+                      className="hidden px-sa-3 py-sa-3 text-left text-[10px] font-bold uppercase tracking-[0.14em] text-sa-text-technical lg:table-cell"
                     >
                       Best game
                     </th>
@@ -409,12 +441,12 @@ export default function RankingsPage() {
                     activeKey={sortKey}
                     direction={sortDirection}
                     onSort={handleSort}
-                    className={`w-24 text-right sm:w-28 ${selectedScope === "Overall" ? "xl:w-[11%]" : "xl:w-[14%]"}`}
+                    className="text-right"
                   />
                   {selectedScope === "Overall" ? (
                     <th
                       scope="col"
-                      className="hidden px-sa-3 py-sa-3 text-left text-[10px] font-bold uppercase tracking-[0.14em] text-sa-text-technical xl:table-cell xl:w-[11%]"
+                      className="hidden px-sa-3 py-sa-3 text-left text-[10px] font-bold uppercase tracking-[0.14em] text-sa-text-technical xl:table-cell"
                     >
                       Trend
                     </th>
@@ -425,7 +457,7 @@ export default function RankingsPage() {
                     activeKey={sortKey}
                     direction={sortDirection}
                     onSort={handleSort}
-                    className={`hidden text-right md:table-cell ${selectedScope === "Overall" ? "xl:w-[11%]" : "xl:w-[14%]"}`}
+                    className="hidden text-right md:table-cell"
                   />
                   <SortHeader
                     label="Rank change"
@@ -433,7 +465,7 @@ export default function RankingsPage() {
                     activeKey={sortKey}
                     direction={sortDirection}
                     onSort={handleSort}
-                    className={`hidden text-right sm:table-cell ${selectedScope === "Overall" ? "xl:w-[9%]" : "xl:w-[11%]"}`}
+                    className="hidden text-right sm:table-cell"
                   />
                 </tr>
               </thead>
