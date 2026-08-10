@@ -8,8 +8,11 @@ import {
   RANKING_NAV_ITEMS as rankingItems,
   ROUTES,
 } from "@/constants/routes";
+import { useSkillAtlasTheme } from "@/app/theme-provider";
 
 const rankingPaths = new Set<string>(rankingItems.map((item) => item.href));
+const desktopNavigationItems = navigationItems.filter((item) => item.href !== ROUTES.about);
+const aboutNavigationItem = navigationItems.find((item) => item.href === ROUTES.about);
 const mobileMenuId = "skillatlas-mobile-navigation";
 const mobileRankingsMenuId = "skillatlas-mobile-rankings-navigation";
 
@@ -23,8 +26,35 @@ function pathIsActive(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
+function ThemeSwitch({
+  className,
+  darkMode,
+  onToggle,
+}: {
+  className: string;
+  darkMode: boolean;
+  onToggle: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onToggle}
+      className={`skillatlas-theme-switch ${className}`}
+      aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
+      aria-pressed={darkMode}
+    >
+      <span className="skillatlas-theme-visual-track" aria-hidden="true">
+        <span className="skillatlas-theme-track-icon skillatlas-theme-sun">☀</span>
+        <span className="skillatlas-theme-track-icon skillatlas-theme-moon">☾</span>
+        <span className="skillatlas-theme-knob" />
+      </span>
+    </button>
+  );
+}
+
 export default function SiteHeader() {
   const pathname = normalisePath(usePathname() || ROUTES.rankings);
+  const { darkMode, toggleTheme } = useSkillAtlasTheme();
   const hidden = pathname.startsWith(ROUTES.spaceInvaders);
   const rankingsActive = rankingPaths.has(pathname);
   const mobileRankingsDefaultOpen = pathname === ROUTES.userRankings || pathname === ROUTES.liveRankings;
@@ -34,7 +64,6 @@ export default function SiteHeader() {
     pathname,
     open: mobileRankingsDefaultOpen,
   });
-  const desktopNavRef = useRef<HTMLElement | null>(null);
   const headerRef = useRef<HTMLElement | null>(null);
   const mobileMenuButtonRef = useRef<HTMLButtonElement | null>(null);
   const mobileMenuOpen = mobileMenuPath === pathname;
@@ -107,70 +136,6 @@ export default function SiteHeader() {
     return () => desktopQuery.removeEventListener("change", handleDesktopChange);
   }, [closeMobileMenu]);
 
-  const alignNavigationToThemeToggle = useCallback(() => {
-    const nav = desktopNavRef.current;
-
-    if (!nav) return;
-
-    const items = Array.from(nav.children).filter(
-      (child): child is HTMLElement => child instanceof HTMLElement
-    );
-
-    items.forEach((item) => {
-      item.style.transform = "";
-    });
-
-    if (!window.matchMedia("(min-width: 1280px)").matches || items.length < 2) return;
-
-    const switchButton = document.querySelector<HTMLElement>(".skillatlas-theme-switch");
-
-    if (!switchButton) return;
-
-    const switchRect = switchButton.getBoundingClientRect();
-
-    if (switchRect.width <= 0) return;
-
-    const switchCentre = switchRect.left + switchRect.width / 2;
-    const itemRects = items.map((item) => item.getBoundingClientRect());
-    const itemWidths = itemRects.map((rect) => rect.width);
-    const firstLeft = itemRects[0].left;
-    const lastWidth = itemWidths[itemWidths.length - 1] ?? 0;
-    const lastLeft = switchCentre - lastWidth / 2;
-    const totalItemWidth = itemWidths.reduce((sum, width) => sum + width, 0);
-    const availableGapSpace = Math.max(0, lastLeft + lastWidth - firstLeft - totalItemWidth);
-    const equalGap = availableGapSpace / Math.max(items.length - 1, 1);
-
-    let nextLeft = firstLeft;
-
-    items.forEach((item, index) => {
-      const rect = itemRects[index];
-      const targetLeft = index === items.length - 1 ? lastLeft : nextLeft;
-      const offset = targetLeft - rect.left;
-
-      item.style.transform = `translateX(${offset.toFixed(2)}px)`;
-      nextLeft = targetLeft + itemWidths[index] + equalGap;
-    });
-  }, []);
-
-  useEffect(() => {
-    if (hidden) return;
-
-    let frame = window.requestAnimationFrame(alignNavigationToThemeToggle);
-    const scheduleAlignment = () => {
-      window.cancelAnimationFrame(frame);
-      frame = window.requestAnimationFrame(alignNavigationToThemeToggle);
-    };
-
-    window.addEventListener("resize", scheduleAlignment);
-    window.addEventListener("skillatlas-theme-change", scheduleAlignment);
-
-    return () => {
-      window.cancelAnimationFrame(frame);
-      window.removeEventListener("resize", scheduleAlignment);
-      window.removeEventListener("skillatlas-theme-change", scheduleAlignment);
-    };
-  }, [alignNavigationToThemeToggle, hidden, pathname, scrolled]);
-
   if (hidden) return null;
 
   const linkClassName = `font-semibold text-gray-700 transition-all duration-300 hover:text-[#19d3cf] ${
@@ -180,12 +145,13 @@ export default function SiteHeader() {
   return (
     <header
       ref={headerRef}
+      data-scrolled={scrolled ? "true" : "false"}
       className={`fixed left-0 right-0 top-0 z-50 border-b border-[#ff2fa8]/25 bg-white/95 backdrop-blur transition-all duration-300 ${
         scrolled ? "h-[68px] xl:h-[72px]" : "h-[80px] xl:h-[126px]"
       }`}
     >
       <div className="mx-auto flex h-full max-w-7xl items-center px-4 pr-[124px] sm:px-6 sm:pr-[124px] min-[901px]:pr-[164px] xl:px-8 xl:pr-8">
-        <div className="flex min-w-0 shrink-0 items-center gap-3 xl:mr-14 xl:gap-5">
+        <div className="flex min-w-0 shrink-0 items-center gap-3 xl:mr-8 xl:gap-5">
           <a
             href={ROUTES.spaceInvaders}
             className={`relative shrink-0 transition-all duration-300 ${
@@ -226,8 +192,7 @@ export default function SiteHeader() {
         </div>
 
         <nav
-          ref={desktopNavRef}
-          className="skillatlas-desktop-nav hidden flex-1 items-center justify-around xl:flex"
+          className="skillatlas-desktop-nav hidden items-center xl:grid"
           aria-label="Primary navigation"
         >
           <div className="skillatlas-rankings-dropdown" data-skillatlas-rankings-dropdown="true">
@@ -260,7 +225,7 @@ export default function SiteHeader() {
             </div>
           </div>
 
-          {navigationItems.map((item) => {
+          {desktopNavigationItems.map((item) => {
             const active = pathIsActive(pathname, item.href);
 
             return (
@@ -274,7 +239,30 @@ export default function SiteHeader() {
               </a>
             );
           })}
+
+          {aboutNavigationItem && (
+            <div className="skillatlas-about-slot">
+              <a
+                href={aboutNavigationItem.href}
+                className={`${linkClassName} ${pathIsActive(pathname, aboutNavigationItem.href) ? "skillatlas-active-nav" : ""}`}
+                aria-current={pathIsActive(pathname, aboutNavigationItem.href) ? "page" : undefined}
+              >
+                {aboutNavigationItem.label}
+              </a>
+              <ThemeSwitch
+                className="skillatlas-theme-switch-desktop"
+                darkMode={darkMode}
+                onToggle={toggleTheme}
+              />
+            </div>
+          )}
         </nav>
+
+        <ThemeSwitch
+          className="skillatlas-theme-switch-mobile xl:hidden"
+          darkMode={darkMode}
+          onToggle={toggleTheme}
+        />
 
         <button
           ref={mobileMenuButtonRef}
