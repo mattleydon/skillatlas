@@ -298,6 +298,30 @@
   }
 }
 
+@media (min-width: 900px) {
+  .globeFrame {
+    position: absolute;
+    inset: 0;
+    width: auto;
+    aspect-ratio: auto;
+  }
+
+  .globeViewport {
+    width: 100%;
+    height: 100%;
+  }
+
+  .globeCanvas {
+    inset: auto;
+    top: 50%;
+    left: 50%;
+    width: auto;
+    height: 640px;
+    aspect-ratio: 1;
+    transform: translate(-50%, -50%);
+  }
+}
+
 @media (min-width: 1200px) {
   .metricGrid {
     grid-template-columns: repeat(6, minmax(0, 1fr));

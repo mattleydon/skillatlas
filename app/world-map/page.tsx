@@ -550,6 +550,41 @@ function clampMapView(view: MapView, frame: HTMLDivElement | null) {
   const width = frame.clientWidth;
   const height = frame.clientHeight;
 
+  // Desktop uses the whole rectangular map stage as the camera viewport while
+  // keeping the rendered globe square and centred inside it. Constrain the
+  // transformed globe against that outer viewport rather than the old 640px
+  // square so useful panel width remains available during zoom.
+  if (width > height + 40) {
+    const globeSize = Math.max(
+      1,
+      Math.min(CANVAS_SIZE, width - 32)
+    );
+    const globeLeft = (width - globeSize) / 2;
+    const globeTop = (height - globeSize) / 2;
+    const horizontalLimits = [
+      -globeLeft * scale,
+      width - (globeLeft + globeSize) * scale,
+    ];
+    const verticalLimits = [
+      -globeTop * scale,
+      height - (globeTop + globeSize) * scale,
+    ];
+
+    return {
+      scale,
+      translateX: clamp(
+        view.translateX,
+        Math.min(...horizontalLimits),
+        Math.max(...horizontalLimits)
+      ),
+      translateY: clamp(
+        view.translateY,
+        Math.min(...verticalLimits),
+        Math.max(...verticalLimits)
+      ),
+    };
+  }
+
   return {
     scale,
     translateX: clamp(view.translateX, width - width * scale, 0),
