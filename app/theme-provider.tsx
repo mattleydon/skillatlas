@@ -977,18 +977,34 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
           min-height: 24px;
           max-height: 24px;
           padding: 0;
+          border: 0;
           border-radius: 999px;
+          background: transparent;
+          box-shadow: none;
+        }
+
+        .skillatlas-theme-visual-track {
+          pointer-events: none;
+          position: absolute;
+          left: 50%;
+          top: 50%;
+          width: 46px;
+          height: 24px;
+          box-sizing: border-box;
+          transform: translate(-50%, -50%);
           border: 2px solid #0f2530;
+          border-radius: 999px;
           background: rgba(255, 255, 255, 0.96);
           box-shadow: 0 8px 20px rgba(15, 23, 42, 0.12);
           transition:
+            width 300ms ease,
+            height 300ms ease,
             background-color 180ms ease,
             border-color 180ms ease,
-            opacity 180ms ease,
             box-shadow 180ms ease;
         }
 
-        .skillatlas-theme-switch:hover {
+        .skillatlas-theme-switch:hover .skillatlas-theme-visual-track {
           border-color: var(--skillatlas-turquoise);
         }
 
@@ -998,12 +1014,7 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
           top: 12px;
           z-index: 2;
           transform: translateX(-50%);
-          transition:
-            top 300ms ease,
-            background-color 180ms ease,
-            border-color 180ms ease,
-            opacity 180ms ease,
-            box-shadow 180ms ease;
+          transition: top 300ms ease;
         }
 
         header[data-scrolled="true"] .skillatlas-theme-switch-desktop {
@@ -1023,7 +1034,11 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
           transform: translateY(-50%);
           font-size: 11px;
           line-height: 1;
-          transition: opacity 160ms ease;
+          transition:
+            opacity 160ms ease,
+            font-size 300ms ease,
+            left 300ms ease,
+            right 300ms ease;
           pointer-events: none;
         }
 
@@ -1044,27 +1059,26 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
           left: 3px;
           top: 2px;
           width: 16px;
-          min-width: 16px;
-          max-width: 16px;
           height: 16px;
-          min-height: 16px;
-          max-height: 16px;
           border-radius: 50%;
           background: var(--skillatlas-charcoal) !important;
           box-shadow: 0 2px 7px rgba(15, 23, 42, 0.22);
           transition:
             transform 180ms ease,
+            top 300ms ease,
+            width 300ms ease,
+            height 300ms ease,
             background-color 180ms ease,
             box-shadow 180ms ease;
         }
 
-        html.skillatlas-dark .skillatlas-theme-switch {
+        html.skillatlas-dark .skillatlas-theme-visual-track {
           background: #172838 !important;
           border-color: #f8fafc;
           box-shadow: 0 8px 20px rgba(0, 0, 0, 0.22);
         }
 
-        html.skillatlas-dark .skillatlas-theme-switch:hover {
+        html.skillatlas-dark .skillatlas-theme-switch:hover .skillatlas-theme-visual-track {
           border-color: var(--skillatlas-turquoise);
         }
 
@@ -1079,6 +1093,33 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
         html.skillatlas-dark .skillatlas-theme-knob {
           transform: translateX(20px);
           background: #f8fafc !important;
+        }
+
+        header[data-scrolled="true"] .skillatlas-theme-switch-desktop .skillatlas-theme-visual-track {
+          width: 38px;
+          height: 20px;
+        }
+
+        header[data-scrolled="true"] .skillatlas-theme-switch-desktop .skillatlas-theme-track-icon {
+          font-size: 10px;
+        }
+
+        header[data-scrolled="true"] .skillatlas-theme-switch-desktop .skillatlas-theme-sun {
+          left: 5px;
+        }
+
+        header[data-scrolled="true"] .skillatlas-theme-switch-desktop .skillatlas-theme-moon {
+          right: 5px;
+        }
+
+        header[data-scrolled="true"] .skillatlas-theme-switch-desktop .skillatlas-theme-knob {
+          top: 3px;
+          width: 14px;
+          height: 14px;
+        }
+
+        html.skillatlas-dark header[data-scrolled="true"] .skillatlas-theme-switch-desktop .skillatlas-theme-knob {
+          transform: translateX(18px);
         }
 
 

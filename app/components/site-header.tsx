@@ -43,9 +43,11 @@ function ThemeSwitch({
       aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
       aria-pressed={darkMode}
     >
-      <span className="skillatlas-theme-track-icon skillatlas-theme-sun">☀</span>
-      <span className="skillatlas-theme-track-icon skillatlas-theme-moon">☾</span>
-      <span className="skillatlas-theme-knob" />
+      <span className="skillatlas-theme-visual-track" aria-hidden="true">
+        <span className="skillatlas-theme-track-icon skillatlas-theme-sun">☀</span>
+        <span className="skillatlas-theme-track-icon skillatlas-theme-moon">☾</span>
+        <span className="skillatlas-theme-knob" />
+      </span>
     </button>
   );
 }
