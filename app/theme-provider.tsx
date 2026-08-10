@@ -157,7 +157,7 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
   const hideToggle = isSkillInvadersPage;
   const hideLiveChat = isSkillInvadersPage;
 
-  const [darkMode, setDarkMode] = useState(false);
+  const [darkMode, setDarkMode] = useState(true);
   const [chatOpen, setChatOpen] = useState(false);
   const [displayName, setDisplayName] = useState("Visitor");
   const [emojiMenuOpen, setEmojiMenuOpen] = useState(false);
@@ -175,8 +175,7 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const savedTheme = window.localStorage.getItem(THEME_KEY);
-    const prefersDark = window.matchMedia?.("(prefers-color-scheme: dark)").matches ?? false;
-    const shouldUseDark = savedTheme ? savedTheme === "dark" : prefersDark;
+    const shouldUseDark = savedTheme !== "light";
 
     const frame = window.requestAnimationFrame(() => {
       setDarkMode(shouldUseDark);
