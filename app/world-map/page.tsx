@@ -1,146 +1,180 @@
 "use client";
 
-import type { PointerEvent } from "react";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { GAME_IDS as gameOrder, GAME_LABELS as gameLabels, type GameId as GameKey } from "@/constants/games";
+import Link from "next/link";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type KeyboardEvent as ReactKeyboardEvent,
+  type MouseEvent as ReactMouseEvent,
+  type PointerEvent as ReactPointerEvent,
+  type ReactNode,
+} from "react";
+import CountryFlag from "@/app/components/country-flag";
+import CompactSelect, {
+  type CompactSelectOption,
+} from "@/app/components/intelligence-ui/compact-select";
+import DataLabel from "@/app/components/intelligence-ui/data-label";
+import IntelligencePanel from "@/app/components/intelligence-ui/intelligence-panel";
+import SearchBar from "@/app/components/search-bar";
+import { GAMES, type Game } from "@/constants/games";
+import { countryRoute } from "@/constants/routes";
+import {
+  sovereignCountries,
+  type CountryAtlasRecord,
+} from "@/data/countries";
+import {
+  getPrototypeCountryRankings,
+  type CountryRankingScope,
+  type PrototypeCountryRanking,
+} from "@/data/country-rankings";
 import { clamp } from "@/lib/math";
+import { matchesSearchQuery } from "@/lib/search";
+import styles from "./world-map.module.css";
 
-type HeatMode = "ranking" | "emerging" | "loser";
 type LonLat = [number, number];
 
 type GeoGeometry =
   | { type: "Polygon"; coordinates: LonLat[][] }
   | { type: "MultiPolygon"; coordinates: LonLat[][][] };
 
+type GeoProperties = {
+  ISO_A2?: string;
+  POSTAL?: string;
+  name?: string;
+  NAME?: string;
+  NAME_LONG?: string;
+  ADMIN?: string;
+  SOVEREIGNT?: string;
+};
+
 type GeoFeature = {
   type: "Feature";
-  properties: { name?: string; NAME?: string; ADMIN?: string; [key: string]: unknown };
+  properties: GeoProperties;
   geometry: GeoGeometry | null;
 };
 
-type GeoCollection = { type: "FeatureCollection"; features: GeoFeature[] };
-
-type CountryPerformance = {
-  id: string;
-  label: string;
-  geoNames: string[];
-  anchor: { lat: number; lon: number };
-  rank: number;
-  rankMoveAllTime: number;
-  score: number;
-  why: string[];
-  improve: string[];
+type GeoCollection = {
+  type: "FeatureCollection";
+  features: GeoFeature[];
 };
 
 type PreparedFeature = {
+  key: string;
   name: string;
   normalisedName: string;
   rings: LonLat[][];
   centroid: { lat: number; lon: number };
+  countryId?: string;
 };
 
-type ProjectedPoint = { x: number; y: number; z: number; visible: boolean };
+type ProjectedPoint = {
+  x: number;
+  y: number;
+  z: number;
+  visible: boolean;
+};
 
-type Metric = {
-  mode: HeatMode;
+type MapView = {
+  scale: number;
+  translateX: number;
+  translateY: number;
+};
+
+type ViewMotion = "direct" | "smooth";
+
+type ScopedCountryRanking = PrototypeCountryRanking & {
   rank: number;
-  value: number;
-  color: string;
-  alpha: number;
-  stroke: string;
-  isTopTen: boolean;
 };
 
-const WORLD_GEOJSON_URL = "/data/world-countries-110m.geo.json";
+type DragState = {
+  pointerId: number;
+  lastX: number;
+  lastY: number;
+  moved: boolean;
+  hadMultiplePointers: boolean;
+};
 
+type PinchState = {
+  startDistance: number;
+  startScale: number;
+  anchorX: number;
+  anchorY: number;
+};
+
+const BASE_GEOJSON_URL = "/data/world-countries-110m.geo.json";
+const MICROSTATE_GEOJSON_URL = "/data/world-microstates-10m.geo.json";
 const CANVAS_SIZE = 900;
 const CENTER = CANVAS_SIZE / 2;
 const GLOBE_RADIUS = 360;
+const MIN_VIEW_SCALE = 1;
+const MAX_VIEW_SCALE = 2.8;
+const VIEW_ZOOM_STEP = 1.28;
+const INITIAL_ROTATION = { lat: -8, lon: -8 };
+const WORLD_VIEW: MapView = { scale: 1, translateX: 0, translateY: 0 };
 
-const heatModes: { id: HeatMode; label: string; description: string }[] = [
-  { id: "ranking", label: "Ranking", description: "Overall ranking for countries for each game." },
-  { id: "emerging", label: "Biggest Gainer", description: "Ranking for countries that have moved up in overall ranking the most over all-time." },
-  { id: "loser", label: "Biggest Loser", description: "Ranking for countries that have moved down in overall ranking the most over all-time." },
+const countriesById = new Map(
+  sovereignCountries.map((country) => [country.id, country])
+);
+const countriesByCode = new Map(
+  sovereignCountries.map((country) => [country.flagCode.toUpperCase(), country])
+);
+const countriesByName = new Map(
+  sovereignCountries.map((country) => [normaliseName(country.name), country])
+);
+const alphabeticalCountries = [...sovereignCountries].sort((left, right) =>
+  left.name.localeCompare(right.name)
+);
+
+const GAME_SCOPE_OPTIONS: readonly CompactSelectOption<CountryRankingScope>[] = [
+  { value: "Overall", label: "Overall" },
+  ...GAMES.map((game) => ({
+    value: game,
+    label: gameDisplayName(game),
+  })),
 ];
 
-const gameData: Record<GameKey, CountryPerformance[]> = {
-  cs2: [
-    { id: "denmark", label: "Denmark", geoNames: ["Denmark"], anchor: { lat: 56.2, lon: 9.5 }, rank: 1, rankMoveAllTime: 21, score: 98, why: ["Elite CS systems", "Tactical culture", "LAN history"], improve: ["Larger talent pool", "More aim depth"] },
-    { id: "south-korea", label: "South Korea", geoNames: ["South Korea", "Republic of Korea", "Korea, Republic of"], anchor: { lat: 36.5, lon: 127.8 }, rank: 2, rankMoveAllTime: 17, score: 96, why: ["Esports discipline", "Fast practice culture", "Infrastructure"], improve: ["More CS history", "More top-tier teams"] },
-    { id: "china", label: "China", geoNames: ["China", "People's Republic of China"], anchor: { lat: 35.8, lon: 104.1 }, rank: 3, rankMoveAllTime: -12, score: 94, why: ["Huge player base", "Investment", "Mechanical ceiling"], improve: ["LAN consistency", "Tactical identity"] },
-    { id: "sweden", label: "Sweden", geoNames: ["Sweden"], anchor: { lat: 60.1, lon: 18.6 }, rank: 4, rankMoveAllTime: 31, score: 91, why: ["FPS heritage", "Grassroots scene", "Mechanical skill"], improve: ["Modern team depth", "Youth pipeline"] },
-    { id: "usa", label: "USA", geoNames: ["United States of America", "United States", "USA"], anchor: { lat: 39.8, lon: -98.6 }, rank: 5, rankMoveAllTime: -26, score: 89, why: ["Large talent pool", "Creator scene", "Prize exposure"], improve: ["Team discipline", "Tactical identity"] },
-    { id: "france", label: "France", geoNames: ["France"], anchor: { lat: 46.2, lon: 2.2 }, rank: 6, rankMoveAllTime: 10, score: 86, why: ["EU pressure", "Strong clubs", "FPS culture"], improve: ["Consistency", "More elite IGLs"] },
-    { id: "brazil", label: "Brazil", geoNames: ["Brazil"], anchor: { lat: -14.2, lon: -51.9 }, rank: 7, rankMoveAllTime: -14, score: 84, why: ["Aggressive style", "Passionate scene", "LAN energy"], improve: ["Structure", "Map pool depth"] },
-    { id: "australia", label: "Australia", geoNames: ["Australia"], anchor: { lat: -25.3, lon: 133.8 }, rank: 8, rankMoveAllTime: 8, score: 78, why: ["Dedicated scene", "Strong mechanics", "OCE rivalry"], improve: ["International reps", "Ping barrier"] },
-  ],
-  league: [
-    { id: "south-korea", label: "South Korea", geoNames: ["South Korea", "Republic of Korea", "Korea, Republic of"], anchor: { lat: 36.5, lon: 127.8 }, rank: 1, rankMoveAllTime: 9, score: 99, why: ["Elite coaching", "Solo queue depth", "Esports culture"], improve: ["Creative drafting", "Meta risk-taking"] },
-    { id: "china", label: "China", geoNames: ["China", "People's Republic of China"], anchor: { lat: 35.8, lon: 104.1 }, rank: 2, rankMoveAllTime: -4, score: 97, why: ["Massive league", "Investment", "Mechanical talent"], improve: ["International consistency", "Macro discipline"] },
-    { id: "denmark", label: "Denmark", geoNames: ["Denmark"], anchor: { lat: 56.2, lon: 9.5 }, rank: 3, rankMoveAllTime: 22, score: 89, why: ["Mid-lane legacy", "EU systems", "High-level exports"], improve: ["Domestic scale", "Player depth"] },
-    { id: "usa", label: "USA", geoNames: ["United States of America", "United States", "USA"], anchor: { lat: 39.8, lon: -98.6 }, rank: 4, rankMoveAllTime: -28, score: 82, why: ["Big market", "Imports", "Content ecosystem"], improve: ["Native talent", "Practice culture"] },
-    { id: "france", label: "France", geoNames: ["France"], anchor: { lat: 46.2, lon: 2.2 }, rank: 5, rankMoveAllTime: 12, score: 81, why: ["EU ecosystem", "Young talent", "Strong orgs"], improve: ["International peaks", "Role depth"] },
-    { id: "brazil", label: "Brazil", geoNames: ["Brazil"], anchor: { lat: -14.2, lon: -51.9 }, rank: 6, rankMoveAllTime: 16, score: 77, why: ["Passion", "Solo queue energy", "Regional fandom"], improve: ["Macro control", "Talent retention"] },
-  ],
-  valorant: [
-    { id: "brazil", label: "Brazil", geoNames: ["Brazil"], anchor: { lat: -14.2, lon: -51.9 }, rank: 1, rankMoveAllTime: 34, score: 93, why: ["Aggression", "Aim culture", "LAN confidence"], improve: ["Utility discipline", "Map pool depth"] },
-    { id: "south-korea", label: "South Korea", geoNames: ["South Korea", "Republic of Korea", "Korea, Republic of"], anchor: { lat: 36.5, lon: 127.8 }, rank: 2, rankMoveAllTime: 18, score: 92, why: ["Structure", "Utility discipline", "Coaching"], improve: ["Creative mid-rounding", "Peak aim volatility"] },
-    { id: "usa", label: "USA", geoNames: ["United States of America", "United States", "USA"], anchor: { lat: 39.8, lon: -98.6 }, rank: 3, rankMoveAllTime: -11, score: 90, why: ["Creator pipeline", "Talent pool", "Org investment"], improve: ["Role stability", "Consistency"] },
-    { id: "france", label: "France", geoNames: ["France"], anchor: { lat: 46.2, lon: 2.2 }, rank: 4, rankMoveAllTime: 10, score: 86, why: ["FPS history", "EU scene", "Tactical depth"], improve: ["Star depth", "International finals"] },
-    { id: "china", label: "China", geoNames: ["China", "People's Republic of China"], anchor: { lat: 35.8, lon: 104.1 }, rank: 5, rankMoveAllTime: 38, score: 84, why: ["Rapid investment", "Huge player base", "Rising mechanics"], improve: ["Global reps", "Meta adaptation"] },
-    { id: "australia", label: "Australia", geoNames: ["Australia"], anchor: { lat: -25.3, lon: 133.8 }, rank: 6, rankMoveAllTime: -8, score: 76, why: ["OCE culture", "Mechanical promise", "Team loyalty"], improve: ["Server distance", "Practice access"] },
-  ],
-  fortnite: [
-    { id: "usa", label: "USA", geoNames: ["United States of America", "United States", "USA"], anchor: { lat: 39.8, lon: -98.6 }, rank: 1, rankMoveAllTime: 7, score: 95, why: ["Creator scene", "Prize exposure", "Huge player base"], improve: ["Consistency", "Burnout management"] },
-    { id: "canada", label: "Canada", geoNames: ["Canada"], anchor: { lat: 56.1, lon: -106.3 }, rank: 2, rankMoveAllTime: 25, score: 91, why: ["Mechanical skill", "NA servers", "Tournament depth"], improve: ["Scale", "Team transition"] },
-    { id: "france", label: "France", geoNames: ["France"], anchor: { lat: 46.2, lon: 2.2 }, rank: 3, rankMoveAllTime: 14, score: 87, why: ["EU ecosystem", "Technical skill", "Competitive scene"], improve: ["Creator exposure", "Regional dominance"] },
-    { id: "brazil", label: "Brazil", geoNames: ["Brazil"], anchor: { lat: -14.2, lon: -51.9 }, rank: 4, rankMoveAllTime: -20, score: 84, why: ["Aggressive play", "Large player base", "Creative meta"], improve: ["Defensive structure", "Tournament stability"] },
-    { id: "australia", label: "Australia", geoNames: ["Australia"], anchor: { lat: -25.3, lon: 133.8 }, rank: 5, rankMoveAllTime: 11, score: 81, why: ["OCE grinders", "Competitive spirit", "Mechanical talent"], improve: ["International reps", "Ping barrier"] },
-  ],
-  rocketLeague: [
-    { id: "france", label: "France", geoNames: ["France"], anchor: { lat: 46.2, lon: 2.2 }, rank: 1, rankMoveAllTime: 29, score: 92, why: ["Team play", "Mechanical depth", "EU dominance"], improve: ["Mental reset", "Rotation risk"] },
-    { id: "netherlands", label: "Netherlands", geoNames: ["Netherlands"], anchor: { lat: 52.1, lon: 5.3 }, rank: 2, rankMoveAllTime: 35, score: 89, why: ["Fast rotations", "Young talent", "Club systems"], improve: ["LAN experience", "Depth past top players"] },
-    { id: "usa", label: "USA", geoNames: ["United States of America", "United States", "USA"], anchor: { lat: 39.8, lon: -98.6 }, rank: 3, rankMoveAllTime: -15, score: 87, why: ["NA depth", "Org backing", "Content pipeline"], improve: ["EU pace adaptation", "Defensive structure"] },
-    { id: "australia", label: "Australia", geoNames: ["Australia"], anchor: { lat: -25.3, lon: 133.8 }, rank: 4, rankMoveAllTime: -6, score: 78, why: ["Regional scene", "Dedicated talent", "Team chemistry"], improve: ["Ping barrier", "International reps"] },
-    { id: "denmark", label: "Denmark", geoNames: ["Denmark"], anchor: { lat: 56.2, lon: 9.5 }, rank: 5, rankMoveAllTime: 8, score: 76, why: ["EU practice", "Mechanical base", "Small scene efficiency"], improve: ["Depth", "Elite LAN reps"] },
-  ],
-  chess: [
-    { id: "india", label: "India", geoNames: ["India"], anchor: { lat: 20.6, lon: 78.9 }, rank: 1, rankMoveAllTime: 42, score: 94, why: ["Youth wave", "Coaching culture", "Online chess boom"], improve: ["World title conversion", "Veteran depth"] },
-    { id: "usa", label: "USA", geoNames: ["United States of America", "United States", "USA"], anchor: { lat: 39.8, lon: -98.6 }, rank: 2, rankMoveAllTime: 13, score: 91, why: ["University chess", "Online platforms", "Elite tournaments"], improve: ["Grassroots scale", "Junior consistency"] },
-    { id: "uzbekistan", label: "Uzbekistan", geoNames: ["Uzbekistan"], anchor: { lat: 41.4, lon: 64.6 }, rank: 3, rankMoveAllTime: 48, score: 88, why: ["Young grandmasters", "Team success", "Rapid growth"], improve: ["Depth", "Long-term infrastructure"] },
-    { id: "china", label: "China", geoNames: ["China", "People's Republic of China"], anchor: { lat: 35.8, lon: 104.1 }, rank: 4, rankMoveAllTime: -23, score: 86, why: ["Structured training", "Strong federation", "Elite players"], improve: ["Tournament volume", "Visibility"] },
-    { id: "france", label: "France", geoNames: ["France"], anchor: { lat: 46.2, lon: 2.2 }, rank: 5, rankMoveAllTime: 9, score: 80, why: ["Club culture", "European events", "Strong juniors"], improve: ["World title pipeline", "Mass participation"] },
-  ],
-};
+function gameDisplayName(game: Game | string) {
+  return game === "CS2" ? "Counter-Strike 2" : game;
+}
 
-type RankedCountry = {
-  name: string;
-  normalisedName: string;
-  feature: PreparedFeature;
-  performance?: CountryPerformance;
-  rank: number;
-  score: number;
-  rankMoveAllTime: number;
-  rankingStrength: number;
-};
+function scopeDisplayName(scope: CountryRankingScope) {
+  return scope === "Overall" ? "Overall" : gameDisplayName(scope);
+}
 
 function normaliseName(name: string) {
-  return name.toLowerCase().replace(/[^a-z0-9]/g, "");
+  return name.toLowerCase().normalize("NFKD").replace(/[^a-z0-9]/g, "");
 }
 
-function hashString(input: string) {
-  let hash = 2166136261;
-
-  for (let index = 0; index < input.length; index += 1) {
-    hash ^= input.charCodeAt(index);
-    hash = Math.imul(hash, 16777619);
+function countryForProperties(properties: GeoProperties) {
+  for (const code of [properties.ISO_A2, properties.POSTAL]) {
+    if (!code || code === "-99") continue;
+    const country = countriesByCode.get(code.toUpperCase());
+    if (country) return country;
   }
 
-  return Math.abs(hash >>> 0);
+  for (const name of [
+    properties.ADMIN,
+    properties.NAME_LONG,
+    properties.NAME,
+    properties.name,
+    properties.SOVEREIGNT,
+  ]) {
+    if (!name) continue;
+    const country = countriesByName.get(normaliseName(name));
+    if (country) return country;
+  }
 }
 
-function getFeatureName(feature: GeoFeature) {
-  return feature.properties.name ?? feature.properties.NAME ?? feature.properties.ADMIN ?? "Unknown";
+function featureName(feature: GeoFeature) {
+  return (
+    feature.properties.NAME ??
+    feature.properties.name ??
+    feature.properties.ADMIN ??
+    "Unknown"
+  );
 }
 
 function geometryToRings(geometry: GeoGeometry): LonLat[][] {
@@ -149,538 +183,703 @@ function geometryToRings(geometry: GeoGeometry): LonLat[][] {
 }
 
 function simplifyRing(ring: LonLat[]) {
-  if (ring.length <= 90) return ring;
-  const step = Math.ceil(ring.length / 90);
-  return ring.filter((_, index) => index % step === 0 || index === ring.length - 1);
+  if (ring.length <= 120) return ring;
+  const step = Math.ceil(ring.length / 120);
+  return ring.filter(
+    (_, index) => index % step === 0 || index === ring.length - 1
+  );
 }
 
-function prepareFeature(feature: GeoFeature): PreparedFeature | null {
+function prepareFeature(
+  feature: GeoFeature,
+  key: string,
+  countryId?: string
+): PreparedFeature | null {
   if (!feature.geometry) return null;
 
   const rings = geometryToRings(feature.geometry)
-    .map((ring) => simplifyRing(ring))
+    .map(simplifyRing)
     .filter((ring) => ring.length > 2);
-
   if (rings.length === 0) return null;
 
-  let latTotal = 0;
-  let lonTotal = 0;
-  let count = 0;
+  let latitudeTotal = 0;
+  let longitudeTotal = 0;
+  let pointCount = 0;
 
   for (const ring of rings) {
-    const step = Math.max(1, Math.floor(ring.length / 16));
-
+    const step = Math.max(1, Math.floor(ring.length / 20));
     for (let index = 0; index < ring.length; index += step) {
-      const [lon, lat] = ring[index];
-      latTotal += lat;
-      lonTotal += lon;
-      count += 1;
+      const [longitude, latitude] = ring[index];
+      latitudeTotal += latitude;
+      longitudeTotal += longitude;
+      pointCount += 1;
     }
   }
 
+  const name = featureName(feature);
+
   return {
-    name: getFeatureName(feature),
-    normalisedName: normaliseName(getFeatureName(feature)),
+    key,
+    name,
+    normalisedName: normaliseName(name),
     rings,
     centroid: {
-      lat: count ? latTotal / count : 0,
-      lon: count ? lonTotal / count : 0,
+      lat: pointCount ? latitudeTotal / pointCount : 0,
+      lon: pointCount ? longitudeTotal / pointCount : 0,
     },
+    countryId,
   };
 }
 
-function projectPoint(lon: number, lat: number, rotation: { lat: number; lon: number }): ProjectedPoint {
-  const phi = (lat * Math.PI) / 180;
-  const lambda = ((lon + rotation.lon) * Math.PI) / 180;
-  const tilt = (rotation.lat * Math.PI) / 180;
+function prepareFeatures(
+  baseCollection: GeoCollection,
+  microstateCollection: GeoCollection
+) {
+  const claimedCountryIds = new Set<string>();
+  const prepared: PreparedFeature[] = [];
 
+  function addCollection(collection: GeoCollection, detailed: boolean) {
+    collection.features.forEach((feature, index) => {
+      const country = countryForProperties(feature.properties);
+      const countryId =
+        country && !claimedCountryIds.has(country.id) ? country.id : undefined;
+      const item = prepareFeature(
+        feature,
+        (detailed ? "detail-" : "base-") + normaliseName(featureName(feature)) + "-" + index,
+        countryId
+      );
+
+      if (!item) return;
+      if (countryId) claimedCountryIds.add(countryId);
+      prepared.push(item);
+    });
+  }
+
+  addCollection(baseCollection, false);
+  addCollection(microstateCollection, true);
+  return prepared;
+}
+
+function projectPoint(
+  longitude: number,
+  latitude: number,
+  rotation: { lat: number; lon: number }
+): ProjectedPoint {
+  const phi = (latitude * Math.PI) / 180;
+  const lambda = ((longitude + rotation.lon) * Math.PI) / 180;
+  const tilt = (rotation.lat * Math.PI) / 180;
   const x = Math.cos(phi) * Math.sin(lambda);
   const y = Math.sin(phi);
   const z = Math.cos(phi) * Math.cos(lambda);
-
-  const y2 = y * Math.cos(tilt) - z * Math.sin(tilt);
-  const z2 = y * Math.sin(tilt) + z * Math.cos(tilt);
+  const rotatedY = y * Math.cos(tilt) - z * Math.sin(tilt);
+  const rotatedZ = y * Math.sin(tilt) + z * Math.cos(tilt);
 
   return {
     x: CENTER + x * GLOBE_RADIUS,
-    y: CENTER - y2 * GLOBE_RADIUS,
-    z: z2,
-    visible: z2 > -0.1,
+    y: CENTER - rotatedY * GLOBE_RADIUS,
+    z: rotatedZ,
+    visible: rotatedZ > -0.1,
   };
 }
 
-function featureFrontness(feature: PreparedFeature, rotation: { lat: number; lon: number }) {
+function featureFrontness(
+  feature: PreparedFeature,
+  rotation: { lat: number; lon: number }
+) {
   return projectPoint(feature.centroid.lon, feature.centroid.lat, rotation).z;
 }
 
-function makeCountryPath(ctx: CanvasRenderingContext2D, feature: PreparedFeature, rotation: { lat: number; lon: number }) {
-  ctx.beginPath();
+function makeCountryPath(
+  context: CanvasRenderingContext2D,
+  feature: PreparedFeature,
+  rotation: { lat: number; lon: number }
+) {
+  context.beginPath();
 
   for (const ring of feature.rings) {
     let started = false;
 
-    for (const [lon, lat] of ring) {
-      const point = projectPoint(lon, lat, rotation);
-
+    for (const [longitude, latitude] of ring) {
+      const point = projectPoint(longitude, latitude, rotation);
       if (!started) {
-        ctx.moveTo(point.x, point.y);
+        context.moveTo(point.x, point.y);
         started = true;
       } else {
-        ctx.lineTo(point.x, point.y);
+        context.lineTo(point.x, point.y);
       }
     }
 
-    if (started) ctx.closePath();
+    if (started) context.closePath();
   }
 }
 
-function turquoiseForRank(rank: number) {
-  const clamped = clamp(rank, 1, 100);
-
-  if (clamped <= 10) {
-    const t = (clamped - 1) / 9;
-    const r = Math.round(0 + t * 20);
-    const g = Math.round(91 + t * 120);
-    const b = Math.round(98 + t * 109);
-    return `rgb(${r}, ${g}, ${b})`;
-  }
-
-  const t = (clamped - 11) / 89;
-  const r = Math.round(20 + t * 185);
-  const g = Math.round(211 + t * 37);
-  const b = Math.round(207 + t * 43);
-  return `rgb(${r}, ${g}, ${b})`;
+function coverageAlpha(rank: number, coverageCount: number) {
+  if (coverageCount <= 1) return 0.9;
+  const position = clamp((rank - 1) / (coverageCount - 1), 0, 1);
+  return clamp(0.88 - position * 0.66, 0.2, 0.88);
 }
 
-function buildPerformanceMap(activeCountries: CountryPerformance[]) {
-  const map = new Map<string, CountryPerformance>();
+function drawCountryLabel(
+  context: CanvasRenderingContext2D,
+  label: string,
+  x: number,
+  y: number,
+  darkMode: boolean
+) {
+  const fontSize = label.length > 24 ? 11 : label.length > 16 ? 12 : 13;
+  context.save();
+  context.font = "800 " + fontSize + "px Arial";
+  const width = clamp(context.measureText(label).width + 28, 92, 260);
+  const height = 32;
+  const left = clamp(x - width / 2, 12, CANVAS_SIZE - width - 12);
+  const top = clamp(y - height / 2, 12, CANVAS_SIZE - height - 12);
 
-  for (const country of activeCountries) {
-    for (const name of country.geoNames) {
-      map.set(normaliseName(name), country);
-    }
-  }
-
-  return map;
-}
-
-function buildRankingRows(features: PreparedFeature[], game: GameKey, performanceByName: Map<string, CountryPerformance>) {
-  return features
-    .map((feature) => {
-      const performance = performanceByName.get(feature.normalisedName);
-      const rankingSeed = hashString(`${feature.normalisedName}-${game}-ranking`);
-      const generatedStrength = rankingSeed % 10000;
-      const generatedMove = (hashString(`${feature.normalisedName}-${game}-move`) % 97) - 48;
-
-      const rankingStrength = performance ? 50000 - performance.rank * 250 : generatedStrength;
-      const score = performance ? performance.score : Math.round(42 + (generatedStrength / 10000) * 48);
-      const rankMoveAllTime = performance ? performance.rankMoveAllTime : generatedMove;
-
-      return {
-        name: performance?.label ?? feature.name,
-        normalisedName: feature.normalisedName,
-        feature,
-        performance,
-        rank: 999,
-        score,
-        rankMoveAllTime,
-        rankingStrength,
-      };
-    })
-    .sort((a, b) => b.rankingStrength - a.rankingStrength)
-    .map((row, index) => ({
-      ...row,
-      rank: index + 1,
-    }));
-}
-
-function getHeatBaseColor(mode: HeatMode) {
-  if (mode === "emerging") return "#8b5cf6";
-  if (mode === "loser") return "#ff2fa8";
-  return "#19d3cf";
-}
-
-function metricForRow(row: RankedCountry | undefined, heatMode: HeatMode): Metric | null {
-  if (!row) return null;
-
-  if (heatMode === "ranking") {
-    if (row.rank > 100) return null;
-
-    const isTopTen = row.rank <= 10;
-    const alpha = isTopTen ? 0.96 - (row.rank - 1) * 0.033 : 0.56 - ((row.rank - 11) / 89) * 0.36;
-
-    return {
-      mode: heatMode,
-      rank: row.rank,
-      value: row.rank,
-      color: turquoiseForRank(row.rank),
-      stroke: isTopTen ? "#005e60" : "#19d3cf",
-      alpha,
-      isTopTen,
-    };
-  }
-
-  if (heatMode === "emerging") {
-    const value = Math.max(0, row.rankMoveAllTime);
-    if (value < 14) return null;
-
-    return {
-      mode: heatMode,
-      rank: row.rank,
-      value,
-      color: "#8b5cf6",
-      stroke: "#6d28d9",
-      alpha: clamp(0.22 + value / 64, 0.24, 0.9),
-      isTopTen: value >= 42,
-    };
-  }
-
-  const value = Math.max(0, -row.rankMoveAllTime);
-  if (value < 14) return null;
-
-  return {
-    mode: heatMode,
-    rank: row.rank,
-    value,
-    color: "#ff2fa8",
-    stroke: "#be185d",
-    alpha: clamp(0.22 + value / 64, 0.24, 0.9),
-    isTopTen: value >= 42,
-  };
-}
-
-function drawCountryBubbleLabel(ctx: CanvasRenderingContext2D, label: string, x: number, y: number, heatBaseColor: string, darkMode: boolean) {
-  let fontSize = 13;
-  if (label.length >= 34) fontSize = 10;
-  else if (label.length >= 25) fontSize = 11;
-  else if (label.length >= 19) fontSize = 12;
-
-  const maxBubbleWidth = 292;
-  const minBubbleWidth = 96;
-  const horizontalPadding = 18;
-  const verticalPadding = 8;
-  const maxTextWidth = maxBubbleWidth - horizontalPadding * 2;
-
-  function wrapLabel(size: number) {
-    ctx.font = `900 ${size}px Arial`;
-    const words = label.split(/\s+/).filter(Boolean);
-    const lines: string[] = [];
-
-    let currentLine = "";
-
-    for (const word of words) {
-      const testLine = currentLine ? `${currentLine} ${word}` : word;
-
-      if (ctx.measureText(testLine).width <= maxTextWidth || !currentLine) {
-        currentLine = testLine;
-      } else {
-        lines.push(currentLine);
-        currentLine = word;
-      }
-    }
-
-    if (currentLine) lines.push(currentLine);
-
-    return lines.length ? lines : [label];
-  }
-
-  let lines = wrapLabel(fontSize);
-  let widestLine = Math.max(...lines.map((line) => ctx.measureText(line).width));
-
-  while (widestLine > maxTextWidth && fontSize > 8) {
-    fontSize -= 1;
-    lines = wrapLabel(fontSize);
-    widestLine = Math.max(...lines.map((line) => ctx.measureText(line).width));
-  }
-
-  const lineHeight = fontSize + 4;
-  const bubbleWidth = clamp(Math.ceil(widestLine + horizontalPadding * 2), minBubbleWidth, maxBubbleWidth);
-  const bubbleHeight = Math.max(30, Math.ceil(lines.length * lineHeight + verticalPadding * 2));
-  const bubbleX = clamp(x - bubbleWidth / 2, 12, CANVAS_SIZE - bubbleWidth - 12);
-  const bubbleY = clamp(y - bubbleHeight / 2, 12, CANVAS_SIZE - bubbleHeight - 12);
-  const textX = bubbleX + bubbleWidth / 2;
-  const firstLineY = bubbleY + bubbleHeight / 2 - ((lines.length - 1) * lineHeight) / 2;
-
-  ctx.save();
-  ctx.fillStyle = darkMode ? "rgba(52,64,78,0.96)" : "rgba(255,255,255,0.95)";
-  ctx.strokeStyle = heatBaseColor;
-  ctx.lineWidth = darkMode ? 1.2 : 1;
-  if (darkMode) {
-    ctx.shadowColor = "rgba(0,0,0,0.16)";
-    ctx.shadowBlur = 10;
-    ctx.shadowOffsetY = 3;
-  }
-  ctx.beginPath();
-  ctx.roundRect(bubbleX, bubbleY, bubbleWidth, bubbleHeight, Math.min(16, bubbleHeight / 2));
-  ctx.fill();
-  ctx.stroke();
-
-  ctx.shadowColor = "transparent";
-  ctx.shadowBlur = 0;
-  ctx.shadowOffsetY = 0;
-
-  ctx.fillStyle = heatBaseColor;
-  ctx.font = `900 ${fontSize}px Arial`;
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-
-  lines.forEach((line, index) => {
-    ctx.fillText(line, textX, firstLineY + index * lineHeight);
-  });
-
-  ctx.restore();
+  context.fillStyle = darkMode
+    ? "rgba(39,51,65,0.96)"
+    : "rgba(255,255,255,0.96)";
+  context.strokeStyle = "#19d3cf";
+  context.lineWidth = 1.4;
+  context.beginPath();
+  context.roundRect(left, top, width, height, 8);
+  context.fill();
+  context.stroke();
+  context.fillStyle = darkMode ? "#e8eef7" : "#111827";
+  context.textAlign = "center";
+  context.textBaseline = "middle";
+  context.fillText(label, left + width / 2, top + height / 2 + 0.5);
+  context.restore();
 }
 
 function drawGlobe(
   canvas: HTMLCanvasElement,
   features: PreparedFeature[],
-  rowByName: Map<string, RankedCountry>,
+  rankingsByCountryId: ReadonlyMap<string, ScopedCountryRanking>,
   rotation: { lat: number; lon: number },
-  heatMode: HeatMode,
-  selectedKey: string,
+  selectedCountryId: string | null,
+  hoveredCountryId: string | null,
   darkMode: boolean
 ) {
-  const ctx = canvas.getContext("2d");
-  if (!ctx) return;
+  const context = canvas.getContext("2d");
+  if (!context) return;
 
-  ctx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
-
-  const heatBaseColor = getHeatBaseColor(heatMode);
-
-  const glow = ctx.createRadialGradient(CENTER - 140, CENTER - 150, 20, CENTER, CENTER, GLOBE_RADIUS);
+  context.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
+  const globeGradient = context.createRadialGradient(
+    CENTER - 145,
+    CENTER - 155,
+    20,
+    CENTER,
+    CENTER,
+    GLOBE_RADIUS
+  );
 
   if (darkMode) {
-    glow.addColorStop(0, "rgba(62,75,90,1)");
-    glow.addColorStop(0.48, "rgba(47,58,70,0.99)");
-    glow.addColorStop(0.78, "rgba(39,51,65,0.98)");
-    glow.addColorStop(1, "rgba(32,43,55,0.97)");
+    globeGradient.addColorStop(0, "#354250");
+    globeGradient.addColorStop(0.58, "#273341");
+    globeGradient.addColorStop(1, "#202b37");
   } else {
-    glow.addColorStop(0, "rgba(255,255,255,1)");
-    glow.addColorStop(0.52, "rgba(255,255,255,1)");
-    glow.addColorStop(0.82, "rgba(255,255,255,0.99)");
-    glow.addColorStop(1, "rgba(255,255,255,0.98)");
+    globeGradient.addColorStop(0, "#ffffff");
+    globeGradient.addColorStop(0.62, "#f1f5f9");
+    globeGradient.addColorStop(1, "#e2e8f0");
   }
 
-  ctx.save();
-  ctx.beginPath();
-  ctx.arc(CENTER, CENTER, GLOBE_RADIUS, 0, Math.PI * 2);
-  ctx.fillStyle = glow;
-  ctx.fill();
-  ctx.clip();
+  context.save();
+  context.beginPath();
+  context.arc(CENTER, CENTER, GLOBE_RADIUS, 0, Math.PI * 2);
+  context.fillStyle = globeGradient;
+  context.fill();
+  context.clip();
 
-  ctx.strokeStyle = heatBaseColor;
-  ctx.globalAlpha = 0.12;
-  ctx.lineWidth = 1;
-
+  context.strokeStyle = darkMode
+    ? "rgba(148,163,184,0.16)"
+    : "rgba(71,85,105,0.14)";
+  context.lineWidth = 1;
   for (const scale of [0.82, 0.62, 0.42, 0.22]) {
-    ctx.beginPath();
-    ctx.ellipse(CENTER, CENTER, GLOBE_RADIUS, GLOBE_RADIUS * scale, 0, 0, Math.PI * 2);
-    ctx.stroke();
-
-    ctx.beginPath();
-    ctx.ellipse(CENTER, CENTER, GLOBE_RADIUS * scale, GLOBE_RADIUS, 0, 0, Math.PI * 2);
-    ctx.stroke();
+    context.beginPath();
+    context.ellipse(
+      CENTER,
+      CENTER,
+      GLOBE_RADIUS,
+      GLOBE_RADIUS * scale,
+      0,
+      0,
+      Math.PI * 2
+    );
+    context.stroke();
+    context.beginPath();
+    context.ellipse(
+      CENTER,
+      CENTER,
+      GLOBE_RADIUS * scale,
+      GLOBE_RADIUS,
+      0,
+      0,
+      Math.PI * 2
+    );
+    context.stroke();
   }
 
-  ctx.globalAlpha = 1;
-
-  ctx.globalAlpha = 1;
-
+  const coverageCount = rankingsByCountryId.size;
   const orderedFeatures = features
     .map((feature) => ({
       feature,
-      row: rowByName.get(feature.normalisedName),
       frontness: featureFrontness(feature, rotation),
     }))
     .filter((item) => item.frontness > -0.1)
-    .sort((a, b) => a.frontness - b.frontness);
+    .sort((left, right) => left.frontness - right.frontness);
 
   for (const item of orderedFeatures) {
     const frontFade = clamp((item.frontness + 0.1) / 1.1, 0, 1);
-    const metric = metricForRow(item.row, heatMode);
-    makeCountryPath(ctx, item.feature, rotation);
+    const ranking = item.feature.countryId
+      ? rankingsByCountryId.get(item.feature.countryId)
+      : undefined;
+    makeCountryPath(context, item.feature, rotation);
 
-    if (metric) {
-      ctx.fillStyle = metric.color;
-      ctx.globalAlpha = metric.alpha * frontFade;
-      ctx.fill();
-
-      ctx.strokeStyle = heatBaseColor;
-      ctx.globalAlpha = metric.isTopTen ? 0.95 * frontFade : 0.62 * frontFade;
-      ctx.lineWidth = metric.isTopTen ? 1.45 : 0.9;
-      ctx.stroke();
+    if (ranking) {
+      context.fillStyle = "#19d3cf";
+      context.globalAlpha =
+        coverageAlpha(ranking.rank, coverageCount) * frontFade;
+      context.fill();
+      context.strokeStyle = ranking.rank <= 5 ? "#0f9694" : "#19d3cf";
+      context.globalAlpha = (ranking.rank <= 5 ? 0.9 : 0.52) * frontFade;
+      context.lineWidth = ranking.rank <= 5 ? 1.45 : 0.8;
+      context.stroke();
     } else {
-      ctx.fillStyle = darkMode ? "rgba(47,58,70,0.72)" : "rgba(255,255,255,0.44)";
-      ctx.globalAlpha = darkMode ? 0.46 * frontFade : 0.30 * frontFade;
-      ctx.fill();
-
-      ctx.strokeStyle = heatBaseColor;
-      ctx.globalAlpha = 0.62 * frontFade;
-      ctx.lineWidth = 0.9;
-      ctx.stroke();
+      context.fillStyle = darkMode ? "#354250" : "#cbd5e1";
+      context.globalAlpha = (darkMode ? 0.72 : 0.54) * frontFade;
+      context.fill();
+      context.strokeStyle = darkMode ? "#64748b" : "#94a3b8";
+      context.globalAlpha = 0.52 * frontFade;
+      context.lineWidth = 0.75;
+      context.stroke();
     }
   }
 
-  const selectedFeature = orderedFeatures.find((item) => item.feature.normalisedName === selectedKey);
+  const hoveredFeature = orderedFeatures.find(
+    (item) => item.feature.countryId === hoveredCountryId
+  );
+  const selectedFeature = orderedFeatures.find(
+    (item) => item.feature.countryId === selectedCountryId
+  );
 
-  if (selectedFeature) {
-    const metric = metricForRow(selectedFeature.row, heatMode);
-    makeCountryPath(ctx, selectedFeature.feature, rotation);
-
-    ctx.strokeStyle = heatBaseColor;
-    ctx.globalAlpha = 0.25;
-    ctx.lineWidth = 12;
-    ctx.stroke();
-
-    ctx.strokeStyle = heatBaseColor;
-    ctx.globalAlpha = 0.95;
-    ctx.lineWidth = 2.6;
-    ctx.stroke();
+  if (hoveredFeature && hoveredCountryId !== selectedCountryId) {
+    makeCountryPath(context, hoveredFeature.feature, rotation);
+    context.fillStyle = "#19d3cf";
+    context.globalAlpha = 0.2;
+    context.fill();
+    context.strokeStyle = "#19d3cf";
+    context.globalAlpha = 0.95;
+    context.lineWidth = 2;
+    context.stroke();
   }
 
-  ctx.restore();
+  if (selectedFeature) {
+    makeCountryPath(context, selectedFeature.feature, rotation);
+    context.strokeStyle = "#19d3cf";
+    context.globalAlpha = 0.2;
+    context.lineWidth = 12;
+    context.stroke();
+    context.strokeStyle = "#19d3cf";
+    context.globalAlpha = 1;
+    context.lineWidth = 2.8;
+    context.stroke();
+  }
 
-  ctx.globalAlpha = 0.20;
-  ctx.strokeStyle = heatBaseColor;
-  ctx.lineWidth = 2;
-  ctx.beginPath();
-  ctx.arc(CENTER, CENTER, GLOBE_RADIUS, 0, Math.PI * 2);
-  ctx.stroke();
+  context.restore();
+  context.globalAlpha = 0.28;
+  context.strokeStyle = "#19d3cf";
+  context.lineWidth = 1.5;
+  context.beginPath();
+  context.arc(CENTER, CENTER, GLOBE_RADIUS, 0, Math.PI * 2);
+  context.stroke();
+  context.globalAlpha = 1;
 
-  ctx.globalAlpha = 1;
-
-  if (selectedFeature?.row) {
-    const selectedPoint = projectPoint(selectedFeature.row.feature.centroid.lon, selectedFeature.row.feature.centroid.lat, rotation);
-    const metric = metricForRow(selectedFeature.row, heatMode);
-
-    if (selectedPoint.visible) {
-      drawCountryBubbleLabel(ctx, selectedFeature.row.name, selectedPoint.x, selectedPoint.y + 34, heatBaseColor, darkMode);
+  const labelledFeature = selectedFeature ?? hoveredFeature;
+  if (labelledFeature?.feature.countryId) {
+    const country = countriesById.get(labelledFeature.feature.countryId);
+    const point = projectPoint(
+      labelledFeature.feature.centroid.lon,
+      labelledFeature.feature.centroid.lat,
+      rotation
+    );
+    if (country && point.visible) {
+      drawCountryLabel(
+        context,
+        country.name,
+        point.x,
+        point.y + 34,
+        darkMode
+      );
     }
   }
 }
 
 function findCountryAtPoint(
   canvas: HTMLCanvasElement,
-  x: number,
-  y: number,
+  clientX: number,
+  clientY: number,
   features: PreparedFeature[],
-  rowByName: Map<string, RankedCountry>,
   rotation: { lat: number; lon: number }
 ) {
-  const ctx = canvas.getContext("2d");
-  if (!ctx) return null;
-
+  const context = canvas.getContext("2d");
+  if (!context) return null;
+  const rect = canvas.getBoundingClientRect();
+  const x = (clientX - rect.left) * (CANVAS_SIZE / rect.width);
+  const y = (clientY - rect.top) * (CANVAS_SIZE / rect.height);
   const candidates = features
+    .filter((feature) => feature.countryId)
     .map((feature) => ({
       feature,
-      row: rowByName.get(feature.normalisedName),
       frontness: featureFrontness(feature, rotation),
     }))
-    .filter((item) => item.row && item.frontness > -0.1)
-    .sort((a, b) => b.frontness - a.frontness);
+    .filter((item) => item.frontness > -0.1)
+    .sort((left, right) => right.frontness - left.frontness);
 
   for (const candidate of candidates) {
-    makeCountryPath(ctx, candidate.feature, rotation);
-    if (ctx.isPointInPath(x, y)) return candidate.row ?? null;
+    makeCountryPath(context, candidate.feature, rotation);
+    if (context.isPointInPath(x, y)) {
+      return candidate.feature.countryId ?? null;
+    }
   }
 
   return null;
 }
 
+function clampMapView(view: MapView, frame: HTMLDivElement | null) {
+  const scale = clamp(view.scale, MIN_VIEW_SCALE, MAX_VIEW_SCALE);
+  if (scale <= MIN_VIEW_SCALE + 0.001 || !frame) return WORLD_VIEW;
+  const width = frame.clientWidth;
+  const height = frame.clientHeight;
+
+  // Desktop uses the whole rectangular map stage as the camera viewport while
+  // keeping the rendered globe square and centred inside it. Constrain the
+  // transformed globe against that outer viewport rather than the old 640px
+  // square so useful panel width remains available during zoom.
+  if (width > height + 40) {
+    const globeSize = Math.max(
+      1,
+      Math.min(CANVAS_SIZE, width - 32)
+    );
+    const globeLeft = (width - globeSize) / 2;
+    const globeTop = (height - globeSize) / 2;
+    const horizontalLimits = [
+      -globeLeft * scale,
+      width - (globeLeft + globeSize) * scale,
+    ];
+    const verticalLimits = [
+      -globeTop * scale,
+      height - (globeTop + globeSize) * scale,
+    ];
+
+    return {
+      scale,
+      translateX: clamp(
+        view.translateX,
+        Math.min(...horizontalLimits),
+        Math.max(...horizontalLimits)
+      ),
+      translateY: clamp(
+        view.translateY,
+        Math.min(...verticalLimits),
+        Math.max(...verticalLimits)
+      ),
+    };
+  }
+
+  return {
+    scale,
+    translateX: clamp(view.translateX, width - width * scale, 0),
+    translateY: clamp(view.translateY, height - height * scale, 0),
+  };
+}
+
+function movementLabel(value: number) {
+  if (value > 0) return "▲ +" + value;
+  if (value < 0) return "▼ " + Math.abs(value);
+  return "—";
+}
+
+function scoreMovementLabel(row: ScopedCountryRanking | undefined) {
+  if (!row || row.scoreChange === 0) return "—";
+  const amount =
+    row.scoreChangeUnit === "percent"
+      ? Math.abs(row.scoreChange).toFixed(1) + "%"
+      : Math.abs(row.scoreChange).toFixed(1) + " pts";
+  return (row.scoreChange > 0 ? "▲ +" : "▼ ") + amount;
+}
+
+function movementClass(value: number | undefined) {
+  if (value && value > 0) return "text-sa-positive";
+  if (value && value < 0) return "text-sa-negative";
+  return "text-sa-text-technical";
+}
+
+function MapControlButton({
+  label,
+  children,
+  onClick,
+  disabled = false,
+}: {
+  label: string;
+  children: ReactNode;
+  onClick: () => void;
+  disabled?: boolean;
+}) {
+  return (
+    <button
+      type="button"
+      aria-label={label}
+      title={label}
+      disabled={disabled}
+      onClick={onClick}
+      className={styles.mapControlButton}
+    >
+      {children}
+    </button>
+  );
+}
+
+function MetricCell({
+  label,
+  value,
+  valueClassName = "",
+  detail,
+}: {
+  label: string;
+  value: string;
+  valueClassName?: string;
+  detail?: string;
+}) {
+  return (
+    <div className={styles.metricCell}>
+      <dt className="text-[10px] font-bold uppercase leading-4 tracking-[0.16em] text-sa-text-technical">
+        {label}
+      </dt>
+      <dd className={"mt-sa-1 font-sa-data text-sm font-black " + valueClassName}>
+        {value}
+      </dd>
+      {detail ? (
+        <p className="mt-0.5 text-[10px] leading-4 text-sa-text-technical">
+          {detail}
+        </p>
+      ) : null}
+    </div>
+  );
+}
+
+function WorldMapBackground() {
+  return (
+    <div className={styles.background} aria-hidden="true">
+      <div className={styles.backgroundGrid} />
+      <div className={styles.backgroundGlow} />
+    </div>
+  );
+}
+
 export default function WorldMapPage() {
   const [features, setFeatures] = useState<PreparedFeature[]>([]);
-  const [loadState, setLoadState] = useState<"loading" | "ready" | "error">("loading");
-  const [selectedGame, setSelectedGame] = useState<GameKey>("cs2");
-  const [heatMode, setHeatMode] = useState<HeatMode>("ranking");
-  const [selectedCountryKey, setSelectedCountryKey] = useState("");
-  const [isDragging, setIsDragging] = useState(false);
-  const [zoomed, setZoomed] = useState(false);
+  const [loadState, setLoadState] = useState<"loading" | "ready" | "error">(
+    "loading"
+  );
+  const [scope, setScope] = useState<CountryRankingScope>("Overall");
+  const [search, setSearch] = useState("");
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [selectedCountryId, setSelectedCountryId] = useState<string | null>(
+    null
+  );
+  const [hoveredCountryId, setHoveredCountryId] = useState<string | null>(null);
   const [darkMode, setDarkMode] = useState(false);
+  const [reducedMotion, setReducedMotion] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const [view, setView] = useState<MapView>(WORLD_VIEW);
+  const [viewMotion, setViewMotion] = useState<ViewMotion>("direct");
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const rotationRef = useRef({ lat: -8, lon: -8 });
-  const velocityRef = useRef({ lat: 0, lon: 0.028 });
-  const dragRef = useRef<{ pointerId: number; lastX: number; lastY: number; moved: boolean } | null>(null);
-  const latestRef = useRef({ features, selectedGame, heatMode, selectedCountryKey, darkMode });
-  const selectedGameRef = useRef<GameKey>("cs2");
-  const rowByNameRef = useRef<Map<string, RankedCountry>>(new Map());
-  const rankingListRef = useRef<HTMLDivElement | null>(null);
-  const rankingRowRefs = useRef<Map<string, HTMLButtonElement>>(new Map());
+  const frameRef = useRef<HTMLDivElement | null>(null);
+  const rotationRef = useRef({ ...INITIAL_ROTATION });
+  const velocityRef = useRef({ lat: 0, lon: 0.022 });
+  const dragRef = useRef<DragState | null>(null);
+  const pointersRef = useRef(new Map<number, { x: number; y: number }>());
+  const pinchRef = useRef<PinchState | null>(null);
+  const viewRef = useRef<MapView>(WORLD_VIEW);
+  const hoveredCountryIdRef = useRef<string | null>(null);
 
-  const activeCountries = gameData[selectedGame];
-  const performanceByName = useMemo(() => buildPerformanceMap(activeCountries), [activeCountries]);
-  const rankingRows = useMemo(() => buildRankingRows(features, selectedGame, performanceByName), [features, selectedGame, performanceByName]);
-  const heatRankedRows = useMemo(() => {
-    if (heatMode === "emerging") {
-      return [...rankingRows].sort((a, b) => b.rankMoveAllTime - a.rankMoveAllTime || a.rank - b.rank);
-    }
-
-    if (heatMode === "loser") {
-      return [...rankingRows].sort((a, b) => a.rankMoveAllTime - b.rankMoveAllTime || a.rank - b.rank);
-    }
-
-    return rankingRows;
-  }, [rankingRows, heatMode]);
-
-  const top100Rows = heatRankedRows.slice(0, 100);
-  const heatRankByName = useMemo(
-    () => new Map(heatRankedRows.map((row, index) => [row.normalisedName, index + 1])),
-    [heatRankedRows]
+  const scopedRankings = useMemo(
+    () =>
+      getPrototypeCountryRankings(scope).map((ranking, index) => ({
+        ...ranking,
+        rank: index + 1,
+      })),
+    [scope]
   );
-  const rowByName = useMemo(() => new Map(rankingRows.map((row) => [row.normalisedName, row])), [rankingRows]);
-  const selectedRow = rowByName.get(selectedCountryKey) ?? top100Rows[0];
-  const selectedHeatRank = selectedRow ? heatRankByName.get(selectedRow.normalisedName) ?? selectedRow.rank : 0;
-  const activeHeatMode = heatModes.find((mode) => mode.id === heatMode) ?? heatModes[0];
+  const rankingsByCountryId = useMemo(
+    () =>
+      new Map(
+        scopedRankings.map((ranking) => [ranking.countryId, ranking])
+      ),
+    [scopedRankings]
+  );
+  const featureByCountryId = useMemo(
+    () =>
+      new Map(
+        features.flatMap((feature) =>
+          feature.countryId ? [[feature.countryId, feature] as const] : []
+        )
+      ),
+    [features]
+  );
+  const selectedCountry = selectedCountryId
+    ? countriesById.get(selectedCountryId)
+    : undefined;
+  const selectedRanking = selectedCountryId
+    ? rankingsByCountryId.get(selectedCountryId)
+    : undefined;
+  const searchResults = useMemo(() => {
+    if (!search.trim()) return [];
+    return alphabeticalCountries
+      .filter((country) =>
+        matchesSearchQuery(search, [
+          country.name,
+          country.region,
+          country.bestGame,
+        ])
+      )
+      .slice(0, 8);
+  }, [search]);
+  const mappedCountryCount = featureByCountryId.size;
 
-  function focusCountry(row: RankedCountry) {
+  const latestRef = useRef({
+    features,
+    rankingsByCountryId,
+    selectedCountryId,
+    hoveredCountryId,
+    darkMode,
+    reducedMotion,
+  });
+
+  const commitView = useCallback((nextView: MapView, motion: ViewMotion) => {
+    const constrained = clampMapView(nextView, frameRef.current);
+    viewRef.current = constrained;
+    setViewMotion(motion);
+    setView(constrained);
+  }, []);
+
+  const zoomAtClientPoint = useCallback(
+    (
+      clientX: number,
+      clientY: number,
+      factor: number,
+      motion: ViewMotion
+    ) => {
+      const frame = frameRef.current;
+      if (!frame) return;
+      const rect = frame.getBoundingClientRect();
+      const pointX = clientX - rect.left;
+      const pointY = clientY - rect.top;
+      const current = viewRef.current;
+      const nextScale = clamp(
+        current.scale * factor,
+        MIN_VIEW_SCALE,
+        MAX_VIEW_SCALE
+      );
+      const worldX = (pointX - current.translateX) / current.scale;
+      const worldY = (pointY - current.translateY) / current.scale;
+
+      commitView(
+        {
+          scale: nextScale,
+          translateX: pointX - worldX * nextScale,
+          translateY: pointY - worldY * nextScale,
+        },
+        motion
+      );
+    },
+    [commitView]
+  );
+
+  const zoomFromCenter = useCallback(
+    (factor: number) => {
+      const frame = frameRef.current;
+      if (!frame) return;
+      const rect = frame.getBoundingClientRect();
+      zoomAtClientPoint(
+        rect.left + rect.width / 2,
+        rect.top + rect.height / 2,
+        factor,
+        reducedMotion ? "direct" : "smooth"
+      );
+    },
+    [reducedMotion, zoomAtClientPoint]
+  );
+
+  function focusCountry(countryId: string) {
+    const feature = featureByCountryId.get(countryId);
+    if (!feature) return;
     rotationRef.current = {
-      lat: clamp(row.feature.centroid.lat * 0.45, -44, 44),
-      lon: -row.feature.centroid.lon,
+      lat: clamp(feature.centroid.lat * 0.45, -44, 44),
+      lon: -feature.centroid.lon,
     };
-
     velocityRef.current = { lat: 0, lon: 0 };
   }
 
-  useEffect(() => {
-    rowByNameRef.current = rowByName;
-  }, [rowByName]);
+  function selectCountry(countryId: string, focus = false) {
+    setSelectedCountryId(countryId);
+    if (focus) focusCountry(countryId);
+  }
+
+  function selectSearchCountry(country: CountryAtlasRecord) {
+    setSearch(country.name);
+    setSearchOpen(false);
+    selectCountry(country.id, true);
+  }
+
+  function resetWorldView() {
+    rotationRef.current = { ...INITIAL_ROTATION };
+    velocityRef.current = {
+      lat: 0,
+      lon: reducedMotion ? 0 : 0.022,
+    };
+    commitView(WORLD_VIEW, reducedMotion ? "direct" : "smooth");
+  }
 
   useEffect(() => {
-    const rankingList = rankingListRef.current;
-    const rowElement = rankingRowRefs.current.get(selectedCountryKey);
-
-    if (!rankingList || !rowElement) return;
-
-    const listRect = rankingList.getBoundingClientRect();
-    const rowRect = rowElement.getBoundingClientRect();
-    const edgePadding = 12;
-
-    if (rowRect.top < listRect.top + edgePadding) {
-      rankingList.scrollTo({
-        top: rankingList.scrollTop - (listRect.top + edgePadding - rowRect.top),
-        behavior: "smooth",
-      });
-    } else if (rowRect.bottom > listRect.bottom - edgePadding) {
-      rankingList.scrollTo({
-        top: rankingList.scrollTop + (rowRect.bottom - (listRect.bottom - edgePadding)),
-        behavior: "smooth",
-      });
-    }
-  }, [selectedCountryKey]);
+    latestRef.current = {
+      features,
+      rankingsByCountryId,
+      selectedCountryId,
+      hoveredCountryId,
+      darkMode,
+      reducedMotion,
+    };
+  }, [
+    darkMode,
+    features,
+    hoveredCountryId,
+    rankingsByCountryId,
+    reducedMotion,
+    selectedCountryId,
+  ]);
 
   useEffect(() => {
-    latestRef.current = { features, selectedGame, heatMode, selectedCountryKey, darkMode };
-  }, [features, selectedGame, heatMode, selectedCountryKey, darkMode]);
+    hoveredCountryIdRef.current = hoveredCountryId;
+  }, [hoveredCountryId]);
 
   useEffect(() => {
     const syncTheme = () => {
-      setDarkMode(document.documentElement.classList.contains("skillatlas-dark"));
+      setDarkMode(
+        document.documentElement.classList.contains("skillatlas-dark")
+      );
     };
+    const media = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const syncMotion = () => setReducedMotion(media.matches);
 
     syncTheme();
+    syncMotion();
     window.addEventListener("skillatlas-theme-change", syncTheme);
-
-    return () => window.removeEventListener("skillatlas-theme-change", syncTheme);
+    media.addEventListener("change", syncMotion);
+    return () => {
+      window.removeEventListener("skillatlas-theme-change", syncTheme);
+      media.removeEventListener("change", syncMotion);
+    };
   }, []);
 
   useEffect(() => {
@@ -688,35 +887,24 @@ export default function WorldMapPage() {
 
     async function loadMap() {
       try {
-        const response = await fetch(WORLD_GEOJSON_URL);
-        if (!response.ok) throw new Error("World map failed to load");
+        const [baseResponse, microstateResponse] = await Promise.all([
+          fetch(BASE_GEOJSON_URL),
+          fetch(MICROSTATE_GEOJSON_URL),
+        ]);
+        if (!baseResponse.ok || !microstateResponse.ok) {
+          throw new Error("A local map data request failed.");
+        }
 
-        const data = (await response.json()) as GeoCollection;
-        const prepared = data.features
-          .map((feature) => prepareFeature(feature))
-          .filter((feature): feature is PreparedFeature => Boolean(feature));
-
+        const [baseCollection, microstateCollection] = (await Promise.all([
+          baseResponse.json(),
+          microstateResponse.json(),
+        ])) as [GeoCollection, GeoCollection];
+        const prepared = prepareFeatures(
+          baseCollection,
+          microstateCollection
+        );
         if (!cancelled) {
-          const initialGame = selectedGameRef.current;
-          const initialRows = buildRankingRows(
-            prepared,
-            initialGame,
-            buildPerformanceMap(gameData[initialGame])
-          );
-          const firstCountry = gameData[initialGame][0];
-          const firstGeoName = normaliseName(firstCountry.geoNames[0]);
-          const targetRow =
-            initialRows.find((row) => row.normalisedName === firstGeoName) ?? initialRows[0];
-
           setFeatures(prepared);
-          if (targetRow) {
-            setSelectedCountryKey(targetRow.normalisedName);
-            rotationRef.current = {
-              lat: clamp(targetRow.feature.centroid.lat * 0.45, -44, 44),
-              lon: -targetRow.feature.centroid.lon,
-            };
-            velocityRef.current = { lat: 0, lon: 0 };
-          }
           setLoadState("ready");
         }
       } catch {
@@ -725,483 +913,645 @@ export default function WorldMapPage() {
     }
 
     loadMap();
-
     return () => {
       cancelled = true;
     };
   }, []);
 
   useEffect(() => {
+    const frame = frameRef.current;
+    if (!frame) return;
+
+    function handleWheel(event: WheelEvent) {
+      event.preventDefault();
+      const factor = clamp(Math.exp(-event.deltaY * 0.0012), 0.82, 1.22);
+      zoomAtClientPoint(event.clientX, event.clientY, factor, "direct");
+    }
+
+    frame.addEventListener("wheel", handleWheel, { passive: false });
+    return () => frame.removeEventListener("wheel", handleWheel);
+  }, [zoomAtClientPoint]);
+
+  useEffect(() => {
     let frame = 0;
 
     function animate() {
-      frame = requestAnimationFrame(animate);
+      frame = window.requestAnimationFrame(animate);
+      const current = latestRef.current;
 
-      if (!dragRef.current) {
+      if (!dragRef.current && !pinchRef.current) {
         velocityRef.current.lon *= 0.955;
         velocityRef.current.lat *= 0.955;
-
-        const idleSpin = Math.abs(velocityRef.current.lon) < 0.008 && Math.abs(velocityRef.current.lat) < 0.008 ? 0.028 : 0;
-
+        const idleSpin =
+          !current.reducedMotion &&
+          Math.abs(velocityRef.current.lon) < 0.008 &&
+          Math.abs(velocityRef.current.lat) < 0.008
+            ? 0.022
+            : 0;
         rotationRef.current = {
-          lat: clamp(rotationRef.current.lat + velocityRef.current.lat, -64, 64),
-          lon: rotationRef.current.lon + velocityRef.current.lon + idleSpin,
+          lat: clamp(
+            rotationRef.current.lat + velocityRef.current.lat,
+            -64,
+            64
+          ),
+          lon:
+            rotationRef.current.lon +
+            velocityRef.current.lon +
+            idleSpin,
         };
       }
 
-      const current = latestRef.current;
-      const selected = current.selectedCountryKey || "";
-
       if (canvasRef.current) {
-        drawGlobe(canvasRef.current, current.features, rowByNameRef.current, rotationRef.current, current.heatMode, selected, current.darkMode);
+        drawGlobe(
+          canvasRef.current,
+          current.features,
+          current.rankingsByCountryId,
+          rotationRef.current,
+          current.selectedCountryId,
+          current.hoveredCountryId,
+          current.darkMode
+        );
       }
     }
 
-    frame = requestAnimationFrame(animate);
-    return () => cancelAnimationFrame(frame);
+    frame = window.requestAnimationFrame(animate);
+    return () => window.cancelAnimationFrame(frame);
   }, []);
 
-  function selectRow(row: RankedCountry) {
-    setSelectedCountryKey(row.normalisedName);
-    focusCountry(row);
-  }
-
-  function selectGame(game: GameKey) {
-    selectedGameRef.current = game;
-    setSelectedGame(game);
-
-    const nextRows = buildRankingRows(features, game, buildPerformanceMap(gameData[game]));
-    const firstCountry = gameData[game][0];
-    const firstGeoName = normaliseName(firstCountry.geoNames[0]);
-    const targetRow = nextRows.find((row) => row.normalisedName === firstGeoName) ?? nextRows[0];
-
-    if (targetRow) {
-      setSelectedCountryKey(targetRow.normalisedName);
-      focusCountry(targetRow);
+  function updateHover(clientX: number, clientY: number) {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const countryId = findCountryAtPoint(
+      canvas,
+      clientX,
+      clientY,
+      features,
+      rotationRef.current
+    );
+    if (countryId !== hoveredCountryIdRef.current) {
+      hoveredCountryIdRef.current = countryId;
+      setHoveredCountryId(countryId);
     }
   }
 
-  function handlePointerDown(event: PointerEvent<HTMLCanvasElement>) {
+  function handlePointerDown(event: ReactPointerEvent<HTMLCanvasElement>) {
+    if (event.pointerType === "mouse" && event.button !== 0) return;
     event.currentTarget.setPointerCapture(event.pointerId);
-    setIsDragging(true);
+    pointersRef.current.set(event.pointerId, {
+      x: event.clientX,
+      y: event.clientY,
+    });
     velocityRef.current = { lat: 0, lon: 0 };
+    setIsDragging(true);
 
-    dragRef.current = {
-      pointerId: event.pointerId,
-      lastX: event.clientX,
-      lastY: event.clientY,
-      moved: false,
+    if (pointersRef.current.size === 1) {
+      dragRef.current = {
+        pointerId: event.pointerId,
+        lastX: event.clientX,
+        lastY: event.clientY,
+        moved: false,
+        hadMultiplePointers: false,
+      };
+      pinchRef.current = null;
+      return;
+    }
+
+    const points = [...pointersRef.current.values()];
+    const first = points[0];
+    const second = points[1];
+    const frame = frameRef.current;
+    if (!frame) return;
+    const rect = frame.getBoundingClientRect();
+    const midpointX = (first.x + second.x) / 2 - rect.left;
+    const midpointY = (first.y + second.y) / 2 - rect.top;
+    const current = viewRef.current;
+    pinchRef.current = {
+      startDistance: Math.max(
+        1,
+        Math.hypot(second.x - first.x, second.y - first.y)
+      ),
+      startScale: current.scale,
+      anchorX: (midpointX - current.translateX) / current.scale,
+      anchorY: (midpointY - current.translateY) / current.scale,
     };
+    if (dragRef.current) {
+      dragRef.current.hadMultiplePointers = true;
+      dragRef.current.moved = true;
+    }
   }
 
-  function handlePointerMove(event: PointerEvent<HTMLCanvasElement>) {
-    if (!dragRef.current) return;
+  function handlePointerMove(event: ReactPointerEvent<HTMLCanvasElement>) {
+    if (!pointersRef.current.has(event.pointerId)) {
+      if (event.pointerType !== "touch") {
+        updateHover(event.clientX, event.clientY);
+      }
+      return;
+    }
 
-    const deltaX = event.clientX - dragRef.current.lastX;
-    const deltaY = event.clientY - dragRef.current.lastY;
+    pointersRef.current.set(event.pointerId, {
+      x: event.clientX,
+      y: event.clientY,
+    });
 
-    if (Math.abs(deltaX) + Math.abs(deltaY) > 3) dragRef.current.moved = true;
+    if (pointersRef.current.size >= 2 && pinchRef.current) {
+      const points = [...pointersRef.current.values()];
+      const first = points[0];
+      const second = points[1];
+      const frame = frameRef.current;
+      if (!frame) return;
+      const rect = frame.getBoundingClientRect();
+      const midpointX = (first.x + second.x) / 2 - rect.left;
+      const midpointY = (first.y + second.y) / 2 - rect.top;
+      const distance = Math.max(
+        1,
+        Math.hypot(second.x - first.x, second.y - first.y)
+      );
+      const scale = clamp(
+        pinchRef.current.startScale *
+          (distance / pinchRef.current.startDistance),
+        MIN_VIEW_SCALE,
+        MAX_VIEW_SCALE
+      );
+
+      commitView(
+        {
+          scale,
+          translateX: midpointX - pinchRef.current.anchorX * scale,
+          translateY: midpointY - pinchRef.current.anchorY * scale,
+        },
+        "direct"
+      );
+      return;
+    }
+
+    const drag = dragRef.current;
+    if (!drag || drag.pointerId !== event.pointerId) return;
+    const deltaX = event.clientX - drag.lastX;
+    const deltaY = event.clientY - drag.lastY;
+    if (Math.abs(deltaX) + Math.abs(deltaY) > 3) drag.moved = true;
 
     rotationRef.current = {
       lat: clamp(rotationRef.current.lat + deltaY * 0.22, -64, 64),
       lon: rotationRef.current.lon + deltaX * 0.28,
     };
-
     velocityRef.current = {
       lat: deltaY * 0.045,
       lon: deltaX * 0.055,
     };
-
-    dragRef.current.lastX = event.clientX;
-    dragRef.current.lastY = event.clientY;
+    drag.lastX = event.clientX;
+    drag.lastY = event.clientY;
   }
 
-  function handlePointerUp(event: PointerEvent<HTMLCanvasElement>) {
+  function handlePointerUp(event: ReactPointerEvent<HTMLCanvasElement>) {
     const drag = dragRef.current;
+    const hadMultiplePointers =
+      Boolean(drag?.hadMultiplePointers) || pointersRef.current.size > 1;
+    pointersRef.current.delete(event.pointerId);
 
-    if (drag?.pointerId === event.pointerId) {
-      if (!drag.moved && canvasRef.current) {
-        const rect = canvasRef.current.getBoundingClientRect();
-        const scaleX = CANVAS_SIZE / rect.width;
-        const scaleY = CANVAS_SIZE / rect.height;
-        const x = (event.clientX - rect.left) * scaleX;
-        const y = (event.clientY - rect.top) * scaleY;
-        const clickedRow = findCountryAtPoint(canvasRef.current, x, y, features, rowByName, rotationRef.current);
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+      event.currentTarget.releasePointerCapture(event.pointerId);
+    }
 
-        if (clickedRow) setSelectedCountryKey(clickedRow.normalisedName);
-      }
+    if (pointersRef.current.size === 1 && hadMultiplePointers) {
+      const [remainingId, remainingPoint] = [
+        ...pointersRef.current.entries(),
+      ][0];
+      dragRef.current = {
+        pointerId: remainingId,
+        lastX: remainingPoint.x,
+        lastY: remainingPoint.y,
+        moved: true,
+        hadMultiplePointers: true,
+      };
+      pinchRef.current = null;
+      return;
+    }
 
-      try {
-        event.currentTarget.releasePointerCapture(event.pointerId);
-      } catch {
-        // no-op
-      }
+    if (pointersRef.current.size > 0) return;
+    if (drag && !drag.moved && !hadMultiplePointers && canvasRef.current) {
+      const countryId = findCountryAtPoint(
+        canvasRef.current,
+        event.clientX,
+        event.clientY,
+        features,
+        rotationRef.current
+      );
+      if (countryId) selectCountry(countryId);
+    }
 
-      dragRef.current = null;
-      setIsDragging(false);
+    dragRef.current = null;
+    pinchRef.current = null;
+    setIsDragging(false);
+  }
+
+  function handleMapKeyDown(
+    event: ReactKeyboardEvent<HTMLCanvasElement>
+  ) {
+    const currentIndex = selectedCountryId
+      ? alphabeticalCountries.findIndex(
+          (country) => country.id === selectedCountryId
+        )
+      : -1;
+    let nextIndex = currentIndex;
+
+    if (event.key === "ArrowRight" || event.key === "ArrowDown") {
+      nextIndex = Math.min(
+        alphabeticalCountries.length - 1,
+        currentIndex < 0 ? 0 : currentIndex + 1
+      );
+    } else if (event.key === "ArrowLeft" || event.key === "ArrowUp") {
+      nextIndex = Math.max(
+        0,
+        currentIndex < 0 ? alphabeticalCountries.length - 1 : currentIndex - 1
+      );
+    } else if (event.key === "Home") {
+      nextIndex = 0;
+    } else if (event.key === "End") {
+      nextIndex = alphabeticalCountries.length - 1;
+    } else if (event.key === "+" || event.key === "=") {
+      event.preventDefault();
+      zoomFromCenter(VIEW_ZOOM_STEP);
+      return;
+    } else if (event.key === "-" || event.key === "_") {
+      event.preventDefault();
+      zoomFromCenter(1 / VIEW_ZOOM_STEP);
+      return;
+    } else if (event.key === "0") {
+      event.preventDefault();
+      resetWorldView();
+      return;
+    } else {
+      return;
+    }
+
+    event.preventDefault();
+    const country = alphabeticalCountries[nextIndex];
+    if (country) selectCountry(country.id, true);
+  }
+
+  function handleDoubleClick(event: ReactMouseEvent<HTMLCanvasElement>) {
+    if (viewRef.current.scale > MIN_VIEW_SCALE + 0.05) {
+      commitView(WORLD_VIEW, reducedMotion ? "direct" : "smooth");
+    } else {
+      zoomAtClientPoint(
+        event.clientX,
+        event.clientY,
+        1.9,
+        reducedMotion ? "direct" : "smooth"
+      );
     }
   }
 
-  const selectedWhy = selectedRow?.performance?.why ?? ["Strong player base", "Competitive scene", "Growing esports culture"];
-  const selectedImprove = selectedRow?.performance?.improve ?? ["More international results", "Clearer talent pipeline"];
-  const selectedMove = selectedRow?.rankMoveAllTime ?? 0;
-  const selectedSevenDayRankDelta = selectedRow ? sevenDayRankDelta(selectedRow) : 0;
-  const selectedSevenDayPercentDelta = selectedRow ? sevenDayPercentDelta(selectedRow) : 0;
+  const scopeName = scopeDisplayName(scope);
+  const selectedHasScopeCoverage = Boolean(selectedRanking);
 
   return (
-    <main className={`world-map-shell relative min-h-screen overflow-hidden transition-colors duration-300 ${darkMode ? "world-map-dark bg-[#2f3a46] text-slate-100" : "bg-[#F8FAFC] text-[#111827]"}`}>
-      <WorldMapBackground darkMode={darkMode} />
+    <main className="relative min-h-screen overflow-x-clip bg-sa-canvas text-sa-text-primary">
+      <WorldMapBackground />
 
-      <style>{`
-        .world-map-dark [class*="bg-white"] {
-          background-color: rgba(31, 41, 55, 0.92) !important;
-        }
-
-        .world-map-dark [class*="bg-gray-50"] {
-          background-color: rgba(15, 23, 42, 0.62) !important;
-        }
-
-        .world-map-dark [class*="text-gray-"] {
-          color: rgb(203, 213, 225) !important;
-        }
-
-        .world-map-dark [class*="text-[#111827]"] {
-          color: rgb(248, 250, 252) !important;
-        }
-
-        .world-map-dark canvas {
-          filter: drop-shadow(0 0 34px rgba(25, 211, 207, 0.08));
-        }
-      `}</style>
-
-      <section className="relative z-10 mx-auto max-w-7xl px-8 pb-10 pt-[150px]">
-        <div className="mb-6 rounded-3xl border border-[#ff2fa8]/45 bg-white/92 p-6 shadow-sm backdrop-blur">
-          <p className="mb-2 text-xs font-bold uppercase tracking-[0.25em] text-[#19d3cf]">World Map</p>
-          <h1 className="mb-2 text-xl font-black tracking-tight">Spin the globe. See where each game belongs.</h1>
-          <p className="text-sm text-gray-600 md:whitespace-nowrap">
-            Click a country or ranking row to bring up its profile. Drag the globe in the direction you want it to move. Double-click to zoom in or out.
-          </p>
-        </div>
-
-        <div className="grid gap-5 xl:grid-cols-[1.02fr_minmax(0,2.25fr)_1.05fr]">
-          <aside className="rounded-3xl border border-[#ff2fa8]/40 bg-white/92 p-5 shadow-sm backdrop-blur">
-            <p className="mb-4 text-[11px] font-black uppercase tracking-[0.22em] text-gray-500">Select Game</p>
-
-            <div className="grid gap-3">
-              {gameOrder.map((game) => (
-                <button
-                  key={game}
-                  onClick={() => selectGame(game)}
-                  className={`rounded-2xl border px-4 py-3 text-left text-sm font-black transition-all duration-300 ${
-                    selectedGame === game
-                      ? "border-[#19d3cf] bg-[#19d3cf] text-white shadow-md"
-                      : "border-gray-200 bg-white text-gray-700 hover:border-[#ff2fa8] hover:text-[#ff2fa8]"
-                  }`}
-                >
-                  {gameLabels[game]}
-                </button>
-              ))}
+      <div className="skillatlas-page-shell relative z-10 mx-auto w-full max-w-[1600px] px-4 pb-8 sm:px-6 lg:px-8 lg:pb-10">
+        <IntelligencePanel
+          as="section"
+          aria-labelledby="global-competitive-map-title"
+          className="mb-sa-3"
+          bodyClassName="px-sa-3 py-sa-3 sm:px-sa-4"
+        >
+          <div className="flex flex-col gap-sa-3 lg:flex-row lg:items-end lg:justify-between">
+            <div className="max-w-3xl">
+              <DataLabel as="p" className="mb-sa-1 text-sa-accent">
+                SkillAtlas / World Map
+              </DataLabel>
+              <h1
+                id="global-competitive-map-title"
+                className="text-[1.625rem] font-black leading-tight tracking-[-0.045em] sm:text-4xl"
+              >
+                Global Competitive Map
+              </h1>
+              <p className="mt-sa-1 max-w-2xl text-sm leading-6 text-sa-text-muted sm:text-[15px]">
+                Explore competitive gaming strength across the world.
+              </p>
             </div>
 
-            <div className="mt-6 rounded-2xl border border-[#19d3cf]/25 bg-[#19d3cf]/5 p-4">
-              <p className="mb-3 text-[10px] font-black uppercase tracking-[0.2em] text-[#19d3cf]">Heat Settings</p>
+            <div className="flex items-center gap-sa-2 self-start rounded-sa-control border border-sa-border-strong bg-sa-surface-1 px-sa-3 py-sa-2 lg:self-auto">
+              <span className="relative flex h-2 w-2" aria-hidden="true">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-sa-accent opacity-35 motion-reduce:animate-none" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-sa-accent" />
+              </span>
+              <span className="leading-tight">
+                <span className="block text-[10px] font-bold uppercase tracking-[0.14em] text-sa-text-technical">
+                  Calibration preview
+                </span>
+                <span className="mt-0.5 block text-[11px] font-semibold text-sa-text-muted">
+                  Prototype map data
+                </span>
+              </span>
+            </div>
+          </div>
+        </IntelligencePanel>
 
-              <div className="grid gap-2">
-                {heatModes.map((mode) => (
-                  <button
-                    key={mode.id}
-                    onClick={() => setHeatMode(mode.id)}
-                    className={`rounded-2xl border px-4 py-3 text-left transition-all duration-300 ${
-                      heatMode === mode.id
-                        ? "border-[#19d3cf] bg-white text-[#111827] shadow-sm"
-                        : "border-transparent bg-white/60 text-gray-600 hover:border-[#ff2fa8]/35"
-                    }`}
-                  >
-                    <p className={`text-sm font-black ${mode.id === "emerging" ? "text-[#8b5cf6]" : mode.id === "loser" ? "text-[#ff2fa8]" : "text-[#19d3cf]"}`}>
-                      {mode.label}
+        <IntelligencePanel
+          as="section"
+          aria-label="World Map controls"
+          className="mb-sa-3"
+          bodyClassName="p-sa-3"
+        >
+          <div className="grid gap-sa-3 md:grid-cols-[minmax(0,1fr)_minmax(220px,0.3fr)] md:items-end">
+            <div
+              className="relative"
+              onFocusCapture={() => {
+                if (search.trim()) setSearchOpen(true);
+              }}
+              onBlur={(event) => {
+                if (!event.currentTarget.contains(event.relatedTarget)) {
+                  setSearchOpen(false);
+                }
+              }}
+              onKeyDown={(event) => {
+                if (event.key === "Enter" && searchResults[0]) {
+                  event.preventDefault();
+                  selectSearchCountry(searchResults[0]);
+                } else if (event.key === "Escape" && search) {
+                  event.preventDefault();
+                  setSearch("");
+                  setSearchOpen(false);
+                }
+              }}
+            >
+              <DataLabel as="span" className="mb-sa-1 block">
+                Search country
+              </DataLabel>
+              <SearchBar
+                label="Search sovereign countries by name, region, or prototype best game"
+                placeholder="Search 195 sovereign countries"
+                value={search}
+                onValueChange={(value) => {
+                  setSearch(value);
+                  setSearchOpen(true);
+                }}
+                variant="intelligence"
+              />
+
+              {search.trim() && searchOpen ? (
+                <div className={styles.searchResults} role="listbox" aria-label="Country search results">
+                  {searchResults.length > 0 ? (
+                    searchResults.map((country) => (
+                      <button
+                        key={country.id}
+                        type="button"
+                        role="option"
+                        aria-selected={country.id === selectedCountryId}
+                        onClick={() => selectSearchCountry(country)}
+                        className={styles.searchResult}
+                      >
+                        <span className="font-bold text-sa-text-primary">
+                          {country.name}
+                        </span>
+                        <span className="text-xs text-sa-text-technical">
+                          {country.region}
+                        </span>
+                      </button>
+                    ))
+                  ) : (
+                    <p className="px-sa-3 py-sa-3 text-sm text-sa-text-muted">
+                      No sovereign country matches this search.
                     </p>
-                    <p className="mt-1 text-[11px] font-semibold leading-snug text-gray-500">{mode.description}</p>
-                  </button>
-                ))}
+                  )}
+                </div>
+              ) : null}
+            </div>
+
+            <CompactSelect
+              id="world-map-game-scope"
+              label="Game scope"
+              value={scope}
+              options={GAME_SCOPE_OPTIONS}
+              onChange={setScope}
+            />
+          </div>
+        </IntelligencePanel>
+
+        <IntelligencePanel
+          as="section"
+          aria-labelledby="competitive-globe-title"
+          className="mb-sa-3"
+          bodyClassName="overflow-hidden"
+          header={
+            <div className="flex flex-col gap-sa-3 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <DataLabel as="p">Global field</DataLabel>
+                <div className="mt-sa-1 flex flex-wrap items-baseline gap-x-sa-3 gap-y-sa-1">
+                  <h2 id="competitive-globe-title" className="text-base font-black">
+                    Competitive globe
+                  </h2>
+                  <span className="font-sa-data text-xs text-sa-text-technical">
+                    {scopedRankings.length} of 195 prototype records in {scopeName}
+                  </span>
+                </div>
+              </div>
+
+              <div className={styles.mapControls} aria-label="Map camera controls">
+                <MapControlButton
+                  label="Zoom in"
+                  onClick={() => zoomFromCenter(VIEW_ZOOM_STEP)}
+                  disabled={view.scale >= MAX_VIEW_SCALE - 0.01}
+                >
+                  <span aria-hidden="true">+</span>
+                </MapControlButton>
+                <MapControlButton
+                  label="Zoom out"
+                  onClick={() => zoomFromCenter(1 / VIEW_ZOOM_STEP)}
+                  disabled={view.scale <= MIN_VIEW_SCALE + 0.01}
+                >
+                  <span aria-hidden="true">−</span>
+                </MapControlButton>
+                <MapControlButton label="Reset to world view" onClick={resetWorldView}>
+                  <span aria-hidden="true">◎</span>
+                </MapControlButton>
               </div>
             </div>
-
-            <div className="mt-4 rounded-2xl border border-[#ff2fa8]/25 bg-[#ff2fa8]/5 p-4">
-              <p className="mb-2 text-[10px] font-black uppercase tracking-[0.2em] text-[#ff2fa8]">Controls</p>
-              <p className="text-xs font-semibold leading-relaxed text-gray-600">
-                Click a country to select it. Drag anywhere on the globe to rotate it from its centre point. Double-click to zoom in or out.
-              </p>
-            </div>
-          </aside>
-
-          <section className="relative min-w-0 overflow-hidden rounded-3xl border border-[#ff2fa8]/40 bg-white/88 pb-5 pt-[76px] shadow-sm backdrop-blur md:min-h-[790px] md:pb-0 md:pt-0">
-            <div className="absolute left-6 right-6 top-5 z-20">
-              <p className="text-[11px] font-black uppercase tracking-[0.22em] text-[#19d3cf]">{gameLabels[selectedGame]}</p>
-              <p className="mt-1 max-w-full text-sm font-semibold leading-snug text-gray-500">
-                {loadState === "ready" ? activeHeatMode.description : "Loading country outlines"}
-              </p>
+          }
+        >
+          <div className={styles.mapStage}>
+            <div className={styles.mapTelemetry} aria-hidden="true">
+              <span>WORLD // CUSTOM GLOBE</span>
+              <span>{mappedCountryCount} TARGETS</span>
+              <span>Z {view.scale.toFixed(2)}×</span>
             </div>
 
-            <div className="relative flex justify-center overflow-hidden md:absolute md:inset-x-0 md:top-[38px]">
-              <div className={`relative aspect-square w-full max-w-[560px] origin-center transition-transform duration-300 ${zoomed ? "scale-[1.45]" : "scale-100"}`}>
+            <div
+              ref={frameRef}
+              className={styles.globeFrame}
+            >
+              <div
+                className={
+                  styles.globeViewport +
+                  (viewMotion === "smooth" ? " " + styles.globeMotion : "")
+                }
+                style={{
+                  transform:
+                    "translate3d(" +
+                    view.translateX +
+                    "px, " +
+                    view.translateY +
+                    "px, 0) scale(" +
+                    view.scale +
+                    ")",
+                }}
+                onTransitionEnd={() => setViewMotion("direct")}
+              >
                 <canvas
                   ref={canvasRef}
                   width={CANVAS_SIZE}
                   height={CANVAS_SIZE}
-                  className={`absolute inset-0 h-full w-full select-none touch-none ${isDragging ? "cursor-grabbing" : "cursor-grab"}`}
+                  tabIndex={0}
+                  role="application"
+                  aria-label={
+                    "Interactive competitive globe. " +
+                    (selectedCountry
+                      ? selectedCountry.name + " is selected."
+                      : "No country is selected.")
+                  }
+                  aria-describedby="world-map-instructions"
+                  className={
+                    styles.globeCanvas +
+                    " " +
+                    (isDragging ? styles.grabbing : styles.grab)
+                  }
                   onPointerDown={handlePointerDown}
                   onPointerMove={handlePointerMove}
                   onPointerUp={handlePointerUp}
                   onPointerCancel={handlePointerUp}
-                  onDoubleClick={() => setZoomed((current) => !current)}
+                  onPointerLeave={() => {
+                    if (pointersRef.current.size === 0) {
+                      hoveredCountryIdRef.current = null;
+                      setHoveredCountryId(null);
+                    }
+                  }}
+                  onDoubleClick={handleDoubleClick}
+                  onKeyDown={handleMapKeyDown}
                 />
               </div>
-
-              {loadState !== "ready" && (
-                <div className="absolute top-1/2 rounded-2xl border border-[#19d3cf]/25 bg-white/90 px-5 py-4 text-sm font-black text-[#19d3cf] shadow-sm">
-                  {loadState === "loading" ? "Loading country outlines..." : "Country outlines could not load"}
-                </div>
-              )}
             </div>
 
-            <div className="relative z-20 mx-4 mt-4 grid auto-rows-[120px] grid-cols-2 gap-3 sm:mx-6 md:absolute md:bottom-5 md:left-6 md:right-6 md:top-[610px] md:mx-0 md:mt-0 md:auto-rows-auto md:grid-cols-3 md:grid-rows-2">
-              <MiniStat label="Selected" value={selectedRow?.name ?? "Loading"} compact />
-              <MiniStat label="Rank" value={selectedRow ? `#${selectedHeatRank}` : "-"} compact />
-              <MiniStat label="Score" value={selectedRow ? `${selectedRow.score}` : "-"} compact />
-              <MiniChartStat label="7 Days Score" row={selectedRow} />
-              <MiniStat
-                label="7 Days Rank"
-                value={selectedRow ? sevenDayRankChange(selectedRow) : "-"}
-                compact
-                colorClass={selectedSevenDayRankDelta >= 0 ? "text-[#19d3cf]" : "text-[#ff2fa8]"}
-              />
-              <MiniStat
-                label="7 Days %"
-                value={selectedRow ? sevenDayPercentChange(selectedRow) : "-"}
-                compact
-                colorClass={selectedSevenDayPercentDelta >= 0 ? "text-[#19d3cf]" : "text-[#ff2fa8]"}
-              />
+            <p id="world-map-instructions" className="sr-only">
+              Drag to rotate the globe. Use the mouse wheel or pinch to zoom.
+              Double-click toggles exploration zoom. Arrow keys select countries,
+              plus and minus zoom, and zero resets the world view.
+            </p>
+
+            <div className={styles.mapLegend} aria-label="Map legend">
+              <span className={styles.legendItem}>
+                <span className={styles.legendCovered} aria-hidden="true" />
+                Scoped prototype record
+              </span>
+              <span className={styles.legendItem}>
+                <span className={styles.legendUncovered} aria-hidden="true" />
+                No scoped record
+              </span>
             </div>
-          </section>
 
-          <aside className="grid min-w-0 gap-4">
-            <div className="min-w-0 overflow-hidden rounded-3xl border border-[#ff2fa8]/40 bg-white/92 p-5 shadow-sm backdrop-blur">
-              <p className="mb-4 text-[11px] font-black uppercase tracking-[0.22em] text-[#19d3cf]">Top 100 Countries</p>
+            {loadState !== "ready" ? (
+              <div className={styles.mapStatus} role="status">
+                {loadState === "loading"
+                  ? "Loading local country geometry…"
+                  : "Local country geometry could not load."}
+              </div>
+            ) : null}
+          </div>
+        </IntelligencePanel>
 
-              <div ref={rankingListRef} className="max-h-[360px] min-w-0 space-y-3 overflow-y-auto pr-1">
-                {top100Rows.map((row, index) => (
-                  <button
-                    key={row.normalisedName}
-                    ref={(node) => {
-                      if (node) rankingRowRefs.current.set(row.normalisedName, node);
-                      else rankingRowRefs.current.delete(row.normalisedName);
-                    }}
-                    onClick={() => selectRow(row)}
-                    className={`flex w-full min-w-0 max-w-full items-center justify-between gap-3 overflow-hidden rounded-2xl px-4 py-3 text-left transition-all duration-300 ${
-                      selectedCountryKey === row.normalisedName
-                        ? "bg-[#19d3cf] text-white shadow-md"
-                        : "bg-gray-50 text-gray-700 hover:bg-[#ff2fa8]/8"
-                    }`}
+        <IntelligencePanel
+          as="section"
+          aria-labelledby="selected-country-intelligence-title"
+          bodyClassName=""
+          header={
+            <div className="flex flex-wrap items-baseline justify-between gap-sa-2">
+              <div>
+                <DataLabel as="p">Geographic context</DataLabel>
+                <h2
+                  id="selected-country-intelligence-title"
+                  className="mt-sa-1 text-base font-black"
+                >
+                  Selected Country Intelligence
+                </h2>
+              </div>
+              <span className="font-sa-data text-xs text-sa-text-technical">
+                {scopeName} scope
+              </span>
+            </div>
+          }
+        >
+          <div aria-live="polite">
+            {!selectedCountry ? (
+              <div className="px-sa-4 py-sa-6 sm:py-sa-8">
+                <p className="text-sm font-semibold text-sa-text-muted">
+                  Select a country to inspect its competitive profile.
+                </p>
+                <p className="mt-sa-1 text-xs leading-5 text-sa-text-technical">
+                  Use country search, click or tap the globe, or focus the map and
+                  use the arrow keys.
+                </p>
+              </div>
+            ) : (
+              <>
+                <div className="flex flex-col gap-sa-4 px-sa-4 py-sa-4 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="flex min-w-0 items-center gap-sa-3">
+                    <CountryFlag country={selectedCountry} size="md" />
+                    <div className="min-w-0">
+                      <DataLabel as="p">{selectedCountry.region}</DataLabel>
+                      <h3 className="mt-sa-1 truncate text-xl font-black tracking-tight">
+                        {selectedCountry.name}
+                      </h3>
+                      {!selectedHasScopeCoverage ? (
+                        <p className="mt-1 text-xs text-sa-text-technical">
+                          No explicit {scopeName} prototype fixture is available.
+                        </p>
+                      ) : null}
+                    </div>
+                  </div>
+
+                  <Link
+                    href={countryRoute(selectedCountry.id)}
+                    className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-sa-control border border-sa-border-active bg-sa-accent/10 px-sa-4 text-sm font-black text-sa-text-primary outline-none transition-[background-color,color] duration-200 ease-sa-standard hover:bg-sa-accent hover:text-slate-950 focus-visible:ring-4 focus-visible:ring-sa-accent/25"
                   >
-                    <span className="flex min-w-0 flex-1 items-center gap-3">
-                      <span className={`shrink-0 font-black ${selectedCountryKey === row.normalisedName ? "text-white" : "text-[#ff2fa8]"}`}>{index + 1}</span>
-                      <span
-                        className={`min-w-0 flex-1 overflow-hidden whitespace-normal font-black [overflow-wrap:normal] [word-break:normal] ${countryNameTextClass(
-                          row.name
-                        )}`}
-                      >
-                        {row.name}
-                      </span>
-                    </span>
-                    <span
-                      className={`ml-3 flex min-w-[52px] shrink-0 items-center justify-end whitespace-nowrap text-right text-sm font-black tabular-nums leading-none ${top100DisplayColor(
-                        heatMode,
-                        selectedCountryKey === row.normalisedName
-                      )}`}
-                    >
-                      {top100DisplayValue(row, heatMode)}
-                    </span>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className="min-w-0 overflow-hidden rounded-3xl border border-[#ff2fa8]/40 bg-white/92 p-5 shadow-sm backdrop-blur">
-              <p className="mb-2 text-[11px] font-black uppercase tracking-[0.22em] text-[#ff2fa8]">Country Detail</p>
-              <h2 className="text-2xl font-black">{selectedRow?.name ?? "Loading"}</h2>
-
-              <div className="mt-4 grid grid-cols-2 gap-3">
-                <div className="rounded-2xl bg-[#19d3cf]/10 p-4">
-                  <p className="text-[10px] font-black uppercase tracking-[0.18em] text-gray-500">Score</p>
-                  <p className="mt-2 text-xl font-black text-[#19d3cf]">{selectedRow?.score ?? "-"}</p>
+                    View Country Intelligence
+                    <span className="ml-2" aria-hidden="true">→</span>
+                  </Link>
                 </div>
 
-                <div className="rounded-2xl bg-[#ff2fa8]/10 p-4">
-                  <p className="text-[10px] font-black uppercase tracking-[0.18em] text-gray-500">All-Time Move</p>
-                  <p className={`mt-2 text-xl font-black ${selectedMove >= 0 ? "text-[#8b5cf6]" : "text-[#ff2fa8]"}`}>
-                    {selectedMove >= 0 ? "▲" : "▼"} {Math.abs(selectedMove)}
-                  </p>
-                </div>
-              </div>
-
-              <div className="mt-5">
-                <p className="mb-2 text-[10px] font-black uppercase tracking-[0.18em] text-gray-500">Why they win</p>
-                <div className="flex flex-wrap gap-2">
-                  {selectedWhy.map((item) => (
-                    <span key={item} className="rounded-full border border-gray-200 bg-white px-3 py-1 text-xs font-bold text-gray-600">
-                      {item}
-                    </span>
-                  ))}
-                </div>
-              </div>
-
-              <div className="mt-5">
-                <p className="mb-2 text-[10px] font-black uppercase tracking-[0.18em] text-gray-500">Room for improvement</p>
-                <div className="flex flex-wrap gap-2">
-                  {selectedImprove.map((item) => (
-                    <span key={item} className="rounded-full border border-[#ff2fa8]/25 bg-[#ff2fa8]/5 px-3 py-1 text-xs font-bold text-gray-600">
-                      {item}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </aside>
-        </div>
-      </section>
+                <dl className={styles.metricGrid}>
+                  <MetricCell label="Region" value={selectedCountry.region} />
+                  <MetricCell
+                    label={scope === "Overall" ? "Prototype global rank" : "Prototype scope rank"}
+                    value={selectedRanking ? "#" + selectedRanking.rank : "—"}
+                    detail={selectedRanking ? undefined : "Not covered in this scope"}
+                  />
+                  <MetricCell
+                    label="Prototype skill score"
+                    value={selectedRanking ? selectedRanking.score.toFixed(1) : "—"}
+                    valueClassName={selectedRanking ? "text-sa-accent" : "text-sa-text-technical"}
+                    detail={selectedRanking ? undefined : "Not covered in this scope"}
+                  />
+                  <MetricCell
+                    label="Best game"
+                    value={gameDisplayName(selectedCountry.bestGame)}
+                  />
+                  <MetricCell
+                    label="Existing score movement"
+                    value={scoreMovementLabel(selectedRanking)}
+                    valueClassName={movementClass(selectedRanking?.scoreChange)}
+                  />
+                  <MetricCell
+                    label="Existing rank movement"
+                    value={selectedRanking ? movementLabel(selectedRanking.rankChange) : "—"}
+                    valueClassName={movementClass(selectedRanking?.rankChange)}
+                  />
+                </dl>
+              </>
+            )}
+          </div>
+        </IntelligencePanel>
+      </div>
     </main>
-  );
-}
-
-function top100DisplayValue(row: RankedCountry, heatMode: HeatMode) {
-  if (heatMode === "emerging") return `▲ ${Math.max(0, row.rankMoveAllTime)}`;
-  if (heatMode === "loser") return `▼ ${Math.max(0, -row.rankMoveAllTime)}`;
-  return `${row.score}`;
-}
-
-function top100DisplayColor(heatMode: HeatMode, selected: boolean) {
-  if (selected) return "text-white";
-  if (heatMode === "emerging") return "text-[#8b5cf6]";
-  if (heatMode === "loser") return "text-[#ff2fa8]";
-  return "text-gray-700";
-}
-
-function countryNameTextClass(name: string) {
-  const words = name.split(/\s+/).filter(Boolean);
-  const longestWord = words.reduce((longest, word) => Math.max(longest, word.length), 0);
-  const totalLength = name.length;
-
-  if (longestWord >= 15 || totalLength >= 38) return "text-[0.72rem] leading-[1.05]";
-  if (longestWord >= 12 || totalLength >= 31) return "text-[0.80rem] leading-[1.08]";
-  if (longestWord >= 10 || totalLength >= 25) return "text-[0.88rem] leading-[1.1]";
-  if (longestWord >= 8 || totalLength >= 20) return "text-[0.96rem] leading-[1.12]";
-  return "text-base leading-tight";
-}
-
-function sevenDayRankDelta(row: RankedCountry) {
-  if (row.performance) {
-    const direction = row.performance.rankMoveAllTime >= 0 ? 1 : -1;
-    const size = clamp(Math.round(Math.abs(row.performance.rankMoveAllTime) / 9), 1, 6);
-    return direction * size;
-  }
-
-  return (hashString(`${row.normalisedName}-7d-rank`) % 9) - 4;
-}
-
-function sevenDayRankChange(row: RankedCountry) {
-  const delta = sevenDayRankDelta(row);
-  if (delta === 0) return "0";
-  return delta > 0 ? `▲ ${delta}` : `▼ ${Math.abs(delta)}`;
-}
-
-function sevenDayPercentDelta(row: RankedCountry) {
-  const seed = hashString(`${row.normalisedName}-7d-percent`);
-  const raw = ((seed % 91) - 35) / 10;
-
-  if (row.performance?.rankMoveAllTime && row.performance.rankMoveAllTime > 0) return Math.abs(raw) + 0.4;
-  if (row.performance?.rankMoveAllTime && row.performance.rankMoveAllTime < 0) return -Math.abs(raw) - 0.2;
-  return raw;
-}
-
-function sevenDayPercentChange(row: RankedCountry) {
-  const delta = sevenDayPercentDelta(row);
-  return `${delta >= 0 ? "+" : ""}${delta.toFixed(1)}%`;
-}
-
-function sevenDaySeries(row: RankedCountry) {
-  const seed = hashString(`${row.normalisedName}-7d-series`);
-  const trend = sevenDayPercentDelta(row) / 5;
-  const base = clamp(row.score - 2.5, 30, 99);
-
-  return Array.from({ length: 7 }, (_, index) => {
-    const wave = Math.sin((index + (seed % 5)) * 1.25) * 1.4;
-    const drift = trend * index;
-    return clamp(base + wave + drift, 20, 100);
-  });
-}
-
-function sevenDaySparklinePath(row: RankedCountry) {
-  const series = sevenDaySeries(row);
-  const min = Math.min(...series);
-  const max = Math.max(...series);
-  const spread = Math.max(1, max - min);
-
-  return series
-    .map((value, index) => {
-      const x = (index / (series.length - 1)) * 100;
-      const y = 30 - ((value - min) / spread) * 24;
-      return `${index === 0 ? "M" : "L"} ${x.toFixed(1)} ${y.toFixed(1)}`;
-    })
-    .join(" ");
-}
-
-function miniStatValueSize(value: string, compact: boolean) {
-  if (!compact) return "text-xl";
-
-  if (value.length <= 4) return "text-[1.32rem] md:text-[1.48rem]";
-  if (value.length <= 9) return "text-[1.12rem] md:text-[1.26rem]";
-  if (value.length <= 14) return "text-[0.98rem] md:text-[1.10rem]";
-  return "text-[0.86rem] md:text-[0.96rem]";
-}
-
-function MiniChartStat({ label, row }: { label: string; row?: RankedCountry }) {
-  return (
-    <div className="flex h-full flex-col justify-center rounded-2xl border border-[#ff2fa8]/30 bg-white/90 p-5 shadow-sm backdrop-blur">
-      <p className="text-[11px] font-black uppercase tracking-[0.12em] text-gray-500">{label}</p>
-      <svg viewBox="0 0 100 34" className="mt-3 h-12 w-full overflow-visible">
-        {row && <path d={sevenDaySparklinePath(row)} fill="none" stroke="#19d3cf" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />}
-      </svg>
-    </div>
-  );
-}
-
-function MiniStat({ label, value, compact = false, colorClass = "text-[#19d3cf]" }: { label: string; value: string; compact?: boolean; colorClass?: string }) {
-  return (
-    <div className={`flex h-full flex-col justify-center rounded-2xl border border-[#ff2fa8]/30 bg-white/90 shadow-sm backdrop-blur ${compact ? "p-4" : "p-5"}`}>
-      <p className="text-[11px] font-black uppercase tracking-[0.12em] text-gray-500">{label}</p>
-      <p
-        className={`mt-3 max-w-full whitespace-normal break-words font-black leading-[1.08] ${miniStatValueSize(value, compact)} ${colorClass}`}
-      >
-        {value}
-      </p>
-    </div>
-  );
-}
-
-function WorldMapBackground({ darkMode }: { darkMode: boolean }) {
-  return (
-    <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
-      <div className={`absolute inset-0 transition-colors duration-300 ${darkMode ? "bg-[#2f3a46]" : "bg-[#f8fafc]"}`} />
-      <div
-        className={`absolute left-[8%] top-[18%] h-72 w-72 rounded-full blur-3xl transition-all duration-300 ${
-          darkMode ? "bg-[#19d3cf]/[0.035]" : "bg-transparent"
-        }`}
-      />
-      <div
-        className={`absolute bottom-[10%] right-[8%] h-80 w-80 rounded-full blur-3xl transition-all duration-300 ${
-          darkMode ? "bg-[#ff2fa8]/[0.025]" : "bg-transparent"
-        }`}
-      />
-    </div>
   );
 }
