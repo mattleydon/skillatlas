@@ -81,6 +81,8 @@
 }
 
 html.skillatlas-dark {
+  --background: #2f3a46;
+  --foreground: #e8eef7;
   --sa-canvas: #2f3a46;
   --sa-surface-1: #354250;
   --sa-surface-2: #273341;
@@ -99,13 +101,6 @@ html.skillatlas-dark {
   --sa-negative: #ff2fa8;
   --sa-alert: #ff2fa8;
   --sa-chart-neutral: #94a3b8;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
 }
 
 body {
