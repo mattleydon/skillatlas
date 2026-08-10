@@ -971,7 +971,12 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
           position: relative;
           flex: 0 0 auto;
           width: 46px;
+          min-width: 46px;
+          max-width: 46px;
           height: 24px;
+          min-height: 24px;
+          max-height: 24px;
+          padding: 0;
           border-radius: 999px;
           border: 2px solid #0f2530;
           background: rgba(255, 255, 255, 0.96);
@@ -1002,7 +1007,7 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
         }
 
         header[data-scrolled="true"] .skillatlas-theme-switch-desktop {
-          top: 0;
+          top: 1px;
         }
 
         .skillatlas-theme-switch-mobile {
@@ -1039,8 +1044,12 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
           left: 3px;
           top: 2px;
           width: 16px;
+          min-width: 16px;
+          max-width: 16px;
           height: 16px;
-          border-radius: 999px;
+          min-height: 16px;
+          max-height: 16px;
+          border-radius: 50%;
           background: var(--skillatlas-charcoal) !important;
           box-shadow: 0 2px 7px rgba(15, 23, 42, 0.22);
           transition:
