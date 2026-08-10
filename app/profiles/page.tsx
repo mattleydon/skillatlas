@@ -234,17 +234,25 @@ export default function PlayersPage() {
     <main className="relative min-h-screen overflow-x-clip bg-sa-canvas text-sa-text-primary">
       <PlayersBackground />
 
-      <div className="relative mx-auto w-full max-w-[1600px] px-4 pb-7 pt-[104px] sm:px-6 sm:pt-[116px] lg:px-8 lg:pb-9 lg:pt-[145px]">
-        <header className="mb-sa-4 border-b border-sa-border-subtle pb-sa-4">
+      <div className="relative mx-auto w-full max-w-[1600px] px-4 pb-7 pt-[88px] sm:px-6 sm:pt-[92px] lg:px-8 lg:pb-9 xl:pt-[132px]">
+        <IntelligencePanel
+          as="section"
+          aria-labelledby="elite-player-rankings-title"
+          className="mb-sa-3"
+          bodyClassName="px-sa-3 py-sa-3 sm:px-sa-4"
+        >
           <div className="flex flex-col gap-sa-3 lg:flex-row lg:items-end lg:justify-between">
             <div className="max-w-3xl">
-              <DataLabel as="p" className="mb-sa-2 text-sa-accent">
+              <DataLabel as="p" className="mb-sa-1 text-sa-accent">
                 SkillAtlas / Players
               </DataLabel>
-              <h1 className="text-3xl font-black tracking-[-0.045em] sm:text-4xl">
+              <h1
+                id="elite-player-rankings-title"
+                className="text-[1.625rem] font-black leading-tight tracking-[-0.045em] sm:text-4xl"
+              >
                 Elite Player Rankings
               </h1>
-              <p className="mt-sa-2 max-w-2xl text-sm leading-6 text-sa-text-muted sm:text-[15px]">
+              <p className="mt-sa-1 max-w-2xl text-sm leading-6 text-sa-text-muted sm:text-[15px]">
                 Compare the current prototype player field across the overall index
                 and six competitive disciplines.
               </p>
@@ -265,7 +273,7 @@ export default function PlayersPage() {
               </span>
             </div>
           </div>
-        </header>
+        </IntelligencePanel>
 
         <IntelligencePanel
           as="section"
