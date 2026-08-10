@@ -367,7 +367,7 @@ export default function RankingsPage() {
           }
         >
           {visibleCountries.length ? (
-            <table className="w-full table-fixed border-collapse md:table-auto">
+            <table className="w-full table-fixed border-collapse md:table-auto xl:table-fixed">
               <caption className="sr-only">
                 Prototype global country rankings. Activate a column heading to sort.
               </caption>
@@ -379,7 +379,7 @@ export default function RankingsPage() {
                     activeKey={sortKey}
                     direction={sortDirection}
                     onSort={handleSort}
-                    className="w-14 sm:w-20"
+                    className={`w-14 sm:w-20 ${selectedScope === "Overall" ? "xl:w-[6%]" : "xl:w-[7%]"}`}
                   />
                   <SortHeader
                     label="Country"
@@ -387,11 +387,18 @@ export default function RankingsPage() {
                     activeKey={sortKey}
                     direction={sortDirection}
                     onSort={handleSort}
+                    className={selectedScope === "Overall" ? "xl:w-[24%]" : "xl:w-[36%]"}
                   />
+                  <th
+                    scope="col"
+                    className={`hidden px-sa-3 py-sa-3 text-left text-[10px] font-bold uppercase tracking-[0.14em] text-sa-text-technical md:table-cell ${selectedScope === "Overall" ? "xl:w-[12%]" : "xl:w-[18%]"}`}
+                  >
+                    Region
+                  </th>
                   {selectedScope === "Overall" ? (
                     <th
                       scope="col"
-                      className="hidden w-48 px-sa-3 py-sa-3 text-left text-[10px] font-bold uppercase tracking-[0.14em] text-sa-text-technical lg:table-cell"
+                      className="hidden px-sa-3 py-sa-3 text-left text-[10px] font-bold uppercase tracking-[0.14em] text-sa-text-technical lg:table-cell xl:w-[16%]"
                     >
                       Best game
                     </th>
@@ -402,21 +409,23 @@ export default function RankingsPage() {
                     activeKey={sortKey}
                     direction={sortDirection}
                     onSort={handleSort}
-                    className="w-24 text-right sm:w-32"
+                    className={`w-24 text-right sm:w-28 ${selectedScope === "Overall" ? "xl:w-[11%]" : "xl:w-[14%]"}`}
                   />
-                  <th
-                    scope="col"
-                    className="hidden w-36 px-sa-3 py-sa-3 text-left text-[10px] font-bold uppercase tracking-[0.14em] text-sa-text-technical xl:table-cell"
-                  >
-                    Trend
-                  </th>
+                  {selectedScope === "Overall" ? (
+                    <th
+                      scope="col"
+                      className="hidden px-sa-3 py-sa-3 text-left text-[10px] font-bold uppercase tracking-[0.14em] text-sa-text-technical xl:table-cell xl:w-[11%]"
+                    >
+                      Trend
+                    </th>
+                  ) : null}
                   <SortHeader
                     label="Score change"
                     sortKey="scoreChange"
                     activeKey={sortKey}
                     direction={sortDirection}
                     onSort={handleSort}
-                    className="hidden w-36 text-right md:table-cell"
+                    className={`hidden text-right md:table-cell ${selectedScope === "Overall" ? "xl:w-[11%]" : "xl:w-[14%]"}`}
                   />
                   <SortHeader
                     label="Rank change"
@@ -424,7 +433,7 @@ export default function RankingsPage() {
                     activeKey={sortKey}
                     direction={sortDirection}
                     onSort={handleSort}
-                    className="hidden w-32 text-right sm:table-cell"
+                    className={`hidden text-right sm:table-cell ${selectedScope === "Overall" ? "xl:w-[9%]" : "xl:w-[11%]"}`}
                   />
                 </tr>
               </thead>
@@ -458,9 +467,9 @@ export default function RankingsPage() {
                             >
                               {country.country}
                             </Link>
-                            <p className="mt-0.5 truncate text-[10px] text-sa-text-technical lg:hidden">
+                            <p className="mt-0.5 truncate text-[10px] text-sa-text-technical md:hidden">
                               {selectedScope === "Overall" && country.bestGame
-                                ? gameDisplayName(country.bestGame)
+                                ? `${gameDisplayName(country.bestGame)} · ${country.region}`
                                 : country.region}
                               <span className="hidden sm:inline">
                                 {` · ${scoreChangeLabel(country)} · ${movementLabel(country.rankChange)}`}
@@ -468,6 +477,9 @@ export default function RankingsPage() {
                             </p>
                           </div>
                         </div>
+                      </td>
+                      <td className="hidden px-sa-3 py-sa-2 align-middle text-xs font-medium text-sa-text-technical md:table-cell">
+                        {country.region}
                       </td>
                       {selectedScope === "Overall" ? (
                         <td className="hidden px-sa-3 py-sa-2 align-middle text-xs font-semibold text-sa-text-muted lg:table-cell">
@@ -479,13 +491,15 @@ export default function RankingsPage() {
                           {country.score.toFixed(1)}
                         </span>
                       </td>
-                      <td className="hidden px-sa-3 py-sa-2 align-middle xl:table-cell">
-                        {country.history?.length ? (
-                          <Sparkline values={[...country.history]} />
-                        ) : (
-                          <span className="text-xs text-sa-text-technical">—</span>
-                        )}
-                      </td>
+                      {selectedScope === "Overall" ? (
+                        <td className="hidden px-sa-3 py-sa-2 align-middle xl:table-cell">
+                          {country.history?.length ? (
+                            <Sparkline values={[...country.history]} />
+                          ) : (
+                            <span className="text-xs text-sa-text-technical">—</span>
+                          )}
+                        </td>
+                      ) : null}
                       <td className={`hidden px-sa-3 py-sa-2 text-right align-middle text-xs font-black tabular-nums md:table-cell ${movementClass(country.scoreChange)}`}>
                         {scoreChangeLabel(country)}
                       </td>
