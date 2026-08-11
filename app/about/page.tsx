@@ -317,7 +317,7 @@ export default function AboutPage() {
                   </Link>
 
                   {surface.children ? (
-                    <div className="border-t border-sa-border-subtle bg-sa-surface-2/55 sm:pl-[62px]">
+                    <div className="border-t border-sa-border-subtle sm:pl-[62px]">
                       {surface.children.map((child, childIndex) => (
                         <Link
                           key={child.name}
@@ -440,7 +440,7 @@ export default function AboutPage() {
                 title="SkillAtlas Is Currently in Calibration"
                 titleId="current-status-title"
               />
-              <div className="mt-sa-3 max-w-5xl space-y-sa-2 text-sm leading-6 text-sa-text-muted sm:text-[15px]">
+              <div className="mt-sa-3 space-y-sa-2 text-sm leading-6 text-sa-text-muted sm:text-[15px]">
                 <p>
                   SkillAtlas is a real product under active development. Its product and interface structure is distinct from the competitive values displayed inside it.
                 </p>
