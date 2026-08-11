@@ -306,7 +306,7 @@ export default function ForumTopicPicker({ value, onChange }: ForumTopicPickerPr
               closePicker(true);
             }
           }}
-          className="fixed inset-x-4 bottom-4 z-50 max-h-[calc(100dvh-2rem)] overflow-y-auto rounded-sa-control border border-sa-border-strong bg-sa-surface-1 shadow-[0_16px_40px_rgba(15,23,42,0.2)] sm:absolute sm:inset-x-auto sm:bottom-auto sm:right-0 sm:top-[calc(100%+6px)] sm:w-[360px] sm:max-h-[min(28rem,calc(100vh-7rem))] sm:overflow-hidden"
+          className="fixed inset-x-4 bottom-4 z-[130] max-h-[calc(100dvh-2rem)] overflow-y-auto rounded-sa-control border border-sa-border-strong bg-sa-surface-1 shadow-[0_16px_40px_rgba(15,23,42,0.2)] sm:absolute sm:inset-x-auto sm:bottom-auto sm:right-0 sm:top-[calc(100%+6px)] sm:w-[360px] sm:max-h-[min(28rem,calc(100vh-7rem))] sm:overflow-hidden"
         >
           {view === "topics" ? (
             <div className="p-sa-2">

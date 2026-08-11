@@ -52,7 +52,7 @@ export default function ForumPage() {
     <main className="relative min-h-screen overflow-x-clip bg-sa-canvas text-sa-text-primary">
       <ForumBackground />
 
-      <div className="skillatlas-page-shell relative z-10 mx-auto w-full max-w-[1600px] px-4 pb-8 sm:px-6 lg:px-8 lg:pb-10">
+      <div className="skillatlas-page-shell relative mx-auto w-full max-w-[1600px] px-4 pb-8 sm:px-6 lg:px-8 lg:pb-10">
         <IntelligencePanel
           as="section"
           aria-labelledby="forum-page-title"
