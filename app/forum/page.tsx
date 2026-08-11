@@ -8,7 +8,13 @@ import SectionToolbar from "@/app/components/intelligence-ui/section-toolbar";
 import SearchBar from "@/app/components/search-bar";
 import { ROUTES } from "@/constants/routes";
 import { matchesSearchQuery } from "@/lib/search";
-import { sampleForumDiscussions } from "./forum-data";
+import {
+  ALL_DISCUSSIONS_TOPIC,
+  discussionMatchesTopic,
+  sampleForumDiscussions,
+  type ForumTopic,
+} from "./forum-data";
+import ForumTopicPicker from "./topic-picker";
 
 function ForumBackground() {
   return (
@@ -21,20 +27,26 @@ function ForumBackground() {
 
 export default function ForumPage() {
   const [search, setSearch] = useState("");
+  const [topic, setTopic] = useState<ForumTopic>(ALL_DISCUSSIONS_TOPIC);
 
   const filteredDiscussions = useMemo(
     () =>
-      sampleForumDiscussions.filter((discussion) =>
-        matchesSearchQuery(search, [
-          discussion.title,
-          discussion.preview,
-          discussion.body,
-          discussion.author,
-          discussion.country,
-        ])
+      sampleForumDiscussions.filter(
+        (discussion) =>
+          discussionMatchesTopic(discussion, topic) &&
+          matchesSearchQuery(search, [
+            discussion.slug,
+            discussion.title,
+            discussion.preview,
+            discussion.body,
+            discussion.author,
+            discussion.country,
+          ])
       ),
-    [search]
+    [search, topic]
   );
+  const searchActive = search.trim().length > 0;
+  const topicActive = topic.type !== "all";
 
   return (
     <main className="relative min-h-screen overflow-x-clip bg-sa-canvas text-sa-text-primary">
@@ -66,11 +78,20 @@ export default function ForumPage() {
           className="mt-sa-3"
           bodyClassName="px-sa-4 py-sa-3"
         >
-          <div className="grid min-w-0 items-end gap-sa-2 sm:grid-cols-[minmax(0,1fr)_auto]">
+          <div className="grid min-w-0 items-end gap-sa-3 lg:grid-cols-[minmax(0,1fr)_minmax(250px,320px)]">
             <div className="min-w-0">
-              <DataLabel as="span" className="mb-sa-1 block">
-                Search discussions
-              </DataLabel>
+              <div className="mb-sa-1 flex min-h-4 items-center justify-between gap-sa-3">
+                <DataLabel as="span">Search discussions</DataLabel>
+                {searchActive ? (
+                  <button
+                    type="button"
+                    onClick={() => setSearch("")}
+                    className="rounded-sa-sm px-sa-1 text-[10px] font-bold uppercase tracking-[0.12em] text-sa-accent outline-none transition-colors duration-150 hover:text-sa-text-primary focus-visible:ring-2 focus-visible:ring-sa-accent"
+                  >
+                    Clear search
+                  </button>
+                ) : null}
+              </div>
               <SearchBar
                 label="Search discussions"
                 placeholder="Search title, message, author, or country"
@@ -80,15 +101,7 @@ export default function ForumPage() {
               />
             </div>
 
-            {search ? (
-              <button
-                type="button"
-                onClick={() => setSearch("")}
-                className="h-11 rounded-sa-control border border-sa-border-subtle bg-sa-surface-2 px-sa-4 text-sm font-bold text-sa-text-muted transition-colors duration-200 ease-sa-standard hover:border-sa-border-active hover:text-sa-accent focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-sa-accent/15 lg:h-10"
-              >
-                Clear search
-              </button>
-            ) : null}
+            <ForumTopicPicker value={topic} onChange={setTopic} />
           </div>
         </IntelligencePanel>
 
@@ -140,17 +153,38 @@ export default function ForumPage() {
 
           {filteredDiscussions.length === 0 ? (
             <div className="px-sa-5 py-10 text-center" role="status">
-              <h2 className="text-lg font-bold text-sa-text-primary">No discussions match that search.</h2>
+              <h2 className="text-lg font-bold text-sa-text-primary">
+                {searchActive && topicActive
+                  ? "No sample discussions match the current filters."
+                  : topicActive
+                    ? "No sample discussions match this topic."
+                    : "No discussions match that search."}
+              </h2>
               <p className="mx-auto mt-sa-2 max-w-xl text-sm leading-6 text-sa-text-muted">
-                Try a country, player, game, or a shorter search phrase.
+                {topicActive
+                  ? "Choose another topic or adjust the discussion search."
+                  : "Try a country, player, game, or a shorter search phrase."}
               </p>
-              <button
-                type="button"
-                onClick={() => setSearch("")}
-                className="mt-sa-4 h-11 rounded-sa-control bg-sa-accent px-sa-4 text-sm font-bold text-slate-950 transition-opacity duration-200 hover:opacity-90 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-sa-accent/25"
-              >
-                Reset search
-              </button>
+              <div className="mt-sa-4 flex flex-wrap justify-center gap-sa-2">
+                {searchActive ? (
+                  <button
+                    type="button"
+                    onClick={() => setSearch("")}
+                    className="h-11 rounded-sa-control bg-sa-accent px-sa-4 text-sm font-bold text-slate-950 transition-opacity duration-200 hover:opacity-90 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-sa-accent/25"
+                  >
+                    Clear search
+                  </button>
+                ) : null}
+                {topicActive ? (
+                  <button
+                    type="button"
+                    onClick={() => setTopic(ALL_DISCUSSIONS_TOPIC)}
+                    className="h-11 rounded-sa-control border border-sa-border-subtle bg-sa-surface-2 px-sa-4 text-sm font-bold text-sa-text-muted transition-colors duration-200 hover:border-sa-border-active hover:text-sa-accent focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-sa-accent/15"
+                  >
+                    Show all discussions
+                  </button>
+                ) : null}
+              </div>
             </div>
           ) : null}
         </IntelligencePanel>
