@@ -5,12 +5,36 @@ import { GAME_DEFINITIONS } from "@/constants/games";
 import { ROUTES } from "@/constants/routes";
 import { SOVEREIGN_COUNTRY_COUNT } from "@/data/countries";
 
-const productSurfaces = [
+type ProductSurface = {
+  name: string;
+  question: string;
+  description: string;
+  href: string;
+  children?: readonly {
+    name: string;
+    description: string;
+    href: string;
+  }[];
+};
+
+const productSurfaces: readonly ProductSurface[] = [
   {
     name: "Rankings",
     question: "Which countries are strongest?",
     description: "Compare the country ranking presentation across overall and game-specific scopes.",
     href: ROUTES.rankings,
+    children: [
+      {
+        name: "User Rankings",
+        description: "Community-driven perspective on the ranking field, currently represented with local prototype votes.",
+        href: ROUTES.userRankings,
+      },
+      {
+        name: "Live Rankings",
+        description: "Dynamic ranking sandbox for exploring leaderboard movement through local interaction.",
+        href: ROUTES.liveRankings,
+      },
+    ],
   },
   {
     name: "World Map",
@@ -42,7 +66,7 @@ const productSurfaces = [
     description: "Understand the product, its principles, and the distinction between current and future intelligence.",
     href: ROUTES.about,
   },
-] as const;
+];
 
 const intelligenceLayers = [
   {
@@ -158,7 +182,7 @@ function SectionHeading({
   titleId: string;
 }) {
   return (
-    <div className="max-w-4xl">
+    <div className="min-w-0">
       <DataLabel as="p" className="text-sa-accent">
         {eyebrow}
       </DataLabel>
@@ -166,7 +190,7 @@ function SectionHeading({
         {title}
       </h2>
       {description ? (
-        <p className="mt-sa-2 max-w-3xl text-sm leading-6 text-sa-text-muted sm:text-[15px]">
+        <p className="mt-sa-2 text-sm leading-6 text-sa-text-muted sm:text-[15px]">
           {description}
         </p>
       ) : null}
@@ -208,13 +232,13 @@ export default function AboutPage() {
             >
               About SkillAtlas
             </h1>
-            <p className="mt-sa-2 max-w-4xl text-sm leading-6 text-sa-text-muted sm:text-[15px]">
+            <p className="mt-sa-2 text-sm leading-6 text-sa-text-muted sm:text-[15px]">
               SkillAtlas maps competitive gaming across countries, games, and elite players, connecting global comparison with geographic exploration and community discussion.
             </p>
           </IntelligencePanel>
 
           <IntelligencePanel as="section" className="mt-sa-3 overflow-hidden">
-            <div className="grid lg:grid-cols-2">
+            <div className="grid lg:grid-cols-[0.9fr_1.1fr]">
               <article className="px-sa-4 py-sa-5 sm:px-sa-5" aria-labelledby="what-skillatlas-is-title">
                 <SectionHeading
                   eyebrow="Product definition"
@@ -245,13 +269,16 @@ export default function AboutPage() {
                     SkillAtlas aims to make that geography easier to understand—encouraging open comparison, discovery, sporting rivalry, and healthy national competitive pride without losing a global perspective.
                   </p>
                 </div>
-                <div className="mt-sa-4 border-l-2 border-sa-accent pl-sa-3">
-                  <DataLabel as="p">Central question</DataLabel>
-                  <p className="mt-sa-1 text-lg font-bold leading-6 text-sa-text-primary sm:text-xl">
-                    Which country is actually the best at gaming—and what evidence helps explain why?
-                  </p>
-                </div>
               </article>
+            </div>
+
+            <div className="border-t border-sa-border-subtle px-sa-4 py-sa-3 sm:px-sa-5 sm:py-sa-4">
+              <div className="border-l-2 border-sa-accent pl-sa-3 sm:grid sm:grid-cols-[150px_minmax(0,1fr)] sm:items-center sm:gap-sa-4">
+                <DataLabel as="p">Central question</DataLabel>
+                <p className="mt-sa-1 text-lg font-bold leading-6 text-sa-text-primary sm:mt-0 sm:text-xl">
+                  Which country is actually the best at gaming—and what evidence helps explain why?
+                </p>
+              </div>
             </div>
           </IntelligencePanel>
 
@@ -270,24 +297,44 @@ export default function AboutPage() {
           >
             <div className="divide-y divide-sa-border-subtle">
               {productSurfaces.map((surface, index) => (
-                <Link
-                  key={surface.name}
-                  href={surface.href}
-                  aria-current={surface.href === ROUTES.about ? "page" : undefined}
-                  className="group grid min-h-16 gap-sa-2 px-sa-4 py-sa-3 outline-none transition-colors duration-150 ease-sa-standard hover:bg-sa-surface-2 focus-visible:bg-sa-surface-2 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-sa-accent sm:grid-cols-[42px_150px_minmax(0,1fr)_auto] sm:items-center sm:px-sa-5"
-                >
-                  <span className="font-sa-data text-[11px] text-sa-text-technical" aria-hidden="true">
-                    {String(index + 1).padStart(2, "0")}
-                  </span>
-                  <span className="font-bold text-sa-text-primary transition-colors duration-150 group-hover:text-sa-accent">
-                    {surface.name}
-                  </span>
-                  <span className="min-w-0 text-sm leading-5 text-sa-text-muted">
-                    <span className="font-semibold text-sa-text-primary">{surface.question}</span>{" "}
-                    {surface.description}
-                  </span>
-                  <span className="text-sa-accent" aria-hidden="true">→</span>
-                </Link>
+                <div key={surface.name}>
+                  <Link
+                    href={surface.href}
+                    aria-current={surface.href === ROUTES.about ? "page" : undefined}
+                    className="group grid min-h-16 gap-sa-2 px-sa-4 py-sa-3 outline-none transition-colors duration-150 ease-sa-standard hover:bg-sa-surface-2 focus-visible:bg-sa-surface-2 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-sa-accent sm:grid-cols-[42px_150px_minmax(0,1fr)_auto] sm:items-center sm:px-sa-5"
+                  >
+                    <span className="font-sa-data text-[11px] text-sa-text-technical" aria-hidden="true">
+                      {String(index + 1).padStart(2, "0")}
+                    </span>
+                    <span className="font-bold text-sa-text-primary transition-colors duration-150 group-hover:text-sa-accent">
+                      {surface.name}
+                    </span>
+                    <span className="min-w-0 text-sm leading-5 text-sa-text-muted">
+                      <span className="font-semibold text-sa-text-primary">{surface.question}</span>{" "}
+                      {surface.description}
+                    </span>
+                    <span className="text-sa-accent" aria-hidden="true">→</span>
+                  </Link>
+
+                  {surface.children ? (
+                    <div className="border-t border-sa-border-subtle bg-sa-surface-2/55 sm:pl-[62px]">
+                      {surface.children.map((child, childIndex) => (
+                        <Link
+                          key={child.name}
+                          href={child.href}
+                          className={`group grid min-h-12 gap-x-sa-3 gap-y-sa-1 px-sa-4 py-sa-2 outline-none transition-colors duration-150 ease-sa-standard hover:bg-sa-surface-inset focus-visible:bg-sa-surface-inset focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-sa-accent sm:grid-cols-[150px_minmax(0,1fr)_auto] sm:items-center sm:px-sa-5 ${childIndex === 0 ? "" : "border-t border-sa-border-subtle"}`}
+                        >
+                          <span className="flex items-center gap-sa-2 text-xs font-bold uppercase tracking-[0.08em] text-sa-text-primary transition-colors duration-150 group-hover:text-sa-accent">
+                            <span className="font-sa-data text-sa-accent" aria-hidden="true">↳</span>
+                            {child.name}
+                          </span>
+                          <span className="text-sm leading-5 text-sa-text-muted">{child.description}</span>
+                          <span className="text-sa-accent" aria-hidden="true">→</span>
+                        </Link>
+                      ))}
+                    </div>
+                  ) : null}
+                </div>
               ))}
             </div>
           </IntelligencePanel>
