@@ -1,346 +1,454 @@
-"use client";
-
-import { useState } from "react";
+import Link from "next/link";
+import DataLabel from "@/app/components/intelligence-ui/data-label";
+import IntelligencePanel from "@/app/components/intelligence-ui/intelligence-panel";
+import { GAME_DEFINITIONS } from "@/constants/games";
 import { ROUTES } from "@/constants/routes";
+import { SOVEREIGN_COUNTRY_COUNT } from "@/data/countries";
 
-type FAQItem = {
-  question: string;
-  answer: string;
-};
-
-const rankingSignals = [
-  {
-    title: "Tournament results",
-    description: "Major wins, consistent placements, deep international runs, and performance across different competitive eras.",
-  },
-  {
-    title: "Player depth",
-    description: "How many elite players, rising prospects, specialist roles, and high-level grinders a country produces.",
-  },
-  {
-    title: "Game identity",
-    description: "Some countries are FPS furnaces, some are MOBA machines, some are fighting-game laboratories. SkillAtlas keeps that flavour visible.",
-  },
-  {
-    title: "Infrastructure",
-    description: "Teams, academies, coaching, sponsors, LAN culture, servers, grassroots scenes, and the boring machinery behind greatness.",
-  },
-  {
-    title: "Community opinion",
-    description: "User Rankings and Live Rankings will let players vote, argue, reorder, and build the public pulse of the site.",
-  },
-  {
-    title: "Momentum",
-    description: "Rankings should not feel frozen. Form, trends, new games, breakout players, and rising scenes all matter.",
-  },
-];
-
-const siteAreas = [
+const productSurfaces = [
   {
     name: "Rankings",
-    description: "The homepage. A general country leaderboard showing who is currently strongest across games and why.",
+    question: "Which countries are strongest?",
+    description: "Compare the country ranking presentation across overall and game-specific scopes.",
     href: ROUTES.rankings,
   },
   {
-    name: "User Rankings",
-    description: "Community voting by game. Players decide which countries deserve to rise or fall.",
-    href: ROUTES.userRankings,
-  },
-  {
-    name: "Live Rankings",
-    description: "A real-time ranking sandbox where users can move countries up and down the leaderboard.",
-    href: ROUTES.liveRankings,
-  },
-  {
     name: "World Map",
-    description: "A visual globe layer for exploring country strength by game and geography.",
+    question: "Where is strength concentrated?",
+    description: "Explore the geographic shape of global competitive gaming.",
     href: ROUTES.worldMap,
   },
   {
     name: "Countries",
-    description: "Country profile cards with rankings, strengths, weaknesses, identities, and gaming fingerprints.",
+    question: "What does each country reveal?",
+    description: "Browse sovereign-country geography and investigate country intelligence records.",
     href: ROUTES.countries,
   },
   {
     name: "Players",
-    description: "Player archetypes, roles, and eventually real user-created SkillAtlas profiles.",
+    question: "Which elite players stand out?",
+    description: "Compare the current elite-player presentation across six competitive disciplines.",
     href: ROUTES.players,
   },
-];
+  {
+    name: "Forum",
+    question: "What is the community discussing?",
+    description: "Debate rankings, countries, games, players, and new ideas for the atlas.",
+    href: ROUTES.forum,
+  },
+  {
+    name: "About",
+    question: "How does SkillAtlas work?",
+    description: "Understand the product, its principles, and the distinction between current and future intelligence.",
+    href: ROUTES.about,
+  },
+] as const;
 
-const roadmapItems = [
-  "Connect rankings to real datasets and transparent scoring rules.",
-  "Let users create profiles and receive a SkillAtlas player identity.",
-  "Add country pages with deeper game-by-game breakdowns.",
-  "Build voting, comments, and community ranking history.",
-  "Add game pages for CS2, League of Legends, Valorant, Fortnite, Rocket League, Chess, and more.",
-  "Make the World Map feel like a living atlas of competitive gaming culture.",
-];
+const intelligenceLayers = [
+  {
+    name: "Raw Evidence",
+    description: "Competitive records retained with enough source context to remain traceable.",
+  },
+  {
+    name: "Normalised Observations",
+    description: "Evidence transformed into consistent observations that can be compared responsibly.",
+  },
+  {
+    name: "Derived Intelligence",
+    description: "A versioned methodology turns observations into scores, rankings, movement, and related outputs.",
+  },
+  {
+    name: "Interpretation",
+    description: "SkillAtlas explains what an output may indicate without presenting inference as established cause.",
+  },
+] as const;
 
-const faqs: FAQItem[] = [
+const analyticalDisciplines = [
   {
-    question: "What is SkillAtlas?",
-    answer:
-      "SkillAtlas is a country ranking website for gaming and esports. It is designed to show which countries are strongest at each game, why they are strong, and how different gaming cultures compare across the world.",
+    name: "Observation",
+    description: "A country records strong results across multiple competitive events.",
   },
   {
-    question: "Are the current rankings final?",
-    answer:
-      "No. The current version is a design and concept base with sample data. The goal is to evolve it into a transparent ranking system using real performance data, community votes, and live movement over time.",
+    name: "Interpretation",
+    description: "That recurring pattern may indicate competitive depth.",
   },
   {
-    question: "How will countries be ranked?",
-    answer:
-      "The long-term scoring system can combine tournament results, elite player output, player depth, infrastructure, community votes, recent form, and game-specific dominance.",
+    name: "Causation",
+    description: "A cultural, economic, infrastructure, or training factor should not be named as the cause without supporting evidence.",
+  },
+] as const;
+
+const methodologyPrinciples = [
+  {
+    name: "No Fabricated Data",
+    description: "Unsupported competitive intelligence should never be presented as fact.",
   },
   {
-    question: "Why rank countries instead of only teams or players?",
-    answer:
-      "Teams and players are already tracked everywhere. SkillAtlas looks at the deeper question underneath them: where talent comes from, which cultures produce certain playstyles, and why different countries dominate different games.",
+    name: "Provenance",
+    description: "Published intelligence should be traceable to its underlying evidence.",
   },
   {
-    question: "What is User Rankings?",
-    answer:
-      "User Rankings is the community voting layer. Visitors can vote on which countries they believe are strongest for each game, creating a public pulse alongside the main rankings.",
+    name: "Reproducibility",
+    description: "A published result should be reproducible from its inputs and methodology version.",
   },
   {
-    question: "What is Live Rankings?",
-    answer:
-      "Live Rankings is a more interactive ranking board where countries can be moved in real time. It is meant to feel immediate, playful, and community-driven.",
+    name: "Versioning",
+    description: "Methodology changes should be explicit instead of silently rewriting historical meaning.",
   },
   {
-    question: "What are player identities?",
-    answer:
-      "Player identities are SkillAtlas-style archetypes like Tactical Brain, Mechanical Demon, Clutch Artist, Team Anchor, or Creative Builder. They help describe how a player wins, not just whether they win.",
+    name: "Confidence",
+    description: "Intelligence should communicate how complete and reliable its supporting evidence is.",
   },
   {
-    question: "Can users create their own profiles?",
-    answer:
-      "That is the plan. Eventually users should be able to create a SkillAtlas profile, choose their country and main game, describe their playstyle, and receive a player identity.",
+    name: "Zero Is Not Unknown",
+    description: "Missing evidence must not silently become a signal of poor performance.",
   },
   {
-    question: "Will SkillAtlas include every game?",
-    answer:
-      "The site can start with major competitive games and expand over time. Each game may need its own scoring logic because being dominant at CS2 is different from being dominant at Chess, Rocket League, Fortnite, or League of Legends.",
+    name: "Source Quality",
+    description: "Authoritative and specialist evidence should carry more weight than weak secondary material.",
   },
-];
+  {
+    name: "Transparency",
+    description: "Users should be able to understand what an output means and how it was formed.",
+  },
+] as const;
+
+const realToday = [
+  `A reviewed scope of ${SOVEREIGN_COUNTRY_COUNT} sovereign countries`,
+  `A ${GAME_DEFINITIONS.length}-game starting taxonomy`,
+  "Local geographic country mapping and atlas exploration",
+  "Connected Rankings, World Map, Countries, Players, and Forum surfaces",
+  "Formal methodology and governance principles for future intelligence",
+] as const;
+
+const futureIntelligence = [
+  "Authoritative, sourced country and player rankings",
+  "Richer country dossiers and regional comparison",
+  "Historical movement and competitive context",
+  "Rivalries, competitive gaps, and clearer Data Confidence",
+  "Stronger links between intelligence and community discussion",
+] as const;
+
+const exploreLinks = [
+  { label: "View Rankings", href: ROUTES.rankings },
+  { label: "Explore World Map", href: ROUTES.worldMap },
+  { label: "Browse Countries", href: ROUTES.countries },
+  { label: "View Elite Players", href: ROUTES.players },
+  { label: "Join the Forum", href: ROUTES.forum },
+] as const;
 
 function AboutBackground() {
   return (
-    <div className="pointer-events-none absolute inset-0 overflow-hidden">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_8%,rgba(25,211,207,0.18),transparent_28%),radial-gradient(circle_at_82%_22%,rgba(255,47,168,0.14),transparent_30%),linear-gradient(180deg,#F8FAFC_0%,#EEF7FA_100%)]" />
-      <div className="absolute left-[-10%] top-40 h-[560px] w-[560px] rounded-full border border-[#19d3cf]/20" />
-      <div className="absolute right-[-12%] top-72 h-[620px] w-[620px] rounded-full border border-[#ff2fa8]/20" />
-      <div className="absolute inset-x-0 top-[250px] h-px bg-[#ff2fa8]/25" />
-      <div className="absolute left-1/2 top-[180px] h-[700px] w-[700px] -translate-x-1/2 rounded-full border border-slate-300/40" />
-      <div className="absolute inset-0 opacity-[0.18] [background-image:linear-gradient(rgba(15,23,42,0.32)_1px,transparent_1px),linear-gradient(90deg,rgba(15,23,42,0.32)_1px,transparent_1px)] [background-size:96px_96px]" />
+    <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_16%_8%,color-mix(in_srgb,var(--sa-accent)_7%,transparent),transparent_30%),linear-gradient(180deg,var(--sa-canvas),var(--sa-canvas))]" />
+      <div className="absolute inset-0 opacity-30 [background-image:linear-gradient(var(--sa-border-subtle)_1px,transparent_1px),linear-gradient(90deg,var(--sa-border-subtle)_1px,transparent_1px)] [background-size:88px_88px] [mask-image:linear-gradient(to_bottom,black,transparent_52%)]" />
     </div>
   );
 }
 
-export default function AboutPage() {
-  const [openFAQ, setOpenFAQ] = useState(0);
-
+function SectionHeading({
+  eyebrow,
+  title,
+  description,
+  titleId,
+}: {
+  eyebrow: string;
+  title: string;
+  description?: string;
+  titleId: string;
+}) {
   return (
-    <main className="about-shell relative min-h-screen overflow-hidden bg-[#F8FAFC] text-[#111827] transition-colors duration-300">
+    <div className="max-w-4xl">
+      <DataLabel as="p" className="text-sa-accent">
+        {eyebrow}
+      </DataLabel>
+      <h2 id={titleId} className="mt-sa-1 text-xl font-bold tracking-tight text-sa-text-primary sm:text-2xl">
+        {title}
+      </h2>
+      {description ? (
+        <p className="mt-sa-2 max-w-3xl text-sm leading-6 text-sa-text-muted sm:text-[15px]">
+          {description}
+        </p>
+      ) : null}
+    </div>
+  );
+}
+
+function CompactList({ items }: { items: readonly string[] }) {
+  return (
+    <ul className="mt-sa-3 grid gap-sa-2">
+      {items.map((item) => (
+        <li key={item} className="flex gap-sa-3 text-sm leading-6 text-sa-text-muted">
+          <span className="mt-[9px] h-1.5 w-1.5 flex-none rounded-full bg-sa-accent" aria-hidden="true" />
+          <span>{item}</span>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+export default function AboutPage() {
+  return (
+    <main className="relative min-h-screen overflow-x-clip bg-sa-canvas text-sa-text-primary">
       <AboutBackground />
 
-      <style>{`
-        html.skillatlas-dark .about-shell [class*="bg-white"] {
-          background-color: rgba(53, 66, 80, 0.92) !important;
-        }
-
-        html.skillatlas-dark .about-shell [class*="bg-gray-50"] {
-          background-color: rgba(32, 43, 55, 0.92) !important;
-        }
-
-        html.skillatlas-dark .about-shell [class*="text-gray-"] {
-          color: rgb(203, 213, 225) !important;
-        }
-
-        html.skillatlas-dark .about-shell [class*="text-[#111827]"] {
-          color: rgb(248, 250, 252) !important;
-        }
-
-        html.skillatlas-dark .about-shell {
-          background: #2f3a46;
-          color: rgb(248, 250, 252);
-        }
-
-        html.skillatlas-dark .about-shell > div:first-child {
-          opacity: 0.58;
-          filter: brightness(0.72) saturate(1.25);
-        }
-      `}</style>
-
-      <section className="relative z-10 mx-auto max-w-7xl px-8 pb-16 pt-[150px]">
-        <div className="mb-6 overflow-hidden rounded-3xl border border-[#ff2fa8]/45 bg-white/92 shadow-sm backdrop-blur">
-          <div className="grid gap-6 p-6 lg:grid-cols-[1.15fr_0.85fr] lg:items-start">
-            <div>
-              <p className="mb-2 text-xs font-black uppercase tracking-[0.28em] text-[#19d3cf]">About SkillAtlas</p>
-              <h1 className="mb-3 max-w-4xl text-3xl font-black tracking-tight md:text-4xl">
-                Building the ultimate country ranking website for gaming.
-              </h1>
-              <p className="max-w-4xl text-sm font-semibold leading-relaxed text-gray-600 md:text-base">
-                SkillAtlas connects gamers across the world by mapping which countries dominate each game, why they win, and how different gaming cultures create different kinds of players.
-              </p>
-            </div>
-
-            <div className="rounded-3xl border border-[#19d3cf]/30 bg-[#19d3cf]/8 p-5 lg:mt-8">
-              <p className="mb-2 text-[11px] font-black uppercase tracking-[0.24em] text-[#ff2fa8]">The simple idea</p>
-              <p className="text-xl font-black leading-tight">
-                Every country has a gaming fingerprint. SkillAtlas is here to map it.
-              </p>
-            </div>
-          </div>
-
-          <div className="grid border-t border-[#ff2fa8]/20 md:grid-cols-3">
-            {[
-              ["Mission", "Connect gamers globally through country-based rankings, maps, profiles, and community debate."],
-              ["Goal", "Become the go-to website for understanding which countries are best at each game."],
-              ["Spirit", "Competitive, curious, global, playful, and obsessed with why certain places produce certain skills."],
-            ].map(([title, description]) => (
-              <div key={title} className="border-t border-[#ff2fa8]/10 p-5 md:border-l md:border-t-0 first:md:border-l-0">
-                <p className="mb-2 text-[10px] font-black uppercase tracking-[0.22em] text-gray-500">{title}</p>
-                <p className="text-sm font-bold leading-relaxed text-gray-600">{description}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <section className="mb-6 grid gap-5 lg:grid-cols-[0.92fr_1.08fr]">
-          <div className="rounded-3xl border border-[#ff2fa8]/45 bg-white/92 p-6 shadow-sm backdrop-blur">
-            <p className="mb-2 text-[11px] font-black uppercase tracking-[0.24em] text-[#19d3cf]">Mission & Goals</p>
-            <h2 className="mb-4 text-2xl font-black">What SkillAtlas is trying to become.</h2>
-            <div className="space-y-4 text-sm font-semibold leading-relaxed text-gray-600">
-              <p>
-                SkillAtlas is not just another leaderboard. It is an atlas for gaming culture: a place to explore how countries develop talent, which games they dominate, and what makes their players different.
-              </p>
-              <p>
-                The long-term goal is to combine real competitive data, community voting, player profiles, live rankings, and a world map into one clean home for global gaming comparison.
-              </p>
-              <p>
-                It should be useful for esports fans, casual gamers, content creators, analysts, and anyone who has ever wondered, “Why is that country so good at this game?”
-              </p>
-              <p>
-                The bigger vision is to make global gaming feel connected: a place where a player in Sydney, Seoul, São Paulo, Copenhagen, or Lagos can see their scene represented and compare it with the rest of the world.
-              </p>
-            </div>
-          </div>
-
-          <div className="grid gap-4 sm:grid-cols-2">
-            {rankingSignals.map((signal) => (
-              <div key={signal.title} className="rounded-3xl border border-[#ff2fa8]/35 bg-white/88 p-5 shadow-sm backdrop-blur">
-                <p className="mb-2 text-[10px] font-black uppercase tracking-[0.2em] text-[#19d3cf]">{signal.title}</p>
-                <p className="text-sm font-semibold leading-relaxed text-gray-600">{signal.description}</p>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        <section className="mb-6 rounded-3xl border border-[#ff2fa8]/45 bg-white/92 p-6 shadow-sm backdrop-blur">
-          <div className="mb-5 flex flex-wrap items-end justify-between gap-4">
-            <div>
-              <p className="mb-2 text-[11px] font-black uppercase tracking-[0.24em] text-[#19d3cf]">How the site works</p>
-              <h2 className="text-2xl font-black">The SkillAtlas ecosystem.</h2>
-            </div>
-            <p className="max-w-3xl text-sm font-semibold leading-relaxed text-gray-600">
-              Each page answers one question: where does gaming skill come from?
+      <div className="skillatlas-page-shell relative z-10 mx-auto w-full max-w-[1600px] px-4 pb-10 sm:px-6 lg:px-8 lg:pb-12">
+        <div className="mx-auto max-w-[1320px]">
+          <IntelligencePanel
+            as="section"
+            aria-labelledby="about-skillatlas-title"
+            bodyClassName="px-sa-4 py-sa-4 sm:px-sa-5"
+          >
+            <DataLabel as="p" className="mb-sa-1 text-sa-accent">
+              SkillAtlas / About
+            </DataLabel>
+            <h1
+              id="about-skillatlas-title"
+              className="text-[1.75rem] font-black leading-[1.08] tracking-[-0.04em] text-sa-text-primary sm:text-4xl"
+            >
+              About SkillAtlas
+            </h1>
+            <p className="mt-sa-2 max-w-4xl text-sm leading-6 text-sa-text-muted sm:text-[15px]">
+              SkillAtlas maps competitive gaming across countries, games, and elite players, connecting global comparison with geographic exploration and community discussion.
             </p>
-          </div>
+          </IntelligencePanel>
 
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-            {siteAreas.map((area) => (
-              <a
-                key={area.name}
-                href={area.href}
-                className="group rounded-3xl border border-gray-200 bg-white/70 p-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-[#19d3cf]/70 hover:shadow-lg"
-              >
-                <p className="mb-2 text-lg font-black transition-colors group-hover:text-[#19d3cf]">{area.name}</p>
-                <p className="text-sm font-semibold leading-relaxed text-gray-600">{area.description}</p>
-              </a>
-            ))}
-          </div>
-        </section>
+          <IntelligencePanel as="section" className="mt-sa-3 overflow-hidden">
+            <div className="grid lg:grid-cols-2">
+              <article className="px-sa-4 py-sa-5 sm:px-sa-5" aria-labelledby="what-skillatlas-is-title">
+                <SectionHeading
+                  eyebrow="Product definition"
+                  title="What SkillAtlas Is"
+                  titleId="what-skillatlas-is-title"
+                />
+                <div className="mt-sa-3 space-y-sa-3 text-sm leading-6 text-sa-text-muted sm:text-[15px]">
+                  <p>
+                    SkillAtlas is a global competitive-gaming intelligence product focused on understanding competitive strength across countries, games, and elite professional players.
+                  </p>
+                  <p>
+                    Its current interfaces bring Rankings, World Map, Country Intelligence, Elite Player Rankings, and Community Forum into one connected country-first product.
+                  </p>
+                </div>
+              </article>
 
-        <section className="mb-6 grid gap-5 lg:grid-cols-[1fr_0.9fr]">
-          <div className="rounded-3xl border border-[#ff2fa8]/45 bg-white/92 p-6 shadow-sm backdrop-blur">
-            <p className="mb-2 text-[11px] font-black uppercase tracking-[0.24em] text-[#19d3cf]">Roadmap</p>
-            <h2 className="mb-5 text-2xl font-black">Where it can go next.</h2>
-            <div className="space-y-3">
-              {roadmapItems.map((item, index) => (
-                <div key={item} className="flex min-h-[76px] items-center gap-3 rounded-2xl border border-gray-200 bg-white/70 p-4">
-                  <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-[#ff2fa8]/10 text-xs font-black text-[#ff2fa8]">
-                    {index + 1}
+              <article className="border-t border-sa-border-subtle px-sa-4 py-sa-5 sm:px-sa-5 lg:border-l lg:border-t-0" aria-labelledby="why-skillatlas-exists-title">
+                <SectionHeading
+                  eyebrow="Purpose"
+                  title="Why SkillAtlas Exists"
+                  titleId="why-skillatlas-exists-title"
+                />
+                <div className="mt-sa-3 space-y-sa-3 text-sm leading-6 text-sa-text-muted sm:text-[15px]">
+                  <p>
+                    Traditional sport gives countries an intuitive competitive identity. Competitive gaming has global results and devoted communities, but country-level strength is harder to see as one coherent geography.
+                  </p>
+                  <p>
+                    SkillAtlas aims to make that geography easier to understand—encouraging open comparison, discovery, sporting rivalry, and healthy national competitive pride without losing a global perspective.
+                  </p>
+                </div>
+                <div className="mt-sa-4 border-l-2 border-sa-accent pl-sa-3">
+                  <DataLabel as="p">Central question</DataLabel>
+                  <p className="mt-sa-1 text-lg font-bold leading-6 text-sa-text-primary sm:text-xl">
+                    Which country is actually the best at gaming—and what evidence helps explain why?
+                  </p>
+                </div>
+              </article>
+            </div>
+          </IntelligencePanel>
+
+          <IntelligencePanel
+            as="section"
+            className="mt-sa-3 overflow-hidden"
+            aria-labelledby="product-system-title"
+            header={
+              <SectionHeading
+                eyebrow="Connected system"
+                title="How SkillAtlas Fits Together"
+                description="Each surface answers a different question while remaining part of the same competitive atlas. Surface roles do not imply that current prototype values are final rankings."
+                titleId="product-system-title"
+              />
+            }
+          >
+            <div className="divide-y divide-sa-border-subtle">
+              {productSurfaces.map((surface, index) => (
+                <Link
+                  key={surface.name}
+                  href={surface.href}
+                  aria-current={surface.href === ROUTES.about ? "page" : undefined}
+                  className="group grid min-h-16 gap-sa-2 px-sa-4 py-sa-3 outline-none transition-colors duration-150 ease-sa-standard hover:bg-sa-surface-2 focus-visible:bg-sa-surface-2 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-sa-accent sm:grid-cols-[42px_150px_minmax(0,1fr)_auto] sm:items-center sm:px-sa-5"
+                >
+                  <span className="font-sa-data text-[11px] text-sa-text-technical" aria-hidden="true">
+                    {String(index + 1).padStart(2, "0")}
                   </span>
-                  <p className="text-sm font-bold leading-snug text-gray-600">{item}</p>
-                </div>
+                  <span className="font-bold text-sa-text-primary transition-colors duration-150 group-hover:text-sa-accent">
+                    {surface.name}
+                  </span>
+                  <span className="min-w-0 text-sm leading-5 text-sa-text-muted">
+                    <span className="font-semibold text-sa-text-primary">{surface.question}</span>{" "}
+                    {surface.description}
+                  </span>
+                  <span className="text-sa-accent" aria-hidden="true">→</span>
+                </Link>
               ))}
             </div>
-          </div>
+          </IntelligencePanel>
 
-          <div className="rounded-3xl border border-[#ff2fa8]/45 bg-white/92 p-6 shadow-sm backdrop-blur">
-            <p className="mb-2 text-[11px] font-black uppercase tracking-[0.24em] text-[#19d3cf]">Core Principles</p>
-            <h2 className="mb-5 text-2xl font-black">Rules for the atlas.</h2>
-
-            <div className="grid gap-3">
-              {[
-                ["Global first", "Every region deserves to be visible, not just the biggest esports markets."],
-                ["Explain the why", "A ranking without reasoning is just a number wearing a crown."],
-                ["Keep it alive", "Rankings should move as scenes rise, fall, rebuild, and surprise everyone."],
-                ["Let the community speak", "Players should be able to vote, comment, challenge, and shape the public layer."],
-              ].map(([title, description]) => (
-                <div key={title} className="rounded-2xl border border-gray-200 bg-white/70 p-4">
-                  <p className="mb-1 text-sm font-black text-[#ff2fa8]">{title}</p>
-                  <p className="text-sm font-semibold leading-relaxed text-gray-600">{description}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <section className="mb-6 rounded-3xl border border-[#ff2fa8]/45 bg-white/92 p-6 shadow-sm backdrop-blur">
-          <div className="mb-5">
-            <p className="mb-2 text-[11px] font-black uppercase tracking-[0.24em] text-[#19d3cf]">FAQ</p>
-            <h2 className="text-2xl font-black">Questions players will probably ask.</h2>
-          </div>
-
-          <div className="grid gap-3">
-            {faqs.map((faq, index) => {
-              const open = openFAQ === index;
-
-              return (
-                <div key={faq.question} className="overflow-hidden rounded-3xl border border-gray-200 bg-white/70">
-                  <button
-                    type="button"
-                    onClick={() => setOpenFAQ(open ? -1 : index)}
-                    className="flex w-full items-center justify-between gap-4 p-5 text-left"
-                  >
-                    <span className="font-black">{faq.question}</span>
-                    <span className={`text-xl font-black text-[#ff2fa8] transition-transform duration-300 ${open ? "rotate-45" : ""}`}>+</span>
-                  </button>
-
-                  <div className={`grid transition-all duration-300 ${open ? "grid-rows-[1fr]" : "grid-rows-[0fr]"}`}>
-                    <div className="overflow-hidden">
-                      <p className="border-t border-gray-200 px-5 py-4 text-sm font-semibold leading-relaxed text-gray-600">{faq.answer}</p>
-                    </div>
+          <IntelligencePanel
+            as="section"
+            className="mt-sa-3 overflow-hidden"
+            aria-labelledby="intelligence-pipeline-title"
+            header={
+              <SectionHeading
+                eyebrow="Intelligence model"
+                title="How SkillAtlas Intelligence Is Built"
+                description="A trustworthy production model keeps evidence, analytical outputs, and explanation distinct. This pipeline describes the intended discipline, not a claim that every current prototype value already passes through it."
+                titleId="intelligence-pipeline-title"
+              />
+            }
+          >
+            <ol className="grid lg:grid-cols-4">
+              {intelligenceLayers.map((layer, index) => (
+                <li
+                  key={layer.name}
+                  className={`relative px-sa-4 py-sa-4 sm:px-sa-5 ${index === 0 ? "" : "border-t border-sa-border-subtle lg:border-l lg:border-t-0"}`}
+                >
+                  <div className="flex items-center justify-between gap-sa-3">
+                    <DataLabel as="span">Layer {String(index + 1).padStart(2, "0")}</DataLabel>
+                    {index < intelligenceLayers.length - 1 ? (
+                      <span className="hidden text-sa-accent lg:inline" aria-hidden="true">→</span>
+                    ) : null}
                   </div>
-                </div>
-              );
-            })}
-          </div>
-        </section>
+                  <h3 className="mt-sa-2 text-sm font-bold uppercase tracking-[0.08em] text-sa-text-primary">
+                    {layer.name}
+                  </h3>
+                  <p className="mt-sa-2 text-sm leading-6 text-sa-text-muted">{layer.description}</p>
+                </li>
+              ))}
+            </ol>
+          </IntelligencePanel>
 
-        <section className="rounded-3xl border border-[#ff2fa8]/45 bg-white/92 p-6 text-center shadow-sm backdrop-blur">
-          <p className="mb-2 text-[11px] font-black uppercase tracking-[0.24em] text-[#19d3cf]">Join the map</p>
-          <h2 className="mx-auto mb-3 max-w-3xl text-2xl font-black">
-            The dream is a living atlas built by gamers, not just watched by them.
-          </h2>
-          <p className="mx-auto max-w-3xl text-sm font-semibold leading-relaxed text-gray-600">
-            Rankings, country identities, player archetypes, comments, votes, and live movement can turn SkillAtlas into a global gaming argument machine, but a useful one.
-          </p>
-        </section>
-      </section>
+          <IntelligencePanel
+            as="section"
+            className="mt-sa-3 overflow-hidden"
+            aria-labelledby="analytical-discipline-title"
+            header={
+              <SectionHeading
+                eyebrow="Analytical discipline"
+                title="Observation, Interpretation, and Causation"
+                description="Useful explanation depends on saying clearly what the evidence shows, what it may indicate, and what it cannot yet prove."
+                titleId="analytical-discipline-title"
+              />
+            }
+          >
+            <div className="grid md:grid-cols-3">
+              {analyticalDisciplines.map((discipline, index) => (
+                <article
+                  key={discipline.name}
+                  className={`px-sa-4 py-sa-4 sm:px-sa-5 ${index === 0 ? "" : "border-t border-sa-border-subtle md:border-l md:border-t-0"}`}
+                >
+                  <h3 className="text-[10px] font-bold uppercase leading-4 tracking-[0.16em] text-sa-accent">
+                    {discipline.name}
+                  </h3>
+                  <p className="mt-sa-2 text-sm leading-6 text-sa-text-muted">{discipline.description}</p>
+                </article>
+              ))}
+            </div>
+          </IntelligencePanel>
+
+          <IntelligencePanel
+            as="section"
+            className="mt-sa-3 overflow-hidden"
+            aria-labelledby="methodology-principles-title"
+            header={
+              <SectionHeading
+                eyebrow="Trust framework"
+                title="Data & Methodology Principles"
+                description="These principles set the standard future public intelligence is intended to meet without publishing provisional formulas as settled methodology."
+                titleId="methodology-principles-title"
+              />
+            }
+          >
+            <div className="grid sm:grid-cols-2">
+              {methodologyPrinciples.map((principle, index) => (
+                <article
+                  key={principle.name}
+                  className={`border-t border-sa-border-subtle px-sa-4 py-sa-3 sm:px-sa-5 ${index % 2 === 0 ? "sm:border-r" : ""}`}
+                >
+                  <h3 className="text-[10px] font-bold uppercase leading-4 tracking-[0.16em] text-sa-text-primary">
+                    {principle.name}
+                  </h3>
+                  <p className="mt-sa-1 text-sm leading-6 text-sa-text-muted">{principle.description}</p>
+                </article>
+              ))}
+            </div>
+          </IntelligencePanel>
+
+          <IntelligencePanel
+            as="section"
+            className="mt-sa-3 overflow-hidden border-sa-border-strong"
+            aria-labelledby="current-status-title"
+          >
+            <div className="border-l-2 border-sa-accent px-sa-4 py-sa-4 sm:px-sa-5">
+              <SectionHeading
+                eyebrow="Current status"
+                title="SkillAtlas Is Currently in Calibration"
+                titleId="current-status-title"
+              />
+              <div className="mt-sa-3 max-w-5xl space-y-sa-2 text-sm leading-6 text-sa-text-muted sm:text-[15px]">
+                <p>
+                  SkillAtlas is a real product under active development. Its product and interface structure is distinct from the competitive values displayed inside it.
+                </p>
+                <p>
+                  Some current public scores, ranks, movement, player records, and historical series are prototype presentation data used to develop and test the experience. They are not final methodology-approved rankings.
+                </p>
+                <p>
+                  The production evidence and methodology pipeline is still being developed. Future published intelligence is intended to be sourced, reproducible, versioned, transparent, and accompanied by clearer provenance and Data Confidence.
+                </p>
+              </div>
+            </div>
+
+            <div className="grid border-t border-sa-border-subtle lg:grid-cols-2">
+              <article className="px-sa-4 py-sa-4 sm:px-sa-5" aria-labelledby="real-today-title">
+                <DataLabel as="p" className="text-sa-accent">Product structure</DataLabel>
+                <h3 id="real-today-title" className="mt-sa-1 text-lg font-bold text-sa-text-primary">What Is Real Today</h3>
+                <CompactList items={realToday} />
+              </article>
+
+              <article className="border-t border-sa-border-subtle px-sa-4 py-sa-4 sm:px-sa-5 lg:border-l lg:border-t-0" aria-labelledby="future-intelligence-title">
+                <DataLabel as="p">Intended direction</DataLabel>
+                <h3 id="future-intelligence-title" className="mt-sa-1 text-lg font-bold text-sa-text-primary">What Is Still Being Developed</h3>
+                <CompactList items={futureIntelligence} />
+              </article>
+            </div>
+          </IntelligencePanel>
+
+          <IntelligencePanel
+            as="section"
+            className="mt-sa-3 overflow-hidden"
+            aria-labelledby="explore-skillatlas-title"
+            header={
+              <SectionHeading
+                eyebrow="Continue exploring"
+                title="Explore SkillAtlas"
+                description="Move from the product explanation into the atlas, rankings, player field, or community discussion."
+                titleId="explore-skillatlas-title"
+              />
+            }
+          >
+            <nav aria-label="Explore SkillAtlas" className="grid sm:grid-cols-2 lg:grid-cols-5">
+              {exploreLinks.map((link, index) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={`group flex min-h-12 items-center justify-between gap-sa-3 px-sa-4 py-sa-3 text-sm font-bold text-sa-text-primary outline-none transition-colors duration-150 ease-sa-standard hover:bg-sa-surface-2 hover:text-sa-accent focus-visible:bg-sa-surface-2 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-sa-accent ${index === 0 ? "" : "border-t border-sa-border-subtle sm:[&:nth-child(even)]:border-l lg:border-l lg:border-t-0"}`}
+                >
+                  <span>{link.label}</span>
+                  <span className="text-sa-accent transition-transform duration-150 motion-reduce:transition-none group-hover:translate-x-0.5 motion-reduce:group-hover:translate-x-0" aria-hidden="true">→</span>
+                </Link>
+              ))}
+            </nav>
+          </IntelligencePanel>
+        </div>
+      </div>
     </main>
   );
 }
