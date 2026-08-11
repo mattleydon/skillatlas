@@ -1,6 +1,10 @@
 import { createServerClient } from "@supabase/ssr";
 import { type NextRequest, NextResponse } from "next/server";
-import { getSupabasePublicConfig, SupabaseConfigurationError } from "@/lib/supabase/config";
+import {
+  getSupabasePublicConfig,
+  SUPABASE_AUTH_COOKIE_OPTIONS,
+  SupabaseConfigurationError,
+} from "@/lib/supabase/config";
 import type { Database } from "@/types/database";
 
 export async function refreshSupabaseSession(request: NextRequest) {
@@ -9,6 +13,7 @@ export async function refreshSupabaseSession(request: NextRequest) {
   try {
     const { url, anonKey } = getSupabasePublicConfig();
     const supabase = createServerClient<Database>(url, anonKey, {
+      cookieOptions: SUPABASE_AUTH_COOKIE_OPTIONS,
       cookies: {
         getAll() {
           return request.cookies.getAll();

@@ -1,6 +1,13 @@
 const CONFIGURATION_MESSAGE =
   "SkillAtlas authentication is not configured. Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY.";
 
+export const SUPABASE_AUTH_COOKIE_OPTIONS = {
+  httpOnly: true,
+  sameSite: "lax" as const,
+  secure: process.env.NODE_ENV === "production",
+  path: "/",
+};
+
 export class SupabaseConfigurationError extends Error {
   constructor() {
     super(CONFIGURATION_MESSAGE);

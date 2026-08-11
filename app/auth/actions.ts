@@ -52,6 +52,10 @@ function requestError(error: AuthError): AuthActionState {
   };
 }
 
+function isUnknownSignInAccount(error: AuthError, flow: AuthFlow) {
+  return flow === "sign-in" && error.status === 422 && error.code === "otp_disabled";
+}
+
 function verificationError(error: AuthError): AuthActionState {
   if (error.code?.includes("expired")) {
     return {
@@ -98,7 +102,7 @@ async function requestCode(flow: AuthFlow, formData: FormData): Promise<AuthActi
       options: { shouldCreateUser: flow === "sign-up" },
     });
 
-    if (error) return requestError(error);
+    if (error && !isUnknownSignInAccount(error, flow)) return requestError(error);
   } catch (error) {
     return error instanceof SupabaseConfigurationError ? CONFIGURATION_ERROR : UNAVAILABLE_ERROR;
   }
@@ -191,7 +195,7 @@ export async function resendCodeAction(
       options: { shouldCreateUser: flowValue === "sign-up" },
     });
 
-    if (error) return requestError(error);
+    if (error && !isUnknownSignInAccount(error, flowValue)) return requestError(error);
   } catch (error) {
     return error instanceof SupabaseConfigurationError ? CONFIGURATION_ERROR : UNAVAILABLE_ERROR;
   }

@@ -19,12 +19,23 @@ type PageComment = {
   created_at: string;
 };
 
-const RAW_SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
+const RAW_SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() ?? "";
 const SUPABASE_URL = RAW_SUPABASE_URL.replace(/\/rest\/v1\/?$/i, "").replace(/\/+$/, "");
-const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "";
+const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim() ?? "";
+
+function hasValidPageCommentsConfig() {
+  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) return false;
+
+  try {
+    const parsedUrl = new URL(SUPABASE_URL);
+    return parsedUrl.protocol === "http:" || parsedUrl.protocol === "https:";
+  } catch {
+    return false;
+  }
+}
 
 const pageCommentsClient =
-  SUPABASE_URL && SUPABASE_ANON_KEY ? createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+  hasValidPageCommentsConfig() ? createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
 
 const SKILLATLAS_EMOJIS = [
   { label: "Turquoise smiley", symbol: "🙂", code: ":sa_turquoise_smiley:", className: "turquoise native-tint face-emoji" },
