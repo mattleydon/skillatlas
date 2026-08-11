@@ -11,7 +11,7 @@
     "supabase:stop": "supabase stop",
     "supabase:reset": "supabase db reset --local",
     "supabase:test:db": "supabase test db --local",
-    "supabase:types": "supabase gen types typescript --local --schema public > types/database.ts"
+    "supabase:types": "supabase gen types typescript --local --schema public | node scripts/write-supabase-types.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "0.12.4",
