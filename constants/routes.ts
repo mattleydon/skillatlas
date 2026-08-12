@@ -7,6 +7,10 @@ export const ROUTES = {
   players: "/profiles",
   forum: "/forum",
   about: "/about",
+  authSignIn: "/auth/sign-in",
+  authSignUp: "/auth/sign-up",
+  authVerify: "/auth/verify",
+  account: "/account",
   spaceInvaders: "/space-invaders",
 } as const;
 

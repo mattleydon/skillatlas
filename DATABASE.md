@@ -1,8 +1,18 @@
-# SkillAtlas Proposed Database Design
+# SkillAtlas Database and Account Architecture
 
-> **Status: proposal only.** This document describes a possible future Supabase/Postgres schema. These tables, relationships, indexes, and Row Level Security (RLS) policies are not implemented by this document, and the application must not assume they exist.
+> **Status:** PR 1 implements only the local Supabase foundation and Supabase-managed verified email authentication. The domain schema below remains approved future architecture, not an implemented schema.
 
-The current repository only uses Supabase for the optional `skillatlas_page_comments` integration in `app/theme-provider.tsx`. That existing table is outside this proposal and should be retained, migrated, or retired through a separate decision.
+## Current implementation
+
+- Supabase Auth owns account identity in its managed `auth` schema.
+- The application supports verified email OTP request, verification, session refresh, minimal `/account` state, and sign-out.
+- No `public.profiles`, countries, rankings, Forum, voting, or User Rankings persistence table is implemented by PR 1.
+- The local `supabase/` foundation contains no account-domain migration yet.
+- The existing optional hosted `skillatlas_page_comments` integration in `app/theme-provider.tsx` is unchanged. Its exact hosted schema and RLS policies were not available for safe verification, so the repository does not claim to reproduce it.
+
+## Approved future architecture
+
+The tables, relationships, indexes, and RLS policies below are proposed future work. The application must not assume these public tables exist until their reviewed migrations and policy tests land.
 
 ## Design principles
 
@@ -18,31 +28,31 @@ The current repository only uses Supabase for the optional `skillatlas_page_comm
 
 ```mermaid
 erDiagram
-    AUTH_USERS ||--|| USERS : owns
-    COUNTRIES ||--o{ USERS : represents
+    AUTH_USERS ||--|| PROFILES : owns
+    COUNTRIES ||--o{ PROFILES : represents
     COUNTRIES ||--o{ RANKINGS : ranked
     GAMES ||--o{ RANKINGS : scopes
     RANKINGS ||--o{ RANKING_HISTORY : records
     FORUM_CATEGORIES ||--o{ FORUM_THREADS : contains
-    USERS ||--o{ FORUM_THREADS : authors
+    PROFILES ||--o{ FORUM_THREADS : authors
     COUNTRIES ||--o{ FORUM_THREADS : discusses
     FORUM_THREADS ||--o{ FORUM_REPLIES : receives
-    USERS ||--o{ FORUM_REPLIES : authors
+    PROFILES ||--o{ FORUM_REPLIES : authors
     FORUM_REPLIES ||--o{ FORUM_REPLIES : replies_to
-    USERS ||--o{ VOTES : casts
+    PROFILES ||--o{ VOTES : casts
     FORUM_THREADS ||--o{ VOTES : receives
     FORUM_REPLIES ||--o{ VOTES : receives
-    USERS ||--o{ USER_RANKINGS : submits
+    PROFILES ||--o{ USER_RANKINGS : submits
     COUNTRIES ||--o{ USER_RANKINGS : ranks
     GAMES ||--o{ USER_RANKINGS : scopes
-    USERS ||--o{ LIVE_RANKING_EVENTS : creates
+    PROFILES ||--o{ LIVE_RANKING_EVENTS : creates
     COUNTRIES ||--o{ LIVE_RANKING_EVENTS : affects
     GAMES ||--o{ LIVE_RANKING_EVENTS : scopes
 ```
 
 ## Tables
 
-### `public.users`
+### `public.profiles`
 
 **Purpose:** Public SkillAtlas profile data linked one-to-one with Supabase Auth. Authentication secrets and provider data remain in `auth.users`.
 
@@ -77,7 +87,7 @@ erDiagram
 - `is_active boolean not null default true`
 - `created_at timestamptz`, `updated_at timestamptz`
 
-**Relationships:** Referenced by users, rankings, threads, user rankings, and live ranking events.
+**Relationships:** Referenced by profiles, rankings, threads, user rankings, and live ranking events.
 
 **Likely indexes:** Unique indexes on `iso2`, `iso3`, and `slug`; index on `(is_active, name)`.
 
@@ -169,7 +179,7 @@ erDiagram
 
 - `id uuid primary key`
 - `category_id uuid not null references forum_categories(id)`
-- `author_id uuid references users(id) on delete set null`
+- `author_id uuid references profiles(id) on delete set null`
 - `country_id uuid references countries(id) on delete set null`
 - `title text not null`, `body text not null`, `slug text`
 - `tags text[] not null default '{}'`
@@ -192,7 +202,7 @@ erDiagram
 
 - `id uuid primary key`
 - `thread_id uuid not null references forum_threads(id) on delete cascade`
-- `author_id uuid references users(id) on delete set null`
+- `author_id uuid references profiles(id) on delete set null`
 - `parent_reply_id uuid references forum_replies(id) on delete set null`
 - `body text not null`
 - `status text not null default 'visible'` such as `visible`, `hidden`, or `removed`
@@ -212,7 +222,7 @@ erDiagram
 **Important columns**
 
 - `id uuid primary key`
-- `user_id uuid not null references users(id) on delete cascade`
+- `user_id uuid not null references profiles(id) on delete cascade`
 - `thread_id uuid references forum_threads(id) on delete cascade`
 - `reply_id uuid references forum_replies(id) on delete cascade`
 - `value smallint not null check (value in (-1, 1))`
@@ -232,7 +242,7 @@ erDiagram
 **Important columns**
 
 - `id uuid primary key`
-- `user_id uuid not null references users(id) on delete cascade`
+- `user_id uuid not null references profiles(id) on delete cascade`
 - `country_id uuid not null references countries(id)`
 - `game_id uuid references games(id)`; null means overall
 - `position integer not null check (position > 0)`
@@ -254,7 +264,7 @@ erDiagram
 
 - `id bigint generated always as identity primary key`
 - `session_id uuid not null` to group one live ranking session
-- `actor_user_id uuid references users(id) on delete set null`
+- `actor_user_id uuid references profiles(id) on delete set null`
 - `country_id uuid not null references countries(id)`
 - `game_id uuid references games(id)`; null means overall
 - `event_type text not null` such as `move`, `upvote`, `downvote`, `score_adjustment`, or `snapshot`
