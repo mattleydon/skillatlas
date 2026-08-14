@@ -3,8 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "predev": "node scripts/verify-local-supabase-env.mjs",
     "dev": "next dev",
     "build": "next build",
+    "prestart": "node scripts/verify-local-supabase-env.mjs --production",
     "start": "next start",
     "lint": "eslint",
     "supabase:start": "supabase start",
@@ -12,13 +14,14 @@
     "supabase:reset": "supabase db reset --local",
     "supabase:test:db": "supabase test db --local",
     "supabase:types": "supabase gen types typescript --local --schema public | node scripts/write-supabase-types.mjs",
+    "supabase:verify-local": "node scripts/verify-local-supabase-env.mjs",
     "countries:reference:write": "node scripts/country-reference.mjs --write",
     "countries:reference:check": "node scripts/country-reference.mjs --check"
   },
   "dependencies": {
     "@supabase/ssr": "0.12.4",
-    "@supabase/supabase-js": "^2.108.2",
-    "next": "16.2.11",
+    "@supabase/supabase-js": "2.112.3",
+    "next": "16.3.1",
     "react": "19.2.4",
     "react-dom": "19.2.4"
   },
@@ -28,7 +31,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
-    "eslint-config-next": "16.2.9",
+    "eslint-config-next": "16.3.1",
     "supabase": "2.113.0",
     "tailwindcss": "^4",
     "typescript": "^5"
