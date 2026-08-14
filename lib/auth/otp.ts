@@ -3,7 +3,7 @@ export type AuthFlow = "sign-in" | "sign-up";
 export const AUTH_EMAIL_COOKIE = "skillatlas-auth-email";
 export const AUTH_FLOW_COOKIE = "skillatlas-auth-flow";
 export const AUTH_RESEND_COOKIE = "skillatlas-auth-resend-after";
-export const OTP_LENGTH = 6;
+export const OTP_LENGTH = 8;
 export const OTP_MAX_AGE_SECONDS = 10 * 60;
 export const RESEND_COOLDOWN_SECONDS = 60;
 

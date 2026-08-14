@@ -90,7 +90,7 @@ export default function VerifyCodeForm({ maskedEmail, flow, requested }: VerifyC
             aria-describedby={`verification-code-help${state.status === "error" ? " verification-code-error" : ""}`}
             aria-invalid={state.status === "error"}
             className="mt-sa-2 min-h-12 w-full rounded-sa-control border border-sa-border-strong bg-sa-surface-inset px-sa-3 text-center font-sa-data text-2xl font-black tracking-[0.3em] text-sa-text-primary outline-none transition-colors duration-200 ease-sa-standard placeholder:text-sa-text-technical focus:border-sa-border-active focus:ring-4 focus:ring-sa-accent/15"
-            placeholder="000000"
+            placeholder={"0".repeat(OTP_LENGTH)}
           />
         </div>
 

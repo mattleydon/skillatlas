@@ -12,7 +12,7 @@ import {
 } from "@/app/auth/actions";
 import SubmitButton from "@/app/auth/components/submit-button";
 import { ROUTES } from "@/constants/routes";
-import type { AuthFlow } from "@/lib/auth/otp";
+import { OTP_LENGTH, type AuthFlow } from "@/lib/auth/otp";
 
 type AuthRequestFormProps = {
   flow: AuthFlow;
@@ -48,7 +48,7 @@ export default function AuthRequestForm({ flow, configurationAvailable }: AuthRe
           Email address
         </label>
         <p id={`${flow}-email-help`} className="mt-sa-1 text-xs leading-5 text-sa-text-technical">
-          We&apos;ll send a six-digit one-time code. No password is required.
+          We&apos;ll send an {OTP_LENGTH}-digit one-time code. No password is required.
         </p>
         <input
           ref={emailRef}

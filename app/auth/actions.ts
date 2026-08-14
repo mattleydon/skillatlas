@@ -204,7 +204,7 @@ export async function resendCodeAction(
 
   return {
     status: "success",
-    message: "A new code has been requested. Check your local Mailpit inbox or email.",
+    message: "A new code has been sent. Check your email.",
   };
 }
 
