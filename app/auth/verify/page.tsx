@@ -32,7 +32,7 @@ export default async function VerifyPage({ searchParams }: VerifyPageProps) {
     <AuthShell
       title="Verify Your Email"
       description="Enter the one-time code from your email to establish a secure SkillAtlas session."
-      footer="Codes expire after 10 minutes in the local development configuration. SkillAtlas never asks you to put a code in a URL."
+      footer="Codes are time-limited. Use the newest code from your email, and request another if it expires. SkillAtlas never asks you to put a code in a URL."
     >
       {hasPendingRequest ? (
         <VerifyCodeForm
