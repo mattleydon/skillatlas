@@ -72,6 +72,12 @@ npm.cmd run supabase:stop
 - Ordinary setup must not use `supabase db push`, link to a hosted project, or change hosted Auth/RLS settings.
 - The existing hosted `skillatlas_page_comments` schema is not reproduced by a speculative migration; see `supabase/migrations/README.md`.
 
+### Hosted Preview email testing
+
+The hosted Preview environment currently uses Resend test-mode SMTP with the `onboarding@resend.dev` sender. In this mode, email can be delivered only to the address authorized by the Resend account; arbitrary recipient testing is intentionally unavailable until a SkillAtlas sending domain is verified. Rejection of another recipient is a hosted test-environment limitation, not an application Auth failure.
+
+Production SMTP and verified-domain configuration remain separate launch requirements. Never commit SMTP passwords, API keys, sender secrets, or authorized recipient addresses to the repository.
+
 ## Build
 
 ```bash

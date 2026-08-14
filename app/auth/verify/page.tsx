@@ -14,7 +14,7 @@ import {
 
 export const metadata: Metadata = {
   title: "Verify Email | SkillAtlas",
-  description: "Verify a SkillAtlas email one-time code.",
+  description: "Verify a SkillAtlas 8-digit email access code.",
 };
 
 type VerifyPageProps = {
@@ -31,8 +31,8 @@ export default async function VerifyPage({ searchParams }: VerifyPageProps) {
   return (
     <AuthShell
       title="Verify Your Email"
-      description="Enter the one-time code from your email to establish a secure SkillAtlas session."
-      footer="Codes are time-limited. Use the newest code from your email, and request another if it expires. SkillAtlas never asks you to put a code in a URL."
+      description="Enter the access code from your email to establish a secure SkillAtlas session."
+      footer="Access codes are time-limited. Use the newest code from your email, and request another if it expires. SkillAtlas never asks you to put a code in a URL."
     >
       {hasPendingRequest ? (
         <VerifyCodeForm
@@ -43,7 +43,7 @@ export default async function VerifyPage({ searchParams }: VerifyPageProps) {
       ) : (
         <div role="status" className="space-y-sa-4">
           <p className="text-sm leading-6 text-sa-text-muted">
-            There is no active verification request in this browser. Request a new code to continue.
+            There is no active verification request in this browser. Request a new access code to continue.
           </p>
           <div className="grid gap-sa-2 sm:grid-cols-2">
             <Link
