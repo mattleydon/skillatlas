@@ -33,14 +33,16 @@ npm.cmd install
 npm.cmd run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000). Copy `.env.example` to `.env.local` and provide the public Supabase values used by the environment:
+Open [http://localhost:3000](http://localhost:3000). Copy `.env.example` to `.env.local` and provide the local public Supabase values:
 
 ```dotenv
-NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
 ```
 
 Never put a service-role key, database password, SMTP credential, or Supabase access token in a `NEXT_PUBLIC_` variable. Public browsing continues to work if Supabase is unavailable; account routes show a scoped unavailable state.
+
+`npm.cmd run dev` and a local `npm.cmd run start` check the effective environment before Next.js starts. They refuse any Supabase URL other than `http://127.0.0.1:54321` by default, so a stale hosted value in `.env.local` cannot silently receive local Auth, profile, or page-comment writes. The check never prints keys or rewrites environment files.
 
 ## Local Supabase and email OTP
 
@@ -52,6 +54,8 @@ npm.cmd exec supabase -- status -o env
 ```
 
 Map the local `API_URL` and `ANON_KEY` output to the two `NEXT_PUBLIC_` names in `.env.local`, then restart `npm.cmd run dev`. Request a code at `/auth/sign-up` or `/auth/sign-in`, read it in local Mailpit at [http://127.0.0.1:54324](http://127.0.0.1:54324), verify at `/auth/verify`, and continue from `/account` to the short member-profile onboarding flow. Completed public member identities are available at `/members/[username]`.
+
+Deliberate browser validation against a hosted Supabase project requires separate approval and an unmistakable process-level opt-in: `SKILLATLAS_ALLOW_HOSTED_SUPABASE=approved-nonproduction`. Confirm the target is the approved non-production project before using it, keep the override out of `.env*` files, and remove it immediately after that process. The override must never be used for Production. Vercel Preview is unaffected because this safeguard runs only before the local development command.
 
 Useful local commands:
 
@@ -66,6 +70,7 @@ npm.cmd run supabase:stop
 - `supabase:reset` replays repository migrations against the local stack only.
 - `supabase:test:db` runs the pgTAP database tests in `supabase/tests/database`.
 - `supabase:types` refreshes `types/database.ts` from the local public schema.
+- `supabase:verify-local` runs the same fail-closed environment check used before local development.
 - `countries:reference:check` confirms the migration catalogue exactly matches the canonical 195 sovereign records in `data/countries.ts`.
 - Local test members are created through the same email OTP and `/account/onboarding` flow as the application; no development member activity is seeded.
 - Local Auth uses the repository-controlled code-only email template. Production SMTP and hosted Auth-template changes are future operational work.
