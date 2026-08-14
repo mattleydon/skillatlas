@@ -92,6 +92,12 @@ export default async function AccountPage({ searchParams }: AccountPageProps) {
           displayName={account.profile.displayName}
           countryId={account.profile.countryId}
         />
+        <Link
+          href={memberRoute(account.profile.username)}
+          className="inline-flex min-h-11 w-full items-center justify-center rounded-sa-control border border-sa-border-active bg-sa-accent/8 px-sa-4 text-sm font-bold text-sa-accent outline-none transition-colors duration-200 ease-sa-standard hover:bg-sa-accent/14 hover:text-sa-text-primary focus-visible:ring-4 focus-visible:ring-sa-accent/20"
+        >
+          View public profile
+        </Link>
         <SignOutForm failed={signOutFailed} />
       </div>
     </AuthShell>

@@ -98,8 +98,10 @@ export async function createProfileAction(
     return ACCOUNT_UNAVAILABLE;
   }
 
+  const publicProfileRoute = memberRoute(usernameResult.value);
   revalidatePath(ROUTES.account);
-  redirect(ROUTES.account);
+  revalidatePath(publicProfileRoute);
+  redirect(publicProfileRoute);
 }
 
 export async function updateProfileAction(
