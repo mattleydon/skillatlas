@@ -5,13 +5,20 @@ import IntelligencePanel from "@/app/components/intelligence-ui/intelligence-pan
 import { ROUTES } from "@/constants/routes";
 
 type AuthShellProps = {
+  eyebrow?: string;
   title: string;
   description: string;
   children: ReactNode;
   footer?: ReactNode;
 };
 
-export default function AuthShell({ title, description, children, footer }: AuthShellProps) {
+export default function AuthShell({
+  eyebrow = "SkillAtlas / Account",
+  title,
+  description,
+  children,
+  footer,
+}: AuthShellProps) {
   return (
     <main className="skillatlas-page-shell relative min-h-screen overflow-x-clip bg-sa-canvas text-sa-text-primary">
       <div className="pointer-events-none absolute inset-0" aria-hidden="true">
@@ -23,7 +30,7 @@ export default function AuthShell({ title, description, children, footer }: Auth
         <div className="w-full max-w-[540px]">
           <div className="mb-sa-3 px-sa-1">
             <DataLabel as="p" className="text-sa-accent">
-              SkillAtlas / Account
+              {eyebrow}
             </DataLabel>
             <h1 className="mt-sa-1 text-[1.75rem] font-black leading-[1.08] tracking-[-0.035em] text-sa-text-primary sm:text-4xl">
               {title}

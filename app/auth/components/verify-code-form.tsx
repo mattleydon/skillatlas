@@ -27,7 +27,7 @@ function ResendButton() {
       disabled={pending}
       className="min-h-11 rounded-sa-control border border-sa-border-strong bg-sa-surface-2 px-sa-4 text-sm font-bold text-sa-text-primary outline-none transition-colors duration-200 ease-sa-standard hover:border-sa-border-active hover:text-sa-accent focus-visible:ring-4 focus-visible:ring-sa-accent/20 disabled:cursor-not-allowed disabled:opacity-60"
     >
-      {pending ? "Requesting…" : "Request a new code"}
+      {pending ? "Requesting…" : "Request a new access code"}
     </button>
   );
 }
@@ -53,7 +53,7 @@ function ResendCode() {
 
 export default function VerifyCodeForm({ maskedEmail, flow, requested }: VerifyCodeFormProps) {
   const initialState: AuthActionState = requested
-    ? { status: "success", message: `A code was requested for ${maskedEmail}.` }
+    ? { status: "success", message: `An access code was requested for ${maskedEmail}.` }
     : INITIAL_AUTH_ACTION_STATE;
   const [state, formAction] = useActionState<AuthActionState, FormData>(
     verifyCodeAction,
@@ -70,7 +70,7 @@ export default function VerifyCodeForm({ maskedEmail, flow, requested }: VerifyC
       <form action={formAction} className="space-y-sa-4">
         <div>
           <label htmlFor="verification-code" className="text-xs font-bold uppercase tracking-[0.1em] text-sa-text-primary">
-            One-time code
+            Access code
           </label>
           <p id="verification-code-help" className="mt-sa-1 text-xs leading-5 text-sa-text-technical">
             Enter the {OTP_LENGTH}-digit code sent to {maskedEmail}.
@@ -90,7 +90,7 @@ export default function VerifyCodeForm({ maskedEmail, flow, requested }: VerifyC
             aria-describedby={`verification-code-help${state.status === "error" ? " verification-code-error" : ""}`}
             aria-invalid={state.status === "error"}
             className="mt-sa-2 min-h-12 w-full rounded-sa-control border border-sa-border-strong bg-sa-surface-inset px-sa-3 text-center font-sa-data text-2xl font-black tracking-[0.3em] text-sa-text-primary outline-none transition-colors duration-200 ease-sa-standard placeholder:text-sa-text-technical focus:border-sa-border-active focus:ring-4 focus:ring-sa-accent/15"
-            placeholder="000000"
+            placeholder={"0".repeat(OTP_LENGTH)}
           />
         </div>
 

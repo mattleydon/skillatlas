@@ -11,6 +11,7 @@ export const ROUTES = {
   authSignUp: "/auth/sign-up",
   authVerify: "/auth/verify",
   account: "/account",
+  accountOnboarding: "/account/onboarding",
   spaceInvaders: "/space-invaders",
 } as const;
 
@@ -30,4 +31,8 @@ export const PRIMARY_NAV_ITEMS = [
 
 export function countryRoute(countryId: string) {
   return `${ROUTES.countries}/${encodeURIComponent(countryId)}`;
+}
+
+export function memberRoute(username: string) {
+  return `/members/${encodeURIComponent(username)}`;
 }

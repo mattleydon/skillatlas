@@ -42,13 +42,13 @@ function requestError(error: AuthError): AuthActionState {
   if (error.status === 429 || error.code?.includes("rate_limit")) {
     return {
       status: "error",
-      message: "Please wait before requesting another code.",
+      message: "Please wait before requesting another access code.",
     };
   }
 
   return {
     status: "error",
-    message: "We couldn't send a code. Check the address and try again.",
+    message: "We couldn't send an access code. Check the address and try again.",
   };
 }
 
@@ -60,14 +60,14 @@ function verificationError(error: AuthError): AuthActionState {
   if (error.code?.includes("expired")) {
     return {
       status: "error",
-      message: "That code has expired. Request a new code and try again.",
+      message: "That access code has expired. Request a new code and try again.",
       field: "token",
     };
   }
 
   return {
     status: "error",
-    message: "We couldn't verify that code. Request a new code and try again.",
+    message: "We couldn't verify that access code. Request a new code and try again.",
     field: "token",
   };
 }
@@ -136,7 +136,7 @@ export async function verifyCodeAction(
   if (!isValidEmail(email)) {
     return {
       status: "error",
-      message: "Request a new code before continuing.",
+      message: "Request a new access code before continuing.",
       field: "token",
     };
   }
@@ -184,7 +184,7 @@ export async function resendCodeAction(
     const seconds = Math.max(1, Math.ceil((resendAfter - Date.now()) / 1000));
     return {
       status: "error",
-      message: `Please wait ${seconds} seconds before requesting another code.`,
+      message: `Please wait ${seconds} seconds before requesting another access code.`,
     };
   }
 
@@ -204,7 +204,7 @@ export async function resendCodeAction(
 
   return {
     status: "success",
-    message: "A new code has been requested. Check your local Mailpit inbox or email.",
+    message: "A new access code has been sent. Check your email.",
   };
 }
 

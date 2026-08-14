@@ -5,14 +5,14 @@ import { hasSupabasePublicConfig } from "@/lib/supabase/config";
 
 export const metadata: Metadata = {
   title: "Sign In | SkillAtlas",
-  description: "Sign in to SkillAtlas with a verified email one-time code.",
+  description: "Sign in to SkillAtlas with a verified 8-digit email access code.",
 };
 
 export default function SignInPage() {
   return (
     <AuthShell
       title="Sign In"
-      description="Access your SkillAtlas account with a verified email code. Passwords are not used."
+      description="Access your SkillAtlas account with an 8-digit email access code. Passwords are not used."
       footer="Use the email address attached to your SkillAtlas account. The response remains intentionally generic to protect account privacy."
     >
       <AuthRequestForm flow="sign-in" configurationAvailable={hasSupabasePublicConfig()} />
