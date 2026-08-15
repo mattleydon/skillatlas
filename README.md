@@ -7,9 +7,12 @@ SkillAtlas is a country-based gaming and esports atlas for exploring rankings, c
 | Page | Route |
 | --- | --- |
 | Rankings | `/` |
-| World Map | `/world-map` |
+| Atlas | `/world-map` |
 | Countries | `/countries` |
+| Games | `/games` |
 | Players | `/profiles` |
+| Teams | `/teams` |
+| Members | `/members` |
 | Forum | `/forum` |
 | User Rankings | `/user-rankings` |
 | Live Rankings | `/live-rankings` |

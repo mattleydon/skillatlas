@@ -35,7 +35,16 @@ function hasValidPageCommentsConfig() {
 }
 
 const pageCommentsClient =
-  hasValidPageCommentsConfig() ? createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+  hasValidPageCommentsConfig()
+    ? createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+        auth: {
+          autoRefreshToken: false,
+          detectSessionInUrl: false,
+          persistSession: false,
+          storageKey: "skillatlas-page-comments-anonymous",
+        },
+      })
+    : null;
 
 const SKILLATLAS_EMOJIS = [
   { label: "Turquoise smiley", symbol: "🙂", code: ":sa_turquoise_smiley:", className: "turquoise native-tint face-emoji" },
@@ -1144,6 +1153,528 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
 
         header[data-scrolled="true"] .skillatlas-theme-switch-desktop .skillatlas-theme-moon {
           right: 5px;
+        }
+
+        /* Global Navigation V2: shared atlas command interface. */
+        .skillatlas-site-header {
+          height: 80px;
+          border-bottom: 1px solid color-mix(in srgb, var(--sa-negative) 32%, var(--sa-border-subtle));
+          background: color-mix(in srgb, var(--sa-surface-1) 96%, transparent);
+          color: var(--sa-text-primary);
+          backdrop-filter: blur(18px);
+          transition: height 240ms cubic-bezier(0.4, 0, 0.2, 1), background-color 200ms ease;
+        }
+
+        .skillatlas-site-header::after {
+          content: "";
+          position: absolute;
+          inset: auto 0 -1px;
+          height: 1px;
+          background: linear-gradient(90deg, transparent 7%, var(--sa-accent) 32%, var(--sa-negative) 68%, transparent 93%);
+          opacity: 0.42;
+          pointer-events: none;
+        }
+
+        .skillatlas-site-header-scrolled { height: 68px; }
+
+        .skillatlas-header-inner {
+          position: relative;
+          display: flex;
+          width: min(100%, 1600px);
+          height: 100%;
+          margin: 0 auto;
+          align-items: center;
+          padding: 0 16px;
+        }
+
+        .skillatlas-brand-lockup {
+          display: flex;
+          min-width: 0;
+          align-items: center;
+          gap: 12px;
+        }
+
+        .skillatlas-brand-mark,
+        .skillatlas-brand-title {
+          position: relative;
+          display: block;
+          flex: 0 0 auto;
+          transition: width 240ms ease, height 240ms ease;
+        }
+
+        .skillatlas-brand-mark { width: 52px; height: 52px; }
+        .skillatlas-brand-title { width: 112px; height: 32px; }
+        .skillatlas-site-header-scrolled .skillatlas-brand-mark { width: 44px; height: 44px; }
+        .skillatlas-site-header-scrolled .skillatlas-brand-title { width: 108px; height: 26px; }
+
+        header nav.skillatlas-desktop-nav { display: none !important; }
+        .skillatlas-desktop-system-stack { display: none; }
+
+        .skillatlas-primary-nav-trigger {
+          position: relative;
+          display: inline-flex;
+          min-width: 0;
+          min-height: 44px;
+          align-items: center;
+          justify-content: center;
+          gap: 6px;
+          border: 0;
+          background: transparent;
+          color: var(--sa-text-muted);
+          font: inherit;
+          font-size: 13px;
+          font-weight: 800;
+          line-height: 1;
+          text-decoration: none;
+          cursor: pointer;
+          transition: color 180ms ease, background-color 180ms ease;
+        }
+
+        .skillatlas-primary-nav-trigger::after {
+          content: "";
+          position: absolute;
+          right: 15px;
+          bottom: 4px;
+          left: 15px;
+          height: 2px;
+          background: var(--sa-accent);
+          transform: scaleX(0);
+          transform-origin: center;
+          transition: transform 180ms ease;
+        }
+
+        .skillatlas-primary-nav-trigger:hover,
+        .skillatlas-primary-nav-trigger:focus-visible,
+        .skillatlas-primary-nav-trigger.skillatlas-nav-family-active {
+          color: var(--sa-text-primary);
+        }
+
+        .skillatlas-primary-nav-trigger:focus-visible {
+          outline: 2px solid color-mix(in srgb, var(--sa-accent) 72%, transparent);
+          outline-offset: -2px;
+        }
+
+        .skillatlas-primary-nav-trigger.skillatlas-nav-family-active::after,
+        .skillatlas-primary-nav-trigger[aria-current="page"]::after {
+          transform: scaleX(1);
+        }
+
+        .skillatlas-primary-nav-trigger.skillatlas-nav-family-active::before {
+          content: "";
+          width: 4px;
+          height: 4px;
+          border-radius: 1px;
+          background: var(--sa-negative);
+          box-shadow: 0 0 0 1px color-mix(in srgb, var(--sa-negative) 26%, transparent);
+        }
+
+        .skillatlas-nav-chevron {
+          color: var(--sa-accent);
+          font-family: var(--sa-font-data);
+          font-size: 12px;
+          transform: translateY(-1px);
+          transition: transform 180ms ease;
+        }
+
+        .skillatlas-nav-family {
+          position: relative;
+          display: flex;
+          width: 100%;
+          height: 100%;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .skillatlas-nav-family::after {
+          content: "";
+          position: absolute;
+          top: 100%;
+          right: -28px;
+          left: -28px;
+          height: 16px;
+        }
+
+        .skillatlas-nav-family[data-open="true"] .skillatlas-nav-chevron { transform: rotate(180deg) translateY(1px); }
+
+        header nav .skillatlas-nav-menu {
+          pointer-events: none;
+          position: absolute;
+          top: calc(100% + 8px);
+          left: 50%;
+          z-index: 90;
+          width: 272px;
+          overflow: hidden;
+          border: 1px solid var(--sa-border-strong);
+          border-radius: 7px;
+          background: color-mix(in srgb, var(--sa-surface-1) 97%, transparent);
+          box-shadow: 0 18px 44px color-mix(in srgb, #020617 20%, transparent);
+          opacity: 0;
+          transform: translateX(-50%) translateY(-5px);
+          transition: opacity 170ms ease, transform 170ms ease;
+          backdrop-filter: blur(18px);
+        }
+
+        .skillatlas-nav-family[data-open="true"] .skillatlas-nav-menu {
+          pointer-events: auto;
+          opacity: 1;
+          transform: translateX(-50%) translateY(0);
+        }
+
+        .skillatlas-nav-menu-heading,
+        .skillatlas-mobile-console-heading {
+          display: flex;
+          min-height: 28px;
+          align-items: center;
+          justify-content: space-between;
+          gap: 12px;
+          border-bottom: 1px solid var(--sa-border-subtle);
+          color: var(--sa-text-technical);
+          font-family: var(--sa-font-data);
+          font-size: 9px;
+          font-weight: 800;
+          letter-spacing: 0.16em;
+          text-transform: uppercase;
+        }
+
+        .skillatlas-nav-menu-heading { padding: 0 12px; }
+
+        header nav .skillatlas-nav-menu-item {
+          position: relative;
+          display: grid;
+          min-height: 48px;
+          grid-template-columns: 26px minmax(0, 1fr) 8px;
+          align-items: center;
+          gap: 8px;
+          border-bottom: 1px solid var(--sa-border-subtle);
+          padding: 7px 12px;
+          color: var(--sa-text-primary);
+          text-decoration: none;
+          transition: background-color 160ms ease, color 160ms ease;
+        }
+
+        header nav .skillatlas-nav-menu-item:last-child { border-bottom: 0; }
+        header nav .skillatlas-nav-menu-item:hover,
+        header nav .skillatlas-nav-menu-item:focus-visible { background: color-mix(in srgb, var(--sa-accent) 8%, var(--sa-surface-2)); }
+        header nav .skillatlas-nav-menu-item:focus-visible { outline: 2px solid var(--sa-accent); outline-offset: -2px; }
+        header nav .skillatlas-nav-menu-item-active { background: color-mix(in srgb, var(--sa-accent) 10%, var(--sa-surface-2)); }
+
+        .skillatlas-nav-menu-index,
+        .skillatlas-mobile-nav-index {
+          color: var(--sa-text-technical);
+          font-family: var(--sa-font-data);
+          font-size: 9px;
+          font-weight: 800;
+          letter-spacing: 0.08em;
+        }
+
+        .skillatlas-nav-menu-copy { display: block; min-width: 0; }
+        .skillatlas-nav-menu-copy strong { display: block; color: var(--sa-text-primary); font-size: 12px; font-weight: 850; }
+        .skillatlas-nav-menu-copy small { display: block; margin-top: 2px; overflow: hidden; color: var(--sa-text-technical); font-size: 9px; font-weight: 650; letter-spacing: 0.025em; text-overflow: ellipsis; white-space: nowrap; }
+
+        .skillatlas-nav-menu-state,
+        .skillatlas-mobile-nav-state {
+          width: 5px;
+          height: 5px;
+          border: 1px solid var(--sa-border-strong);
+          border-radius: 1px;
+        }
+
+        .skillatlas-nav-menu-item-active .skillatlas-nav-menu-state,
+        .skillatlas-mobile-nav-link-active .skillatlas-mobile-nav-state {
+          border-color: var(--sa-accent);
+          background: var(--sa-accent);
+          box-shadow: 0 0 0 2px color-mix(in srgb, var(--sa-accent) 15%, transparent);
+        }
+
+        .skillatlas-desktop-system-stack,
+        .skillatlas-mobile-system-stack {
+          min-width: 0;
+        }
+
+        .skillatlas-member-menu-root { position: relative; min-width: 0; }
+
+        .skillatlas-member-control,
+        .skillatlas-display-control {
+          box-sizing: border-box;
+          display: grid;
+          width: 100%;
+          min-width: 0;
+          min-height: 44px;
+          align-items: center;
+          border: 1px solid var(--sa-border-strong);
+          border-radius: 6px;
+          background: var(--sa-surface-inset);
+          color: var(--sa-text-primary);
+          text-align: left;
+          text-decoration: none;
+          cursor: pointer;
+          transition: border-color 170ms ease, background-color 170ms ease, color 170ms ease;
+        }
+
+        .skillatlas-member-control {
+          grid-template-columns: 30px minmax(0, 1fr) auto;
+          gap: 8px;
+          padding: 4px 9px 4px 6px;
+        }
+
+        .skillatlas-member-control-static { cursor: default; }
+        .skillatlas-member-control:hover,
+        .skillatlas-member-control:focus-visible,
+        .skillatlas-member-control[aria-expanded="true"],
+        .skillatlas-display-control:hover,
+        .skillatlas-display-control:focus-visible {
+          border-color: var(--sa-border-active);
+          background: color-mix(in srgb, var(--sa-accent) 7%, var(--sa-surface-inset));
+        }
+
+        .skillatlas-member-control:focus-visible,
+        .skillatlas-display-control:focus-visible { outline: 2px solid color-mix(in srgb, var(--sa-accent) 70%, transparent); outline-offset: 2px; }
+
+        .skillatlas-member-glyph {
+          display: grid;
+          width: 30px;
+          height: 30px;
+          place-items: center;
+          border: 1px solid var(--sa-border-active);
+          border-radius: 3px;
+          background: color-mix(in srgb, var(--sa-accent) 9%, var(--sa-surface-2));
+          color: var(--sa-accent);
+          font-family: var(--sa-font-data);
+          font-size: 10px;
+          font-weight: 900;
+          letter-spacing: -0.03em;
+        }
+
+        .skillatlas-member-copy,
+        .skillatlas-display-copy { display: block; min-width: 0; }
+        .skillatlas-member-copy small,
+        .skillatlas-display-copy small { display: block; color: var(--sa-text-technical); font-family: var(--sa-font-data); font-size: 8px; font-weight: 800; letter-spacing: 0.15em; line-height: 1.1; text-transform: uppercase; }
+        .skillatlas-member-copy strong,
+        .skillatlas-display-copy strong { display: block; margin-top: 3px; overflow: hidden; color: var(--sa-text-primary); font-size: 10px; font-weight: 850; line-height: 1.05; text-overflow: ellipsis; white-space: nowrap; }
+        .skillatlas-member-chevron { color: var(--sa-accent); font-family: var(--sa-font-data); font-size: 12px; }
+
+        .skillatlas-display-control {
+          grid-template-columns: 4px minmax(0, 1fr) 24px;
+          gap: 9px;
+          padding: 5px 8px;
+        }
+
+        .skillatlas-display-marker { width: 3px; height: 24px; border-radius: 1px; background: var(--sa-accent); }
+        .skillatlas-display-icon { display: grid; width: 24px; height: 24px; place-items: center; color: var(--sa-accent); }
+        .skillatlas-display-icon svg { width: 18px; height: 18px; }
+
+        .skillatlas-member-menu {
+          position: absolute;
+          top: calc(100% + 7px);
+          right: 0;
+          z-index: 95;
+          width: 240px;
+          overflow: hidden;
+          border: 1px solid var(--sa-border-strong);
+          border-radius: 7px;
+          background: color-mix(in srgb, var(--sa-surface-1) 98%, transparent);
+          box-shadow: 0 18px 44px color-mix(in srgb, #020617 22%, transparent);
+          animation: skillatlas-control-reveal 160ms ease both;
+        }
+
+        .skillatlas-member-menu[aria-hidden="true"] { display: none; }
+        .skillatlas-member-menu a,
+        .skillatlas-member-menu button {
+          display: block;
+          width: 100%;
+          min-height: 46px;
+          border: 0;
+          border-bottom: 1px solid var(--sa-border-subtle);
+          border-radius: 0;
+          background: transparent;
+          padding: 7px 11px;
+          color: var(--sa-text-primary);
+          text-align: left;
+          text-decoration: none;
+          cursor: pointer;
+        }
+        .skillatlas-member-menu > :last-child button,
+        .skillatlas-member-menu > :last-child { border-bottom: 0; }
+        .skillatlas-member-menu a:hover,
+        .skillatlas-member-menu button:hover,
+        .skillatlas-member-menu a:focus-visible,
+        .skillatlas-member-menu button:focus-visible { background: color-mix(in srgb, var(--sa-accent) 8%, var(--sa-surface-2)); outline: 2px solid var(--sa-accent); outline-offset: -2px; }
+        .skillatlas-member-menu span { display: block; font-size: 11px; font-weight: 850; }
+        .skillatlas-member-menu small { display: block; margin-top: 2px; color: var(--sa-text-technical); font-size: 9px; font-weight: 650; }
+
+        @keyframes skillatlas-control-reveal { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
+
+        .skillatlas-mobile-menu-button {
+          position: absolute;
+          right: 16px;
+          top: 50%;
+          display: grid;
+          width: 44px;
+          height: 44px;
+          place-items: center;
+          transform: translateY(-50%);
+          border: 1px solid var(--sa-border-strong);
+          border-radius: 6px;
+          background: var(--sa-surface-inset);
+          box-shadow: none;
+        }
+
+        .skillatlas-mobile-menu-button > span { position: relative; display: block; width: 20px; height: 14px; }
+        .skillatlas-mobile-menu-button i { position: absolute; left: 0; width: 20px; height: 2px; border-radius: 1px; background: var(--sa-text-primary); transition: top 180ms ease, transform 180ms ease, opacity 150ms ease, background-color 180ms ease; }
+        .skillatlas-mobile-menu-button i:nth-child(1) { top: 0; background: var(--sa-accent); }
+        .skillatlas-mobile-menu-button i:nth-child(2) { top: 6px; }
+        .skillatlas-mobile-menu-button i:nth-child(3) { top: 12px; background: var(--sa-negative); }
+        .skillatlas-mobile-menu-button[aria-expanded="true"] i:nth-child(1) { top: 6px; transform: rotate(45deg); }
+        .skillatlas-mobile-menu-button[aria-expanded="true"] i:nth-child(2) { opacity: 0; }
+        .skillatlas-mobile-menu-button[aria-expanded="true"] i:nth-child(3) { top: 6px; transform: rotate(-45deg); }
+
+        header nav.skillatlas-mobile-nav {
+          pointer-events: none;
+          position: absolute;
+          top: calc(100% + 8px);
+          right: 12px;
+          left: 12px;
+          box-sizing: border-box;
+          display: block !important;
+          max-width: calc(100vw - 24px) !important;
+          max-height: calc(100vh - 96px);
+          margin: 0 !important;
+          overflow-x: hidden;
+          overflow-y: auto;
+          border: 1px solid var(--sa-border-strong);
+          border-radius: 7px;
+          background: color-mix(in srgb, var(--sa-surface-1) 98%, transparent);
+          box-shadow: 0 24px 60px color-mix(in srgb, #020617 26%, transparent);
+          opacity: 0;
+          padding: 10px;
+          transform: translateY(-7px);
+          transition: opacity 180ms ease, transform 180ms ease;
+          overscroll-behavior: contain;
+          scrollbar-color: var(--sa-accent) transparent;
+          scrollbar-width: thin;
+          backdrop-filter: blur(20px);
+        }
+
+        header nav.skillatlas-mobile-nav-open { pointer-events: auto; opacity: 1; transform: translateY(0); }
+        .skillatlas-mobile-console-heading { padding: 0 4px 7px; }
+
+        .skillatlas-mobile-family { margin-top: 8px; border: 1px solid var(--sa-border-subtle); border-radius: 5px; background: var(--sa-surface-inset); }
+        .skillatlas-mobile-family-active { border-color: var(--sa-border-active); }
+        .skillatlas-mobile-family-trigger {
+          display: flex;
+          width: 100%;
+          min-height: 48px;
+          align-items: center;
+          justify-content: space-between;
+          border: 0;
+          border-radius: 0;
+          background: transparent;
+          padding: 6px 11px;
+          color: var(--sa-text-primary);
+          text-align: left;
+        }
+        .skillatlas-mobile-family-trigger small,
+        .skillatlas-mobile-direct-link small { display: block; color: var(--sa-text-technical); font-family: var(--sa-font-data); font-size: 8px; font-weight: 800; letter-spacing: 0.15em; line-height: 1; text-transform: uppercase; }
+        .skillatlas-mobile-family-trigger strong,
+        .skillatlas-mobile-direct-link strong { display: block; margin-top: 4px; font-size: 12px; font-weight: 850; line-height: 1; }
+        .skillatlas-mobile-family-chevron { color: var(--sa-accent); font-family: var(--sa-font-data); transition: transform 180ms ease; }
+        .skillatlas-mobile-family-trigger[aria-expanded="true"] .skillatlas-mobile-family-chevron { transform: rotate(180deg); }
+
+        .skillatlas-mobile-family-content { display: grid; grid-template-rows: 0fr; opacity: 0; transition: grid-template-rows 180ms ease, opacity 180ms ease; }
+        .skillatlas-mobile-family-content > div { overflow: hidden; }
+        .skillatlas-mobile-family-content-open { grid-template-rows: 1fr; opacity: 1; }
+
+        .skillatlas-mobile-nav-link {
+          display: grid;
+          min-height: 44px;
+          grid-template-columns: 28px minmax(0, 1fr) 8px;
+          align-items: center;
+          gap: 8px;
+          border: 0;
+          border-top: 1px solid var(--sa-border-subtle);
+          border-radius: 0;
+          padding: 6px 11px;
+          color: var(--sa-text-muted);
+          font-size: 11px;
+          font-weight: 800;
+          text-decoration: none;
+          transform: none;
+        }
+        .skillatlas-mobile-nav-link:hover,
+        .skillatlas-mobile-nav-link:focus-visible { border-color: var(--sa-border-subtle); background: color-mix(in srgb, var(--sa-accent) 7%, var(--sa-surface-2)); color: var(--sa-text-primary); transform: none; }
+        .skillatlas-mobile-nav-link:focus-visible { outline: 2px solid var(--sa-accent); outline-offset: -2px; }
+        .skillatlas-mobile-nav-link-active { color: var(--sa-accent) !important; }
+
+        .skillatlas-mobile-direct-link {
+          display: grid;
+          min-height: 48px;
+          grid-template-columns: minmax(0, 1fr) 8px;
+          align-items: center;
+          gap: 10px;
+          margin-top: 8px;
+          border: 1px solid var(--sa-border-subtle);
+          border-radius: 5px;
+          background: var(--sa-surface-inset);
+          padding: 6px 11px;
+          color: var(--sa-text-primary);
+          text-decoration: none;
+        }
+        .skillatlas-mobile-direct-link > span:last-child { width: 5px; height: 5px; border: 1px solid var(--sa-border-strong); border-radius: 1px; }
+        .skillatlas-mobile-direct-link-active { border-color: var(--sa-border-active); }
+        .skillatlas-mobile-direct-link-active > span:last-child { border-color: var(--sa-accent); background: var(--sa-accent); }
+        .skillatlas-mobile-direct-link:focus-visible { outline: 2px solid var(--sa-accent); outline-offset: 2px; }
+        .skillatlas-mobile-direct-group { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+        .skillatlas-mobile-system-stack { margin-top: 10px; border-top: 1px solid var(--sa-border-subtle); padding-top: 9px; }
+        .skillatlas-mobile-system-stack .skillatlas-mobile-console-heading { border-bottom: 0; }
+        .skillatlas-member-control-mobile,
+        .skillatlas-display-control-mobile { margin-top: 6px; }
+        .skillatlas-mobile-system-stack .skillatlas-member-menu { position: relative; top: auto; right: auto; width: 100%; margin-top: 5px; }
+
+        @media (min-width: 640px) {
+          .skillatlas-header-inner { padding-right: 24px; padding-left: 24px; }
+          .skillatlas-brand-title { width: 174px; }
+          .skillatlas-site-header-scrolled .skillatlas-brand-title { width: 148px; }
+          header nav.skillatlas-mobile-nav { right: 20px; left: auto; width: 400px; }
+          .skillatlas-mobile-menu-button { right: 24px; }
+        }
+
+        @media (min-width: 1280px) {
+          .skillatlas-site-header { height: 118px; }
+          .skillatlas-site-header-scrolled { height: 96px; }
+          .skillatlas-header-inner { display: grid; grid-template-columns: minmax(250px, 1fr) 520px 176px; gap: 18px; padding-right: 32px; padding-left: 32px; }
+          .skillatlas-brand-mark { width: 72px; height: 72px; }
+          .skillatlas-brand-title { width: 220px; height: 42px; }
+          .skillatlas-site-header-scrolled .skillatlas-brand-mark { width: 52px; height: 52px; }
+          .skillatlas-site-header-scrolled .skillatlas-brand-title { width: 166px; height: 32px; }
+          header nav.skillatlas-desktop-nav {
+            display: grid !important;
+            width: 520px;
+            height: 100%;
+            grid-template-columns: repeat(5, minmax(0, 1fr));
+            align-items: center;
+            margin: 0 !important;
+          }
+          .skillatlas-desktop-system-stack { display: grid; grid-template-rows: 44px 44px; gap: 4px; align-content: center; }
+          .skillatlas-mobile-menu-button,
+          header nav.skillatlas-mobile-nav { display: none !important; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .skillatlas-site-header,
+          .skillatlas-brand-mark,
+          .skillatlas-brand-title,
+          .skillatlas-primary-nav-trigger,
+          .skillatlas-primary-nav-trigger::after,
+          .skillatlas-nav-chevron,
+          .skillatlas-nav-menu,
+          .skillatlas-member-control,
+          .skillatlas-display-control,
+          .skillatlas-mobile-menu-button i,
+          .skillatlas-mobile-nav,
+          .skillatlas-mobile-family-content,
+          .skillatlas-mobile-family-chevron { transition-duration: 0.01ms !important; }
+          .skillatlas-member-menu { animation-duration: 0.01ms !important; }
         }
 
         .skillatlas-live-chat {

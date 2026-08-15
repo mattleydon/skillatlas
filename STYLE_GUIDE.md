@@ -157,7 +157,8 @@ Ranking order must remain understandable through number, position, and text with
 
 - Continue using the single shared header implementation.
 - Preserve the logo/title assets, theme toggle, active-route styling, sticky and compact-scroll behavior, desktop navigation, and mobile menu behavior.
-- Desktop navigation order remains `Rankings | World Map | Countries | Players | Forum | About`.
+- Desktop navigation order is `Rankings | Atlas | Explore | Forum | About`.
+- Explore contains `Countries | Games | Players | Teams | Members`.
 - The Rankings dropdown contains `Rankings`, `User Rankings`, and `Live Rankings`.
 - User Rankings and Live Rankings must not appear as separate top-level items.
 - Use `Players`, not `Profiles`, in visible navigation.

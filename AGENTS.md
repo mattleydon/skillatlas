@@ -5,9 +5,13 @@ SkillAtlas is a country-based gaming and esports atlas.
 
 Core pages:
 - Rankings
-- World Map
+- Atlas
+- Explore
 - Countries
+- Games
 - Players
+- Teams
+- Members
 - Forum
 - User Rankings
 - Live Rankings
@@ -30,7 +34,14 @@ Core pages:
 
 ## Navigation
 Top-level navigation must be:
-Rankings | World Map | Countries | Players | Forum | About
+Rankings | Atlas | Explore | Forum | About
+
+Explore contains:
+- Countries
+- Games
+- Players
+- Teams
+- Members
 
 Rankings dropdown contains:
 - Rankings

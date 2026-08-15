@@ -1219,7 +1219,7 @@ export default function WorldMapPage() {
           <div className="flex flex-col gap-sa-3 lg:flex-row lg:items-end lg:justify-between">
             <div className="max-w-3xl">
               <DataLabel as="p" className="mb-sa-1 text-sa-accent">
-                SkillAtlas / World Map
+                SkillAtlas / Atlas
               </DataLabel>
               <h1
                 id="global-competitive-map-title"
@@ -1251,7 +1251,7 @@ export default function WorldMapPage() {
 
         <IntelligencePanel
           as="section"
-          aria-label="World Map controls"
+          aria-label="Atlas controls"
           className="mb-sa-3"
           bodyClassName="p-sa-3"
         >

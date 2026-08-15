@@ -37,10 +37,10 @@ const productSurfaces: readonly ProductSurface[] = [
     ],
   },
   {
-    name: "World Map",
+    name: "Atlas",
     question: "Where is strength concentrated?",
     description: "Explore the geographic shape of global competitive gaming.",
-    href: ROUTES.worldMap,
+    href: ROUTES.atlas,
   },
   {
     name: "Countries",
@@ -141,7 +141,7 @@ const realToday = [
   `A reviewed scope of ${SOVEREIGN_COUNTRY_COUNT} sovereign countries`,
   `A ${GAME_DEFINITIONS.length}-game starting taxonomy`,
   "Local geographic country mapping and atlas exploration",
-  "Connected Rankings, World Map, Countries, Players, and Forum surfaces",
+  "Connected Rankings, Atlas, Explore, Forum, and About surfaces",
   "Formal methodology and governance principles for future intelligence",
 ] as const;
 
@@ -155,7 +155,7 @@ const futureIntelligence = [
 
 const exploreLinks = [
   { label: "View Rankings", href: ROUTES.rankings },
-  { label: "Explore World Map", href: ROUTES.worldMap },
+  { label: "Explore Atlas", href: ROUTES.atlas },
   { label: "Browse Countries", href: ROUTES.countries },
   { label: "View Elite Players", href: ROUTES.players },
   { label: "Join the Forum", href: ROUTES.forum },
@@ -250,7 +250,7 @@ export default function AboutPage() {
                     SkillAtlas is a global competitive-gaming intelligence product focused on understanding competitive strength across countries, games, and elite professional players.
                   </p>
                   <p>
-                    Its current interfaces bring Rankings, World Map, Country Intelligence, Elite Player Rankings, and Community Forum into one connected country-first product.
+                    Its current interfaces bring Rankings, Atlas, Country Intelligence, Elite Player Rankings, and Community Forum into one connected country-first product.
                   </p>
                 </div>
               </article>
