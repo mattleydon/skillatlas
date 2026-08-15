@@ -30,35 +30,112 @@ export type Database = {
         }
         Relationships: []
       }
-      profiles: {
+      profile_heritage_countries: {
         Row: {
-          country_id: string | null
-          created_at: string
-          display_name: string
-          id: string
-          updated_at: string
-          username: string
+          country_id: string
+          position: number
+          profile_id: string
         }
         Insert: {
-          country_id?: string | null
-          created_at?: string
-          display_name: string
-          id: string
-          updated_at?: string
-          username: string
+          country_id: string
+          position: number
+          profile_id: string
         }
         Update: {
-          country_id?: string | null
-          created_at?: string
-          display_name?: string
-          id?: string
-          updated_at?: string
-          username?: string
+          country_id?: string
+          position?: number
+          profile_id?: string
         }
         Relationships: [
           {
-            foreignKeyName: "profiles_country_id_fkey"
+            foreignKeyName: "profile_heritage_countries_country_id_fkey"
             columns: ["country_id"]
+            isOneToOne: false
+            referencedRelation: "countries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profile_heritage_countries_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          bio: string | null
+          birth_country_id: string | null
+          birth_country_is_public: boolean
+          city_town: string | null
+          city_town_is_public: boolean
+          created_at: string
+          display_name: string
+          heritage_is_public: boolean
+          id: string
+          representing_country_id: string | null
+          residence_country_id: string | null
+          residence_country_is_public: boolean
+          updated_at: string
+          username: string
+          username_case_corrected_at: string | null
+          username_case_correction_available: boolean
+        }
+        Insert: {
+          bio?: string | null
+          birth_country_id?: string | null
+          birth_country_is_public?: boolean
+          city_town?: string | null
+          city_town_is_public?: boolean
+          created_at?: string
+          display_name: string
+          heritage_is_public?: boolean
+          id: string
+          representing_country_id?: string | null
+          residence_country_id?: string | null
+          residence_country_is_public?: boolean
+          updated_at?: string
+          username: string
+          username_case_corrected_at?: string | null
+          username_case_correction_available?: boolean
+        }
+        Update: {
+          bio?: string | null
+          birth_country_id?: string | null
+          birth_country_is_public?: boolean
+          city_town?: string | null
+          city_town_is_public?: boolean
+          created_at?: string
+          display_name?: string
+          heritage_is_public?: boolean
+          id?: string
+          representing_country_id?: string | null
+          residence_country_id?: string | null
+          residence_country_is_public?: boolean
+          updated_at?: string
+          username?: string
+          username_case_corrected_at?: string | null
+          username_case_correction_available?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profiles_birth_country_id_fkey"
+            columns: ["birth_country_id"]
+            isOneToOne: false
+            referencedRelation: "countries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profiles_representing_country_id_fkey"
+            columns: ["representing_country_id"]
+            isOneToOne: false
+            referencedRelation: "countries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profiles_residence_country_id_fkey"
+            columns: ["residence_country_id"]
             isOneToOne: false
             referencedRelation: "countries"
             referencedColumns: ["id"]
@@ -70,7 +147,34 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_public_member_profile: {
+        Args: { p_username: string }
+        Returns: {
+          bio: string
+          birth_country: Json
+          city_town: string
+          created_at: string
+          display_name: string
+          heritage: Json
+          representing_country: Json
+          residence_country: Json
+          username: string
+        }[]
+      }
+      update_profile_country_identity: {
+        Args: {
+          p_birth_country_id: string
+          p_birth_country_is_public: boolean
+          p_city_town: string
+          p_city_town_is_public: boolean
+          p_heritage_country_ids: string[]
+          p_heritage_is_public: boolean
+          p_representing_country_id: string
+          p_residence_country_id: string
+          p_residence_country_is_public: boolean
+        }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never

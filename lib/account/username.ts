@@ -27,7 +27,9 @@ export const RESERVED_USERNAMES = [
   "skillatlas",
 ] as const;
 
-const USERNAME_PATTERN = /^[a-z0-9](?:[a-z0-9_]{1,22}[a-z0-9])$/;
+export const USERNAME_HTML_PATTERN = "[A-Za-z0-9](?:[A-Za-z0-9_]{1,22}[A-Za-z0-9])";
+
+const USERNAME_PATTERN = /^[A-Za-z0-9](?:[A-Za-z0-9_]{1,22}[A-Za-z0-9])$/;
 const RESERVED_USERNAME_SET = new Set<string>(RESERVED_USERNAMES);
 
 export type UsernameValidation =
@@ -42,15 +44,22 @@ export function validateUsername(value: string): UsernameValidation {
   if (!USERNAME_PATTERN.test(value)) {
     return {
       valid: false,
-      message: "Use lowercase letters, numbers, and underscores, starting and ending with a letter or number.",
+      message: "Use letters, numbers, and underscores, starting and ending with a letter or number.",
     };
   }
 
-  if (RESERVED_USERNAME_SET.has(value)) {
+  if (RESERVED_USERNAME_SET.has(value.toLowerCase())) {
     return { valid: false, message: "That username is reserved by SkillAtlas." };
   }
 
   return { valid: true, value };
+}
+
+export function isCapitalizationOnlyCorrection(currentUsername: string, nextUsername: string) {
+  return (
+    currentUsername !== nextUsername &&
+    currentUsername.toLowerCase() === nextUsername.toLowerCase()
+  );
 }
 
 export function validateDisplayName(value: string) {

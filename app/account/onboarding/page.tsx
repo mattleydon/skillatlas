@@ -25,11 +25,11 @@ export default async function AccountOnboardingPage() {
 
   return (
     <AuthShell
-      title="Create Your Member Profile"
+      title="Create Your Profile"
       description="Choose the public identity you'll use across SkillAtlas community features."
       footer="A member profile is required only for future community participation. Public browsing remains available without one."
     >
-      <ProfileForm mode="onboarding" countries={accountCountryOptions} />
+      <ProfileForm countries={accountCountryOptions} />
     </AuthShell>
   );
 }

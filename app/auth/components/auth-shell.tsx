@@ -10,6 +10,8 @@ type AuthShellProps = {
   description: string;
   children: ReactNode;
   footer?: ReactNode;
+  contentClassName?: string;
+  bare?: boolean;
 };
 
 export default function AuthShell({
@@ -18,6 +20,8 @@ export default function AuthShell({
   description,
   children,
   footer,
+  contentClassName = "max-w-[540px]",
+  bare = false,
 }: AuthShellProps) {
   return (
     <main className="skillatlas-page-shell relative min-h-screen overflow-x-clip bg-sa-canvas text-sa-text-primary">
@@ -27,7 +31,7 @@ export default function AuthShell({
       </div>
 
       <div className="relative mx-auto flex w-full max-w-[1440px] justify-center px-4 pb-16 pt-sa-5 sm:px-6 sm:pb-20 sm:pt-sa-6 lg:px-8">
-        <div className="w-full max-w-[540px]">
+        <div className={`w-full ${contentClassName}`}>
           <div className="mb-sa-3 px-sa-1">
             <DataLabel as="p" className="text-sa-accent">
               {eyebrow}
@@ -40,18 +44,29 @@ export default function AuthShell({
             </p>
           </div>
 
-          <IntelligencePanel
-            as="section"
-            className="overflow-hidden border-sa-border-strong"
-            bodyClassName="px-sa-4 py-sa-5 sm:px-sa-5"
-          >
-            {children}
-            {footer ? (
-              <div className="mt-sa-5 border-t border-sa-border-subtle pt-sa-4 text-sm leading-6 text-sa-text-muted">
-                {footer}
-              </div>
-            ) : null}
-          </IntelligencePanel>
+          {bare ? (
+            <>
+              {children}
+              {footer ? (
+                <div className="mt-sa-4 border-t border-sa-border-subtle px-sa-1 pt-sa-3 text-sm leading-6 text-sa-text-muted">
+                  {footer}
+                </div>
+              ) : null}
+            </>
+          ) : (
+            <IntelligencePanel
+              as="section"
+              className="overflow-hidden border-sa-border-strong"
+              bodyClassName="px-sa-4 py-sa-5 sm:px-sa-5"
+            >
+              {children}
+              {footer ? (
+                <div className="mt-sa-5 border-t border-sa-border-subtle pt-sa-4 text-sm leading-6 text-sa-text-muted">
+                  {footer}
+                </div>
+              ) : null}
+            </IntelligencePanel>
+          )}
 
           <p className="mt-sa-3 text-center text-xs leading-5 text-sa-text-technical">
             Account access is optional. Public SkillAtlas pages remain available without signing in. {" "}
