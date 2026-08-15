@@ -1,8 +1,9 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { type MouseEvent, useCallback, useEffect, useRef, useState } from "react";
 import {
   PRIMARY_NAV_ITEMS as navigationItems,
   RANKING_NAV_ITEMS as rankingItems,
@@ -24,6 +25,26 @@ function normalisePath(pathname: string) {
 function pathIsActive(pathname: string, href: string) {
   if (href === ROUTES.rankings) return pathname === ROUTES.rankings;
   return pathname === href || pathname.startsWith(`${href}/`);
+}
+
+function preventRedundantNavigation(
+  event: MouseEvent<HTMLAnchorElement>,
+  pathname: string,
+  href: string
+) {
+  if (
+    normalisePath(href) !== pathname ||
+    event.button !== 0 ||
+    event.metaKey ||
+    event.ctrlKey ||
+    event.shiftKey ||
+    event.altKey ||
+    event.currentTarget.target === "_blank"
+  ) {
+    return;
+  }
+
+  event.preventDefault();
 }
 
 function ThemeSwitch({
@@ -152,7 +173,7 @@ export default function SiteHeader() {
     >
       <div className="mx-auto flex h-full max-w-7xl items-center px-4 pr-[124px] sm:px-6 sm:pr-[124px] min-[901px]:pr-[164px] xl:px-8 xl:pr-8">
         <div className="flex min-w-0 shrink-0 items-center gap-3 xl:mr-8 xl:gap-5">
-          <a
+          <Link
             href={ROUTES.spaceInvaders}
             className={`relative shrink-0 transition-all duration-300 ${
               scrolled ? "h-10 w-10 xl:h-11 xl:w-11" : "h-14 w-14 xl:h-24 xl:w-24"
@@ -166,10 +187,11 @@ export default function SiteHeader() {
               className="object-contain"
               priority
             />
-          </a>
+          </Link>
 
-          <a
+          <Link
             href={ROUTES.rankings}
+            onClick={(event) => preventRedundantNavigation(event, pathname, ROUTES.rankings)}
             className={`relative hidden min-w-0 shrink-0 transition-all duration-300 min-[360px]:block ${
               scrolled
                 ? "h-6 w-28 sm:w-40 xl:h-7 xl:w-44"
@@ -188,7 +210,7 @@ export default function SiteHeader() {
               className="object-contain object-left"
               priority
             />
-          </a>
+          </Link>
         </div>
 
         <nav
@@ -196,30 +218,32 @@ export default function SiteHeader() {
           aria-label="Primary navigation"
         >
           <div className="skillatlas-rankings-dropdown" data-skillatlas-rankings-dropdown="true">
-            <a
+            <Link
               href={ROUTES.rankings}
               className={`${linkClassName} skillatlas-rankings-trigger ${rankingsActive ? "skillatlas-active-nav" : ""}`}
               aria-haspopup="true"
               aria-current={rankingsActive ? "page" : undefined}
+              onClick={(event) => preventRedundantNavigation(event, pathname, ROUTES.rankings)}
             >
               <span>Rankings</span>
-            </a>
+            </Link>
 
             <div className="skillatlas-rankings-menu" role="menu">
               {rankingItems.map((item) => {
                 const active = pathIsActive(pathname, item.href);
 
                 return (
-                  <a
+                  <Link
                     key={item.href}
                     href={item.href}
                     className={`skillatlas-rankings-menu-item ${active ? "skillatlas-active-nav" : ""}`}
                     role="menuitem"
                     aria-current={active ? "page" : undefined}
+                    onClick={(event) => preventRedundantNavigation(event, pathname, item.href)}
                   >
                     <span>{item.label}</span>
                     <small>{item.description}</small>
-                  </a>
+                  </Link>
                 );
               })}
             </div>
@@ -229,26 +253,30 @@ export default function SiteHeader() {
             const active = pathIsActive(pathname, item.href);
 
             return (
-              <a
+              <Link
                 key={item.href}
                 href={item.href}
                 className={`${linkClassName} ${active ? "skillatlas-active-nav" : ""}`}
                 aria-current={active ? "page" : undefined}
+                onClick={(event) => preventRedundantNavigation(event, pathname, item.href)}
               >
                 {item.label}
-              </a>
+              </Link>
             );
           })}
 
           {aboutNavigationItem && (
             <div className="skillatlas-about-slot">
-              <a
+              <Link
                 href={aboutNavigationItem.href}
                 className={`${linkClassName} ${pathIsActive(pathname, aboutNavigationItem.href) ? "skillatlas-active-nav" : ""}`}
                 aria-current={pathIsActive(pathname, aboutNavigationItem.href) ? "page" : undefined}
+                onClick={(event) =>
+                  preventRedundantNavigation(event, pathname, aboutNavigationItem.href)
+                }
               >
                 {aboutNavigationItem.label}
-              </a>
+              </Link>
               <ThemeSwitch
                 className="skillatlas-theme-switch-desktop"
                 darkMode={darkMode}
@@ -340,7 +368,7 @@ export default function SiteHeader() {
                     const active = pathIsActive(pathname, item.href);
 
                     return (
-                      <a
+                      <Link
                         key={item.href}
                         href={item.href}
                         tabIndex={mobileMenuOpen && mobileRankingsOpen ? 0 : -1}
@@ -348,11 +376,14 @@ export default function SiteHeader() {
                           active ? "skillatlas-active-nav skillatlas-mobile-nav-link-active" : ""
                         }`}
                         aria-current={active ? "page" : undefined}
-                        onClick={closeMobileMenu}
+                        onClick={(event) => {
+                          preventRedundantNavigation(event, pathname, item.href);
+                          closeMobileMenu();
+                        }}
                       >
                         <span>{item.label}</span>
                         {active && <span className="h-1.5 w-1.5 rounded-full bg-[#ff2fa8]" aria-hidden="true" />}
-                      </a>
+                      </Link>
                     );
                   })}
                 </div>
@@ -365,7 +396,7 @@ export default function SiteHeader() {
               const active = pathIsActive(pathname, item.href);
 
               return (
-                <a
+                <Link
                   key={item.href}
                   href={item.href}
                   tabIndex={mobileMenuOpen ? 0 : -1}
@@ -373,11 +404,14 @@ export default function SiteHeader() {
                     active ? "skillatlas-active-nav skillatlas-mobile-nav-link-active" : ""
                   }`}
                   aria-current={active ? "page" : undefined}
-                  onClick={closeMobileMenu}
+                  onClick={(event) => {
+                    preventRedundantNavigation(event, pathname, item.href);
+                    closeMobileMenu();
+                  }}
                 >
                   <span>{item.label}</span>
                   {active && <span className="h-2 w-2 rounded-full bg-[#ff2fa8]" aria-hidden="true" />}
-                </a>
+                </Link>
               );
             })}
           </div>

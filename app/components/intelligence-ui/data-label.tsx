@@ -1,6 +1,6 @@
 import type { HTMLAttributes } from "react";
 
-type DataLabelElement = "div" | "p" | "span";
+type DataLabelElement = "div" | "h2" | "h3" | "p" | "span";
 
 type DataLabelProps = HTMLAttributes<HTMLElement> & {
   as?: DataLabelElement;

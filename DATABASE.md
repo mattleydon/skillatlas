@@ -1,85 +1,83 @@
 # SkillAtlas Database and Account Architecture
 
-> **Status:** The Supabase Auth foundation, canonical country catalogue, and public member profiles described under “Current implementation” are implemented. Everything under “Approved future work” remains proposed and must not be treated as an available schema.
+> **Status:** Supabase Auth, the canonical country catalogue, privacy-aware member profiles, and ordered Heritage are implemented locally through the reviewed repository migrations. Community persistence and competitive-intelligence data remain proposed future work.
 
-## Current implementation
+## Identity and privacy boundary
 
-### Identity boundary
+Supabase Auth owns private account identity in `auth.users`. `public.profiles` is the authenticated member's SkillAtlas identity record. Email, provider data, tokens, sessions, passwords, and moderation/security metadata are never copied into the public schema.
 
-Supabase Auth owns private account identity in `auth.users`. `public.profiles` is the separate, public SkillAtlas member identity. The application never copies email, provider IDs, verification state, tokens, session data, passwords, or moderation/security metadata into the public schema.
+Raw `public.profiles` rows are owner-readable only. Anonymous visitors and other authenticated members cannot query them. Public `/members/[username]` reads go through `public.get_public_member_profile(text)`, a security-definer RPC with an empty `search_path`, fully qualified relations, explicit output columns, and grants limited to `anon` and `authenticated`. Its payload contains no Auth UUID and conditionally exposes only fields approved by the member's privacy controls.
 
-Profiles are created explicitly through `/account/onboarding`; there is no `auth.users` trigger. An authenticated account without a profile is a valid, recoverable `PROFILE_INCOMPLETE` state.
+Profiles are created explicitly through `/account/onboarding`; there is no `auth.users` trigger. An authenticated account without a profile remains a valid, recoverable `PROFILE_INCOMPLETE` state.
+
+## Implemented tables
 
 ### `public.countries`
 
-**Purpose:** Production reference catalogue for the reviewed 195-country sovereign scope used by profile foreign keys.
-
-| Column | Definition |
-| --- | --- |
-| `id` | Stable SkillAtlas text ID, primary key |
-| `iso2` | Unique uppercase ISO 3166-1 alpha-2 code |
-| `name` | Canonical display name |
-| `region` | One of Africa, Asia, Europe, Middle East, North America, Oceania, or South America |
-
-The table deliberately contains no rankings, scores, trends, identity copy, or prototype intelligence. Reference rows are inserted deterministically by the production migration and must match `data/countries.ts`. Anonymous and authenticated clients may read the catalogue; ordinary clients receive no write privileges.
+The production reference catalogue for the reviewed 195-country sovereign scope. It contains stable SkillAtlas ID, uppercase ISO2 code, canonical name, and canonical region. Anonymous and authenticated clients may read it; ordinary clients cannot write it.
 
 ### `public.profiles`
 
-**Purpose:** Minimal public identity for ordinary SkillAtlas members.
-
-| Column | Definition |
+| Column | Purpose |
 | --- | --- |
-| `id` | UUID primary key and foreign key to `auth.users(id) on delete cascade` |
-| `username` | Immutable `citext`, unique and constrained to the V0.1 username policy |
-| `display_name` | Public, editable display name, 1–50 characters |
-| `country_id` | Optional text foreign key to `public.countries(id) on delete set null` |
-| `created_at` | Database-generated `timestamptz` |
-| `updated_at` | Database-generated and trigger-maintained `timestamptz` |
+| `id` | UUID primary key and `auth.users(id)` foreign key; owner identity only |
+| `username` | Case-preserving `citext`, unique case-insensitively |
+| `display_name` | Public editable display name, 1–50 characters |
+| `bio` | Optional public plain text, up to 280 characters and three lines |
+| `representing_country_id` | Optional public Representing country; migrated from PR2 `country_id` |
+| `birth_country_id` | Optional Born country, private by default |
+| `residence_country_id` | Optional Lives In country, private by default |
+| `city_town` | Optional plain-text City / Town, private by default |
+| `*_is_public` | Explicit privacy controls for Born, Lives In, City / Town, and Heritage |
+| `username_case_correction_available` | Migration-granted eligibility for existing PR2 members only |
+| `username_case_corrected_at` | Audit timestamp for the consumed correction |
+| `created_at` / `updated_at` | Database-generated timestamps; `updated_at` is trigger-managed |
 
-Usernames are 3–24 lowercase ASCII letters, numbers, or underscores, must start and end with a letter or number, are case-insensitively unique, and reject the reviewed reserved-name set. V0.1 clients may not update usernames.
+Usernames allow 3–24 ASCII letters, numbers, or underscores, must start and end with a letter or number, preserve selected capitalization, reject reserved names case-insensitively, and remain unique case-insensitively. New profiles are immutable. Existing PR2 rows receive one database-enforced capitalization-only correction; it cannot change the case-folded identity and cannot be used twice.
 
-RLS and column privileges provide these boundaries:
+### `public.profile_heritage_countries`
 
-- Anonymous and authenticated visitors may read public profile rows.
-- An authenticated user may insert only a profile whose `id` equals `auth.uid()`.
-- The owner may update only `display_name` and `country_id`.
-- Non-owners cannot modify a profile.
-- Ordinary client roles cannot update ownership/system fields or delete profiles.
-- Country, username, display-name, and timestamp invariants are enforced in the database as well as the application.
+Normalized ordered Heritage with `profile_id`, `country_id`, and `position`.
 
-The Auth-user cascade applies only to the current profile-only model. Retention policy must be revisited before Forum or vote foreign keys are introduced. There is no self-service account deletion UI.
+- Zero to five canonical countries.
+- No duplicates.
+- Positions are 1–5 and unique per profile.
+- Profile deletion cascades; country deletion restricts.
+- Raw reads and all mutations are owner-only under RLS.
+- `public.update_profile_country_identity(...)` replaces the list atomically, preserving contiguous order.
+- Heritage is absent from the public projection unless `heritage_is_public` is enabled.
 
-### Reproducibility and tests
+## RLS and privileges
 
-- `supabase/migrations/20260812031320_create_member_profiles.sql` creates both implemented tables, policies, grants, constraints, and the canonical reference rows.
-- `npm.cmd run countries:reference:check` verifies the migration’s 195 country tuples exactly match the reviewed application source.
-- `npm.cmd run supabase:reset` replays the schema locally.
-- `npm.cmd run supabase:test:db` runs pgTAP schema, catalogue, and two-account RLS tests.
-- `npm.cmd run supabase:types` regenerates `types/database.ts` from the local public schema.
-
-No service-role client exists in application code. Ordinary development must not link to or push schema changes to a hosted Supabase project.
+- `countries`: public read, no ordinary writes.
+- `profiles`: authenticated owner SELECT/INSERT/UPDATE only; no anonymous raw SELECT and no ordinary DELETE.
+- `profile_heritage_countries`: authenticated owner SELECT/INSERT/UPDATE/DELETE only.
+- Server Actions re-authenticate and derive ownership from `auth.uid()`; client-supplied UUID ownership is not accepted.
+- `get_public_member_profile(text)`: public-safe read RPC only; no UUID, email, private locations, privacy flags, security metadata, or unapproved internal timestamps.
+- `update_profile_country_identity(...)`: authenticated security-invoker mutation; validates ownership, list size, duplicates, foreign keys, and ordering in one transaction.
 
 ## Current application behavior
 
-- Verified email OTP authentication and cookie/session refresh use the request-scoped `@supabase/ssr` helpers.
-- `/account` distinguishes signed out, profile incomplete, profile complete, and query/configuration failure.
-- `/account/onboarding` creates the authenticated user’s profile through an RLS-protected Server Action.
-- `/members/[username]` reads only public profile and country columns.
-- `lib/account/participation.ts` exposes a domain-neutral gate for future writes; PR 2 does not connect it to Forum or User Rankings.
-- The optional hosted `skillatlas_page_comments` integration in `app/theme-provider.tsx` is unchanged and is not reproduced by a speculative migration.
+- Verified eight-digit email OTP authentication uses request-scoped `@supabase/ssr` clients.
+- `/account` distinguishes signed out, profile incomplete, profile complete, and unavailable states.
+- `/account/onboarding` creates a case-preserving username and optional Representing country.
+- `/account` provides separate Profile / Identity and Country Identity actions.
+- `/members/[username]` uses only the public-safe RPC, resolves case-insensitively, and redirects alternate casing to the stored canonical spelling.
+- `lib/account/participation.ts` remains the domain-neutral gate for future community writes.
+
+## Migrations and reproducibility
+
+- `20260812031320_create_member_profiles.sql`: canonical PR2 countries/profile baseline.
+- `20260814225124_extended_identity_privacy.sql`: PR3A identity, privacy, Heritage, RPC, RLS, and username correction.
+- `npm.cmd run supabase:reset`: replay migrations locally.
+- `npm.cmd run supabase:test:db`: run pgTAP schema, privacy, RLS, username, Heritage, and account-isolation tests.
+- `npm.cmd run countries:reference:check`: verify exact parity with `data/countries.ts`.
+- `npm.cmd run supabase:types`: regenerate `types/database.ts` from the local public schema.
+
+No service-role client exists in application code. Ordinary development must not link to or push schema changes to hosted Supabase.
 
 ## Approved future work
 
-The following areas are not implemented by the current schema:
+Not implemented here: avatars/storage, favourite games, platforms, gaming history, following/social graph, Forum persistence, User Rankings persistence, notifications, blocking/muting, direct messages, Personal Atlas, OAuth/passkeys, games, authoritative rankings, ranking history, or live ranking events.
 
-- User Rankings votes, events, allowance logic, and Community Score
-- Forum categories, threads, replies, moderation, and persistent voting
-- Games, authoritative rankings, ranking history, and live ranking events
-- Professional-player-to-member linking
-- Avatars/storage, bios, favourite games, social links, roles, reputation, badges, notifications, and relationships
-
-Future migrations must preserve the country-only MVP, use reviewed foreign keys and constraints, enable RLS before API exposure, capture source provenance where relevant, and ship with policy tests. Forum/vote retention and Auth-user deletion behavior require a separate governance decision once those schemas are designed.
-
-## Hosted deployment boundary
-
-A future human-reviewed non-production rollout requires applying the repository migration, retaining the reviewed Auth configuration, and setting the public Supabase environment variables in that environment. This repository workflow does not run `supabase link`, `supabase db push`, or mutate hosted Auth/RLS settings.
+Future migrations must preserve the country-only MVP, use reviewed constraints and foreign keys, enable RLS before API exposure, capture provenance where relevant, and ship with policy/leakage tests.

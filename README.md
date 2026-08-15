@@ -20,7 +20,7 @@ SkillAtlas is a country-based gaming and esports atlas for exploring rankings, c
 - Next.js 16 with the App Router
 - React 19 and TypeScript
 - Tailwind CSS 4
-- Supabase for page comments, verified email OTP sessions, and member profiles
+- Supabase for page comments, verified email OTP sessions, and privacy-aware member profiles
 - Vercel for deployment
 - npm with `package-lock.json`
 
@@ -53,7 +53,7 @@ npm.cmd run supabase:start
 npm.cmd exec supabase -- status -o env
 ```
 
-Map the local `API_URL` and `ANON_KEY` output to the two `NEXT_PUBLIC_` names in `.env.local`, then restart `npm.cmd run dev`. Request a code at `/auth/sign-up` or `/auth/sign-in`, read it in local Mailpit at [http://127.0.0.1:54324](http://127.0.0.1:54324), verify at `/auth/verify`, and continue from `/account` to the short member-profile onboarding flow. Completed public member identities are available at `/members/[username]`.
+Map the local `API_URL` and `ANON_KEY` output to the two `NEXT_PUBLIC_` names in `.env.local`, then restart `npm.cmd run dev`. Request a code at `/auth/sign-up` or `/auth/sign-in`, read it in local Mailpit at [http://127.0.0.1:54324](http://127.0.0.1:54324), verify at `/auth/verify`, and continue from `/account` to the short member-profile onboarding flow. Completed profiles support a case-preserved username, bio, Representing, private-by-default country identity, and ordered Heritage. Public member identities are available at `/members/[username]` through an explicit privacy-filtered database projection.
 
 Deliberate browser validation against a hosted Supabase project requires separate approval and an unmistakable process-level opt-in: `SKILLATLAS_ALLOW_HOSTED_SUPABASE=approved-nonproduction`. Confirm the target is the approved non-production project before using it, keep the override out of `.env*` files, and remove it immediately after that process. The override must never be used for Production. Vercel Preview is unaffected because this safeguard runs only before the local development command.
 
@@ -68,7 +68,7 @@ npm.cmd run supabase:stop
 ```
 
 - `supabase:reset` replays repository migrations against the local stack only.
-- `supabase:test:db` runs the pgTAP database tests in `supabase/tests/database`.
+- `supabase:test:db` runs pgTAP schema, RLS, privacy-leakage, username, Heritage, and account-isolation tests in `supabase/tests/database`.
 - `supabase:types` refreshes `types/database.ts` from the local public schema.
 - `supabase:verify-local` runs the same fail-closed environment check used before local development.
 - `countries:reference:check` confirms the migration catalogue exactly matches the canonical 195 sovereign records in `data/countries.ts`.
@@ -96,7 +96,7 @@ Run `npm.cmd run lint` for the configured ESLint checks.
 
 ```text
 app/                 App Router pages, including Auth, account onboarding, and public members
-lib/account/         Server-only account-state, participation, and profile validation helpers
+lib/account/         Server-only account state, public DTO, participation, and profile validation helpers
 lib/supabase/        Browser, server, configuration, and session-refresh helpers
 supabase/            Local stack config, migrations, email template, and pgTAP tests
 types/database.ts    Generated local public-schema TypeScript types

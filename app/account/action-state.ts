@@ -1,4 +1,12 @@
-export type ProfileActionField = "username" | "displayName" | "country";
+export type ProfileActionField =
+  | "username"
+  | "displayName"
+  | "bio"
+  | "representingCountry"
+  | "birthCountry"
+  | "residenceCountry"
+  | "cityTown"
+  | "heritage";
 
 export type ProfileActionState = {
   status: "idle" | "error" | "success";

@@ -1,4 +1,5 @@
 type CountryFlagSize = "sm" | "md" | "lg" | "xl";
+type CountryFlagVariant = "default" | "atlas";
 
 type CountryFlagProps = {
   country: {
@@ -7,6 +8,7 @@ type CountryFlagProps = {
     flag?: string;
   };
   size?: CountryFlagSize;
+  variant?: CountryFlagVariant;
 };
 
 const sizeClasses: Record<CountryFlagSize, string> = {
@@ -16,12 +18,26 @@ const sizeClasses: Record<CountryFlagSize, string> = {
   xl: "h-16 w-16 rounded-3xl",
 };
 
-export default function CountryFlag({ country, size = "md" }: CountryFlagProps) {
+const atlasSizeClasses: Record<CountryFlagSize, string> = {
+  sm: "h-5 w-8 rounded-[2px]",
+  md: "h-6 w-10 rounded-[2px]",
+  lg: "h-8 w-12 rounded-[2px]",
+  xl: "h-10 w-16 rounded-[2px]",
+};
+
+export default function CountryFlag({
+  country,
+  size = "md",
+  variant = "default",
+}: CountryFlagProps) {
   const countryCode = country.flagCode.trim().toLowerCase();
+  const sizing = variant === "atlas" ? atlasSizeClasses[size] : sizeClasses[size];
 
   return (
     <span
-      className={`grid ${sizeClasses[size]} shrink-0 place-items-center overflow-hidden bg-gray-50 shadow-inner`}
+      className={`grid ${sizing} shrink-0 place-items-center overflow-hidden bg-gray-50 ${
+        variant === "atlas" ? "border border-sa-border-strong" : "shadow-inner"
+      }`}
     >
       {countryCode ? (
         <img
