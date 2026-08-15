@@ -111,6 +111,7 @@ export default async function AccountPage({ searchParams }: AccountPageProps) {
           bodyClassName="px-sa-4 py-sa-4 sm:px-sa-5"
         >
           <CountryIdentityForm
+            key={profile.updatedAt}
             countries={accountCountryOptions}
             representingCountryId={profile.representingCountryId}
             birthCountryId={profile.birthCountryId}
