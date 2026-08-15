@@ -92,7 +92,7 @@ export default async function MemberPage({ params }: MemberPageProps) {
           <div className="grid gap-sa-4 sm:grid-cols-[auto_minmax(0,1fr)_auto] sm:items-center">
             <div
               className="grid h-16 w-16 place-items-center rounded-sa-control border border-sa-border-active bg-sa-accent/8 font-sa-data text-xl font-black tracking-[-0.04em] text-sa-accent"
-              aria-label={`${profile.displayName} member initials`}
+              aria-hidden="true"
             >
               {memberInitials(profile.displayName, profile.username)}
             </div>
