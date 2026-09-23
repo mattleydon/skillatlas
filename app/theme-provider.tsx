@@ -1599,7 +1599,9 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
         @media (min-width: 1280px) {
           .skillatlas-site-header { height: 118px; }
           .skillatlas-site-header-scrolled { height: 96px; }
-          .skillatlas-header-inner { display: grid; grid-template-columns: 432px minmax(0, 1fr) 160px; gap: 48px; padding-right: 32px; padding-left: 32px; }
+          /* Keep spare space before the command strip. 44px + the final label's
+             4px trigger padding matches the 48px visible gap between nav labels. */
+          .skillatlas-header-inner { display: grid; grid-template-columns: minmax(432px, 1fr) max-content 160px; gap: 44px; padding-right: 32px; padding-left: 32px; }
           .skillatlas-brand-mark { width: 72px; height: 72px; }
           .skillatlas-brand-title { width: 220px; height: 42px; }
           .skillatlas-site-header-scrolled .skillatlas-brand-mark { width: 52px; height: 52px; }
@@ -1609,7 +1611,7 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
             width: max-content;
             max-width: 100% !important;
             /* Keep a deliberate brand gap followed by a compact, content-sized group. */
-            padding-inline: 16px;
+            padding-inline: 0;
             justify-self: start;
             height: 100%;
             grid-template-columns: repeat(5, max-content);

@@ -9,13 +9,20 @@ type CountryFlagProps = {
     flagCode: string;
     flag?: string;
   };
-  /** Kept for caller compatibility; every flag now uses the same 32 × 20px plate. */
   size?: CountryFlagSize;
   variant?: CountryFlagVariant;
 };
 
+const imageSizes: Record<CountryFlagSize, string> = {
+  sm: "32px",
+  md: "40px",
+  lg: "48px",
+  xl: "64px",
+};
+
 export default function CountryFlag({
   country,
+  size = "md",
   variant = "default",
 }: CountryFlagProps) {
   const countryCode = country.flagCode.trim().toLowerCase();
@@ -23,6 +30,7 @@ export default function CountryFlag({
   return (
     <span
       data-variant={variant}
+      data-size={size}
       className="skillatlas-country-flag"
     >
       {countryCode ? (
@@ -30,7 +38,7 @@ export default function CountryFlag({
           src={`https://flagcdn.com/w160/${countryCode}.png`}
           alt={`${country.name} flag`}
           fill
-          sizes="32px"
+          sizes={imageSizes[size]}
           unoptimized
           className="skillatlas-country-flag-image"
         />

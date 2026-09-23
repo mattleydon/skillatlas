@@ -150,7 +150,7 @@ body {
 }
 
 .skillatlas-page-shell {
-  padding-top: calc(80px + var(--sa-space-3));
+  padding-top: calc(80px + var(--sa-page-gutter));
 }
 
 /* Auth uses an inner frame so its full-bleed background stays unchanged. */
@@ -172,13 +172,17 @@ body {
   background: var(--sa-surface-inset);
 }
 
+.skillatlas-country-flag[data-size="md"] { width: 40px; height: 24px; }
+.skillatlas-country-flag[data-size="lg"] { width: 48px; height: 32px; }
+.skillatlas-country-flag[data-size="xl"] { width: 64px; height: 40px; }
+
 .skillatlas-country-flag-image {
   object-fit: contain;
   filter: saturate(0.65) brightness(0.9) contrast(1.05);
 }
 
 html.skillatlas-dark .skillatlas-country-flag-image {
-  filter: saturate(0.55) brightness(0.7) contrast(1.08);
+  filter: saturate(0.55) brightness(0.78) contrast(1.08);
 }
 
 /* Shared operational page hierarchy; leave body prose and control targets intact. */
@@ -212,11 +216,7 @@ html.skillatlas-dark .skillatlas-country-flag-image {
 }
 
 @media (min-width: 1280px) {
-  :root {
-    --sa-page-gutter: 24px;
-  }
-
   .skillatlas-page-shell {
-    padding-top: calc(126px + var(--sa-space-3));
+    padding-top: calc(118px + var(--sa-page-gutter));
   }
 }
