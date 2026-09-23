@@ -159,6 +159,28 @@ body {
   padding-inline: var(--sa-page-gutter);
 }
 
+.skillatlas-country-flag {
+  position: relative;
+  display: inline-grid;
+  width: 32px;
+  height: 20px;
+  flex-shrink: 0;
+  place-items: center;
+  vertical-align: middle;
+  border: 1px solid var(--sa-border-subtle);
+  border-radius: 0;
+  background: var(--sa-surface-inset);
+}
+
+.skillatlas-country-flag-image {
+  object-fit: contain;
+  filter: saturate(0.65) brightness(0.9) contrast(1.05);
+}
+
+html.skillatlas-dark .skillatlas-country-flag-image {
+  filter: saturate(0.55) brightness(0.7) contrast(1.08);
+}
+
 /* Shared operational page hierarchy; leave body prose and control targets intact. */
 .skillatlas-page-shell h1 {
   font-size: 1.5rem;
@@ -174,10 +196,6 @@ body {
 }
 
 @media (min-width: 640px) {
-  :root {
-    --sa-page-gutter: 24px;
-  }
-
   .skillatlas-page-shell h1 {
     font-size: 1.875rem;
   }
@@ -187,9 +205,15 @@ body {
   }
 }
 
+@media (min-width: 1024px) {
+  :root {
+    --sa-page-gutter: 20px;
+  }
+}
+
 @media (min-width: 1280px) {
   :root {
-    --sa-page-gutter: 32px;
+    --sa-page-gutter: 24px;
   }
 
   .skillatlas-page-shell {

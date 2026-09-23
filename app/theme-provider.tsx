@@ -1129,7 +1129,7 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
         .skillatlas-site-header {
           height: 80px;
           border: 0;
-          border-bottom: 1px solid color-mix(in srgb, var(--sa-accent) 24%, transparent);
+          border-bottom: 1px solid var(--sa-border-subtle);
           box-shadow: none;
           background: color-mix(in srgb, var(--sa-surface-1) 96%, transparent);
           color: var(--sa-text-primary);
@@ -1599,7 +1599,7 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
         @media (min-width: 1280px) {
           .skillatlas-site-header { height: 118px; }
           .skillatlas-site-header-scrolled { height: 96px; }
-          .skillatlas-header-inner { display: grid; grid-template-columns: 368px minmax(0, 1fr) 160px; gap: 48px; padding-right: 32px; padding-left: 32px; }
+          .skillatlas-header-inner { display: grid; grid-template-columns: 432px minmax(0, 1fr) 160px; gap: 48px; padding-right: 32px; padding-left: 32px; }
           .skillatlas-brand-mark { width: 72px; height: 72px; }
           .skillatlas-brand-title { width: 220px; height: 42px; }
           .skillatlas-site-header-scrolled .skillatlas-brand-mark { width: 52px; height: 52px; }

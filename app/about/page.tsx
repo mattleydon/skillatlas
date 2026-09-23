@@ -216,7 +216,7 @@ export default function AboutPage() {
     <main className="relative min-h-screen overflow-x-clip bg-sa-canvas text-sa-text-primary">
       <AboutBackground />
 
-      <div className="skillatlas-page-shell relative z-10 mx-auto w-full max-w-[1600px] px-4 pb-10 sm:px-6 lg:px-8 lg:pb-12">
+      <div className="skillatlas-page-shell relative z-10 mx-auto w-full max-w-[1600px] pb-10 lg:pb-12">
         <div className="mx-auto max-w-[1320px]">
           <IntelligencePanel
             as="section"

@@ -162,7 +162,7 @@ export default function CountriesAtlas() {
     <main className={`${styles.shell} relative min-h-screen overflow-hidden`}>
       <CountriesBackground />
 
-      <div className="skillatlas-page-shell relative z-10 mx-auto max-w-7xl px-4 pb-16 sm:px-6 xl:px-8">
+      <div className="skillatlas-page-shell relative z-10 mx-auto w-full max-w-7xl pb-16">
         <div className="mb-sa-2 max-w-4xl">
           <p className="mb-sa-1 text-[11px] font-bold uppercase tracking-[0.2em] text-sa-accent">
             Countries
