@@ -1196,7 +1196,7 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
           font: inherit;
           font-family: var(--sa-font-data);
           font-size: 16px;
-          font-weight: 500;
+          font-weight: 400;
           line-height: 1;
           text-decoration: none;
           cursor: pointer;
@@ -1410,7 +1410,7 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
           color: var(--sa-accent);
           font-family: var(--sa-font-data);
           font-size: 10px;
-          font-weight: 600;
+          font-weight: 500;
           letter-spacing: -0.03em;
         }
 
@@ -1545,7 +1545,7 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
         .skillatlas-mobile-family-trigger small,
         .skillatlas-mobile-direct-link small { display: block; color: var(--sa-text-technical); font-family: var(--sa-font-data); font-size: 8px; font-weight: 500; letter-spacing: 0.15em; line-height: 1; text-transform: uppercase; }
         .skillatlas-mobile-family-trigger strong,
-        .skillatlas-mobile-direct-link strong { display: block; margin-top: 4px; font-family: var(--sa-font-data); font-size: 14px; font-weight: 500; line-height: 1; }
+        .skillatlas-mobile-direct-link strong { display: block; margin-top: 4px; font-family: var(--sa-font-data); font-size: 14px; font-weight: 400; line-height: 1; }
         .skillatlas-mobile-family-chevron { color: var(--sa-text-technical); font-family: var(--sa-font-data); transition: transform 180ms ease; }
         .skillatlas-mobile-family-trigger[aria-expanded="true"] .skillatlas-mobile-family-chevron { transform: rotate(180deg); }
 
@@ -1622,6 +1622,8 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
             display: grid !important;
             width: 100%;
             max-width: 800px !important;
+            /* Symmetric inset adds brand breathing room without shifting the nav centre. */
+            padding-inline: 16px;
             justify-self: center;
             height: 100%;
             grid-template-columns: repeat(5, minmax(0, 1fr));

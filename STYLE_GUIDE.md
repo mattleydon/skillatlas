@@ -80,13 +80,14 @@ Avoid large translucent SaaS cards, decorative structural pink borders, generous
 
 The `SKILLATLAS / RANKINGS` breadcrumb is the typography reference: IBM Plex Mono gives headings, navigation, technical labels, metadata and numeric instrumentation a precise shared language. Use the companion IBM Plex Sans (not Condensed) for comfortable body copy, form controls and longer descriptions; never make every paragraph uppercase, widely tracked or monospace. Fonts are configured once in the root layout through `next/font` and self-hosted by Next.js, without third-party runtime font requests. The logo/wordmark assets are unchanged.
 
-Use regular `400` for body copy, medium `500` for navigation and controls, and semibold `600` for headings and important data. Technical labels use medium `500` with restrained tracking. Existing Tailwind bold/extrabold/black utilities resolve to a shared `600` ceiling so older surfaces adopt the hierarchy without page-specific overrides or synthetic heavy weights.
+Use regular `400` for body copy, primary navigation and technical labels, and medium `500` for headings, controls and important data. Preserve text contrast rather than relying on heavy weight. Existing Tailwind semibold/bold/extrabold/black utilities resolve to a shared `500` ceiling so older surfaces adopt the hierarchy without page-specific overrides or synthetic heavy weights.
 
 Approximate hierarchy:
 
 | Role | Size |
 | --- | --- |
-| Page title | `32-40px` |
+| Page title | `30px` desktop/tablet, `24px` phone; medium, `1.2` line-height |
+| Page description | `15px` desktop/tablet, `14px` phone; regular, `1.4` line-height |
 | Section heading | `20-24px` |
 | Panel heading | `14-18px` |
 | Body and data | `13-15px` |
@@ -109,6 +110,7 @@ Technical labels should be concise. Wide tracking may be used carefully, but lab
 - Use consistent alignment, dividers, columns, and compact toolbars to establish hierarchy.
 - Group related metrics into strips or grids instead of separate cards.
 - Keep headers proportionate to the data region they describe.
+- The shared page shell uses a compact title/description hierarchy with a `4px` description gap. Keep existing panel padding, status alignment and comfortable control targets; reduce typographic dominance rather than squeezing the interface.
 - Prefer compact tables and lists where scanning is more useful than card browsing.
 - Do not manufacture density with irrelevant metadata or decorative charts.
 - Keep standard page gutters and the established responsive container behavior unless a map or data table requires a deliberate exception.
@@ -164,7 +166,7 @@ Ranking order must remain understandable through number, position, and text with
 - The Rankings dropdown contains `Rankings`, `User Rankings`, and `Live Rankings`.
 - User Rankings and Live Rankings must not appear as separate top-level items.
 - Use `Players`, not `Profiles`, in visible navigation.
-- Desktop navigation uses medium `16px` Plex Mono in five evenly distributed columns within the flexible centre track (up to `800px`). Preserve the `1280px` desktop breakpoint, brand geometry and system-control column.
+- Desktop navigation uses regular `16px` Plex Mono in five evenly distributed columns within the flexible centre track (up to `800px`). A symmetric `16px` internal inset gives Rankings additional breathing room from the logo without moving the navigation centre or system controls. Preserve the `1280px` desktop breakpoint and brand geometry.
 - Desktop active navigation uses primary text and a close, thin `1px` turquoise underline attached to the text-label span only, without a pink leading marker. Neutral chevrons sit outside the underline and identify actual expandable families only. Retain comfortable hit targets independently of the narrow visual indicator.
 - Navigation Console category/system labels and medium destination names use Plex Mono at distinct sizes. Preserve the console's layout, focus behavior and disclosures.
 - Technical text uses a contrast-safe slate in both themes (`#52647b` light, `#a6b4c6` dark); active mobile text stays dark in light mode with turquoise as the indicator.
