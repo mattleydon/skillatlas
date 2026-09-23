@@ -44,7 +44,7 @@
   --sa-motion-map: 460ms;
   --sa-ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
 
-  --sa-font-ui: var(--font-sa-interface), "Arial Narrow", Arial, sans-serif;
+  --sa-font-ui: var(--font-sa-interface), Arial, sans-serif;
   --sa-font-data: var(--font-sa-instrumentation), ui-monospace, SFMono-Regular, Consolas, monospace;
 }
 
@@ -117,6 +117,10 @@ body {
 }
 
 @layer base {
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--sa-font-data);
+  }
+
   h1, h2, h3, h4, h5, h6, strong, b {
     font-weight: 600;
   }

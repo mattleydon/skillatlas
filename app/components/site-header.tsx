@@ -170,7 +170,7 @@ function DesktopFamilyMenu({
           aria-current={pathname === href ? "page" : active ? "location" : undefined}
           onClick={(event) => preventRedundantNavigation(event, pathname, href)}
         >
-          <span>{label}</span><span className="skillatlas-nav-chevron" aria-hidden="true">⌄</span>
+          <span className="skillatlas-primary-nav-label">{label}</span><span className="skillatlas-nav-chevron" aria-hidden="true">⌄</span>
         </Link>
       ) : (
         <button
@@ -190,7 +190,7 @@ function DesktopFamilyMenu({
             }
           }}
         >
-          <span>{label}</span><span className="skillatlas-nav-chevron" aria-hidden="true">⌄</span>
+          <span className="skillatlas-primary-nav-label">{label}</span><span className="skillatlas-nav-chevron" aria-hidden="true">⌄</span>
         </button>
       )}
 
@@ -419,20 +419,20 @@ export default function SiteHeader() {
             className={`skillatlas-primary-nav-trigger ${pathIsActive(pathname, ROUTES.atlas) ? "skillatlas-nav-family-active" : ""}`}
             aria-current={navigationCurrent(pathname, ROUTES.atlas)}
             onClick={(event) => preventRedundantNavigation(event, pathname, ROUTES.atlas)}
-          >Atlas</Link>
+          ><span className="skillatlas-primary-nav-label">Atlas</span></Link>
           <DesktopFamilyMenu key={`explore-${pathname}`} id="explore" label="Explore" items={exploreItems} pathname={pathname} active={exploreActive} />
           <Link
             href={ROUTES.forum}
             className={`skillatlas-primary-nav-trigger ${pathIsActive(pathname, ROUTES.forum) ? "skillatlas-nav-family-active" : ""}`}
             aria-current={navigationCurrent(pathname, ROUTES.forum)}
             onClick={(event) => preventRedundantNavigation(event, pathname, ROUTES.forum)}
-          >Forum</Link>
+          ><span className="skillatlas-primary-nav-label">Forum</span></Link>
           <Link
             href={ROUTES.about}
             className={`skillatlas-primary-nav-trigger ${pathIsActive(pathname, ROUTES.about) ? "skillatlas-nav-family-active" : ""}`}
             aria-current={navigationCurrent(pathname, ROUTES.about)}
             onClick={(event) => preventRedundantNavigation(event, pathname, ROUTES.about)}
-          >About</Link>
+          ><span className="skillatlas-primary-nav-label">About</span></Link>
         </nav>
 
         <div className="skillatlas-desktop-system-stack" aria-label="Member and display controls">

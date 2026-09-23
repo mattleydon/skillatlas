@@ -1194,7 +1194,8 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
           background: transparent;
           color: var(--sa-text-muted);
           font: inherit;
-          font-size: 13px;
+          font-family: var(--sa-font-data);
+          font-size: 16px;
           font-weight: 500;
           line-height: 1;
           text-decoration: none;
@@ -1202,12 +1203,17 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
           transition: color 180ms ease, background-color 180ms ease;
         }
 
-        .skillatlas-primary-nav-trigger::after {
+        .skillatlas-primary-nav-label {
+          position: relative;
+          white-space: nowrap;
+        }
+
+        .skillatlas-primary-nav-label::after {
           content: "";
           position: absolute;
-          right: 2px;
-          bottom: calc(50% - 0.5em - 4px);
-          left: 2px;
+          right: 0;
+          bottom: -4px;
+          left: 0;
           height: 1px;
           background: var(--sa-accent);
           transform: scaleX(0);
@@ -1226,8 +1232,8 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
           outline-offset: -2px;
         }
 
-        .skillatlas-primary-nav-trigger.skillatlas-nav-family-active::after,
-        .skillatlas-primary-nav-trigger[aria-current="page"]::after {
+        .skillatlas-primary-nav-trigger.skillatlas-nav-family-active .skillatlas-primary-nav-label::after,
+        .skillatlas-primary-nav-trigger[aria-current="page"] .skillatlas-primary-nav-label::after {
           transform: scaleX(1);
         }
 
@@ -1331,7 +1337,7 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
         }
 
         .skillatlas-nav-menu-copy { display: block; min-width: 0; }
-        .skillatlas-nav-menu-copy strong { display: block; color: var(--sa-text-primary); font-size: 12px; font-weight: 500; }
+        .skillatlas-nav-menu-copy strong { display: block; color: var(--sa-text-primary); font-family: var(--sa-font-data); font-size: 12px; font-weight: 500; }
         .skillatlas-nav-menu-copy small { display: block; margin-top: 2px; overflow: hidden; color: var(--sa-text-technical); font-size: 9px; font-weight: 400; letter-spacing: 0.025em; text-overflow: ellipsis; white-space: nowrap; }
 
         .skillatlas-nav-menu-state,
@@ -1413,7 +1419,7 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
         .skillatlas-member-copy small,
         .skillatlas-display-copy small { display: block; color: var(--sa-text-technical); font-family: var(--sa-font-data); font-size: 8px; font-weight: 500; letter-spacing: 0.15em; line-height: 1.1; text-transform: uppercase; }
         .skillatlas-member-copy strong,
-        .skillatlas-display-copy strong { display: block; margin-top: 3px; overflow: hidden; color: var(--sa-text-primary); font-size: 10px; font-weight: 500; line-height: 1.05; text-overflow: ellipsis; white-space: nowrap; }
+        .skillatlas-display-copy strong { display: block; margin-top: 3px; overflow: hidden; color: var(--sa-text-primary); font-family: var(--sa-font-data); font-size: 10px; font-weight: 500; line-height: 1.05; text-overflow: ellipsis; white-space: nowrap; }
         .skillatlas-member-chevron { color: var(--sa-accent); font-family: var(--sa-font-data); font-size: 12px; }
 
         .skillatlas-display-control {
@@ -1539,7 +1545,7 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
         .skillatlas-mobile-family-trigger small,
         .skillatlas-mobile-direct-link small { display: block; color: var(--sa-text-technical); font-family: var(--sa-font-data); font-size: 8px; font-weight: 500; letter-spacing: 0.15em; line-height: 1; text-transform: uppercase; }
         .skillatlas-mobile-family-trigger strong,
-        .skillatlas-mobile-direct-link strong { display: block; margin-top: 4px; font-size: 12px; font-weight: 500; line-height: 1; }
+        .skillatlas-mobile-direct-link strong { display: block; margin-top: 4px; font-family: var(--sa-font-data); font-size: 14px; font-weight: 500; line-height: 1; }
         .skillatlas-mobile-family-chevron { color: var(--sa-text-technical); font-family: var(--sa-font-data); transition: transform 180ms ease; }
         .skillatlas-mobile-family-trigger[aria-expanded="true"] .skillatlas-mobile-family-chevron { transform: rotate(180deg); }
 
@@ -1558,6 +1564,7 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
           border-radius: 0;
           padding: 6px 11px;
           color: var(--sa-text-muted);
+          font-family: var(--sa-font-data);
           font-size: 11px;
           font-weight: 500;
           text-decoration: none;
@@ -1606,14 +1613,16 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
         @media (min-width: 1280px) {
           .skillatlas-site-header { height: 118px; }
           .skillatlas-site-header-scrolled { height: 96px; }
-          .skillatlas-header-inner { display: grid; grid-template-columns: minmax(250px, 1fr) 520px 176px; gap: 18px; padding-right: 32px; padding-left: 32px; }
+          .skillatlas-header-inner { display: grid; grid-template-columns: 304px minmax(0, 1fr) 176px; gap: 24px; padding-right: 32px; padding-left: 32px; }
           .skillatlas-brand-mark { width: 72px; height: 72px; }
           .skillatlas-brand-title { width: 220px; height: 42px; }
           .skillatlas-site-header-scrolled .skillatlas-brand-mark { width: 52px; height: 52px; }
           .skillatlas-site-header-scrolled .skillatlas-brand-title { width: 166px; height: 32px; }
           header nav.skillatlas-desktop-nav {
             display: grid !important;
-            width: 520px;
+            width: 100%;
+            max-width: 800px !important;
+            justify-self: center;
             height: 100%;
             grid-template-columns: repeat(5, minmax(0, 1fr));
             align-items: center;
@@ -1629,7 +1638,7 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
           .skillatlas-brand-mark,
           .skillatlas-brand-title,
           .skillatlas-primary-nav-trigger,
-          .skillatlas-primary-nav-trigger::after,
+          .skillatlas-primary-nav-label::after,
           .skillatlas-nav-chevron,
           .skillatlas-nav-menu,
           .skillatlas-member-control,

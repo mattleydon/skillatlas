@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
-import { IBM_Plex_Mono, IBM_Plex_Sans_Condensed } from "next/font/google";
+import { IBM_Plex_Mono, IBM_Plex_Sans } from "next/font/google";
 import "./globals.css";
 import SiteHeader from "./components/site-header";
 import ThemeProvider from "./theme-provider";
 
 // Next self-hosts these assets; visitors do not make Google Fonts requests.
-const interfaceFont = IBM_Plex_Sans_Condensed({
+const interfaceFont = IBM_Plex_Sans({
   subsets: ["latin"],
   weight: ["400", "500", "600"],
   display: "swap",
