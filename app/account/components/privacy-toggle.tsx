@@ -23,10 +23,10 @@ export default function PrivacyToggle({
       }`}
     >
       <span className="min-w-0">
-        <span className="block text-xs font-bold uppercase tracking-[0.08em] text-sa-text-primary">
+        <span className="block font-sa-data text-xs font-medium uppercase tracking-[0.08em] text-sa-text-primary">
           {label}
         </span>
-        <span className="mt-0.5 block text-[11px] leading-4 text-sa-text-technical">
+        <span className="mt-0.5 block font-sans text-[11px] leading-4 text-sa-text-technical">
           {description}
         </span>
       </span>
@@ -39,8 +39,8 @@ export default function PrivacyToggle({
           disabled={disabled}
           className="peer sr-only"
         />
-        <span className="absolute inset-0 rounded-full border border-sa-border-strong bg-sa-surface-2 transition-colors duration-200 ease-sa-standard peer-checked:border-sa-border-active peer-checked:bg-sa-accent/20 peer-focus-visible:ring-4 peer-focus-visible:ring-sa-accent/20" />
-        <span className="absolute left-1 h-4 w-4 rounded-full bg-sa-text-technical transition-[transform,background-color] duration-200 ease-sa-standard peer-checked:translate-x-5 peer-checked:bg-sa-accent" />
+        <span className="absolute inset-0 rounded-sa-control border border-sa-border-strong bg-sa-surface-2 transition-colors duration-200 ease-sa-standard peer-checked:border-sa-border-active peer-checked:bg-sa-accent/20 peer-focus-visible:ring-4 peer-focus-visible:ring-sa-accent/20" />
+        <span className="absolute left-1 h-4 w-4 rounded-sa-control bg-sa-text-technical transition-[transform,background-color] duration-200 ease-sa-standard peer-checked:translate-x-5 peer-checked:bg-sa-accent" />
       </span>
     </label>
   );

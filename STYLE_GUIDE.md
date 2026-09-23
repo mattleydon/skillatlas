@@ -207,6 +207,10 @@ Avoid:
 
 Respect `prefers-reduced-motion`. Reduced motion must not remove essential state feedback.
 
+## Visible surface coverage
+
+User Rankings, Live Rankings and the minimal country destination use the shared page frame and square panel/control tokens, including their table badges, game filters and action buttons. The floating page-comments panel and account privacy controls follow the same geometry; comment prose remains Plex Sans. Atlas camera labels use regular/medium weights rather than synthetic heavy faces. Country flags keep their existing dimensions with square framing. Circular geography, status dots, emoji artwork and the functional Live rank-wheel geometry are intentional exceptions, not rounded cards.
+
 ## Incremental adoption
 
 - Do not apply the new semantic tokens globally to legacy page components.

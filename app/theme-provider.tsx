@@ -1665,7 +1665,7 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
           flex-direction: column;
           align-items: flex-end;
           gap: 12px;
-          font-family: inherit;
+          font-family: var(--sa-font-ui);
         }
 
         .skillatlas-live-chat-panel {
@@ -1675,7 +1675,7 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
           flex-direction: column;
           overflow: hidden;
           border: 1px solid rgba(255, 47, 168, 0.36);
-          border-radius: 24px;
+          border-radius: var(--sa-radius-panel);
           background: rgba(255, 255, 255, 0.96);
           box-shadow: 0 22px 60px rgba(15, 23, 42, 0.18);
           backdrop-filter: blur(18px);
@@ -1697,33 +1697,35 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
         }
 
         .skillatlas-live-chat-kicker {
+          font-family: var(--sa-font-data);
           margin: 0;
           font-size: 10px;
-          font-weight: 900;
-          letter-spacing: 0.22em;
+          font-weight: 500;
+          letter-spacing: 0.12em;
           text-transform: uppercase;
           color: var(--skillatlas-turquoise);
         }
 
         .skillatlas-live-chat-title {
+          font-family: var(--sa-font-data);
           margin: 3px 0 0;
           font-size: 16px;
-          font-weight: 950;
+          font-weight: 500;
           color: #111827;
         }
 
         .skillatlas-live-chat-close {
           position: relative;
           display: grid;
-          width: 32px;
-          height: 32px;
+          width: 44px;
+          height: 44px;
           place-items: center;
           border: 1px solid rgba(15, 23, 42, 0.12);
-          border-radius: 999px;
+          border-radius: var(--sa-radius-control);
           background: rgba(255, 255, 255, 0.82);
           color: #111827;
           font-size: 0;
-          font-weight: 900;
+          font-weight: 500;
           line-height: 0;
           padding: 0;
           transition:
@@ -1773,11 +1775,11 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
         .skillatlas-live-chat-message {
           width: 100%;
           max-width: 100%;
-          border-radius: 12px;
+          border-radius: var(--sa-radius-sm);
           padding: 6px 8px;
           font-size: 11.5px;
-          font-weight: 700;
-          line-height: 1.2;
+          font-weight: 400;
+          line-height: 1.5;
         }
 
         .skillatlas-live-chat-message.assistant {
@@ -1793,10 +1795,11 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
         }
 
         .skillatlas-live-chat-meta {
+          font-family: var(--sa-font-data);
           display: inline;
           margin: 0 7px 0 0;
           font-size: 9px;
-          font-weight: 950;
+          font-weight: 500;
           letter-spacing: 0.10em;
           text-transform: uppercase;
           opacity: 0.72;
@@ -1816,7 +1819,7 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
           margin: 0 0.12em;
           border-radius: 999px;
           font-size: 1.04em;
-          font-weight: 950;
+          font-weight: 500;
           line-height: 1;
           vertical-align: -0.16em;
           background: rgba(255,255,255,0.78);
@@ -1900,10 +1903,10 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
         .skillatlas-live-chat-empty,
         .skillatlas-live-chat-error {
           margin: 0;
-          border-radius: 16px;
+          border-radius: var(--sa-radius-control);
           padding: 8px 10px;
           font-size: 12px;
-          font-weight: 800;
+          font-weight: 400;
           line-height: 1.35;
         }
 
@@ -1941,12 +1944,13 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
         }
 
         .skillatlas-live-chat-input-shell {
+          min-height: 44px;
           display: flex;
           min-width: 0;
           flex: 1;
           align-items: center;
           border: 1px solid rgba(15, 23, 42, 0.12);
-          border-radius: 999px;
+          border-radius: var(--sa-radius-control);
           background: #ffffff;
           padding: 7px 12px;
           box-shadow: inset 0 0 0 1px rgba(25, 211, 207, 0);
@@ -1965,7 +1969,7 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
           overflow-y: auto;
           color: #111827;
           font-size: 13px;
-          font-weight: 700;
+          font-weight: 400;
           line-height: 1.35;
           outline: none;
           white-space: pre-wrap;
@@ -1993,17 +1997,17 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
 
         .skillatlas-live-chat-emoji-trigger {
           display: grid;
-          width: 42px;
-          height: 42px;
+          width: 44px;
+          height: 44px;
           place-items: center;
           border: 1px solid rgba(25, 211, 207, 0.34);
-          border-radius: 999px;
+          border-radius: var(--sa-radius-control);
           background:
             linear-gradient(135deg, rgba(25,211,207,0.14), rgba(255,47,168,0.10)),
             rgba(255,255,255,0.92);
           color: var(--skillatlas-turquoise);
           font-size: 18px;
-          font-weight: 950;
+          font-weight: 500;
           line-height: 1;
           padding: 0;
           transition:
@@ -2046,7 +2050,7 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
           overflow-y: auto;
           overscroll-behavior: contain;
           border: 1px solid rgba(255, 47, 168, 0.28);
-          border-radius: 18px;
+          border-radius: var(--sa-radius-panel);
           background: rgba(255,255,255,0.98);
           box-shadow: 0 18px 42px rgba(15, 23, 42, 0.18);
           padding: 8px;
@@ -2060,7 +2064,7 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
           height: 44px;
           place-items: center;
           border: 1px solid rgba(15, 23, 42, 0.08);
-          border-radius: 14px;
+          border-radius: var(--sa-radius-control);
           background: rgba(248,250,252,0.84);
           padding: 0;
           color: #243447;
@@ -2094,15 +2098,16 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
         }
 
         .skillatlas-live-chat-name {
+          min-height: 44px;
           min-width: 0;
           width: 100%;
           border: 1px solid rgba(15, 23, 42, 0.12);
-          border-radius: 999px;
+          border-radius: var(--sa-radius-control);
           background: #ffffff;
           color: #111827;
           padding: 10px 13px;
           font-size: 13px;
-          font-weight: 700;
+          font-weight: 400;
           outline: none;
         }
 
@@ -2112,13 +2117,14 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
         }
 
         .skillatlas-live-chat-send {
+          min-height: 44px;
           border: 0;
-          border-radius: 999px;
+          border-radius: var(--sa-radius-control);
           background: var(--skillatlas-turquoise);
-          color: #ffffff;
+          color: #111827;
           padding: 0 14px;
           font-size: 13px;
-          font-weight: 900;
+          font-weight: 500;
           transition:
             filter 180ms ease,
             transform 180ms ease;
@@ -2135,12 +2141,12 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
           height: 54px;
           place-items: center;
           border: 1px solid rgba(255, 47, 168, 0.38);
-          border-radius: 999px;
+          border-radius: var(--sa-radius-control);
           background: linear-gradient(135deg, var(--skillatlas-turquoise), var(--skillatlas-pink));
           box-shadow: 0 14px 32px rgba(15, 23, 42, 0.24);
           color: #ffffff;
           font-size: 24px;
-          font-weight: 950;
+          font-weight: 500;
           line-height: 1;
           transition:
             opacity 180ms ease,

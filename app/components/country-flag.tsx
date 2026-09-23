@@ -12,17 +12,17 @@ type CountryFlagProps = {
 };
 
 const sizeClasses: Record<CountryFlagSize, string> = {
-  sm: "h-8 w-8 rounded-xl",
-  md: "h-12 w-12 rounded-2xl",
-  lg: "h-14 w-14 rounded-3xl",
-  xl: "h-16 w-16 rounded-3xl",
+  sm: "h-8 w-8 rounded-sa-sm",
+  md: "h-12 w-12 rounded-sa-sm",
+  lg: "h-14 w-14 rounded-sa-sm",
+  xl: "h-16 w-16 rounded-sa-sm",
 };
 
 const atlasSizeClasses: Record<CountryFlagSize, string> = {
-  sm: "h-5 w-8 rounded-[2px]",
-  md: "h-6 w-10 rounded-[2px]",
-  lg: "h-8 w-12 rounded-[2px]",
-  xl: "h-10 w-16 rounded-[2px]",
+  sm: "h-5 w-8 rounded-sa-sm",
+  md: "h-6 w-10 rounded-sa-sm",
+  lg: "h-8 w-12 rounded-sa-sm",
+  xl: "h-10 w-16 rounded-sa-sm",
 };
 
 export default function CountryFlag({
