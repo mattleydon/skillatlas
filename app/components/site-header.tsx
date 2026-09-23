@@ -20,6 +20,8 @@ import {
   ROUTES,
 } from "@/constants/routes";
 import {
+  isPlainNavigationClick,
+  navigationCurrent,
   normalisePath,
   pathIsActive,
   preventRedundantNavigation,
@@ -87,11 +89,24 @@ function DesktopFamilyMenu({
   pathname: string;
   active: boolean;
 }) {
-  const [open, setOpen] = useState(false);
+  const [openMode, setOpenMode] = useState<"closed" | "hover" | "active">("closed");
+  const open = openMode !== "closed";
   const rootRef = useRef<HTMLDivElement | null>(null);
   const triggerRef = useRef<HTMLAnchorElement | HTMLButtonElement | null>(null);
   const menuRef = useRef<HTMLDivElement | null>(null);
   const menuId = `skillatlas-${id}-menu`;
+  const triggerId = `${menuId}-trigger`;
+
+  useEffect(() => {
+    if (!open) return;
+    const dismiss = (event: PointerEvent) => {
+      if (!(event.target instanceof Node) || rootRef.current?.contains(event.target)) return;
+      if (rootRef.current?.contains(document.activeElement)) triggerRef.current?.focus();
+      setOpenMode("closed");
+    };
+    document.addEventListener("pointerdown", dismiss);
+    return () => document.removeEventListener("pointerdown", dismiss);
+  }, [open]);
 
   const focusItem = (index: number) => {
     const links = Array.from(menuRef.current?.querySelectorAll<HTMLAnchorElement>("a[role='menuitem']") ?? []);
@@ -101,7 +116,8 @@ function DesktopFamilyMenu({
   const handleKeyDown = (event: ReactKeyboardEvent<HTMLDivElement>) => {
     if (event.key === "Escape" && open) {
       event.preventDefault();
-      setOpen(false);
+      event.stopPropagation();
+      setOpenMode("closed");
       triggerRef.current?.focus();
       return;
     }
@@ -111,11 +127,11 @@ function DesktopFamilyMenu({
 
     if (event.key === "ArrowDown") {
       event.preventDefault();
-      setOpen(true);
+      setOpenMode("active");
       window.requestAnimationFrame(() => focusItem(currentIndex < 0 ? 0 : (currentIndex + 1) % links.length));
     } else if (event.key === "ArrowUp") {
       event.preventDefault();
-      setOpen(true);
+      setOpenMode("active");
       window.requestAnimationFrame(() => focusItem(currentIndex < 0 ? links.length - 1 : (currentIndex - 1 + links.length) % links.length));
     } else if (event.key === "Home" && currentIndex >= 0) {
       event.preventDefault();
@@ -133,41 +149,52 @@ function DesktopFamilyMenu({
       ref={rootRef}
       className="skillatlas-nav-family"
       data-open={open ? "true" : "false"}
-      onMouseEnter={() => setOpen(true)}
-      onMouseLeave={() => setOpen(false)}
+      onMouseEnter={() => setOpenMode((mode) => mode === "closed" ? "hover" : mode)}
+      onMouseLeave={() => {
+        if (!rootRef.current?.contains(document.activeElement)) setOpenMode("closed");
+      }}
       onBlur={(event) => {
-        if (!event.currentTarget.contains(event.relatedTarget)) setOpen(false);
+        if (!event.currentTarget.contains(event.relatedTarget)) setOpenMode("closed");
       }}
       onKeyDown={handleKeyDown}
     >
       {href ? (
         <Link
+          id={triggerId}
           ref={(node) => { triggerRef.current = node; }}
           href={href}
           className={triggerClassName}
           aria-haspopup="menu"
           aria-expanded={open}
           aria-controls={menuId}
-          aria-current={pathname === href ? "page" : undefined}
+          aria-current={pathname === href ? "page" : active ? "location" : undefined}
           onClick={(event) => preventRedundantNavigation(event, pathname, href)}
         >
           <span>{label}</span><span className="skillatlas-nav-chevron" aria-hidden="true">⌄</span>
         </Link>
       ) : (
         <button
+          id={triggerId}
           ref={(node) => { triggerRef.current = node; }}
           type="button"
           className={triggerClassName}
           aria-haspopup="menu"
           aria-expanded={open}
           aria-controls={menuId}
-          onClick={() => setOpen(true)}
+          aria-current={active ? "location" : undefined}
+          onClick={() => {
+            if (openMode === "active") setOpenMode("closed");
+            else {
+              setOpenMode("active");
+              window.requestAnimationFrame(() => focusItem(0));
+            }
+          }}
         >
           <span>{label}</span><span className="skillatlas-nav-chevron" aria-hidden="true">⌄</span>
         </button>
       )}
 
-      <div ref={menuRef} id={menuId} className="skillatlas-nav-menu" role="menu" aria-hidden={!open}>
+      <div ref={menuRef} id={menuId} className="skillatlas-nav-menu" role="menu" aria-labelledby={triggerId} aria-hidden={!open} inert={!open}>
         <div className="skillatlas-nav-menu-heading" aria-hidden="true">
           <span>Directory</span><span>{String(items.length).padStart(2, "0")}</span>
         </div>
@@ -180,10 +207,12 @@ function DesktopFamilyMenu({
               role="menuitem"
               tabIndex={open ? 0 : -1}
               className={`skillatlas-nav-menu-item ${itemActive ? "skillatlas-nav-menu-item-active" : ""}`}
-              aria-current={itemActive ? "page" : undefined}
+              aria-current={navigationCurrent(pathname, item.href)}
               onClick={(event) => {
+                if (!isPlainNavigationClick(event)) return;
                 preventRedundantNavigation(event, pathname, item.href);
-                setOpen(false);
+                if (event.defaultPrevented) triggerRef.current?.focus();
+                setOpenMode("closed");
               }}
             >
               <span className="skillatlas-nav-menu-index" aria-hidden="true">{String(index + 1).padStart(2, "0")}</span>
@@ -225,13 +254,14 @@ function MobileFamily({
         className="skillatlas-mobile-family-trigger"
         aria-controls={id}
         aria-expanded={open}
+        aria-current={active ? "location" : undefined}
         tabIndex={menuOpen ? 0 : -1}
         onClick={onToggle}
       >
         <span><small>Directory</small><strong>{label}</strong></span>
         <span className="skillatlas-mobile-family-chevron" aria-hidden="true">⌄</span>
       </button>
-      <div id={id} aria-hidden={!open} className={`skillatlas-mobile-family-content ${open ? "skillatlas-mobile-family-content-open" : ""}`}>
+      <div id={id} aria-hidden={!open} inert={!menuOpen || !open} className={`skillatlas-mobile-family-content ${open ? "skillatlas-mobile-family-content-open" : ""}`}>
         <div>
           {items.map((item, index) => {
             const itemActive = pathIsActive(pathname, item.href);
@@ -241,8 +271,9 @@ function MobileFamily({
                 href={item.href}
                 tabIndex={menuOpen && open ? 0 : -1}
                 className={`skillatlas-mobile-nav-link ${itemActive ? "skillatlas-mobile-nav-link-active" : ""}`}
-                aria-current={itemActive ? "page" : undefined}
+                aria-current={navigationCurrent(pathname, item.href)}
                 onClick={(event) => {
+                  if (!isPlainNavigationClick(event)) return;
                   preventRedundantNavigation(event, pathname, item.href);
                   onNavigate();
                 }}
@@ -272,7 +303,7 @@ export default function SiteHeader() {
     : "public";
   const memberState = useHeaderMemberState(authRefreshKey, !hidden);
   const [scrolled, setScrolled] = useState(false);
-  const [mobileMenuPath, setMobileMenuPath] = useState<string | null>(null);
+  const [mobileMenuState, setMobileMenuState] = useState({ pathname, open: false });
   const [mobileSectionState, setMobileSectionState] = useState({
     pathname,
     rankings: mobileRankingsDefaultOpen,
@@ -280,7 +311,11 @@ export default function SiteHeader() {
   });
   const headerRef = useRef<HTMLElement | null>(null);
   const mobileMenuButtonRef = useRef<HTMLButtonElement | null>(null);
-  const mobileMenuOpen = mobileMenuPath === pathname;
+  const mobileMenuOpen = mobileMenuState.pathname === pathname && mobileMenuState.open;
+  // Forget the prior disclosure state even when Back/Forward returns to its route.
+  if (mobileMenuState.pathname !== pathname) {
+    setMobileMenuState({ pathname, open: false });
+  }
   const mobileRankingsOpen = mobileSectionState.pathname === pathname
     ? mobileSectionState.rankings
     : mobileRankingsDefaultOpen;
@@ -289,13 +324,18 @@ export default function SiteHeader() {
     : mobileExploreDefaultOpen;
 
   const closeMobileMenu = useCallback(() => {
-    setMobileMenuPath(null);
+    setMobileMenuState({ pathname, open: false });
     setMobileSectionState({
       pathname,
       rankings: mobileRankingsDefaultOpen,
       explore: mobileExploreDefaultOpen,
     });
   }, [mobileExploreDefaultOpen, mobileRankingsDefaultOpen, pathname]);
+
+  const closeMobileMenuAfterNavigation = () => {
+    mobileMenuButtonRef.current?.focus({ preventScroll: true });
+    closeMobileMenu();
+  };
 
   const toggleMobileMenu = useCallback(() => {
     if (mobileMenuOpen) {
@@ -308,7 +348,7 @@ export default function SiteHeader() {
       rankings: mobileRankingsDefaultOpen,
       explore: mobileExploreDefaultOpen,
     });
-    setMobileMenuPath(pathname);
+    setMobileMenuState({ pathname, open: true });
   }, [closeMobileMenu, mobileExploreDefaultOpen, mobileMenuOpen, mobileRankingsDefaultOpen, pathname]);
 
   useEffect(() => {
@@ -322,12 +362,16 @@ export default function SiteHeader() {
   useEffect(() => {
     if (!mobileMenuOpen) return;
     const handleKeyDown = (event: globalThis.KeyboardEvent) => {
-      if (event.key !== "Escape") return;
+      if (event.key !== "Escape" || event.defaultPrevented) return;
+      event.preventDefault();
       closeMobileMenu();
       mobileMenuButtonRef.current?.focus();
     };
     const handlePointerDown = (event: PointerEvent) => {
-      if (event.target instanceof Node && !headerRef.current?.contains(event.target)) closeMobileMenu();
+      if (event.target instanceof Node && !headerRef.current?.contains(event.target)) {
+        if (headerRef.current?.contains(document.activeElement)) mobileMenuButtonRef.current?.focus();
+        closeMobileMenu();
+      }
     };
     document.addEventListener("keydown", handleKeyDown);
     document.addEventListener("pointerdown", handlePointerDown);
@@ -352,7 +396,7 @@ export default function SiteHeader() {
     <header
       ref={headerRef}
       data-scrolled={scrolled ? "true" : "false"}
-      className={`skillatlas-site-header fixed inset-x-0 top-0 z-50 ${scrolled ? "skillatlas-site-header-scrolled" : ""}`}
+      className={`skillatlas-site-header fixed inset-x-0 top-0 z-[130] ${scrolled ? "skillatlas-site-header-scrolled" : ""}`}
     >
       <div className="skillatlas-header-inner">
         <div className="skillatlas-brand-lockup">
@@ -373,26 +417,26 @@ export default function SiteHeader() {
           <Link
             href={ROUTES.atlas}
             className={`skillatlas-primary-nav-trigger ${pathIsActive(pathname, ROUTES.atlas) ? "skillatlas-nav-family-active" : ""}`}
-            aria-current={pathIsActive(pathname, ROUTES.atlas) ? "page" : undefined}
+            aria-current={navigationCurrent(pathname, ROUTES.atlas)}
             onClick={(event) => preventRedundantNavigation(event, pathname, ROUTES.atlas)}
           >Atlas</Link>
           <DesktopFamilyMenu key={`explore-${pathname}`} id="explore" label="Explore" items={exploreItems} pathname={pathname} active={exploreActive} />
           <Link
             href={ROUTES.forum}
             className={`skillatlas-primary-nav-trigger ${pathIsActive(pathname, ROUTES.forum) ? "skillatlas-nav-family-active" : ""}`}
-            aria-current={pathIsActive(pathname, ROUTES.forum) ? "page" : undefined}
+            aria-current={navigationCurrent(pathname, ROUTES.forum)}
             onClick={(event) => preventRedundantNavigation(event, pathname, ROUTES.forum)}
           >Forum</Link>
           <Link
             href={ROUTES.about}
             className={`skillatlas-primary-nav-trigger ${pathIsActive(pathname, ROUTES.about) ? "skillatlas-nav-family-active" : ""}`}
-            aria-current={pathIsActive(pathname, ROUTES.about) ? "page" : undefined}
+            aria-current={navigationCurrent(pathname, ROUTES.about)}
             onClick={(event) => preventRedundantNavigation(event, pathname, ROUTES.about)}
           >About</Link>
         </nav>
 
         <div className="skillatlas-desktop-system-stack" aria-label="Member and display controls">
-          <HeaderMemberControl memberState={memberState} pathname={pathname} />
+          <HeaderMemberControl key={pathname} memberState={memberState} pathname={pathname} />
           <DisplayControl darkMode={darkMode} onToggle={toggleTheme} />
         </div>
 
@@ -413,6 +457,10 @@ export default function SiteHeader() {
           className={`skillatlas-mobile-nav ${mobileMenuOpen ? "skillatlas-mobile-nav-open" : ""}`}
           aria-label="Navigation console"
           aria-hidden={!mobileMenuOpen}
+          inert={!mobileMenuOpen}
+          onBlur={(event) => {
+            if (!event.currentTarget.contains(event.relatedTarget) && event.relatedTarget !== mobileMenuButtonRef.current) closeMobileMenu();
+          }}
         >
           <div className="skillatlas-mobile-console-heading" aria-hidden="true"><span>Navigation console</span><span>SA / 01</span></div>
           <MobileFamily
@@ -424,17 +472,18 @@ export default function SiteHeader() {
             items={rankingItems}
             pathname={pathname}
             onToggle={() => setMobileSectionState({ pathname, rankings: !mobileRankingsOpen, explore: mobileExploreOpen })}
-            onNavigate={closeMobileMenu}
+            onNavigate={closeMobileMenuAfterNavigation}
           />
 
           <Link
             href={ROUTES.atlas}
             tabIndex={mobileMenuOpen ? 0 : -1}
             className={`skillatlas-mobile-direct-link ${pathIsActive(pathname, ROUTES.atlas) ? "skillatlas-mobile-direct-link-active" : ""}`}
-            aria-current={pathIsActive(pathname, ROUTES.atlas) ? "page" : undefined}
+            aria-current={navigationCurrent(pathname, ROUTES.atlas)}
             onClick={(event) => {
+              if (!isPlainNavigationClick(event)) return;
               preventRedundantNavigation(event, pathname, ROUTES.atlas);
-              closeMobileMenu();
+              closeMobileMenuAfterNavigation();
             }}
           ><span><small>Flagship</small><strong>Atlas</strong></span><span aria-hidden="true" /></Link>
 
@@ -447,7 +496,7 @@ export default function SiteHeader() {
             items={exploreItems}
             pathname={pathname}
             onToggle={() => setMobileSectionState({ pathname, rankings: mobileRankingsOpen, explore: !mobileExploreOpen })}
-            onNavigate={closeMobileMenu}
+            onNavigate={closeMobileMenuAfterNavigation}
           />
 
           <div className="skillatlas-mobile-direct-group">
@@ -459,10 +508,11 @@ export default function SiteHeader() {
                   href={item.href}
                   tabIndex={mobileMenuOpen ? 0 : -1}
                   className={`skillatlas-mobile-direct-link ${active ? "skillatlas-mobile-direct-link-active" : ""}`}
-                  aria-current={active ? "page" : undefined}
+                  aria-current={navigationCurrent(pathname, item.href)}
                   onClick={(event) => {
+                    if (!isPlainNavigationClick(event)) return;
                     preventRedundantNavigation(event, pathname, item.href);
-                    closeMobileMenu();
+                    closeMobileMenuAfterNavigation();
                   }}
                 ><span><small>Destination</small><strong>{item.label}</strong></span><span aria-hidden="true" /></Link>
               );
@@ -477,7 +527,7 @@ export default function SiteHeader() {
               pathname={pathname}
               compact
               interactive={mobileMenuOpen}
-              onNavigate={closeMobileMenu}
+              onNavigate={closeMobileMenuAfterNavigation}
             />
             <DisplayControl darkMode={darkMode} onToggle={toggleTheme} compact interactive={mobileMenuOpen} />
           </div>

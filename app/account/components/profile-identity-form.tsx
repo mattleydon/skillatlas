@@ -13,6 +13,7 @@ import {
 import SubmitButton from "@/app/auth/components/submit-button";
 import { memberRoute } from "@/constants/routes";
 import { BIO_MAX_LENGTH } from "@/lib/account/profile";
+import { notifyProfileIdentityUpdated } from "@/lib/account/profile-events";
 import { USERNAME_HTML_PATTERN, validateUsername } from "@/lib/account/username";
 
 type ProfileIdentityFormProps = {
@@ -44,11 +45,13 @@ export default function ProfileIdentityForm({
   const usernameRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
+    if (identityState.status === "success") notifyProfileIdentityUpdated();
     if (identityState.field === "displayName") displayNameRef.current?.focus();
     if (identityState.field === "bio") bioRef.current?.focus();
   }, [identityState]);
 
   useEffect(() => {
+    if (usernameState.status === "success") notifyProfileIdentityUpdated();
     if (usernameState.field === "username") usernameRef.current?.focus();
   }, [usernameState]);
 

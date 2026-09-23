@@ -1,18 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { type KeyboardEvent as ReactKeyboardEvent, useEffect, useRef, useState } from "react";
 import { signOutAction } from "@/app/auth/actions";
+import { getHeaderMemberState, type HeaderMemberSnapshot } from "@/app/auth/header-state";
 import { memberRoute, ROUTES } from "@/constants/routes";
-import { preventRedundantNavigation } from "@/lib/navigation";
-import { createClient } from "@/lib/supabase/client";
+import { PROFILE_IDENTITY_UPDATED_EVENT } from "@/lib/account/profile-events";
+import { isPlainNavigationClick, navigationCurrent, pathIsActive, preventRedundantNavigation } from "@/lib/navigation";
 
-export type HeaderMemberState =
-  | { status: "checking" }
-  | { status: "signed_out" }
-  | { status: "profile_incomplete" }
-  | { status: "profile_complete"; username: string; displayName: string }
-  | { status: "unavailable" };
+export type HeaderMemberState = HeaderMemberSnapshot | { status: "checking" };
 
 export function useHeaderMemberState(refreshKey: string, enabled = true) {
   const [memberState, setMemberState] = useState<HeaderMemberState>({ status: "checking" });
@@ -21,85 +17,33 @@ export function useHeaderMemberState(refreshKey: string, enabled = true) {
     if (!enabled) return;
 
     let active = true;
-    let requestedProfileUserId: string | null = null;
-    const scheduled: number[] = [];
-
-    let supabase: ReturnType<typeof createClient>;
-    try {
-      supabase = createClient();
-    } catch {
-      const timeout = window.setTimeout(() => {
-        if (active) setMemberState({ status: "unavailable" });
-      }, 0);
-      scheduled.push(timeout);
-      return () => {
-        active = false;
-        window.clearTimeout(timeout);
-      };
-    }
-
-    const resolveMember = async (knownUserId?: string) => {
+    let generation = 0;
+    const refreshMember = async () => {
+      const requestGeneration = ++generation;
       try {
-        let userId = knownUserId;
-
-        if (!userId) {
-          const { data, error } = await supabase.auth.getUser();
-          if (!active) return;
-          if (error) {
-            setMemberState({ status: "unavailable" });
-            return;
-          }
-          if (!data.user) {
-            setMemberState({ status: "signed_out" });
-            return;
-          }
-          userId = data.user.id;
-        }
-
-        if (requestedProfileUserId === userId) return;
-        requestedProfileUserId = userId;
-
-        const { data: profile, error: profileError } = await supabase
-          .from("profiles")
-          .select("username, display_name")
-          .eq("id", userId)
-          .maybeSingle();
-
-        if (!active) return;
-        if (profileError) {
-          setMemberState({ status: "unavailable" });
-        } else if (!profile) {
-          setMemberState({ status: "profile_incomplete" });
-        } else {
-          setMemberState({
-            status: "profile_complete",
-            username: profile.username,
-            displayName: profile.display_name,
-          });
-        }
+        const nextState = await getHeaderMemberState();
+        if (active && requestGeneration === generation) setMemberState(nextState);
       } catch {
-        if (active) setMemberState({ status: "unavailable" });
+        if (active && requestGeneration === generation) setMemberState({ status: "unavailable" });
       }
     };
-
-    void resolveMember();
-
-    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
-      const timeout = window.setTimeout(() => {
-        if (!active) return;
-        if (!session?.user) {
-          requestedProfileUserId = null;
-          setMemberState({ status: "signed_out" });
-        }
-        else void resolveMember(session.user.id);
-      }, 0);
-      scheduled.push(timeout);
-    });
+    const refreshWhenVisible = () => {
+      if (document.visibilityState === "visible") void refreshMember();
+    };
+    // HttpOnly auth changes are not visible to browser-client subscriptions.
+    // Recheck on return from another tab and on restored browser history pages.
+    void refreshMember();
+    window.addEventListener("focus", refreshWhenVisible);
+    window.addEventListener("pageshow", refreshWhenVisible);
+    window.addEventListener(PROFILE_IDENTITY_UPDATED_EVENT, refreshMember);
+    document.addEventListener("visibilitychange", refreshWhenVisible);
 
     return () => {
       active = false;
-      scheduled.forEach((timeout) => window.clearTimeout(timeout));
-      authListener.subscription.unsubscribe();
+      window.removeEventListener("focus", refreshWhenVisible);
+      window.removeEventListener("pageshow", refreshWhenVisible);
+      window.removeEventListener(PROFILE_IDENTITY_UPDATED_EVENT, refreshMember);
+      document.removeEventListener("visibilitychange", refreshWhenVisible);
     };
   }, [enabled, refreshKey]);
 
@@ -140,22 +84,42 @@ export default function HeaderMemberControl({
   useEffect(() => {
     if (!open) return;
 
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key !== "Escape") return;
-      setOpen(false);
-      triggerRef.current?.focus();
-    };
     const handlePointerDown = (event: PointerEvent) => {
-      if (event.target instanceof Node && !rootRef.current?.contains(event.target)) setOpen(false);
+      if (event.target instanceof Node && !rootRef.current?.contains(event.target)) {
+        if (rootRef.current?.contains(document.activeElement)) triggerRef.current?.focus();
+        setOpen(false);
+      }
     };
 
-    document.addEventListener("keydown", handleKeyDown);
     document.addEventListener("pointerdown", handlePointerDown);
     return () => {
-      document.removeEventListener("keydown", handleKeyDown);
       document.removeEventListener("pointerdown", handlePointerDown);
     };
   }, [open]);
+
+  const focusItem = (index: number) => {
+    rootRef.current?.querySelectorAll<HTMLElement>("[role='menuitem']")[index]?.focus();
+  };
+  const handleKeyDown = (event: ReactKeyboardEvent<HTMLDivElement>) => {
+    if (event.key === "Escape" && open) {
+      event.preventDefault();
+      event.stopPropagation();
+      setOpen(false);
+      triggerRef.current?.focus();
+      return;
+    }
+    const items = Array.from(rootRef.current?.querySelectorAll<HTMLElement>("[role='menuitem']") ?? []);
+    const index = items.indexOf(document.activeElement as HTMLElement);
+    let next: number;
+    if (event.key === "ArrowDown") next = index < 0 ? 0 : (index + 1) % items.length;
+    else if (event.key === "ArrowUp") next = index < 0 ? items.length - 1 : (index - 1 + items.length) % items.length;
+    else if (event.key === "Home" && index >= 0) next = 0;
+    else if (event.key === "End" && index >= 0) next = items.length - 1;
+    else return;
+    event.preventDefault();
+    setOpen(true);
+    window.requestAnimationFrame(() => focusItem(next));
+  };
 
   const shellClassName = compact
     ? "skillatlas-member-control skillatlas-member-control-mobile"
@@ -172,7 +136,11 @@ export default function HeaderMemberControl({
 
   if (memberState.status === "signed_out") {
     return (
-      <Link className={shellClassName} href={ROUTES.authSignIn} tabIndex={interactive ? 0 : -1} onClick={onNavigate}>
+      <Link className={shellClassName} href={ROUTES.authSignIn} aria-current={navigationCurrent(pathname, ROUTES.authSignIn)} tabIndex={interactive ? 0 : -1} onClick={(event) => {
+        if (!isPlainNavigationClick(event)) return;
+        preventRedundantNavigation(event, pathname, ROUTES.authSignIn);
+        onNavigate?.();
+      }}>
         <span className="skillatlas-member-glyph" aria-hidden="true">→</span>
         <span className="skillatlas-member-copy"><small>Profile</small><strong>Sign in</strong></span>
       </Link>
@@ -181,7 +149,11 @@ export default function HeaderMemberControl({
 
   if (memberState.status === "profile_incomplete") {
     return (
-      <Link className={shellClassName} href={ROUTES.accountOnboarding} tabIndex={interactive ? 0 : -1} onClick={onNavigate}>
+      <Link className={shellClassName} href={ROUTES.accountOnboarding} aria-current={navigationCurrent(pathname, ROUTES.accountOnboarding)} tabIndex={interactive ? 0 : -1} onClick={(event) => {
+        if (!isPlainNavigationClick(event)) return;
+        preventRedundantNavigation(event, pathname, ROUTES.accountOnboarding);
+        onNavigate?.();
+      }}>
         <span className="skillatlas-member-glyph" aria-hidden="true">+</span>
         <span className="skillatlas-member-copy"><small>Profile</small><strong>Complete profile</strong></span>
       </Link>
@@ -201,16 +173,22 @@ export default function HeaderMemberControl({
   const initials = memberInitials(memberState.displayName, memberState.username);
 
   return (
-    <div ref={rootRef} className="skillatlas-member-menu-root">
+    <div ref={rootRef} className="skillatlas-member-menu-root" onKeyDown={handleKeyDown} onBlur={(event) => {
+      if (!event.currentTarget.contains(event.relatedTarget)) setOpen(false);
+    }}>
       <button
         ref={triggerRef}
         type="button"
         className={shellClassName}
         aria-haspopup="menu"
         aria-expanded={interactive && open}
+        aria-current={pathIsActive(pathname, ROUTES.account) || pathname === publicProfileHref ? "location" : undefined}
         aria-controls={compact ? "skillatlas-mobile-member-menu" : "skillatlas-desktop-member-menu"}
         tabIndex={interactive ? 0 : -1}
-        onClick={() => setOpen((current) => !current)}
+        onClick={() => {
+          setOpen(!open);
+          if (!open) window.requestAnimationFrame(() => focusItem(0));
+        }}
       >
         <span className="skillatlas-member-glyph" aria-hidden="true">{initials}</span>
         <span className="skillatlas-member-copy"><small>Profile</small><strong>@{memberState.username}</strong></span>
@@ -221,16 +199,21 @@ export default function HeaderMemberControl({
         id={compact ? "skillatlas-mobile-member-menu" : "skillatlas-desktop-member-menu"}
         className="skillatlas-member-menu"
         role="menu"
+        aria-label="Profile"
         aria-hidden={!interactive || !open}
+        inert={!interactive || !open}
       >
         <Link
           href={ROUTES.account}
           role="menuitem"
+          aria-current={navigationCurrent(pathname, ROUTES.account)}
           tabIndex={interactive && open ? 0 : -1}
           onClick={(event) => {
+            if (!isPlainNavigationClick(event)) return;
             preventRedundantNavigation(event, pathname, ROUTES.account);
             setOpen(false);
-            onNavigate?.();
+            if (event.defaultPrevented) triggerRef.current?.focus();
+            else onNavigate?.();
           }}
         >
           <span>Profile</span><small>Identity and privacy controls</small>
@@ -238,17 +221,23 @@ export default function HeaderMemberControl({
         <Link
           href={publicProfileHref}
           role="menuitem"
+          aria-current={navigationCurrent(pathname, publicProfileHref)}
           tabIndex={interactive && open ? 0 : -1}
           onClick={(event) => {
+            if (!isPlainNavigationClick(event)) return;
             preventRedundantNavigation(event, pathname, publicProfileHref);
             setOpen(false);
-            onNavigate?.();
+            if (event.defaultPrevented) triggerRef.current?.focus();
+            else onNavigate?.();
           }}
         >
           <span>View public profile</span><small>@{memberState.username}</small>
         </Link>
         <form action={signOutAction}>
-          <button type="submit" role="menuitem" tabIndex={interactive && open ? 0 : -1} onClick={() => setOpen(false)}>
+          <button type="submit" role="menuitem" tabIndex={interactive && open ? 0 : -1} onClick={() => {
+            triggerRef.current?.focus();
+            setOpen(false);
+          }}>
             <span>Sign out</span><small>End this SkillAtlas session</small>
           </button>
         </form>

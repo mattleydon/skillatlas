@@ -584,7 +584,7 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
           border-color: rgba(203, 213, 225, 0.34) !important;
         }
 
-        html.skillatlas-dark header {
+        html.skillatlas-dark header:not(.skillatlas-site-header) {
           background-color: rgba(47, 58, 70, 0.97) !important;
         }
 
@@ -879,35 +879,12 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
           outline-offset: 1px;
         }
 
-        .skillatlas-mobile-nav-link.skillatlas-mobile-nav-link-active {
-          border-color: rgba(25, 211, 207, 0.42);
-          background:
-            linear-gradient(90deg, rgba(25, 211, 207, 0.13), rgba(255, 47, 168, 0.07));
-          color: var(--skillatlas-turquoise) !important;
-        }
-
         .skillatlas-mobile-ranking-link {
           font-size: 13px;
         }
 
-        html.skillatlas-dark .skillatlas-mobile-menu-button {
-          border-color: rgba(255, 47, 168, 0.44);
-          background:
-            linear-gradient(135deg, rgba(25, 211, 207, 0.13), rgba(255, 47, 168, 0.13)),
-            rgba(39, 51, 65, 0.98);
-          box-shadow: 0 12px 30px rgba(0, 0, 0, 0.28);
-        }
-
         html.skillatlas-dark .skillatlas-mobile-menu-middle {
           background: var(--skillatlas-text-dark) !important;
-        }
-
-        html.skillatlas-dark header nav.skillatlas-mobile-nav {
-          border-color: rgba(255, 47, 168, 0.38);
-          background:
-            linear-gradient(145deg, rgba(25, 211, 207, 0.11), rgba(255, 47, 168, 0.09)),
-            rgba(39, 51, 65, 0.985);
-          box-shadow: 0 30px 74px rgba(0, 0, 0, 0.38);
         }
 
         html.skillatlas-dark .skillatlas-mobile-rankings {
@@ -920,15 +897,8 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
           background: rgba(25, 211, 207, 0.10);
         }
 
-        html.skillatlas-dark .skillatlas-mobile-section-label,
-        html.skillatlas-dark .skillatlas-mobile-nav-link {
+        html.skillatlas-dark .skillatlas-mobile-section-label {
           color: var(--skillatlas-text-dark);
-        }
-
-        html.skillatlas-dark .skillatlas-mobile-nav-link:hover {
-          border-color: rgba(25, 211, 207, 0.30);
-          background: rgba(53, 66, 80, 0.94);
-          color: #ffffff;
         }
 
         ::view-transition-group(root) {
@@ -1603,7 +1573,8 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
         .skillatlas-mobile-nav-link:hover,
         .skillatlas-mobile-nav-link:focus-visible { border-color: var(--sa-border-subtle); background: color-mix(in srgb, var(--sa-accent) 7%, var(--sa-surface-2)); color: var(--sa-text-primary); transform: none; }
         .skillatlas-mobile-nav-link:focus-visible { outline: 2px solid var(--sa-accent); outline-offset: -2px; }
-        .skillatlas-mobile-nav-link-active { color: var(--sa-accent) !important; }
+        .skillatlas-site-header .skillatlas-mobile-nav-link-active { color: var(--sa-text-primary) !important; }
+        html.skillatlas-dark .skillatlas-site-header .skillatlas-mobile-nav-link-active { color: var(--sa-accent) !important; }
 
         .skillatlas-mobile-direct-link {
           display: grid;
