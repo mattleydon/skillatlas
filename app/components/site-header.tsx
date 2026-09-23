@@ -170,7 +170,7 @@ function DesktopFamilyMenu({
           aria-current={pathname === href ? "page" : active ? "location" : undefined}
           onClick={(event) => preventRedundantNavigation(event, pathname, href)}
         >
-          <span className="skillatlas-primary-nav-label">{label}</span><span className="skillatlas-nav-chevron" aria-hidden="true">⌄</span>
+          <span className="skillatlas-primary-nav-label">{label}</span>
         </Link>
       ) : (
         <button
@@ -190,7 +190,7 @@ function DesktopFamilyMenu({
             }
           }}
         >
-          <span className="skillatlas-primary-nav-label">{label}</span><span className="skillatlas-nav-chevron" aria-hidden="true">⌄</span>
+          <span className="skillatlas-primary-nav-label">{label}</span>
         </button>
       )}
 

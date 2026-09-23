@@ -3,6 +3,7 @@
 import type { DragEvent as ReactDragEvent } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import Sparkline from "@/app/components/sparkline";
+import CountryFlag from "@/app/components/country-flag";
 import { GAMES } from "@/constants/games";
 import { clamp } from "@/lib/math";
 
@@ -787,9 +788,7 @@ export default function LiveRankingsPage() {
                     <td className={`whitespace-nowrap px-4 py-2 font-sa-data text-base font-medium text-[#ff2fa8] ${draggedName === country.name && hoveredRankIndex !== index ? "opacity-45" : ""}`}>#{index + 1}</td>
                     <td className="whitespace-nowrap px-4 py-2">
                       <div className="flex items-center gap-3">
-                        <span className="grid h-6 w-6 shrink-0 place-items-center overflow-hidden rounded-sa-sm bg-gray-50 shadow-inner">
-                          <img src={`https://flagcdn.com/w80/${country.code}.png`} alt={`${country.name} flag`} className="h-full w-full object-cover" />
-                        </span>
+                        <CountryFlag country={{ name: country.name, flagCode: country.code }} size="sm" />
                         <span className="text-sm font-medium">{country.name}</span>
                       </div>
                     </td>

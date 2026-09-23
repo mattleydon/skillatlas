@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Sparkline from "@/app/components/sparkline";
+import CountryFlag from "@/app/components/country-flag";
 import { GAMES as games } from "@/constants/games";
 import { clamp } from "@/lib/math";
 
@@ -140,9 +141,7 @@ export default function UserRankingsPage() {
             <p className="mb-2 text-[11px] font-normal uppercase tracking-[0.12em] text-[#19d3cf] font-sa-data">Community Leader</p>
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div className="flex items-center gap-4">
-                <span className="grid h-16 w-16 shrink-0 place-items-center overflow-hidden rounded-sa-panel bg-gray-50 shadow-inner">
-                  <img src={`https://flagcdn.com/w160/${topCountry.code}.png`} alt={`${topCountry.name} flag`} className="h-full w-full object-cover" />
-                </span>
+                <CountryFlag country={{ name: topCountry.name, flagCode: topCountry.code }} size="lg" />
                 <div>
                   <h2 className="text-2xl font-medium">{topCountry.name}</h2>
                   <p className="font-medium text-[#ff2fa8]">{selectedGame}</p>
@@ -200,9 +199,7 @@ export default function UserRankingsPage() {
                     <td className="px-5 py-4 font-sa-data text-lg font-medium text-[#ff2fa8]">#{index + 1}</td>
                     <td className="px-5 py-4">
                       <div className="flex items-center gap-3">
-                        <span className="grid h-8 w-8 shrink-0 place-items-center overflow-hidden rounded-sa-sm bg-gray-50 shadow-inner">
-                          <img src={`https://flagcdn.com/w80/${country.code}.png`} alt={`${country.name} flag`} className="h-full w-full object-cover" />
-                        </span>
+                        <CountryFlag country={{ name: country.name, flagCode: country.code }} size="sm" />
                         <span className="text-sm font-medium">{country.name}</span>
                       </div>
                     </td>

@@ -115,7 +115,7 @@ Shared form labels and legends use regular Plex Mono; inputs and longer option d
 - The shared page shell uses a compact title/description hierarchy with a `4px` description gap. Keep existing panel padding, status alignment and comfortable control targets; reduce typographic dominance rather than squeezing the interface.
 - Prefer compact tables and lists where scanning is more useful than card browsing.
 - Do not manufacture density with irrelevant metadata or decorative charts.
-- Shared page frames use `20px` phone gutters, `32px` from `640px`, and `48px` from `1280px`, within existing maximum-width containers. Auth applies this to its inner frame so full-bleed backgrounds remain unchanged.
+- Shared page frames use `16px` phone gutters, `24px` from `640px`, and `32px` from `1280px`, within existing maximum-width containers. Auth applies this to its inner frame so full-bleed backgrounds remain unchanged.
 - Preserve clear empty, loading, error, and selected states.
 
 ## Controls and responsive density
@@ -168,10 +168,10 @@ Ranking order must remain understandable through number, position, and text with
 - The Rankings dropdown contains `Rankings`, `User Rankings`, and `Live Rankings`.
 - User Rankings and Live Rankings must not appear as separate top-level items.
 - Use `Players`, not `Profiles`, in visible navigation.
-- Desktop navigation uses regular `15px` Plex Mono in five evenly distributed columns within the flexible centre track (up to `800px`). The desktop grid reserves `320px` for the brand and `160px` for system controls, with `24px` gaps and the existing symmetric `16px` navigation inset. This moves the navigation start `16px` further from the unchanged logo without reducing its spread. Preserve the `1280px` desktop breakpoint.
+- Desktop navigation uses regular `14px` Plex Mono in a compact, content-sized group with `40px` gaps between items. The desktop grid reserves `368px` for the unchanged brand and `160px` for system controls, with `48px` track gaps and a `16px` navigation inset. Navigation begins after a deliberate logo/title gap rather than spreading evenly across the available header width. Preserve the `1280px` desktop breakpoint.
 - Desktop Profile and Display controls use `40px` rows; mobile controls retain at least `44px` targets. Their structural corners are square, like panels and menus.
 - The header has no top border or shadow and one faint `1px` turquoise bottom rule, without a gradient overlay.
-- Desktop active navigation uses primary text and a close, thin `1px` turquoise underline attached to the text-label span only, without a pink leading marker. Neutral chevrons sit outside the underline and identify actual expandable families only. Retain comfortable hit targets independently of the narrow visual indicator.
+- Desktop active navigation uses primary text and a close, thin `1px` turquoise underline attached to the text-label span only, without a pink leading marker. Desktop top-level labels have no decorative chevrons; expandable families retain their menu semantics and keyboard controls. Mobile disclosure indicators remain. Retain comfortable hit targets independently of the narrow visual indicator.
 - Navigation Console category/system labels and medium destination names use Plex Mono at distinct sizes. Preserve the console's layout, focus behavior and disclosures.
 - Technical text uses a contrast-safe slate in both themes (`#52647b` light, `#a6b4c6` dark); active mobile text stays dark in light mode with turquoise as the indicator.
 - Any future Intelligence UI restyle of the header must be performed as a dedicated, regression-tested change rather than as a side effect of a page migration.
@@ -209,7 +209,7 @@ Respect `prefers-reduced-motion`. Reduced motion must not remove essential state
 
 ## Visible surface coverage
 
-User Rankings, Live Rankings and the minimal country destination use the shared page frame and square panel/control tokens, including their table badges, game filters and action buttons. The floating page-comments panel and account privacy controls follow the same geometry; comment prose remains Plex Sans. Atlas camera labels use regular/medium weights rather than synthetic heavy faces. Country flags keep their existing dimensions with square framing. Circular geography, status dots, emoji artwork and the functional Live rank-wheel geometry are intentional exceptions, not rounded cards.
+User Rankings, Live Rankings and the minimal country destination use the shared page frame and square panel/control tokens, including their table badges, game filters and action buttons. The floating page-comments panel and account privacy controls follow the same geometry; comment prose remains Plex Sans. Atlas camera labels use regular/medium weights rather than synthetic heavy faces. Country flags use the shared `CountryFlag`: `32×20px` slots for tables/lists, then `40×24`, `48×32`, and `64×40px` for larger contexts. Both default and atlas variants use the same geometry, with centred, contained images preserving native proportions and no decorative background, shadow, or crop. The existing FlagCDN source remains unchanged; no additional provider is introduced. Circular geography, status dots, emoji artwork and the functional Live rank-wheel geometry are intentional exceptions, not rounded cards.
 
 ## Incremental adoption
 

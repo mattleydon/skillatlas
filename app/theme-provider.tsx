@@ -1191,7 +1191,7 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
           color: var(--sa-text-muted);
           font: inherit;
           font-family: var(--sa-font-data);
-          font-size: 15px;
+          font-size: 14px;
           font-weight: 400;
           line-height: 1;
           text-decoration: none;
@@ -1233,14 +1233,6 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
           transform: scaleX(1);
         }
 
-        .skillatlas-nav-chevron {
-          color: var(--sa-text-technical);
-          font-family: var(--sa-font-data);
-          font-size: 12px;
-          transform: translateY(-1px);
-          transition: transform 180ms ease;
-        }
-
         .skillatlas-nav-family {
           position: relative;
           display: flex;
@@ -1258,8 +1250,6 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
           left: -28px;
           height: 16px;
         }
-
-        .skillatlas-nav-family[data-open="true"] .skillatlas-nav-chevron { transform: rotate(180deg) translateY(1px); }
 
         header nav .skillatlas-nav-menu {
           pointer-events: none;
@@ -1609,20 +1599,21 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
         @media (min-width: 1280px) {
           .skillatlas-site-header { height: 118px; }
           .skillatlas-site-header-scrolled { height: 96px; }
-          .skillatlas-header-inner { display: grid; grid-template-columns: 320px minmax(0, 1fr) 160px; gap: 24px; padding-right: 32px; padding-left: 32px; }
+          .skillatlas-header-inner { display: grid; grid-template-columns: 368px minmax(0, 1fr) 160px; gap: 48px; padding-right: 32px; padding-left: 32px; }
           .skillatlas-brand-mark { width: 72px; height: 72px; }
           .skillatlas-brand-title { width: 220px; height: 42px; }
           .skillatlas-site-header-scrolled .skillatlas-brand-mark { width: 52px; height: 52px; }
           .skillatlas-site-header-scrolled .skillatlas-brand-title { width: 166px; height: 32px; }
           header nav.skillatlas-desktop-nav {
             display: grid !important;
-            width: 100%;
-            max-width: 800px !important;
-            /* Symmetric inset adds brand breathing room without shifting the nav centre. */
+            width: max-content;
+            max-width: 100% !important;
+            /* Keep a deliberate brand gap followed by a compact, content-sized group. */
             padding-inline: 16px;
-            justify-self: center;
+            justify-self: start;
             height: 100%;
-            grid-template-columns: repeat(5, minmax(0, 1fr));
+            grid-template-columns: repeat(5, max-content);
+            column-gap: 40px;
             align-items: center;
             margin: 0 !important;
           }
@@ -1645,7 +1636,6 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
           .skillatlas-brand-title,
           .skillatlas-primary-nav-trigger,
           .skillatlas-primary-nav-label::after,
-          .skillatlas-nav-chevron,
           .skillatlas-nav-menu,
           .skillatlas-member-control,
           .skillatlas-display-control,

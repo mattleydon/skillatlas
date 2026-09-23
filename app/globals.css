@@ -34,7 +34,7 @@
   --sa-space-4: 16px;
   --sa-space-5: 20px;
   --sa-space-6: 24px;
-  --sa-page-gutter: 20px;
+  --sa-page-gutter: 16px;
 
   --sa-control-height: 40px;
   --sa-control-height-touch: 44px;
@@ -175,7 +175,7 @@ body {
 
 @media (min-width: 640px) {
   :root {
-    --sa-page-gutter: 32px;
+    --sa-page-gutter: 24px;
   }
 
   .skillatlas-page-shell h1 {
@@ -189,7 +189,7 @@ body {
 
 @media (min-width: 1280px) {
   :root {
-    --sa-page-gutter: 48px;
+    --sa-page-gutter: 32px;
   }
 
   .skillatlas-page-shell {
