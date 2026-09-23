@@ -63,9 +63,9 @@ Colour must not carry meaning alone. Pair movement and status colours with signs
 
 Canonical defaults:
 
-- panel radius: approximately `10px`
-- control radius: approximately `8px`
-- small radius: approximately `6px`
+- panel radius: `0px`
+- control radius: `0px`
+- small structural radius: `0px`
 - borders: thin `1px` rules
 - panel padding: generally `12-20px`
 - panel and layout gaps: generally `10-16px`
@@ -105,6 +105,8 @@ Restrained monospace or semi-monospace treatment is appropriate for:
 
 Technical labels should be concise. Wide tracking may be used carefully, but labels should not create excessive vertical space.
 
+Shared form labels and legends use regular Plex Mono; inputs and longer option descriptions retain readable Plex Sans. Custom select labels reuse the shared DataLabel treatment. Square structural corners do not require changing genuinely semantic circular map markers or status badges.
+
 ## Information density and layout
 
 - Use consistent alignment, dividers, columns, and compact toolbars to establish hierarchy.
@@ -113,7 +115,7 @@ Technical labels should be concise. Wide tracking may be used carefully, but lab
 - The shared page shell uses a compact title/description hierarchy with a `4px` description gap. Keep existing panel padding, status alignment and comfortable control targets; reduce typographic dominance rather than squeezing the interface.
 - Prefer compact tables and lists where scanning is more useful than card browsing.
 - Do not manufacture density with irrelevant metadata or decorative charts.
-- Keep standard page gutters and the established responsive container behavior unless a map or data table requires a deliberate exception.
+- Shared page frames use `20px` phone gutters, `32px` from `640px`, and `48px` from `1280px`, within existing maximum-width containers. Auth applies this to its inner frame so full-bleed backgrounds remain unchanged.
 - Preserve clear empty, loading, error, and selected states.
 
 ## Controls and responsive density
@@ -166,7 +168,9 @@ Ranking order must remain understandable through number, position, and text with
 - The Rankings dropdown contains `Rankings`, `User Rankings`, and `Live Rankings`.
 - User Rankings and Live Rankings must not appear as separate top-level items.
 - Use `Players`, not `Profiles`, in visible navigation.
-- Desktop navigation uses regular `16px` Plex Mono in five evenly distributed columns within the flexible centre track (up to `800px`). A symmetric `16px` internal inset gives Rankings additional breathing room from the logo without moving the navigation centre or system controls. Preserve the `1280px` desktop breakpoint and brand geometry.
+- Desktop navigation uses regular `15px` Plex Mono in five evenly distributed columns within the flexible centre track (up to `800px`). The desktop grid reserves `320px` for the brand and `160px` for system controls, with `24px` gaps and the existing symmetric `16px` navigation inset. This moves the navigation start `16px` further from the unchanged logo without reducing its spread. Preserve the `1280px` desktop breakpoint.
+- Desktop Profile and Display controls use `40px` rows; mobile controls retain at least `44px` targets. Their structural corners are square, like panels and menus.
+- The header has no top border or shadow and one faint `1px` turquoise bottom rule, without a gradient overlay.
 - Desktop active navigation uses primary text and a close, thin `1px` turquoise underline attached to the text-label span only, without a pink leading marker. Neutral chevrons sit outside the underline and identify actual expandable families only. Retain comfortable hit targets independently of the narrow visual indicator.
 - Navigation Console category/system labels and medium destination names use Plex Mono at distinct sizes. Preserve the console's layout, focus behavior and disclosures.
 - Technical text uses a contrast-safe slate in both themes (`#52647b` light, `#a6b4c6` dark); active mobile text stays dark in light mode with turquoise as the indicator.

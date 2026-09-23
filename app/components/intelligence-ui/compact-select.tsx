@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useId, useRef, useState } from "react";
+import DataLabel from "./data-label";
 
 export type CompactSelectOption<Value extends string = string> = {
   value: Value;
@@ -117,9 +118,9 @@ export default function CompactSelect<Value extends string>({
         if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setOpen(false);
       }}
     >
-      <span id={labelId} className="mb-sa-1 block text-[10px] font-bold uppercase leading-4 tracking-[0.16em] text-sa-text-technical">
+      <DataLabel id={labelId} className="mb-sa-1 block">
         {label}
-      </span>
+      </DataLabel>
       <button
         id={controlId}
         type="button"

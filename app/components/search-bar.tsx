@@ -27,7 +27,7 @@ export default function SearchBar({
         className={
           intelligence
             ? "h-11 w-full rounded-sa-control border border-sa-border-subtle bg-sa-surface-1 px-sa-3 pr-10 text-sm font-semibold text-sa-text-primary outline-none transition-[border-color,box-shadow,background-color] duration-200 ease-sa-standard placeholder:text-sa-text-technical focus:border-sa-border-active focus:ring-4 focus:ring-sa-accent/15 lg:h-10"
-            : "h-14 w-full rounded-2xl border border-[#19d3cf]/35 bg-white/90 px-5 pr-12 text-sm font-bold outline-none transition-all duration-300 placeholder:text-gray-400 focus:border-[#19d3cf] focus:shadow-[0_0_0_4px_rgba(25,211,207,0.14)]"
+            : "h-11 w-full rounded-sa-control border border-[#19d3cf]/35 bg-white/90 px-3 pr-12 text-sm font-medium outline-none transition-all duration-300 placeholder:text-gray-400 focus:border-[#19d3cf] focus:shadow-[0_0_0_4px_rgba(25,211,207,0.14)]"
         }
       />
       <svg

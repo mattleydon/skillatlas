@@ -24,9 +24,9 @@
   --sa-alert: #ff2fa8;
   --sa-chart-neutral: #94a3b8;
 
-  --sa-radius-sm: 6px;
-  --sa-radius-control: 8px;
-  --sa-radius-panel: 10px;
+  --sa-radius-sm: 0px;
+  --sa-radius-control: 0px;
+  --sa-radius-panel: 0px;
 
   --sa-space-1: 4px;
   --sa-space-2: 8px;
@@ -34,6 +34,7 @@
   --sa-space-4: 16px;
   --sa-space-5: 20px;
   --sa-space-6: 24px;
+  --sa-page-gutter: 20px;
 
   --sa-control-height: 40px;
   --sa-control-height-touch: 44px;
@@ -130,6 +131,15 @@ body {
     font-family: inherit;
   }
 
+  label[for], legend {
+    font-family: var(--sa-font-data);
+    font-weight: 400;
+  }
+
+  input, select, textarea {
+    font-family: var(--sa-font-ui);
+  }
+
   button {
     font-weight: 500;
   }
@@ -141,6 +151,12 @@ body {
 
 .skillatlas-page-shell {
   padding-top: calc(80px + var(--sa-space-3));
+}
+
+/* Auth uses an inner frame so its full-bleed background stays unchanged. */
+.skillatlas-page-shell:not(main),
+.skillatlas-content-frame {
+  padding-inline: var(--sa-page-gutter);
 }
 
 /* Shared operational page hierarchy; leave body prose and control targets intact. */
@@ -158,6 +174,10 @@ body {
 }
 
 @media (min-width: 640px) {
+  :root {
+    --sa-page-gutter: 32px;
+  }
+
   .skillatlas-page-shell h1 {
     font-size: 1.875rem;
   }
@@ -168,6 +188,10 @@ body {
 }
 
 @media (min-width: 1280px) {
+  :root {
+    --sa-page-gutter: 48px;
+  }
+
   .skillatlas-page-shell {
     padding-top: calc(126px + var(--sa-space-3));
   }
