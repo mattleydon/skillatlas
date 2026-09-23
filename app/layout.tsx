@@ -1,7 +1,22 @@
 import type { Metadata } from "next";
+import { IBM_Plex_Mono, IBM_Plex_Sans_Condensed } from "next/font/google";
 import "./globals.css";
 import SiteHeader from "./components/site-header";
 import ThemeProvider from "./theme-provider";
+
+// Next self-hosts these assets; visitors do not make Google Fonts requests.
+const interfaceFont = IBM_Plex_Sans_Condensed({
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  display: "swap",
+  variable: "--font-sa-interface",
+});
+const instrumentationFont = IBM_Plex_Mono({
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  display: "swap",
+  variable: "--font-sa-instrumentation",
+});
 
 const initialThemeScript = `
   (() => {
@@ -28,7 +43,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" className={`${interfaceFont.variable} ${instrumentationFont.variable}`} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: initialThemeScript }} />
       </head>

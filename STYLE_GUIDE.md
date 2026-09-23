@@ -78,7 +78,9 @@ Avoid large translucent SaaS cards, decorative structural pink borders, generous
 
 ## Typography hierarchy
 
-The primary interface remains a clean system sans-serif. Use the technical/data font stack selectively rather than making the entire site monospace.
+Use IBM Plex Sans Condensed for the primary interface, headings, navigation, body copy and controls. Use IBM Plex Mono selectively for technical labels, breadcrumbs, metadata and numeric instrumentation; never make the entire site monospace. Fonts are configured once in the root layout through `next/font` and self-hosted by Next.js, without third-party runtime font requests. The logo/wordmark assets are unchanged.
+
+Use regular `400` for body copy, medium `500` for navigation and controls, and semibold `600` for headings and important data. Technical labels use medium `500` with restrained tracking. Existing Tailwind bold/extrabold/black utilities resolve to a shared `600` ceiling so older surfaces adopt the hierarchy without page-specific overrides or synthetic heavy weights.
 
 Approximate hierarchy:
 
@@ -162,6 +164,9 @@ Ranking order must remain understandable through number, position, and text with
 - The Rankings dropdown contains `Rankings`, `User Rankings`, and `Live Rankings`.
 - User Rankings and Live Rankings must not appear as separate top-level items.
 - Use `Players`, not `Profiles`, in visible navigation.
+- Desktop active navigation uses primary text and a close, thin `1px` turquoise underline, without a pink leading marker. Neutral chevrons identify actual expandable families only. Retain comfortable hit targets independently of the narrow visual indicator.
+- Navigation Console category/system labels use Plex Mono; destination names use medium Plex Sans Condensed. Preserve the console's layout, focus behavior and disclosures.
+- Technical text uses a contrast-safe slate in both themes (`#52647b` light, `#a6b4c6` dark); active mobile text stays dark in light mode with turquoise as the indicator.
 - Any future Intelligence UI restyle of the header must be performed as a dedicated, regression-tested change rather than as a side effect of a page migration.
 
 ## Interaction, focus, and selected states

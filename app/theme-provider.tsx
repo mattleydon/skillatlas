@@ -604,11 +604,11 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
           filter: drop-shadow(0 0 34px rgba(25, 211, 207, 0.08));
         }
 
-        header nav a.skillatlas-active-nav {
+        header:not(.skillatlas-site-header) nav a.skillatlas-active-nav {
           color: var(--skillatlas-turquoise) !important;
         }
 
-        header nav a[aria-current="page"] {
+        header:not(.skillatlas-site-header) nav a[aria-current="page"] {
           color: var(--skillatlas-turquoise) !important;
         }
 
@@ -1183,17 +1183,19 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
         .skillatlas-primary-nav-trigger {
           position: relative;
           display: inline-flex;
-          min-width: 0;
+          min-width: 44px;
           min-height: 44px;
+          justify-self: center;
           align-items: center;
           justify-content: center;
           gap: 6px;
+          padding: 0 4px;
           border: 0;
           background: transparent;
           color: var(--sa-text-muted);
           font: inherit;
           font-size: 13px;
-          font-weight: 800;
+          font-weight: 500;
           line-height: 1;
           text-decoration: none;
           cursor: pointer;
@@ -1203,10 +1205,10 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
         .skillatlas-primary-nav-trigger::after {
           content: "";
           position: absolute;
-          right: 15px;
-          bottom: 4px;
-          left: 15px;
-          height: 2px;
+          right: 2px;
+          bottom: calc(50% - 0.5em - 4px);
+          left: 2px;
+          height: 1px;
           background: var(--sa-accent);
           transform: scaleX(0);
           transform-origin: center;
@@ -1229,17 +1231,8 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
           transform: scaleX(1);
         }
 
-        .skillatlas-primary-nav-trigger.skillatlas-nav-family-active::before {
-          content: "";
-          width: 4px;
-          height: 4px;
-          border-radius: 1px;
-          background: var(--sa-negative);
-          box-shadow: 0 0 0 1px color-mix(in srgb, var(--sa-negative) 26%, transparent);
-        }
-
         .skillatlas-nav-chevron {
-          color: var(--sa-accent);
+          color: var(--sa-text-technical);
           font-family: var(--sa-font-data);
           font-size: 12px;
           transform: translateY(-1px);
@@ -1301,7 +1294,7 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
           color: var(--sa-text-technical);
           font-family: var(--sa-font-data);
           font-size: 9px;
-          font-weight: 800;
+          font-weight: 500;
           letter-spacing: 0.16em;
           text-transform: uppercase;
         }
@@ -1333,13 +1326,13 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
           color: var(--sa-text-technical);
           font-family: var(--sa-font-data);
           font-size: 9px;
-          font-weight: 800;
+          font-weight: 500;
           letter-spacing: 0.08em;
         }
 
         .skillatlas-nav-menu-copy { display: block; min-width: 0; }
-        .skillatlas-nav-menu-copy strong { display: block; color: var(--sa-text-primary); font-size: 12px; font-weight: 850; }
-        .skillatlas-nav-menu-copy small { display: block; margin-top: 2px; overflow: hidden; color: var(--sa-text-technical); font-size: 9px; font-weight: 650; letter-spacing: 0.025em; text-overflow: ellipsis; white-space: nowrap; }
+        .skillatlas-nav-menu-copy strong { display: block; color: var(--sa-text-primary); font-size: 12px; font-weight: 500; }
+        .skillatlas-nav-menu-copy small { display: block; margin-top: 2px; overflow: hidden; color: var(--sa-text-technical); font-size: 9px; font-weight: 400; letter-spacing: 0.025em; text-overflow: ellipsis; white-space: nowrap; }
 
         .skillatlas-nav-menu-state,
         .skillatlas-mobile-nav-state {
@@ -1411,16 +1404,16 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
           color: var(--sa-accent);
           font-family: var(--sa-font-data);
           font-size: 10px;
-          font-weight: 900;
+          font-weight: 600;
           letter-spacing: -0.03em;
         }
 
         .skillatlas-member-copy,
         .skillatlas-display-copy { display: block; min-width: 0; }
         .skillatlas-member-copy small,
-        .skillatlas-display-copy small { display: block; color: var(--sa-text-technical); font-family: var(--sa-font-data); font-size: 8px; font-weight: 800; letter-spacing: 0.15em; line-height: 1.1; text-transform: uppercase; }
+        .skillatlas-display-copy small { display: block; color: var(--sa-text-technical); font-family: var(--sa-font-data); font-size: 8px; font-weight: 500; letter-spacing: 0.15em; line-height: 1.1; text-transform: uppercase; }
         .skillatlas-member-copy strong,
-        .skillatlas-display-copy strong { display: block; margin-top: 3px; overflow: hidden; color: var(--sa-text-primary); font-size: 10px; font-weight: 850; line-height: 1.05; text-overflow: ellipsis; white-space: nowrap; }
+        .skillatlas-display-copy strong { display: block; margin-top: 3px; overflow: hidden; color: var(--sa-text-primary); font-size: 10px; font-weight: 500; line-height: 1.05; text-overflow: ellipsis; white-space: nowrap; }
         .skillatlas-member-chevron { color: var(--sa-accent); font-family: var(--sa-font-data); font-size: 12px; }
 
         .skillatlas-display-control {
@@ -1469,8 +1462,8 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
         .skillatlas-member-menu button:hover,
         .skillatlas-member-menu a:focus-visible,
         .skillatlas-member-menu button:focus-visible { background: color-mix(in srgb, var(--sa-accent) 8%, var(--sa-surface-2)); outline: 2px solid var(--sa-accent); outline-offset: -2px; }
-        .skillatlas-member-menu span { display: block; font-size: 11px; font-weight: 850; }
-        .skillatlas-member-menu small { display: block; margin-top: 2px; color: var(--sa-text-technical); font-size: 9px; font-weight: 650; }
+        .skillatlas-member-menu span { display: block; font-size: 11px; font-weight: 500; }
+        .skillatlas-member-menu small { display: block; margin-top: 2px; color: var(--sa-text-technical); font-size: 9px; font-weight: 400; }
 
         @keyframes skillatlas-control-reveal { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
 
@@ -1544,10 +1537,10 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
           text-align: left;
         }
         .skillatlas-mobile-family-trigger small,
-        .skillatlas-mobile-direct-link small { display: block; color: var(--sa-text-technical); font-family: var(--sa-font-data); font-size: 8px; font-weight: 800; letter-spacing: 0.15em; line-height: 1; text-transform: uppercase; }
+        .skillatlas-mobile-direct-link small { display: block; color: var(--sa-text-technical); font-family: var(--sa-font-data); font-size: 8px; font-weight: 500; letter-spacing: 0.15em; line-height: 1; text-transform: uppercase; }
         .skillatlas-mobile-family-trigger strong,
-        .skillatlas-mobile-direct-link strong { display: block; margin-top: 4px; font-size: 12px; font-weight: 850; line-height: 1; }
-        .skillatlas-mobile-family-chevron { color: var(--sa-accent); font-family: var(--sa-font-data); transition: transform 180ms ease; }
+        .skillatlas-mobile-direct-link strong { display: block; margin-top: 4px; font-size: 12px; font-weight: 500; line-height: 1; }
+        .skillatlas-mobile-family-chevron { color: var(--sa-text-technical); font-family: var(--sa-font-data); transition: transform 180ms ease; }
         .skillatlas-mobile-family-trigger[aria-expanded="true"] .skillatlas-mobile-family-chevron { transform: rotate(180deg); }
 
         .skillatlas-mobile-family-content { display: grid; grid-template-rows: 0fr; opacity: 0; transition: grid-template-rows 180ms ease, opacity 180ms ease; }
@@ -1566,7 +1559,7 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
           padding: 6px 11px;
           color: var(--sa-text-muted);
           font-size: 11px;
-          font-weight: 800;
+          font-weight: 500;
           text-decoration: none;
           transform: none;
         }
