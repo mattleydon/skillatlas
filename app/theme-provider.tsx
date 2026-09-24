@@ -1127,7 +1127,7 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
 
         /* Global Navigation V2: shared atlas command interface. */
         .skillatlas-site-header {
-          height: 80px;
+          height: var(--sa-header-expanded-height);
           border: 0;
           border-bottom: 1px solid var(--sa-border-subtle);
           box-shadow: none;
@@ -1597,11 +1597,10 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
         }
 
         @media (min-width: 1280px) {
-          .skillatlas-site-header { height: 118px; }
           .skillatlas-site-header-scrolled { height: 96px; }
-          /* Keep spare space before the command strip. 44px + the final label's
-             4px trigger padding matches the 48px visible gap between nav labels. */
-          .skillatlas-header-inner { display: grid; grid-template-columns: minmax(432px, 1fr) max-content 160px; gap: 44px; padding-right: 32px; padding-left: 32px; }
+          /* Keep spare space before the command strip. 48px + the final label's
+             4px trigger padding matches the 52px visible gap between nav labels. */
+          .skillatlas-header-inner { display: grid; grid-template-columns: minmax(432px, 1fr) max-content 160px; gap: 48px; padding-right: 32px; padding-left: 32px; }
           .skillatlas-brand-mark { width: 72px; height: 72px; }
           .skillatlas-brand-title { width: 220px; height: 42px; }
           .skillatlas-site-header-scrolled .skillatlas-brand-mark { width: 52px; height: 52px; }
@@ -1615,7 +1614,7 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
             justify-self: start;
             height: 100%;
             grid-template-columns: repeat(5, max-content);
-            column-gap: 40px;
+            column-gap: 44px;
             align-items: center;
             margin: 0 !important;
           }

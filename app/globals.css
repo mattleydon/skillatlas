@@ -35,6 +35,7 @@
   --sa-space-5: 20px;
   --sa-space-6: 24px;
   --sa-page-gutter: 16px;
+  --sa-header-expanded-height: 80px;
 
   --sa-control-height: 40px;
   --sa-control-height-touch: 44px;
@@ -150,7 +151,7 @@ body {
 }
 
 .skillatlas-page-shell {
-  padding-top: calc(80px + var(--sa-page-gutter));
+  padding-top: calc(var(--sa-header-expanded-height) + var(--sa-page-gutter));
 }
 
 /* Auth uses an inner frame so its full-bleed background stays unchanged. */
@@ -167,9 +168,10 @@ body {
   flex-shrink: 0;
   place-items: center;
   vertical-align: middle;
-  border: 1px solid var(--sa-border-subtle);
+  /* An invisible alignment slot, not a plate around the native flag shape. */
+  border: 0;
   border-radius: 0;
-  background: var(--sa-surface-inset);
+  background: transparent;
 }
 
 .skillatlas-country-flag[data-size="md"] { width: 40px; height: 24px; }
@@ -216,7 +218,7 @@ html.skillatlas-dark .skillatlas-country-flag-image {
 }
 
 @media (min-width: 1280px) {
-  .skillatlas-page-shell {
-    padding-top: calc(118px + var(--sa-page-gutter));
+  :root {
+    --sa-header-expanded-height: 118px;
   }
 }
