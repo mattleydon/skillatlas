@@ -255,7 +255,7 @@ export default function RankingsPage() {
     <main className="relative min-h-screen overflow-x-clip bg-sa-canvas text-sa-text-primary">
       <RankingsBackground />
 
-      <div className="skillatlas-page-shell skillatlas-rankings-frame relative w-full pb-7 lg:pb-9">
+      <div className="skillatlas-page-shell relative w-full pb-7 lg:pb-9">
         <IntelligencePanel
           as="section"
           aria-labelledby="global-country-rankings-title"

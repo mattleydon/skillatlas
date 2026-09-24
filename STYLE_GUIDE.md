@@ -86,7 +86,7 @@ Approximate hierarchy:
 
 | Role | Size |
 | --- | --- |
-| Page title | `28px` desktop/tablet, `22px` phone; medium, `1.2` line-height |
+| Page title | `22.4px` desktop/tablet, `17.6px` phone; medium, `1.2` line-height (20% below the preceding 28/22px scale) |
 | Page description | `15px` desktop/tablet, `14px` phone; regular, `1.4` line-height |
 | Section heading | `20-24px` |
 | Panel heading | `14-18px` |
@@ -115,7 +115,7 @@ Shared form labels and legends use regular Plex Mono; inputs and longer option d
 - The shared page shell uses a compact title/description hierarchy with a `4px` description gap. Keep existing panel padding, status alignment and comfortable control targets; reduce typographic dominance rather than squeezing the interface.
 - Prefer compact tables and lists where scanning is more useful than card browsing.
 - Do not manufacture density with irrelevant metadata or decorative charts.
-- Shared page frames use `--sa-header-expanded-height` for the header offset and `--sa-page-gutter` for the initial gap below it and horizontal padding: `16px` below `1024px` and `20px` from `1024px`. Rankings uses the full available document width. Its desktop end padding subtracts the actual native scrollbar width (`100vw - 100%`) so the viewport-facing left/right gutters, including the scrollbar, both equal the `20px` top gap. Overlay scrollbars require no subtraction; mobile keeps `16px` document padding. Preserve existing centered maximum widths elsewhere: `1600px` for Players, Forum, Atlas and About; `max-w-7xl` (`1280px`) for Countries, User Rankings and Live Rankings; and About's inner `1320px` limit. Keep intentionally narrow Auth/member forms, destination placeholders and body-copy line lengths unchanged.
+- Shared page frames use `--sa-header-expanded-height` for the header offset and `--sa-page-gutter` for the initial gap below it and symmetric horizontal padding: `16px` below `1024px` and `20px` from `1024px`. Rankings uses the full available document width without viewport-unit or one-sided scrollbar compensation. Measure its panel edges against `document.documentElement.clientWidth`, excluding the scrollbar: left, right and initial top insets must agree within 1px. Preserve existing centered maximum widths elsewhere: `1600px` for Players, Forum, Atlas and About; `max-w-7xl` (`1280px`) for Countries, User Rankings and Live Rankings; and About's inner `1320px` limit. Keep intentionally narrow Auth/member forms, destination placeholders and body-copy line lengths unchanged.
 - Preserve clear empty, loading, error, and selected states.
 
 ## Controls and responsive density
