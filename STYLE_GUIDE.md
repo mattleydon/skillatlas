@@ -86,7 +86,7 @@ Approximate hierarchy:
 
 | Role | Size |
 | --- | --- |
-| Page title | `22.4px` desktop/tablet, `17.6px` phone; medium, `1.2` line-height (20% below the preceding 28/22px scale) |
+| Page title | `17.92px` desktop/tablet, `14.08px` phone; medium, `1.2` line-height (a further 20% below the preceding 22.4/17.6px scale) |
 | Page description | `15px` desktop/tablet, `14px` phone; regular, `1.4` line-height |
 | Section heading | `20-24px` |
 | Panel heading | `14-18px` |

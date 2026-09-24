@@ -1475,10 +1475,12 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
         }
 
         .skillatlas-mobile-menu-button > span { position: relative; display: block; width: 20px; height: 14px; }
-        .skillatlas-mobile-menu-button i { position: absolute; left: 0; width: 20px; height: 2px; border-radius: 1px; background: var(--sa-text-primary); transition: top 180ms ease, transform 180ms ease, opacity 150ms ease, background-color 180ms ease; }
-        .skillatlas-mobile-menu-button i:nth-child(1) { top: 0; background: var(--sa-accent); }
+        .skillatlas-mobile-menu-button i { position: absolute; left: 0; width: 20px; height: 2px; border-radius: 1px; background: var(--sa-accent); transition: top 180ms ease, transform 180ms ease, opacity 150ms ease, background-color 180ms ease; }
+        /* Turquoise control graphics need stronger contrast on the pale surface. */
+        html:not(.skillatlas-dark) .skillatlas-mobile-menu-button i { background: #087f7c; }
+        .skillatlas-mobile-menu-button i:nth-child(1) { top: 0; }
         .skillatlas-mobile-menu-button i:nth-child(2) { top: 6px; }
-        .skillatlas-mobile-menu-button i:nth-child(3) { top: 12px; background: var(--sa-negative); }
+        .skillatlas-mobile-menu-button i:nth-child(3) { top: 12px; }
         .skillatlas-mobile-menu-button[aria-expanded="true"] i:nth-child(1) { top: 6px; transform: rotate(45deg); }
         .skillatlas-mobile-menu-button[aria-expanded="true"] i:nth-child(2) { opacity: 0; }
         .skillatlas-mobile-menu-button[aria-expanded="true"] i:nth-child(3) { top: 6px; transform: rotate(-45deg); }

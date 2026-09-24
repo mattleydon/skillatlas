@@ -189,7 +189,7 @@ html.skillatlas-dark .skillatlas-country-flag-image {
 
 /* Shared operational page hierarchy; leave body prose and control targets intact. */
 .skillatlas-page-shell h1 {
-  font-size: 1.1rem;
+  font-size: 0.88rem;
   font-weight: 500;
   line-height: 1.2;
 }
@@ -203,7 +203,7 @@ html.skillatlas-dark .skillatlas-country-flag-image {
 
 @media (min-width: 640px) {
   .skillatlas-page-shell h1 {
-    font-size: 1.4rem;
+    font-size: 1.12rem;
   }
 
   .skillatlas-page-shell h1 + p {
