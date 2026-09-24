@@ -189,7 +189,7 @@ html.skillatlas-dark .skillatlas-country-flag-image {
 
 /* Shared operational page hierarchy; leave body prose and control targets intact. */
 .skillatlas-page-shell h1 {
-  font-size: 1.5rem;
+  font-size: 1.375rem;
   font-weight: 500;
   line-height: 1.2;
 }
@@ -203,7 +203,7 @@ html.skillatlas-dark .skillatlas-country-flag-image {
 
 @media (min-width: 640px) {
   .skillatlas-page-shell h1 {
-    font-size: 1.875rem;
+    font-size: 1.75rem;
   }
 
   .skillatlas-page-shell h1 + p {
@@ -214,6 +214,13 @@ html.skillatlas-dark .skillatlas-country-flag-image {
 @media (min-width: 1024px) {
   :root {
     --sa-page-gutter: 20px;
+  }
+
+  /* The desktop frame includes the native end scrollbar in its outer inset.
+     This full-width wrapper's 100% excludes that scrollbar; 100vw includes it.
+     Overlay scrollbars contribute zero. Keep the scrollbar itself accessible. */
+  .skillatlas-page-shell.skillatlas-rankings-frame {
+    padding-inline-end: max(0px, calc(var(--sa-page-gutter) - (100vw - 100%)));
   }
 }
 

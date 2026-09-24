@@ -86,7 +86,7 @@ Approximate hierarchy:
 
 | Role | Size |
 | --- | --- |
-| Page title | `30px` desktop/tablet, `24px` phone; medium, `1.2` line-height |
+| Page title | `28px` desktop/tablet, `22px` phone; medium, `1.2` line-height |
 | Page description | `15px` desktop/tablet, `14px` phone; regular, `1.4` line-height |
 | Section heading | `20-24px` |
 | Panel heading | `14-18px` |
@@ -115,7 +115,7 @@ Shared form labels and legends use regular Plex Mono; inputs and longer option d
 - The shared page shell uses a compact title/description hierarchy with a `4px` description gap. Keep existing panel padding, status alignment and comfortable control targets; reduce typographic dominance rather than squeezing the interface.
 - Prefer compact tables and lists where scanning is more useful than card browsing.
 - Do not manufacture density with irrelevant metadata or decorative charts.
-- Shared page frames use `--sa-header-expanded-height` for the header offset and `--sa-page-gutter` for the initial gap below it and horizontal padding: `16px` below `1024px` and `20px` from `1024px`. Rankings uses the full available document width so its left/right insets equal that top gap even beyond `1600px` (the browser scrollbar is outside the document frame). Preserve existing centered maximum widths elsewhere: `1600px` for Players, Forum, Atlas and About; `max-w-7xl` (`1280px`) for Countries, User Rankings and Live Rankings; and About's inner `1320px` limit. Keep intentionally narrow Auth/member forms, destination placeholders and body-copy line lengths unchanged.
+- Shared page frames use `--sa-header-expanded-height` for the header offset and `--sa-page-gutter` for the initial gap below it and horizontal padding: `16px` below `1024px` and `20px` from `1024px`. Rankings uses the full available document width. Its desktop end padding subtracts the actual native scrollbar width (`100vw - 100%`) so the viewport-facing left/right gutters, including the scrollbar, both equal the `20px` top gap. Overlay scrollbars require no subtraction; mobile keeps `16px` document padding. Preserve existing centered maximum widths elsewhere: `1600px` for Players, Forum, Atlas and About; `max-w-7xl` (`1280px`) for Countries, User Rankings and Live Rankings; and About's inner `1320px` limit. Keep intentionally narrow Auth/member forms, destination placeholders and body-copy line lengths unchanged.
 - Preserve clear empty, loading, error, and selected states.
 
 ## Controls and responsive density
@@ -168,7 +168,7 @@ Ranking order must remain understandable through number, position, and text with
 - The Rankings dropdown contains `Rankings`, `User Rankings`, and `Live Rankings`.
 - User Rankings and Live Rankings must not appear as separate top-level items.
 - Use `Players`, not `Profiles`, in visible navigation.
-- Desktop navigation uses regular `14px` Plex Mono in a compact, content-sized group with `44px` gaps between items. Including each trigger's `4px` side padding, visible label gaps are `52px`. The content-sized nav track has no extra inline inset; the `48px` gap to the right-anchored `160px` system block plus About's final `4px` padding preserves that same visible `52px` cadence. Spare width belongs to the brand-side track (minimum `432px`), keeping a deliberate logo/title gap instead of distributing the nav items. Preserve the `1280px` desktop breakpoint.
+- Desktop navigation uses regular `14px` Plex Mono in a compact, content-sized group with `48px` gaps between items. Including each trigger's `4px` side padding, visible label gaps are `56px`. The content-sized nav track has no extra inline inset; the `52px` gap to the right-anchored `160px` system block plus About's final `4px` padding preserves that same visible `56px` cadence. Spare width belongs to the brand-side track (minimum `432px`), keeping a deliberate logo/title gap instead of distributing the nav items. Preserve the `1280px` desktop breakpoint.
 - Desktop Profile and Display controls use `40px` rows; mobile controls retain at least `44px` targets. Their structural corners are square, like panels and menus.
 - The header has no top border or shadow and one `1px solid var(--sa-border-subtle)` bottom rule, matching main panel borders. No accent colour, gradient, or glow.
 - Desktop active navigation uses primary text and a close, thin `1px` turquoise underline attached to the text-label span only, without a pink leading marker. Desktop top-level labels have no decorative chevrons; expandable families retain their menu semantics and keyboard controls. Mobile disclosure indicators remain. Retain comfortable hit targets independently of the narrow visual indicator.
