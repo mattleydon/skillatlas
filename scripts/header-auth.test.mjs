@@ -19,6 +19,68 @@ const session = (expiresAt) => ({
   expires_at: expiresAt, expires_in: 3600, user,
 });
 
+// Render the real control's JSX with a controlled open menu. These presentation
+// fixtures do not claim to establish a browser-authenticated session.
+function renderMemberControl(memberState, compact = false) {
+  const h = harness();
+  const loadedModule = { exports: {} };
+  const source = ts.transpileModule(readFileSync(`${root}app/components/header-member-control.tsx`, "utf8"), {
+    compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020, jsx: ts.JsxEmit.ReactJSX },
+  }).outputText;
+  runInNewContext(source, {
+    module: loadedModule, exports: loadedModule.exports,
+    require: (specifier) => {
+      if (specifier === "react") return {
+        useState: () => [true, () => {}], useEffect() {}, useRef: () => ({ current: null }),
+      };
+      if (specifier === "react/jsx-runtime") return requireDependency(specifier);
+      if (specifier === "next/link") return { default: "a" };
+      if (specifier === "@/constants/routes" || specifier === "@/lib/navigation") return h.load(`${specifier.slice(2)}.ts`);
+      return {};
+    },
+  });
+  const tree = loadedModule.exports.default({ memberState, pathname: "/", compact });
+  const nodes = [];
+  function visit(node) {
+    if (Array.isArray(node)) return node.forEach(visit);
+    if (!node?.props) return;
+    nodes.push(node);
+    visit(node.props.children);
+  }
+  visit(tree);
+  const trigger = nodes.find((node) => node.props["aria-haspopup"] === "menu");
+  const menu = nodes.find((node) => node.props.role === "menu");
+  const profileLink = nodes.find((node) => node.props.href?.startsWith("/members/"));
+  return {
+    trigger, menu, profileLink,
+    label: nodes.find((node) => node.type === "strong").props.children,
+    initials: nodes.find((node) => node.props.className === "skillatlas-member-glyph").props.children,
+  };
+}
+
+for (const compact of [false, true]) {
+  test(`${compact ? "mobile" : "desktop"} member control shows Display Name and retains menu username`, () => {
+    const rendered = renderMemberControl({ status: "profile_complete", displayName: "Human Identity", username: "Member_A" }, compact);
+    assert.equal(rendered.label, "Human Identity");
+    assert.equal(rendered.initials, "HI");
+    assert.equal(rendered.trigger.props["aria-expanded"], true);
+    assert.equal(rendered.menu.props["aria-hidden"], false);
+    assert.equal(rendered.profileLink.props.children[0].props.children, "Human Identity");
+    assert.equal(rendered.profileLink.props.children[1].props.children.join(""), "@Member_A");
+    assert.equal(rendered.profileLink.props.href, "/members/Member_A");
+    assert.equal(rendered.profileLink.props["aria-label"], "View public profile: Human Identity (@Member_A)");
+  });
+  test(`${compact ? "mobile" : "desktop"} member control falls back to the handle for empty Display Name`, () => {
+    for (const displayName of ["", "   "]) {
+      const rendered = renderMemberControl({ status: "profile_complete", displayName, username: "Member_A" }, compact);
+      assert.equal(rendered.label, "@Member_A");
+      assert.equal(rendered.initials, "ME");
+      assert.equal(rendered.profileLink.props.children[1].props.children.join(""), "@Member_A");
+      assert.equal(rendered.profileLink.props["aria-label"], "View public profile: @Member_A");
+    }
+  });
+}
+
 // Real installed SSR/Auth client + real server/account/action modules. Only the
 // Next request-cookie store and Supabase HTTP boundary are fixtures; no network.
 function harness({ signedIn = false, expired = false, profile = true, authFailure = false, profileFailure = false } = {}) {
@@ -216,6 +278,7 @@ for (const kind of ["display name", "username capitalization"]) {
     await settle();
     assert.equal(states.at(-1)?.username, "Member_A");
     assert.equal(states.at(-1)?.displayName, "Member A");
+    assert.equal(renderMemberControl(states.at(-1)).label, "Member A");
 
     const formData = new FormData();
     const actions = h.load("app/account/actions.ts");
@@ -239,6 +302,10 @@ for (const kind of ["display name", "username capitalization"]) {
     assert.equal(reads, 2);
     assert.equal(states.at(-1).username, kind === "display name" ? "Member_A" : "MEMBER_A");
     assert.equal(states.at(-1).displayName, kind === "display name" ? "Updated Identity" : "Member A");
+    const rendered = renderMemberControl(states.at(-1));
+    assert.equal(rendered.label, kind === "display name" ? "Updated Identity" : "Member A");
+    assert.equal(rendered.initials, kind === "display name" ? "UI" : "MA");
+    assert.equal(rendered.profileLink.props.children[1].props.children.join(""), kind === "display name" ? "@Member_A" : "@MEMBER_A");
     actionStates = [{ status: "error" }, { status: "idle" }];
     form({ username: "Member_A", displayName: "Member A", bio: null, capitalizationCorrectionAvailable: true });
     effects.splice(0).forEach((effect) => effect());

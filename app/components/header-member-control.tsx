@@ -170,6 +170,8 @@ export default function HeaderMemberControl({
   }
 
   const publicProfileHref = memberRoute(memberState.username);
+  const displayName = memberState.displayName.trim();
+  const memberLabel = displayName || `@${memberState.username}`;
   const initials = memberInitials(memberState.displayName, memberState.username);
 
   return (
@@ -191,7 +193,7 @@ export default function HeaderMemberControl({
         }}
       >
         <span className="skillatlas-member-glyph" aria-hidden="true">{initials}</span>
-        <span className="skillatlas-member-copy"><small>Profile</small><strong>@{memberState.username}</strong></span>
+        <span className="skillatlas-member-copy"><small>Profile</small><strong>{memberLabel}</strong></span>
         <span className="skillatlas-member-chevron" aria-hidden="true">⌄</span>
       </button>
 
@@ -221,6 +223,7 @@ export default function HeaderMemberControl({
         <Link
           href={publicProfileHref}
           role="menuitem"
+          aria-label={`View public profile: ${memberLabel}${displayName ? ` (@${memberState.username})` : ""}`}
           aria-current={navigationCurrent(pathname, publicProfileHref)}
           tabIndex={interactive && open ? 0 : -1}
           onClick={(event) => {
@@ -231,7 +234,7 @@ export default function HeaderMemberControl({
             else onNavigate?.();
           }}
         >
-          <span>View public profile</span><small>@{memberState.username}</small>
+          <span>{displayName || "View public profile"}</span><small>@{memberState.username}</small>
         </Link>
         <form action={signOutAction}>
           <button type="submit" role="menuitem" tabIndex={interactive && open ? 0 : -1} onClick={() => {
