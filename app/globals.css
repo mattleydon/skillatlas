@@ -35,7 +35,7 @@
   --sa-space-4: 16px;
   --sa-space-5: 20px;
   --sa-space-6: 24px;
-  --sa-page-gutter: 12px;
+  --sa-page-gutter: 10.2px;
   --sa-header-expanded-height: 80px;
 
   --sa-control-height: 40px;
@@ -155,6 +155,11 @@ html.skillatlas-dark .skillatlas-shadow-mark {
 /* Use the original alpha silhouette, not a redrawn approximation. The image
    beneath retains a little of its original shading and remains the fallback. */
 @supports (mask-image: url("/skillatlas-logo.png")) {
+  .skillatlas-brand-mark {
+    isolation: isolate;
+  }
+
+  .skillatlas-brand-mark::before,
   .skillatlas-brand-mark::after {
     content: "";
     position: absolute;
@@ -162,12 +167,24 @@ html.skillatlas-dark .skillatlas-shadow-mark {
     pointer-events: none;
     background-image: var(--sa-brand-gradient);
     mask: url("/skillatlas-logo.png") center / contain no-repeat;
+  }
+
+  /* Keep the approved theme-specific luminance/depth as the lower layer. */
+  .skillatlas-brand-mark::before {
+    z-index: 1;
     opacity: 0.85;
     filter: saturate(1.25) brightness(1.1) contrast(1.12);
   }
 
-  html.skillatlas-dark .skillatlas-brand-mark::after {
+  html.skillatlas-dark .skillatlas-brand-mark::before {
     filter: saturate(1.04) brightness(1.11);
+  }
+
+  /* Colour comes unfiltered from ATLAS; color blending retains the approved
+     lower-layer luminosity instead of brightening or darkening the symbol. */
+  .skillatlas-brand-mark::after {
+    z-index: 2;
+    mix-blend-mode: color;
   }
 }
 
@@ -200,6 +217,7 @@ html.skillatlas-dark .skillatlas-shadow-mark {
 
 .skillatlas-wordmark > span:first-child { font-weight: 300; }
 @media (forced-colors: active) {
+  .skillatlas-brand-mark::before,
   .skillatlas-brand-mark::after { display: none; }
   .skillatlas-wordmark-atlas {
     background-image: none;
@@ -274,7 +292,7 @@ html.skillatlas-dark .skillatlas-country-flag-image {
 
 @media (min-width: 1024px) {
   :root {
-    --sa-page-gutter: 14px;
+    --sa-page-gutter: 11.9px;
   }
 
 }

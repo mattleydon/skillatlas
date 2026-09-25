@@ -75,8 +75,10 @@ test("Auth keeps reading controls and explicit technical eight-digit OTP typogra
 
 test("shared frame uses one tighter responsive inset without duplicate Auth top padding", () => {
   const globals = read("app/globals.css");
-  assert.match(globals, /--sa-page-gutter: 12px/);
-  assert.match(globals, /@media \(min-width: 1024px\) \{\s*:root \{\s*--sa-page-gutter: 14px/);
+  const mobileInset = Number(globals.match(/--sa-page-gutter: ([\d.]+)px/)?.[1]);
+  const desktopInset = Number(globals.match(/@media \(min-width: 1024px\) \{\s*:root \{\s*--sa-page-gutter: ([\d.]+)px/)?.[1]);
+  assert.ok(Math.abs(mobileInset - 12 * 0.85) < 1e-10);
+  assert.ok(Math.abs(desktopInset - 14 * 0.85) < 1e-10);
   assert.match(globals, /padding-top: calc\(var\(--sa-header-expanded-height\) \+ var\(--sa-page-gutter\)\)/);
   assert.match(globals, /padding-inline: var\(--sa-page-gutter\)/);
   const authFrame = read("app/auth/components/auth-shell.tsx").match(/className="skillatlas-content-frame[^"]*"/)?.[0];
@@ -90,7 +92,22 @@ test("symbol brightness is theme-specific without changing wordmark gradient or 
   assert.match(globals, /mask: url\("\/skillatlas-logo.png"\) center \/ contain no-repeat/);
   assert.match(globals, /opacity: 0\.85/);
   assert.match(globals, /filter: saturate\(1\.25\) brightness\(1\.1\) contrast\(1\.12\)/);
-  assert.match(globals, /html\.skillatlas-dark \.skillatlas-brand-mark::after \{\s*filter: saturate\(1\.04\) brightness\(1\.11\)/);
+  assert.match(globals, /html\.skillatlas-dark \.skillatlas-brand-mark::before \{\s*filter: saturate\(1\.04\) brightness\(1\.11\)/);
+});
+
+test("symbol colour uses the unfiltered ATLAS gradient while preserving lower-layer luminance", () => {
+  const globals = read("app/globals.css");
+  assert.match(globals, /\.skillatlas-brand-mark \{\s*isolation: isolate/);
+  const sharedMask = globals.match(/\.skillatlas-brand-mark::before,\s*\.skillatlas-brand-mark::after \{([^}]+)\}/)?.[1];
+  assert.ok(sharedMask);
+  assert.match(sharedMask, /background-image: var\(--sa-brand-gradient\)/);
+  assert.doesNotMatch(sharedMask, /filter:|opacity:|#[\da-f]{3,8}/i);
+  const colourLayer = globals.match(/\.skillatlas-brand-mark::after \{\s*z-index: 2;([^}]+)\}/)?.[1];
+  assert.ok(colourLayer);
+  assert.match(colourLayer, /mix-blend-mode: color/);
+  assert.doesNotMatch(colourLayer, /filter:|opacity:|background/);
+  assert.match(globals, /\.skillatlas-wordmark-atlas \{[^}]*background-image: var\(--sa-brand-gradient\)/);
+  assert.match(globals, /@media \(forced-colors: active\) \{\s*\.skillatlas-brand-mark::before,\s*\.skillatlas-brand-mark::after \{ display: none/);
 });
 
 test("technical labels share one source instead of independent tracking/weight recipes", () => {
