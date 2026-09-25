@@ -651,10 +651,10 @@ function MetricCell({
 }) {
   return (
     <div className={styles.metricCell}>
-      <dt className="text-[10px] font-bold uppercase leading-4 tracking-[0.16em] text-sa-text-technical">
+      <dt className="sa-type-label text-[10px] leading-4 text-sa-text-technical">
         {label}
       </dt>
-      <dd className={"mt-sa-1 font-sa-data text-sm font-black " + valueClassName}>
+      <dd className={"sa-type-data mt-sa-1 text-sm " + valueClassName}>
         {value}
       </dd>
       {detail ? (
@@ -1209,7 +1209,7 @@ export default function WorldMapPage() {
     <main className="relative min-h-screen overflow-x-clip bg-sa-canvas text-sa-text-primary">
       <WorldMapBackground />
 
-      <div className="skillatlas-page-shell relative z-10 mx-auto w-full max-w-[1600px] px-4 pb-8 sm:px-6 lg:px-8 lg:pb-10">
+      <div className="skillatlas-page-shell relative z-10 mx-auto w-full max-w-[1600px] pb-8 lg:pb-10">
         <IntelligencePanel
           as="section"
           aria-labelledby="global-competitive-map-title"
@@ -1219,15 +1219,15 @@ export default function WorldMapPage() {
           <div className="flex flex-col gap-sa-3 lg:flex-row lg:items-end lg:justify-between">
             <div className="max-w-3xl">
               <DataLabel as="p" className="mb-sa-1 text-sa-accent">
-                SkillAtlas / World Map
+                SkillAtlas / Atlas
               </DataLabel>
               <h1
                 id="global-competitive-map-title"
-                className="text-[1.625rem] font-black leading-tight tracking-[-0.045em] sm:text-4xl"
+                className="sa-type-page-title"
               >
                 Global Competitive Map
               </h1>
-              <p className="mt-sa-1 max-w-2xl text-sm leading-6 text-sa-text-muted sm:text-[15px]">
+              <p className="sa-type-intro mt-sa-1 max-w-2xl text-sa-text-muted">
                 Explore competitive gaming strength across the world.
               </p>
             </div>
@@ -1238,10 +1238,10 @@ export default function WorldMapPage() {
                 <span className="relative inline-flex h-2 w-2 rounded-full bg-sa-accent" />
               </span>
               <span className="leading-tight">
-                <span className="block text-[10px] font-bold uppercase tracking-[0.14em] text-sa-text-technical">
+                <span className="sa-type-label block text-[10px] text-sa-text-technical">
                   Calibration preview
                 </span>
-                <span className="mt-0.5 block text-[11px] font-semibold text-sa-text-muted">
+                <span className="mt-0.5 block text-[11px] font-medium text-sa-text-muted">
                   Prototype map data
                 </span>
               </span>
@@ -1251,7 +1251,7 @@ export default function WorldMapPage() {
 
         <IntelligencePanel
           as="section"
-          aria-label="World Map controls"
+          aria-label="Atlas controls"
           className="mb-sa-3"
           bodyClassName="p-sa-3"
         >
@@ -1303,7 +1303,7 @@ export default function WorldMapPage() {
                         onClick={() => selectSearchCountry(country)}
                         className={styles.searchResult}
                       >
-                        <span className="font-bold text-sa-text-primary">
+                        <span className="font-medium text-sa-text-primary">
                           {country.name}
                         </span>
                         <span className="text-xs text-sa-text-technical">
@@ -1340,10 +1340,10 @@ export default function WorldMapPage() {
               <div>
                 <DataLabel as="p">Global field</DataLabel>
                 <div className="mt-sa-1 flex flex-wrap items-baseline gap-x-sa-3 gap-y-sa-1">
-                  <h2 id="competitive-globe-title" className="text-base font-black">
+                  <h2 id="competitive-globe-title" className="sa-type-heading text-base">
                     Competitive globe
                   </h2>
-                  <span className="font-sa-data text-xs text-sa-text-technical">
+                  <span className="sa-type-meta text-xs text-sa-text-technical">
                     {scopedRankings.length} of 195 prototype records in {scopeName}
                   </span>
                 </div>
@@ -1470,12 +1470,12 @@ export default function WorldMapPage() {
                 <DataLabel as="p">Geographic context</DataLabel>
                 <h2
                   id="selected-country-intelligence-title"
-                  className="mt-sa-1 text-base font-black"
+                  className="sa-type-heading mt-sa-1 text-base"
                 >
                   Selected Country Intelligence
                 </h2>
               </div>
-              <span className="font-sa-data text-xs text-sa-text-technical">
+              <span className="sa-type-meta text-xs text-sa-text-technical">
                 {scopeName} scope
               </span>
             </div>
@@ -1484,7 +1484,7 @@ export default function WorldMapPage() {
           <div aria-live="polite">
             {!selectedCountry ? (
               <div className="px-sa-4 py-sa-6 sm:py-sa-8">
-                <p className="text-sm font-semibold text-sa-text-muted">
+                <p className="text-sm font-medium text-sa-text-muted">
                   Select a country to inspect its competitive profile.
                 </p>
                 <p className="mt-sa-1 text-xs leading-5 text-sa-text-technical">
@@ -1499,7 +1499,7 @@ export default function WorldMapPage() {
                     <CountryFlag country={selectedCountry} size="md" />
                     <div className="min-w-0">
                       <DataLabel as="p">{selectedCountry.region}</DataLabel>
-                      <h3 className="mt-sa-1 truncate text-xl font-black tracking-tight">
+                      <h3 className="sa-type-heading mt-sa-1 truncate text-xl">
                         {selectedCountry.name}
                       </h3>
                       {!selectedHasScopeCoverage ? (
@@ -1512,7 +1512,7 @@ export default function WorldMapPage() {
 
                   <Link
                     href={countryRoute(selectedCountry.id)}
-                    className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-sa-control border border-sa-border-active bg-sa-accent/10 px-sa-4 text-sm font-black text-sa-text-primary outline-none transition-[background-color,color] duration-200 ease-sa-standard hover:bg-sa-accent hover:text-slate-950 focus-visible:ring-4 focus-visible:ring-sa-accent/25"
+                    className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-sa-control border border-sa-border-active bg-sa-accent/10 px-sa-4 text-sm font-medium text-sa-text-primary outline-none transition-[background-color,color] duration-200 ease-sa-standard hover:bg-sa-accent hover:text-slate-950 focus-visible:ring-4 focus-visible:ring-sa-accent/25"
                   >
                     View Country Intelligence
                     <span className="ml-2" aria-hidden="true">→</span>

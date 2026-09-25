@@ -20,42 +20,42 @@ export default async function CountryAtlasEntryPage({
 
   return (
     <main className={`${styles.shell} relative min-h-screen overflow-hidden`}>
-      <div className="relative z-10 mx-auto max-w-3xl px-4 pb-16 pt-[108px] sm:px-6 sm:pt-[124px] lg:px-8 lg:pt-[152px]">
+      <div className="skillatlas-page-shell relative z-10 mx-auto max-w-3xl pb-16">
         <Link
           href={ROUTES.countries}
-          className={`${styles.placeholderBackLink} inline-flex min-h-11 items-center rounded-full border px-4 py-2 text-sm font-black transition-colors duration-200 ease-in-out hover:border-[#19d3cf] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#19d3cf]/20`}
+          className={`${styles.placeholderBackLink} inline-flex min-h-11 items-center rounded-sa-control border px-4 py-2 text-sm font-medium transition-colors duration-200 ease-in-out hover:border-[#19d3cf] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#19d3cf]/20`}
         >
           <span className="mr-2" aria-hidden="true">&larr;</span>
           Back to Countries
         </Link>
 
-        <section className={`${styles.panel} mt-6 rounded-3xl p-6 sm:p-9`}>
+        <section className="mt-6 rounded-sa-panel border border-sa-border-subtle bg-sa-surface-1 p-sa-4 sm:p-sa-5">
           <div className="flex items-center gap-4">
             <CountryFlag country={country} size="lg" />
             <div className="min-w-0">
-              <p className="text-[11px] font-black uppercase tracking-[0.24em] text-[#19d3cf]">
+              <p className="sa-type-label text-[10px] text-[#19d3cf]">
                 Country Atlas Entry
               </p>
-              <h1 className="mt-1 break-words text-3xl font-black tracking-tight sm:text-4xl">
+              <h1 className="sa-type-page-title mt-1 break-words">
                 {country.name}
               </h1>
-              <p className={`${styles.placeholderMutedText} mt-1 text-sm font-bold`}>
+              <p className={`${styles.placeholderMutedText} mt-1 text-sm font-normal`}>
                 {country.region}
               </p>
             </div>
           </div>
 
-          <div className={`${styles.achievement} mt-7 rounded-2xl p-5`}>
-            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-500">
+          <div className="mt-sa-5 rounded-sa-control border border-sa-border-subtle bg-sa-surface-inset p-sa-4">
+            <p className="sa-type-label text-[10px] text-gray-500">
               Highest Achievement
             </p>
-            <p className="mt-2 text-xl font-black">
+            <p className="mt-2 text-xl font-medium">
               <span className="text-[#ff2fa8]">#{country.highestAchievement.rank}</span>{" "}
               {country.highestAchievement.game}
             </p>
           </div>
 
-          <p className={`${styles.placeholderMutedText} mt-7 text-sm font-semibold leading-7`}>
+          <p className={`${styles.placeholderMutedText} mt-7 text-sm font-normal leading-7`}>
             Detailed country information is coming in a future release.
           </p>
         </section>

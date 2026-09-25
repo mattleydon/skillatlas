@@ -36,7 +36,7 @@ function PlayerAvatar({ profile }: { profile: PlayerProfile }) {
   return (
     <span
       aria-hidden="true"
-      className="grid h-9 w-9 shrink-0 place-items-center rounded-sa-control border border-sa-border-strong bg-sa-surface-2 text-[11px] font-black uppercase tracking-[0.08em] text-sa-accent"
+      className="sa-type-label grid h-9 w-9 shrink-0 place-items-center rounded-sa-control border border-sa-border-strong bg-sa-surface-2 text-[11px] text-sa-accent"
     >
       {profile.handle.slice(0, 2)}
     </span>
@@ -100,18 +100,18 @@ function SortHeader({
       <button
         type="button"
         onClick={() => onSort(sortKey)}
-        className={`inline-flex min-h-8 items-center gap-1 rounded-sa-sm text-[10px] font-bold uppercase tracking-[0.14em] outline-none transition-colors duration-200 ease-sa-standard focus-visible:ring-2 focus-visible:ring-sa-accent/35 ${
-          active
-            ? "text-sa-accent"
-            : "text-sa-text-technical hover:text-sa-text-primary"
-        }`}
+        className={`sa-type-label inline-flex min-h-8 items-center gap-1 rounded-sa-sm text-[10px] outline-none transition-colors duration-200 ease-sa-standard focus-visible:ring-2 focus-visible:ring-sa-accent/35 ${
+ active
+ ? "text-sa-accent"
+ : "text-sa-text-technical hover:text-sa-text-primary"
+ }`}
       >
         {label}
         <span
           aria-hidden="true"
           className={`text-[9px] transition-opacity ${
-            active ? "opacity-100" : "opacity-35"
-          }`}
+ active ? "opacity-100" : "opacity-35"
+ }`}
         >
           {active && direction === "desc" ? "▼" : "▲"}
         </span>
@@ -234,7 +234,7 @@ export default function PlayersPage() {
     <main className="relative min-h-screen overflow-x-clip bg-sa-canvas text-sa-text-primary">
       <PlayersBackground />
 
-      <div className="skillatlas-page-shell relative mx-auto w-full max-w-[1600px] px-4 pb-7 sm:px-6 lg:px-8 lg:pb-9">
+      <div className="skillatlas-page-shell relative mx-auto w-full max-w-[1600px] pb-7 lg:pb-9">
         <IntelligencePanel
           as="section"
           aria-labelledby="elite-player-rankings-title"
@@ -248,11 +248,11 @@ export default function PlayersPage() {
               </DataLabel>
               <h1
                 id="elite-player-rankings-title"
-                className="text-[1.625rem] font-black leading-tight tracking-[-0.045em] sm:text-4xl"
+                className="sa-type-page-title"
               >
                 Elite Player Rankings
               </h1>
-              <p className="mt-sa-1 max-w-2xl text-sm leading-6 text-sa-text-muted sm:text-[15px]">
+              <p className="sa-type-intro mt-sa-1 max-w-2xl text-sa-text-muted">
                 Compare the current prototype player field across the overall index
                 and six competitive disciplines.
               </p>
@@ -264,10 +264,10 @@ export default function PlayersPage() {
                 <span className="relative inline-flex h-2 w-2 rounded-full bg-sa-accent" />
               </span>
               <span className="leading-tight">
-                <span className="block text-[10px] font-bold uppercase tracking-[0.14em] text-sa-text-technical">
+                <span className="sa-type-label block text-[10px] text-sa-text-technical">
                   Calibration preview
                 </span>
-                <span className="mt-0.5 block text-[11px] font-semibold text-sa-text-muted">
+                <span className="mt-0.5 block text-[11px] font-medium text-sa-text-muted">
                   Prototype ranking data
                 </span>
               </span>
@@ -314,19 +314,19 @@ export default function PlayersPage() {
         >
           <div className="min-w-0 border-b border-r border-sa-border-subtle px-sa-3 py-sa-3 lg:border-b-0">
             <DataLabel as="p">#1 player</DataLabel>
-            <p className="mt-1 truncate text-sm font-black">
+            <p className="mt-1 truncate text-sm font-medium">
               {summary.topPlayer?.handle ?? "—"}
             </p>
           </div>
           <div className="min-w-0 border-b border-sa-border-subtle px-sa-3 py-sa-3 lg:border-b-0 lg:border-r">
             <DataLabel as="p">Leading country</DataLabel>
-            <p className="mt-1 truncate text-sm font-black">
+            <p className="mt-1 truncate text-sm font-medium">
               {summary.leadingCountry || "—"}
             </p>
           </div>
           <div className="min-w-0 border-r border-sa-border-subtle px-sa-3 py-sa-3">
             <DataLabel as="p">Biggest mover</DataLabel>
-            <p className="mt-1 flex items-center gap-2 truncate text-sm font-black">
+            <p className="mt-1 flex items-center gap-2 truncate text-sm font-medium">
               <span className="truncate">{summary.biggestMover?.handle ?? "—"}</span>
               {summary.biggestMover ? (
                 <span className={movementClass(summary.biggestMover.trend)}>
@@ -337,7 +337,7 @@ export default function PlayersPage() {
           </div>
           <div className="min-w-0 px-sa-3 py-sa-3">
             <DataLabel as="p">Biggest faller</DataLabel>
-            <p className="mt-1 flex items-center gap-2 truncate text-sm font-black">
+            <p className="mt-1 flex items-center gap-2 truncate text-sm font-medium">
               <span className="truncate">{summary.biggestFaller?.handle ?? "—"}</span>
               {summary.biggestFaller ? (
                 <span className={movementClass(summary.biggestFaller.trend)}>
@@ -355,7 +355,7 @@ export default function PlayersPage() {
           header={
             <div className="flex flex-col gap-sa-2 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <h2 id="elite-ranking-table-title" className="text-sm font-black">
+                <h2 id="elite-ranking-table-title" className="sa-type-heading text-sm">
                   {selectedGame === "Overall"
                     ? "Overall player index"
                     : `${gameDisplayName(selectedGame)} player index`}
@@ -365,7 +365,7 @@ export default function PlayersPage() {
                   fixtures—not methodology-approved rankings.
                 </p>
               </div>
-              <p className="shrink-0 text-xs font-bold tabular-nums text-sa-text-muted">
+              <p className="sa-type-data shrink-0 text-xs text-sa-text-muted">
                 {visiblePlayers.length} of {scopedPlayers.length} records
               </p>
             </div>
@@ -388,7 +388,7 @@ export default function PlayersPage() {
                   />
                   <th
                     scope="col"
-                    className="px-sa-3 py-sa-3 text-left text-[10px] font-bold uppercase tracking-[0.14em] text-sa-text-technical"
+                    className="sa-type-label px-sa-3 py-sa-3 text-left text-[10px] text-sa-text-technical"
                   >
                     Player
                   </th>
@@ -410,7 +410,7 @@ export default function PlayersPage() {
                   />
                   <th
                     scope="col"
-                    className="hidden px-sa-3 py-sa-3 text-left text-[10px] font-bold uppercase tracking-[0.14em] text-sa-text-technical lg:table-cell"
+                    className="sa-type-label hidden px-sa-3 py-sa-3 text-left text-[10px] text-sa-text-technical lg:table-cell"
                   >
                     Team
                   </th>
@@ -424,13 +424,13 @@ export default function PlayersPage() {
                   />
                   <th
                     scope="col"
-                    className="hidden px-sa-3 py-sa-3 text-left text-[10px] font-bold uppercase tracking-[0.14em] text-sa-text-technical xl:table-cell"
+                    className="sa-type-label hidden px-sa-3 py-sa-3 text-left text-[10px] text-sa-text-technical xl:table-cell"
                   >
                     Trend
                   </th>
                   <th
                     scope="col"
-                    className="hidden w-28 px-sa-3 py-sa-3 text-right text-[10px] font-bold uppercase tracking-[0.14em] text-sa-text-technical lg:table-cell"
+                    className="sa-type-label hidden w-28 px-sa-3 py-sa-3 text-right text-[10px] text-sa-text-technical lg:table-cell"
                   >
                     Rank change
                   </th>
@@ -446,7 +446,7 @@ export default function PlayersPage() {
                       className="border-b border-sa-border-subtle last:border-b-0 hover:bg-sa-surface-2/70"
                     >
                       <td className="px-2 py-sa-2 align-middle sm:px-sa-3">
-                        <span className="text-sm font-black tabular-nums">
+                        <span className="sa-type-data text-sm">
                           #{rank}
                         </span>
                       </td>
@@ -454,7 +454,7 @@ export default function PlayersPage() {
                         <div className="flex min-w-0 items-center gap-sa-2">
                           <PlayerAvatar profile={profile} />
                           <div className="min-w-0">
-                            <p className="truncate text-sm font-black">
+                            <p className="truncate text-sm font-medium">
                               {profile.handle}
                             </p>
                             <p className="hidden truncate text-[11px] text-sa-text-technical sm:block">
@@ -475,19 +475,19 @@ export default function PlayersPage() {
                             }}
                             size="sm"
                           />
-                          <span className="hidden truncate text-xs font-semibold sm:inline">
+                          <span className="hidden truncate text-xs font-medium sm:inline">
                             {profile.country}
                           </span>
                         </div>
                       </td>
-                      <td className="hidden px-sa-3 py-sa-2 align-middle text-xs font-semibold text-sa-text-muted md:table-cell">
+                      <td className="hidden px-sa-3 py-sa-2 align-middle text-xs font-medium text-sa-text-muted md:table-cell">
                         {gameDisplayName(profile.game)}
                       </td>
                       <td className="hidden px-sa-3 py-sa-2 align-middle text-xs text-sa-text-technical lg:table-cell">
                         {profile.team ?? "—"}
                       </td>
                       <td className="px-2 py-sa-2 text-right align-middle sm:px-sa-3">
-                        <span className="text-sm font-black tabular-nums text-sa-accent">
+                        <span className="sa-type-data text-sm text-sa-accent">
                           {profile.score.toFixed(1)}
                         </span>
                       </td>
@@ -495,9 +495,9 @@ export default function PlayersPage() {
                         <Sparkline values={profile.oneYearScore} />
                       </td>
                       <td
-                        className={`hidden px-sa-3 py-sa-2 text-right align-middle text-xs font-black tabular-nums lg:table-cell ${movementClass(
-                          profile.trend,
-                        )}`}
+                        className={`sa-type-data hidden px-sa-3 py-sa-2 text-right align-middle text-xs lg:table-cell ${movementClass(
+ profile.trend,
+ )}`}
                       >
                         {movementLabel(profile.trend)}
                       </td>
@@ -511,13 +511,13 @@ export default function PlayersPage() {
               <DataLabel as="p" className="text-sa-accent">
                 No matching records
               </DataLabel>
-              <h2 className="mt-sa-2 text-lg font-black">
+              <h2 className="sa-type-heading mt-sa-2 text-lg">
                 Adjust the player search or ranking scope.
               </h2>
               <button
                 type="button"
                 onClick={clearFilters}
-                className="mt-sa-4 min-h-11 rounded-sa-control border border-sa-border-active bg-sa-accent/10 px-sa-4 text-xs font-black uppercase tracking-[0.12em] text-sa-text-primary transition-colors duration-200 ease-sa-standard hover:bg-sa-accent/18 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-sa-accent/20"
+                className="sa-type-label mt-sa-4 min-h-11 rounded-sa-control border border-sa-border-active bg-sa-accent/10 px-sa-4 text-xs text-sa-text-primary transition-colors duration-200 ease-sa-standard hover:bg-sa-accent/18 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-sa-accent/20"
               >
                 Reset filters
               </button>

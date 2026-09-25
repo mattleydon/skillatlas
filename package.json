@@ -9,6 +9,8 @@
     "prestart": "node scripts/verify-local-supabase-env.mjs --production",
     "start": "next start",
     "lint": "eslint",
+    "test:navigation": "node --test scripts/navigation.test.mjs",
+    "test:header-auth": "node --test scripts/header-auth.test.mjs",
     "supabase:start": "supabase start",
     "supabase:stop": "supabase stop",
     "supabase:reset": "supabase db reset --local",

@@ -47,7 +47,7 @@ export default async function AccountPage({ searchParams }: AccountPageProps) {
           </div>
           <Link
             href={ROUTES.accountOnboarding}
-            className="inline-flex min-h-11 w-full items-center justify-center rounded-sa-control border border-sa-border-active bg-sa-accent px-sa-4 text-sm font-black text-slate-950 outline-none transition-colors duration-200 ease-sa-standard hover:bg-[#35e1dd] focus-visible:ring-4 focus-visible:ring-sa-accent/25"
+            className="inline-flex min-h-11 w-full items-center justify-center rounded-sa-control border border-sa-border-active bg-sa-accent px-sa-4 text-sm font-medium text-slate-950 outline-none transition-colors duration-200 ease-sa-standard hover:bg-[#35e1dd] focus-visible:ring-4 focus-visible:ring-sa-accent/25"
           >
             Create member profile
           </Link>
@@ -70,7 +70,7 @@ export default async function AccountPage({ searchParams }: AccountPageProps) {
           Public identity: {" "}
           <Link
             href={memberRoute(profile.username)}
-            className="font-bold text-sa-accent outline-none hover:text-sa-text-primary focus-visible:rounded-sa-sm focus-visible:ring-2 focus-visible:ring-sa-accent"
+            className="font-medium text-sa-accent outline-none hover:text-sa-text-primary focus-visible:rounded-sa-sm focus-visible:ring-2 focus-visible:ring-sa-accent"
           >
             /members/{profile.username}
           </Link>
@@ -132,12 +132,12 @@ export default async function AccountPage({ searchParams }: AccountPageProps) {
         >
           <div className="grid gap-sa-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
             <div>
-              <p className="text-sm font-bold text-sa-text-primary">Verified account active</p>
+              <p className="text-sm font-medium text-sa-text-primary">Verified account active</p>
               <p className="mt-sa-1 text-xs leading-5 text-sa-text-technical">
                 Private country fields are available only to you. Public member views use an explicit privacy-filtered projection.
               </p>
             </div>
-            <span className="inline-flex min-h-8 w-fit items-center rounded-sa-sm border border-sa-border-active bg-sa-accent/10 px-sa-2 text-[10px] font-black uppercase tracking-[0.12em] text-sa-accent">
+            <span className="sa-type-label inline-flex min-h-8 w-fit items-center rounded-sa-sm border border-sa-border-active bg-sa-accent/10 px-sa-2 text-[10px] text-sa-accent">
               Profile complete
             </span>
           </div>
@@ -159,7 +159,7 @@ function SignOutForm({ failed }: { failed: boolean }) {
       <form action={signOutAction}>
         <button
           type="submit"
-          className="inline-flex min-h-11 w-full items-center justify-center rounded-sa-control border border-sa-border-strong bg-sa-surface-2 px-sa-4 text-sm font-bold text-sa-text-primary outline-none transition-colors duration-200 ease-sa-standard hover:border-sa-border-active hover:text-sa-accent focus-visible:ring-4 focus-visible:ring-sa-accent/20"
+          className="sa-type-control inline-flex min-h-11 w-full items-center justify-center rounded-sa-control border border-sa-border-strong bg-sa-surface-2 px-sa-4 text-sm text-sa-text-primary outline-none transition-colors duration-200 ease-sa-standard hover:border-sa-border-active hover:text-sa-accent focus-visible:ring-4 focus-visible:ring-sa-accent/20"
         >
           Sign out
         </button>

@@ -19,7 +19,7 @@ export const ALL_DISCUSSIONS_TOPIC = { type: "all" } as const satisfies ForumTop
 export const FORUM_DIRECT_TOPICS = [
   { type: "rankings-analysis", label: "Rankings & Analysis" },
   { type: "players-esports", label: "Players & Esports" },
-  { type: "world-map-geography", label: "World Map & Geography" },
+  { type: "world-map-geography", label: "Atlas & Geography" },
   { type: "skillatlas-feedback", label: "SkillAtlas Ideas & Feedback" },
   { type: "community", label: "Community" },
   { type: "general", label: "General" },

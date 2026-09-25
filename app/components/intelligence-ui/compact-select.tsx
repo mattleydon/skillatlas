@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useId, useRef, useState } from "react";
+import DataLabel from "./data-label";
 
 export type CompactSelectOption<Value extends string = string> = {
   value: Value;
@@ -117,9 +118,9 @@ export default function CompactSelect<Value extends string>({
         if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setOpen(false);
       }}
     >
-      <span id={labelId} className="mb-sa-1 block text-[10px] font-bold uppercase leading-4 tracking-[0.16em] text-sa-text-technical">
+      <DataLabel id={labelId} className="mb-sa-1 block">
         {label}
-      </span>
+      </DataLabel>
       <button
         id={controlId}
         type="button"
@@ -131,7 +132,7 @@ export default function CompactSelect<Value extends string>({
         aria-activedescendant={open && activeIndex >= 0 ? `${controlId}-option-${activeIndex}` : undefined}
         onClick={() => (open ? setOpen(false) : openListbox())}
         onKeyDown={handleKeyDown}
-        className="flex h-11 w-full items-center justify-between gap-sa-3 rounded-sa-control border border-sa-border-subtle bg-sa-surface-1 px-sa-3 text-left text-sm font-semibold text-sa-text-primary outline-none transition-[border-color,box-shadow,background-color] duration-200 ease-sa-standard hover:border-sa-border-strong focus-visible:border-sa-border-active focus-visible:ring-4 focus-visible:ring-sa-accent/15 lg:h-10"
+        className="sa-type-reading-control flex h-11 w-full items-center justify-between gap-sa-3 rounded-sa-control border border-sa-border-subtle bg-sa-surface-1 px-sa-3 text-left text-sm font-medium text-sa-text-primary outline-none transition-[border-color,box-shadow,background-color] duration-200 ease-sa-standard hover:border-sa-border-strong focus-visible:border-sa-border-active focus-visible:ring-4 focus-visible:ring-sa-accent/15 lg:h-10"
       >
         <span id={valueId} className="min-w-0 truncate">{selectedOption?.label ?? "Select"}</span>
         <svg
@@ -171,13 +172,13 @@ export default function CompactSelect<Value extends string>({
                 }}
                 onMouseDown={(event) => event.preventDefault()}
                 onClick={() => chooseOption(index)}
-                className={`flex min-h-11 cursor-pointer items-center justify-between gap-sa-3 rounded-sa-sm px-sa-3 py-sa-2 text-sm font-semibold transition-colors duration-150 ease-sa-standard ${
-                  option.disabled
-                    ? "cursor-not-allowed text-sa-text-technical opacity-50"
-                    : active
-                      ? "bg-sa-accent/12 text-sa-text-primary"
-                      : "text-sa-text-muted hover:bg-sa-surface-2"
-                }`}
+                className={`flex min-h-11 cursor-pointer items-center justify-between gap-sa-3 rounded-sa-sm px-sa-3 py-sa-2 text-sm font-medium transition-colors duration-150 ease-sa-standard ${
+ option.disabled
+ ? "cursor-not-allowed text-sa-text-technical opacity-50"
+ : active
+ ? "bg-sa-accent/12 text-sa-text-primary"
+ : "text-sa-text-muted hover:bg-sa-surface-2"
+ }`}
               >
                 <span>{option.label}</span>
                 {selected ? (

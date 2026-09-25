@@ -132,7 +132,7 @@ export default function CountryPicker({
   return (
     <div className="min-w-0 space-y-sa-2">
       <div>
-        <label id={labelId} htmlFor={searchId} className="text-xs font-bold uppercase tracking-[0.1em] text-sa-text-primary">
+        <label id={labelId} htmlFor={searchId} className="sa-type-label text-xs text-sa-text-primary">
           {label}
         </label>
         {description ? (
@@ -158,7 +158,7 @@ export default function CountryPicker({
           aria-activedescendant={hasQuery && activeResultId ? resultId(activeResultId) : undefined}
           aria-invalid={error}
           placeholder="Search countries..."
-          className="h-11 w-full rounded-sa-control border border-sa-border-subtle bg-sa-surface-inset px-sa-3 pr-10 text-sm font-semibold text-sa-text-primary outline-none transition-[border-color,box-shadow] duration-200 ease-sa-standard placeholder:text-sa-text-technical focus:border-sa-border-active focus:ring-4 focus:ring-sa-accent/15"
+          className="h-11 w-full rounded-sa-control border border-sa-border-subtle bg-sa-surface-inset px-sa-3 pr-10 text-sm font-normal text-sa-text-primary outline-none transition-[border-color,box-shadow] duration-200 ease-sa-standard placeholder:text-sa-text-technical focus:border-sa-border-active focus:ring-4 focus:ring-sa-accent/15"
         />
         <svg viewBox="0 0 20 20" className="pointer-events-none absolute right-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-sa-accent" aria-hidden="true">
           <circle cx="8.5" cy="8.5" r="5.25" fill="none" stroke="currentColor" strokeWidth="1.8" />
@@ -194,22 +194,22 @@ export default function CountryPicker({
                   onMouseDown={(event) => event.preventDefault()}
                   onClick={() => selectCountry(country.id)}
                   className={`flex min-h-11 w-full items-center gap-sa-3 rounded-sa-sm px-sa-3 py-sa-2 text-left text-sm outline-none transition-colors duration-200 ease-sa-standard ${
-                    active
-                      ? "bg-sa-accent/10 text-sa-text-primary"
-                      : "text-sa-text-muted hover:bg-sa-surface-inset hover:text-sa-text-primary"
-                  }`}
+ active
+ ? "bg-sa-accent/10 text-sa-text-primary"
+ : "text-sa-text-muted hover:bg-sa-surface-inset hover:text-sa-text-primary"
+ }`}
                 >
                   <span aria-hidden="true" className="w-6 text-center text-base">
                     {countryFlag(country.iso2)}
                   </span>
                   <span className="min-w-0 flex-1">
-                    <span className="block truncate font-bold">{country.name}</span>
+                    <span className="block truncate font-medium">{country.name}</span>
                     <span className="block truncate text-[11px] text-sa-text-technical">
                       {country.region}
                     </span>
                   </span>
                   {selected ? (
-                    <span className="text-[11px] font-bold uppercase tracking-[0.08em] text-sa-accent">
+                    <span className="sa-type-label text-[11px] text-sa-accent">
                       Selected
                     </span>
                   ) : null}
@@ -236,7 +236,7 @@ export default function CountryPicker({
           aria-labelledby={labelId}
           aria-describedby={[descriptionId, error ? errorMessageId : undefined].filter(Boolean).join(" ") || undefined}
           aria-invalid={error}
-          className="min-h-11 w-full appearance-none rounded-sa-control border border-sa-border-strong bg-sa-surface-inset py-sa-2 pl-11 pr-10 text-sm font-semibold text-sa-text-primary outline-none transition-colors duration-200 ease-sa-standard hover:border-sa-border-active focus-visible:border-sa-border-active focus-visible:ring-4 focus-visible:ring-sa-accent/15"
+          className="min-h-11 w-full appearance-none rounded-sa-control border border-sa-border-strong bg-sa-surface-inset py-sa-2 pl-11 pr-10 text-sm font-normal text-sa-text-primary outline-none transition-colors duration-200 ease-sa-standard hover:border-sa-border-active focus-visible:border-sa-border-active focus-visible:ring-4 focus-visible:ring-sa-accent/15"
         >
           <option value="">{emptyLabel}</option>
           {availableCountries.map((country) => (

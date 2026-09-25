@@ -12,7 +12,7 @@ Deliver a stable, responsive, and deployable foundation for the complete country
 
 - Stable shared navigation
 - Rankings
-- World Map
+- Atlas
 - Countries
 - Players
 - Forum

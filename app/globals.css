@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "./typography.css";
 
 :root {
   --background: #ffffff;
@@ -12,7 +13,7 @@
 
   --sa-text-primary: #111827;
   --sa-text-muted: #475569;
-  --sa-text-technical: #64748b;
+  --sa-text-technical: #52647b;
 
   --sa-border-subtle: rgba(15, 23, 42, 0.12);
   --sa-border-strong: rgba(15, 23, 42, 0.24);
@@ -24,9 +25,9 @@
   --sa-alert: #ff2fa8;
   --sa-chart-neutral: #94a3b8;
 
-  --sa-radius-sm: 6px;
-  --sa-radius-control: 8px;
-  --sa-radius-panel: 10px;
+  --sa-radius-sm: 0px;
+  --sa-radius-control: 0px;
+  --sa-radius-panel: 0px;
 
   --sa-space-1: 4px;
   --sa-space-2: 8px;
@@ -34,6 +35,8 @@
   --sa-space-4: 16px;
   --sa-space-5: 20px;
   --sa-space-6: 24px;
+  --sa-page-gutter: 10.2px;
+  --sa-header-expanded-height: 80px;
 
   --sa-control-height: 40px;
   --sa-control-height-touch: 44px;
@@ -44,7 +47,8 @@
   --sa-motion-map: 460ms;
   --sa-ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
 
-  --sa-font-data: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
+  --sa-font-ui: var(--font-sa-interface), Arial, sans-serif;
+  --sa-font-data: var(--font-sa-instrumentation), ui-monospace, SFMono-Regular, Consolas, monospace;
 }
 
 @theme inline {
@@ -74,8 +78,8 @@
   --spacing-sa-4: var(--sa-space-4);
   --spacing-sa-5: var(--sa-space-5);
   --spacing-sa-6: var(--sa-space-6);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--sa-font-ui);
+  --font-mono: var(--sa-font-data);
   --font-sa-data: var(--sa-font-data);
   --ease-sa-standard: var(--sa-ease-standard);
 }
@@ -90,7 +94,7 @@ html.skillatlas-dark {
 
   --sa-text-primary: #e8eef7;
   --sa-text-muted: #cbd5e1;
-  --sa-text-technical: #94a3b8;
+  --sa-text-technical: #a6b4c6;
 
   --sa-border-subtle: rgba(203, 213, 225, 0.18);
   --sa-border-strong: rgba(203, 213, 225, 0.34);
@@ -106,15 +110,195 @@ html.skillatlas-dark {
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--sa-font-ui);
+  font-weight: 400;
 }
 
-.skillatlas-page-shell {
-  padding-top: calc(80px + var(--sa-space-3));
+@layer base {
+  h1, h2, h3, h4, h5, h6, th, code, kbd, samp, pre {
+    font-family: var(--sa-font-data);
+  }
+
+  h1, h2, h3, h4, h5, h6, strong, b, button {
+    font-weight: var(--sa-weight-medium);
+  }
+
+  label[for], legend {
+    font-family: var(--sa-font-data);
+    font-weight: var(--sa-weight-regular);
+  }
+
+  /* Human-entered text and ordinary prose never inherit a technical wrapper. */
+  input, select, textarea, button {
+    font-family: var(--sa-font-ui);
+  }
+
+  input, select, textarea {
+    font-weight: var(--sa-weight-regular);
+  }
+}
+
+/* Shadow Atlas: a non-destructive treatment of the original raster symbol.
+   No blur, new artwork, clipping or geometry changes. */
+.skillatlas-brand-lockup {
+  --sa-brand-gradient: linear-gradient(100deg, #19d3cf 15%, #ff2fa8 90%);
+}
+
+.skillatlas-shadow-mark {
+  filter: saturate(1.05) brightness(1.08) contrast(1.06);
+}
+
+html.skillatlas-dark .skillatlas-shadow-mark {
+  filter: saturate(0.94) brightness(1.05) contrast(1.03);
+}
+
+/* Use the original alpha silhouette, not a redrawn approximation. The image
+   beneath retains a little of its original shading and remains the fallback. */
+@supports (mask-image: url("/skillatlas-logo.png")) {
+  .skillatlas-brand-mark {
+    isolation: isolate;
+  }
+
+  .skillatlas-brand-mark::before,
+  .skillatlas-brand-mark::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image: var(--sa-brand-gradient);
+    mask: url("/skillatlas-logo.png") center / contain no-repeat;
+  }
+
+  /* Keep the approved theme-specific luminance/depth as the lower layer. */
+  .skillatlas-brand-mark::before {
+    z-index: 1;
+    opacity: 0.85;
+    filter: saturate(1.25) brightness(1.232) contrast(1.12);
+  }
+
+  html.skillatlas-dark .skillatlas-brand-mark::before {
+    filter: saturate(1.04) brightness(1.0656);
+  }
+
+  /* Colour comes unfiltered from ATLAS; color blending retains the approved
+     lower-layer luminosity instead of brightening or darkening the symbol. */
+  .skillatlas-brand-mark::after {
+    z-index: 2;
+    mix-blend-mode: color;
+  }
+}
+
+.skillatlas-brand-type {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  white-space: nowrap;
+}
+
+.skillatlas-wordmark {
+  color: var(--sa-text-primary);
+  font-family: var(--sa-font-ui);
+  font-size: 14px;
+  font-weight: 400;
+  letter-spacing: 0.09em;
+  line-height: 1;
+}
+
+.skillatlas-wordmark-atlas {
+  color: #137e80;
+  font-weight: 400;
+  background-image: var(--sa-brand-gradient);
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.skillatlas-wordmark > span:first-child { font-weight: 300; }
+@media (forced-colors: active) {
+  .skillatlas-brand-mark::before,
+  .skillatlas-brand-mark::after { display: none; }
+  .skillatlas-wordmark-atlas {
+    background-image: none;
+    -webkit-text-fill-color: LinkText;
+  }
+}
+
+.skillatlas-brand-descriptor {
+  display: none;
+  color: var(--sa-text-technical);
+  font-family: var(--sa-font-data);
+  font-size: 8px;
+  font-weight: 400;
+  letter-spacing: 0.025em;
+  line-height: 1.2;
+}
+
+@media (min-width: 640px) {
+  .skillatlas-wordmark { font-size: 20px; }
+  .skillatlas-brand-descriptor { display: block; }
+  .skillatlas-site-header-scrolled .skillatlas-wordmark { font-size: 17px; }
 }
 
 @media (min-width: 1280px) {
-  .skillatlas-page-shell {
-    padding-top: calc(126px + var(--sa-space-3));
+  .skillatlas-wordmark { font-size: 23px; letter-spacing: 0.13em; }
+  .skillatlas-brand-descriptor { font-size: 9px; letter-spacing: 0.06em; }
+  .skillatlas-site-header-scrolled .skillatlas-wordmark { font-size: 18px; }
+  .skillatlas-site-header-scrolled .skillatlas-brand-descriptor { font-size: 8px; letter-spacing: 0.025em; }
+}
+
+.skillatlas-page-shell {
+  padding-top: calc(var(--sa-header-expanded-height) + var(--sa-page-gutter));
+}
+
+/* Auth uses an inner frame so its full-bleed background stays unchanged. */
+.skillatlas-page-shell:not(main),
+.skillatlas-content-frame {
+  padding-inline: var(--sa-page-gutter);
+}
+
+.skillatlas-country-flag {
+  position: relative;
+  display: inline-grid;
+  width: 32px;
+  height: 20px;
+  flex-shrink: 0;
+  place-items: center;
+  vertical-align: middle;
+  /* An invisible alignment slot, not a plate around the native flag shape. */
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.skillatlas-country-flag[data-size="md"] { width: 40px; height: 24px; }
+.skillatlas-country-flag[data-size="lg"] { width: 48px; height: 32px; }
+.skillatlas-country-flag[data-size="xl"] { width: 64px; height: 40px; }
+
+.skillatlas-country-flag-image {
+  object-fit: contain;
+  filter: none;
+}
+
+html.skillatlas-dark .skillatlas-country-flag-image {
+  filter: saturate(0.9) brightness(0.92);
+}
+
+/* Preserve the approved intro spacing; type is owned by sa-type-intro. */
+.skillatlas-page-shell h1 + p {
+  margin-top: var(--sa-space-1);
+}
+
+@media (min-width: 1024px) {
+  :root {
+    --sa-page-gutter: 11.9px;
+  }
+
+}
+
+@media (min-width: 1280px) {
+  :root {
+    --sa-header-expanded-height: 118px;
   }
 }

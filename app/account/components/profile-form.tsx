@@ -36,7 +36,7 @@ export default function ProfileForm({ countries }: ProfileFormProps) {
   return (
     <form action={formAction} className="space-y-sa-5">
       <div>
-        <label htmlFor="profile-username" className="text-xs font-bold uppercase tracking-[0.1em] text-sa-text-primary">
+        <label htmlFor="profile-username" className="sa-type-label text-xs text-sa-text-primary">
           Username
         </label>
         <p id="profile-username-help" className="mt-sa-1 text-xs leading-5 text-sa-text-technical">
@@ -79,8 +79,8 @@ export default function ProfileForm({ countries }: ProfileFormProps) {
         id="profile-form-message"
         aria-live="polite"
         className={`min-h-5 text-sm leading-5 ${
-          state.status === "error" ? "text-sa-negative" : "text-sa-text-muted"
-        }`}
+ state.status === "error" ? "text-sa-negative" : "text-sa-text-muted"
+ }`}
       >
         {state.message}
       </div>

@@ -48,8 +48,8 @@ function CountryRecord({ label, country }: { label: string; country: PublicMembe
           variant="atlas"
         />
         <div className="min-w-0">
-          <p className="truncate text-sm font-bold text-sa-text-primary">{country.name}</p>
-          <p className="truncate text-[10px] uppercase tracking-[0.1em] text-sa-text-technical">{country.region}</p>
+          <p className="truncate text-sm font-medium text-sa-text-primary">{country.name}</p>
+          <p className="sa-type-label truncate text-[10px] text-sa-text-technical">{country.region}</p>
         </div>
       </div>
     </div>
@@ -91,21 +91,21 @@ export default async function MemberPage({ params }: MemberPageProps) {
         <IntelligencePanel as="section" bodyClassName="px-sa-4 py-sa-4 sm:px-sa-5">
           <div className="grid gap-sa-4 sm:grid-cols-[auto_minmax(0,1fr)_auto] sm:items-center">
             <div
-              className="grid h-16 w-16 place-items-center rounded-sa-control border border-sa-border-active bg-sa-accent/8 font-sa-data text-xl font-black tracking-[-0.04em] text-sa-accent"
+              className="sa-type-data grid h-16 w-16 place-items-center rounded-sa-control border border-sa-border-active bg-sa-accent/8 text-xl tracking-[-0.04em] text-sa-accent"
               aria-hidden="true"
             >
               {memberInitials(profile.displayName, profile.username)}
             </div>
             <div className="min-w-0">
               <DataLabel as="p" className="text-sa-accent">Profile / Identity</DataLabel>
-              <p className="mt-sa-1 truncate text-xl font-black text-sa-text-primary">@{profile.username}</p>
+              <p className="mt-sa-1 truncate text-xl font-medium text-sa-text-primary">@{profile.username}</p>
               {profile.bio ? (
                 <p className="mt-sa-2 whitespace-pre-line text-sm leading-6 text-sa-text-muted">{profile.bio}</p>
               ) : null}
             </div>
             <div className="border-l border-sa-border-subtle pl-sa-3 sm:text-right">
               <DataLabel as="p" className="text-sa-text-technical">Member since</DataLabel>
-              <p className="mt-sa-1 font-sa-data text-sm font-bold text-sa-text-primary">{memberSince}</p>
+              <p className="sa-type-data mt-sa-1 text-sm text-sa-text-primary">{memberSince}</p>
             </div>
           </div>
         </IntelligencePanel>
@@ -123,7 +123,7 @@ export default async function MemberPage({ params }: MemberPageProps) {
               {profile.cityTown ? (
                 <div className="border-l-2 border-sa-border-active pl-sa-3">
                   <DataLabel as="p" className="text-sa-text-technical">City / Town</DataLabel>
-                  <p className="mt-sa-2 text-sm font-bold text-sa-text-primary">{profile.cityTown}</p>
+                  <p className="mt-sa-2 text-sm font-medium text-sa-text-primary">{profile.cityTown}</p>
                 </div>
               ) : null}
             </div>
@@ -135,9 +135,9 @@ export default async function MemberPage({ params }: MemberPageProps) {
                   <ol className="mt-sa-3 grid gap-sa-2 sm:grid-cols-2">
                     {profile.heritageCountries.map((country) => (
                       <li key={country.id} className="flex min-h-11 items-center gap-sa-3 rounded-sa-control border border-sa-border-subtle bg-sa-surface-inset px-sa-3 py-sa-2">
-                        <span className="font-sa-data text-[11px] font-black text-sa-accent">{String(country.position).padStart(2, "0")}</span>
+                        <span className="sa-type-data text-[11px] text-sa-accent">{String(country.position).padStart(2, "0")}</span>
                         <CountryFlag country={{ name: country.name, flagCode: country.iso2 }} size="sm" variant="atlas" />
-                        <span className="min-w-0 truncate text-sm font-bold text-sa-text-primary">{country.name}</span>
+                        <span className="min-w-0 truncate text-sm font-medium text-sa-text-primary">{country.name}</span>
                       </li>
                     ))}
                   </ol>

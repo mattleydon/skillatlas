@@ -30,16 +30,16 @@ export default function AuthShell({
         <div className="absolute inset-0 opacity-25 [background-image:linear-gradient(var(--sa-border-subtle)_1px,transparent_1px),linear-gradient(90deg,var(--sa-border-subtle)_1px,transparent_1px)] [background-size:72px_72px] [mask-image:linear-gradient(to_bottom,black,transparent_60%)]" />
       </div>
 
-      <div className="relative mx-auto flex w-full max-w-[1440px] justify-center px-4 pb-16 pt-sa-5 sm:px-6 sm:pb-20 sm:pt-sa-6 lg:px-8">
+      <div className="skillatlas-content-frame relative mx-auto flex w-full max-w-[1440px] justify-center pb-16 sm:pb-20">
         <div className={`w-full ${contentClassName}`}>
           <div className="mb-sa-3 px-sa-1">
             <DataLabel as="p" className="text-sa-accent">
               {eyebrow}
             </DataLabel>
-            <h1 className="mt-sa-1 text-[1.75rem] font-black leading-[1.08] tracking-[-0.035em] text-sa-text-primary sm:text-4xl">
+            <h1 className="sa-type-page-title mt-sa-1 text-sa-text-primary">
               {title}
             </h1>
-            <p className="mt-sa-2 max-w-xl text-sm leading-6 text-sa-text-muted sm:text-[15px]">
+            <p className="sa-type-intro mt-sa-2 max-w-xl text-sa-text-muted">
               {description}
             </p>
           </div>
@@ -72,7 +72,7 @@ export default function AuthShell({
             Account access is optional. Public SkillAtlas pages remain available without signing in. {" "}
             <Link
               href={ROUTES.rankings}
-              className="font-bold text-sa-accent outline-none hover:text-sa-text-primary focus-visible:rounded-sa-sm focus-visible:ring-2 focus-visible:ring-sa-accent"
+              className="font-medium text-sa-accent outline-none hover:text-sa-text-primary focus-visible:rounded-sa-sm focus-visible:ring-2 focus-visible:ring-sa-accent"
             >
               Return to Rankings
             </Link>

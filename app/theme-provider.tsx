@@ -35,7 +35,16 @@ function hasValidPageCommentsConfig() {
 }
 
 const pageCommentsClient =
-  hasValidPageCommentsConfig() ? createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+  hasValidPageCommentsConfig()
+    ? createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+        auth: {
+          autoRefreshToken: false,
+          detectSessionInUrl: false,
+          persistSession: false,
+          storageKey: "skillatlas-page-comments-anonymous",
+        },
+      })
+    : null;
 
 const SKILLATLAS_EMOJIS = [
   { label: "Turquoise smiley", symbol: "🙂", code: ":sa_turquoise_smiley:", className: "turquoise native-tint face-emoji" },
@@ -575,7 +584,7 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
           border-color: rgba(203, 213, 225, 0.34) !important;
         }
 
-        html.skillatlas-dark header {
+        html.skillatlas-dark header:not(.skillatlas-site-header) {
           background-color: rgba(47, 58, 70, 0.97) !important;
         }
 
@@ -595,11 +604,11 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
           filter: drop-shadow(0 0 34px rgba(25, 211, 207, 0.08));
         }
 
-        header nav a.skillatlas-active-nav {
+        header:not(.skillatlas-site-header) nav a.skillatlas-active-nav {
           color: var(--skillatlas-turquoise) !important;
         }
 
-        header nav a[aria-current="page"] {
+        header:not(.skillatlas-site-header) nav a[aria-current="page"] {
           color: var(--skillatlas-turquoise) !important;
         }
 
@@ -664,7 +673,7 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
           color: inherit;
           cursor: pointer;
           font-family: inherit;
-          font-weight: 700;
+          font-weight: var(--sa-weight-regular);
           line-height: 1;
           padding: 0;
           text-decoration: none;
@@ -739,7 +748,7 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
           display: block;
           color: #111827;
           font-size: 13px;
-          font-weight: 950;
+          font-weight: var(--sa-weight-medium);
         }
 
         header nav .skillatlas-rankings-menu-item small {
@@ -747,8 +756,8 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
           margin-top: 3px;
           color: #64748b;
           font-size: 10px;
-          font-weight: 800;
-          letter-spacing: 0.03em;
+          font-weight: var(--sa-weight-regular);
+          letter-spacing: var(--sa-tracking-meta);
         }
 
         header nav .skillatlas-rankings-menu-item.skillatlas-active-nav {
@@ -870,35 +879,12 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
           outline-offset: 1px;
         }
 
-        .skillatlas-mobile-nav-link.skillatlas-mobile-nav-link-active {
-          border-color: rgba(25, 211, 207, 0.42);
-          background:
-            linear-gradient(90deg, rgba(25, 211, 207, 0.13), rgba(255, 47, 168, 0.07));
-          color: var(--skillatlas-turquoise) !important;
-        }
-
         .skillatlas-mobile-ranking-link {
           font-size: 13px;
         }
 
-        html.skillatlas-dark .skillatlas-mobile-menu-button {
-          border-color: rgba(255, 47, 168, 0.44);
-          background:
-            linear-gradient(135deg, rgba(25, 211, 207, 0.13), rgba(255, 47, 168, 0.13)),
-            rgba(39, 51, 65, 0.98);
-          box-shadow: 0 12px 30px rgba(0, 0, 0, 0.28);
-        }
-
         html.skillatlas-dark .skillatlas-mobile-menu-middle {
           background: var(--skillatlas-text-dark) !important;
-        }
-
-        html.skillatlas-dark header nav.skillatlas-mobile-nav {
-          border-color: rgba(255, 47, 168, 0.38);
-          background:
-            linear-gradient(145deg, rgba(25, 211, 207, 0.11), rgba(255, 47, 168, 0.09)),
-            rgba(39, 51, 65, 0.985);
-          box-shadow: 0 30px 74px rgba(0, 0, 0, 0.38);
         }
 
         html.skillatlas-dark .skillatlas-mobile-rankings {
@@ -911,15 +897,8 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
           background: rgba(25, 211, 207, 0.10);
         }
 
-        html.skillatlas-dark .skillatlas-mobile-section-label,
-        html.skillatlas-dark .skillatlas-mobile-nav-link {
+        html.skillatlas-dark .skillatlas-mobile-section-label {
           color: var(--skillatlas-text-dark);
-        }
-
-        html.skillatlas-dark .skillatlas-mobile-nav-link:hover {
-          border-color: rgba(25, 211, 207, 0.30);
-          background: rgba(53, 66, 80, 0.94);
-          color: #ffffff;
         }
 
         ::view-transition-group(root) {
@@ -1146,6 +1125,530 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
           right: 5px;
         }
 
+        /* Global Navigation V2: shared atlas command interface. */
+        .skillatlas-site-header {
+          height: var(--sa-header-expanded-height);
+          border: 0;
+          border-bottom: 1px solid var(--sa-border-subtle);
+          box-shadow: none;
+          background: color-mix(in srgb, var(--sa-surface-1) 96%, transparent);
+          color: var(--sa-text-primary);
+          backdrop-filter: blur(18px);
+          transition: height 240ms cubic-bezier(0.4, 0, 0.2, 1), background-color 200ms ease;
+        }
+
+        .skillatlas-site-header::after {
+          content: none;
+        }
+
+        .skillatlas-site-header-scrolled { height: 68px; }
+
+        .skillatlas-header-inner {
+          position: relative;
+          display: flex;
+          width: min(100%, 1600px);
+          height: 100%;
+          margin: 0 auto;
+          align-items: center;
+          padding: 0 16px;
+        }
+
+        .skillatlas-brand-lockup {
+          display: flex;
+          min-width: 0;
+          align-items: center;
+          gap: 12px;
+        }
+
+        .skillatlas-brand-mark,
+        .skillatlas-brand-title {
+          position: relative;
+          display: block;
+          flex: 0 0 auto;
+          transition: width 240ms ease, height 240ms ease;
+        }
+
+        .skillatlas-brand-mark { width: 52px; height: 52px; }
+        .skillatlas-brand-title { width: 112px; height: 32px; }
+        .skillatlas-site-header-scrolled .skillatlas-brand-mark { width: 44px; height: 44px; }
+        .skillatlas-site-header-scrolled .skillatlas-brand-title { width: 108px; height: 26px; }
+
+        header nav.skillatlas-desktop-nav { display: none !important; }
+        .skillatlas-desktop-system-stack { display: none; }
+
+        .skillatlas-primary-nav-trigger {
+          position: relative;
+          display: inline-flex;
+          min-width: 44px;
+          min-height: 44px;
+          justify-self: center;
+          align-items: center;
+          justify-content: center;
+          gap: 6px;
+          padding: 0 4px;
+          border: 0;
+          background: transparent;
+          color: var(--sa-text-muted);
+          font: inherit;
+          font-family: var(--sa-font-data);
+          font-size: 14px;
+          font-weight: var(--sa-weight-regular);
+          line-height: 1;
+          text-decoration: none;
+          cursor: pointer;
+          transition: color 180ms ease, background-color 180ms ease;
+        }
+
+        .skillatlas-primary-nav-label {
+          position: relative;
+          white-space: nowrap;
+        }
+
+        .skillatlas-primary-nav-label::after {
+          content: "";
+          position: absolute;
+          right: 0;
+          bottom: -4px;
+          left: 0;
+          height: 1px;
+          background: var(--sa-accent);
+          transform: scaleX(0);
+          transform-origin: center;
+          transition: transform 180ms ease;
+        }
+
+        .skillatlas-primary-nav-trigger:hover,
+        .skillatlas-primary-nav-trigger:focus-visible,
+        .skillatlas-primary-nav-trigger.skillatlas-nav-family-active {
+          color: var(--sa-text-primary);
+        }
+
+        .skillatlas-primary-nav-trigger:focus-visible {
+          outline: 2px solid color-mix(in srgb, var(--sa-accent) 72%, transparent);
+          outline-offset: -2px;
+        }
+
+        .skillatlas-primary-nav-trigger.skillatlas-nav-family-active .skillatlas-primary-nav-label::after,
+        .skillatlas-primary-nav-trigger[aria-current="page"] .skillatlas-primary-nav-label::after {
+          transform: scaleX(1);
+        }
+
+        .skillatlas-nav-family {
+          position: relative;
+          display: flex;
+          width: 100%;
+          height: 100%;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .skillatlas-nav-family::after {
+          content: "";
+          position: absolute;
+          top: 100%;
+          right: -28px;
+          left: -28px;
+          height: 16px;
+        }
+
+        header nav .skillatlas-nav-menu {
+          pointer-events: none;
+          position: absolute;
+          top: calc(100% + 8px);
+          left: 50%;
+          z-index: 90;
+          width: 272px;
+          overflow: hidden;
+          border: 1px solid var(--sa-border-strong);
+          border-radius: var(--sa-radius-panel);
+          background: color-mix(in srgb, var(--sa-surface-1) 97%, transparent);
+          box-shadow: 0 18px 44px color-mix(in srgb, #020617 20%, transparent);
+          opacity: 0;
+          transform: translateX(-50%) translateY(-5px);
+          transition: opacity 170ms ease, transform 170ms ease;
+          backdrop-filter: blur(18px);
+        }
+
+        .skillatlas-nav-family[data-open="true"] .skillatlas-nav-menu {
+          pointer-events: auto;
+          opacity: 1;
+          transform: translateX(-50%) translateY(0);
+        }
+
+        .skillatlas-nav-menu-heading,
+        .skillatlas-mobile-console-heading {
+          display: flex;
+          min-height: 28px;
+          align-items: center;
+          justify-content: space-between;
+          gap: 12px;
+          border-bottom: 1px solid var(--sa-border-subtle);
+          color: var(--sa-text-technical);
+          font-family: var(--sa-font-data);
+          font-size: 9px;
+          font-weight: var(--sa-weight-medium);
+          letter-spacing: var(--sa-tracking-label);
+          text-transform: uppercase;
+        }
+
+        .skillatlas-nav-menu-heading { padding: 0 12px; }
+
+        header nav .skillatlas-nav-menu-item {
+          position: relative;
+          display: grid;
+          min-height: 48px;
+          grid-template-columns: 26px minmax(0, 1fr) 8px;
+          align-items: center;
+          gap: 8px;
+          border-bottom: 1px solid var(--sa-border-subtle);
+          padding: 7px 12px;
+          color: var(--sa-text-primary);
+          text-decoration: none;
+          transition: background-color 160ms ease, color 160ms ease;
+        }
+
+        header nav .skillatlas-nav-menu-item:last-child { border-bottom: 0; }
+        header nav .skillatlas-nav-menu-item:hover,
+        header nav .skillatlas-nav-menu-item:focus-visible { background: color-mix(in srgb, var(--sa-accent) 8%, var(--sa-surface-2)); }
+        header nav .skillatlas-nav-menu-item:focus-visible { outline: 2px solid var(--sa-accent); outline-offset: -2px; }
+        header nav .skillatlas-nav-menu-item-active { background: color-mix(in srgb, var(--sa-accent) 10%, var(--sa-surface-2)); }
+
+        .skillatlas-nav-menu-index,
+        .skillatlas-mobile-nav-index {
+          color: var(--sa-text-technical);
+          font-family: var(--sa-font-data);
+          font-size: 9px;
+          font-weight: var(--sa-weight-medium);
+          letter-spacing: var(--sa-tracking-meta);
+        }
+
+        .skillatlas-nav-menu-copy { display: block; min-width: 0; }
+        .skillatlas-nav-menu-copy strong { display: block; color: var(--sa-text-primary); font-family: var(--sa-font-data); font-size: 12px; font-weight: var(--sa-weight-medium); }
+        .skillatlas-nav-menu-copy small { font-family: var(--sa-font-ui); display: block; margin-top: 2px; overflow: hidden; color: var(--sa-text-technical); font-size: 9px; font-weight: var(--sa-weight-regular); letter-spacing: var(--sa-tracking-meta); text-overflow: ellipsis; white-space: nowrap; }
+
+        .skillatlas-nav-menu-state,
+        .skillatlas-mobile-nav-state {
+          width: 5px;
+          height: 5px;
+          border: 1px solid var(--sa-border-strong);
+          border-radius: 1px;
+        }
+
+        .skillatlas-nav-menu-item-active .skillatlas-nav-menu-state,
+        .skillatlas-mobile-nav-link-active .skillatlas-mobile-nav-state {
+          border-color: var(--sa-accent);
+          background: var(--sa-accent);
+          box-shadow: 0 0 0 2px color-mix(in srgb, var(--sa-accent) 15%, transparent);
+        }
+
+        .skillatlas-desktop-system-stack,
+        .skillatlas-mobile-system-stack {
+          min-width: 0;
+        }
+
+        .skillatlas-member-menu-root { position: relative; min-width: 0; }
+
+        .skillatlas-member-control,
+        .skillatlas-display-control {
+          box-sizing: border-box;
+          display: grid;
+          width: 100%;
+          min-width: 0;
+          min-height: 44px;
+          align-items: center;
+          border: 1px solid var(--sa-border-strong);
+          border-radius: var(--sa-radius-control);
+          background: var(--sa-surface-inset);
+          color: var(--sa-text-primary);
+          text-align: left;
+          text-decoration: none;
+          cursor: pointer;
+          transition: border-color 170ms ease, background-color 170ms ease, color 170ms ease;
+        }
+
+        .skillatlas-member-control {
+          grid-template-columns: 30px minmax(0, 1fr) auto;
+          gap: 8px;
+          padding: 4px 9px 4px 6px;
+        }
+
+        .skillatlas-member-control-static { cursor: default; }
+        .skillatlas-member-control:hover,
+        .skillatlas-member-control:focus-visible,
+        .skillatlas-member-control[aria-expanded="true"],
+        .skillatlas-display-control:hover,
+        .skillatlas-display-control:focus-visible {
+          border-color: var(--sa-border-active);
+          background: color-mix(in srgb, var(--sa-accent) 7%, var(--sa-surface-inset));
+        }
+
+        .skillatlas-member-control:focus-visible,
+        .skillatlas-display-control:focus-visible { outline: 2px solid color-mix(in srgb, var(--sa-accent) 70%, transparent); outline-offset: 2px; }
+
+        .skillatlas-member-glyph {
+          display: grid;
+          width: 30px;
+          height: 30px;
+          place-items: center;
+          border: 1px solid var(--sa-border-active);
+          border-radius: var(--sa-radius-sm);
+          background: color-mix(in srgb, var(--sa-accent) 9%, var(--sa-surface-2));
+          color: var(--sa-accent);
+          font-family: var(--sa-font-data);
+          font-size: 10px;
+          font-weight: var(--sa-weight-medium);
+          letter-spacing: -0.03em;
+        }
+
+        .skillatlas-member-copy,
+        .skillatlas-display-copy { display: block; min-width: 0; }
+        .skillatlas-member-copy small,
+        .skillatlas-display-copy small { display: block; color: var(--sa-text-technical); font-family: var(--sa-font-data); font-size: 8px; font-weight: var(--sa-weight-medium); letter-spacing: var(--sa-tracking-label); line-height: 1.1; text-transform: uppercase; }
+        .skillatlas-member-copy strong,
+        .skillatlas-display-copy strong { display: block; margin-top: 3px; overflow: hidden; color: var(--sa-text-primary); font-family: var(--sa-font-data); font-size: 10px; font-weight: var(--sa-weight-medium); line-height: 1.05; text-overflow: ellipsis; white-space: nowrap; }
+        .skillatlas-member-chevron { color: var(--sa-accent); font-family: var(--sa-font-data); font-size: 12px; }
+
+        .skillatlas-display-control {
+          grid-template-columns: 4px minmax(0, 1fr) 24px;
+          gap: 9px;
+          padding: 5px 8px;
+        }
+
+        .skillatlas-display-marker { width: 3px; height: 24px; border-radius: 1px; background: var(--sa-accent); }
+        .skillatlas-display-icon { display: grid; width: 24px; height: 24px; place-items: center; color: var(--sa-accent); }
+        .skillatlas-display-icon svg { width: 18px; height: 18px; }
+
+        .skillatlas-member-menu {
+          position: absolute;
+          top: calc(100% + 7px);
+          right: 0;
+          z-index: 95;
+          width: 240px;
+          overflow: hidden;
+          border: 1px solid var(--sa-border-strong);
+          border-radius: var(--sa-radius-panel);
+          background: color-mix(in srgb, var(--sa-surface-1) 98%, transparent);
+          box-shadow: 0 18px 44px color-mix(in srgb, #020617 22%, transparent);
+          animation: skillatlas-control-reveal 160ms ease both;
+        }
+
+        .skillatlas-member-menu[aria-hidden="true"] { display: none; }
+        .skillatlas-member-menu a,
+        .skillatlas-member-menu button {
+          display: block;
+          width: 100%;
+          min-height: 46px;
+          border: 0;
+          border-bottom: 1px solid var(--sa-border-subtle);
+          border-radius: 0;
+          background: transparent;
+          padding: 7px 11px;
+          color: var(--sa-text-primary);
+          text-align: left;
+          text-decoration: none;
+          cursor: pointer;
+        }
+        .skillatlas-member-menu > :last-child button,
+        .skillatlas-member-menu > :last-child { border-bottom: 0; }
+        .skillatlas-member-menu a:hover,
+        .skillatlas-member-menu button:hover,
+        .skillatlas-member-menu a:focus-visible,
+        .skillatlas-member-menu button:focus-visible { background: color-mix(in srgb, var(--sa-accent) 8%, var(--sa-surface-2)); outline: 2px solid var(--sa-accent); outline-offset: -2px; }
+        .skillatlas-member-menu span { font-family: var(--sa-font-data); display: block; font-size: 11px; font-weight: var(--sa-weight-medium); }
+        .skillatlas-member-menu small { font-family: var(--sa-font-ui); display: block; margin-top: 2px; color: var(--sa-text-technical); font-size: 9px; font-weight: var(--sa-weight-regular); }
+
+        @keyframes skillatlas-control-reveal { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
+
+        .skillatlas-mobile-menu-button {
+          position: absolute;
+          right: 16px;
+          top: 50%;
+          display: grid;
+          width: 44px;
+          height: 44px;
+          place-items: center;
+          transform: translateY(-50%);
+          border: 1px solid var(--sa-border-strong);
+          border-radius: var(--sa-radius-control);
+          background: var(--sa-surface-inset);
+          box-shadow: none;
+        }
+
+        .skillatlas-mobile-menu-button > span { position: relative; display: block; width: 20px; height: 14px; }
+        .skillatlas-mobile-menu-button i { position: absolute; left: 0; width: 20px; height: 2px; border-radius: 1px; background: var(--sa-accent); transition: top 180ms ease, transform 180ms ease, opacity 150ms ease, background-color 180ms ease; }
+        /* Turquoise control graphics need stronger contrast on the pale surface. */
+        html:not(.skillatlas-dark) .skillatlas-mobile-menu-button i { background: #087f7c; }
+        .skillatlas-mobile-menu-button i:nth-child(1) { top: 0; }
+        .skillatlas-mobile-menu-button i:nth-child(2) { top: 6px; }
+        .skillatlas-mobile-menu-button i:nth-child(3) { top: 12px; }
+        .skillatlas-mobile-menu-button[aria-expanded="true"] i:nth-child(1) { top: 6px; transform: rotate(45deg); }
+        .skillatlas-mobile-menu-button[aria-expanded="true"] i:nth-child(2) { opacity: 0; }
+        .skillatlas-mobile-menu-button[aria-expanded="true"] i:nth-child(3) { top: 6px; transform: rotate(-45deg); }
+
+        header nav.skillatlas-mobile-nav {
+          pointer-events: none;
+          position: absolute;
+          top: calc(100% + 8px);
+          right: 12px;
+          left: 12px;
+          box-sizing: border-box;
+          display: block !important;
+          max-width: calc(100vw - 24px) !important;
+          max-height: calc(100vh - 96px);
+          margin: 0 !important;
+          overflow-x: hidden;
+          overflow-y: auto;
+          border: 1px solid var(--sa-border-strong);
+          border-radius: var(--sa-radius-panel);
+          background: color-mix(in srgb, var(--sa-surface-1) 98%, transparent);
+          box-shadow: 0 24px 60px color-mix(in srgb, #020617 26%, transparent);
+          opacity: 0;
+          padding: 10px;
+          transform: translateY(-7px);
+          transition: opacity 180ms ease, transform 180ms ease;
+          overscroll-behavior: contain;
+          scrollbar-color: var(--sa-accent) transparent;
+          scrollbar-width: thin;
+          backdrop-filter: blur(20px);
+        }
+
+        header nav.skillatlas-mobile-nav-open { pointer-events: auto; opacity: 1; transform: translateY(0); }
+        .skillatlas-mobile-console-heading { padding: 0 4px 7px; }
+
+        .skillatlas-mobile-family { margin-top: 8px; border: 1px solid var(--sa-border-subtle); border-radius: var(--sa-radius-panel); background: var(--sa-surface-inset); }
+        .skillatlas-mobile-family-active { border-color: var(--sa-border-active); }
+        .skillatlas-mobile-family-trigger {
+          display: flex;
+          width: 100%;
+          min-height: 48px;
+          align-items: center;
+          justify-content: space-between;
+          border: 0;
+          border-radius: 0;
+          background: transparent;
+          padding: 6px 11px;
+          color: var(--sa-text-primary);
+          text-align: left;
+        }
+        .skillatlas-mobile-family-trigger small,
+        .skillatlas-mobile-direct-link small { display: block; color: var(--sa-text-technical); font-family: var(--sa-font-data); font-size: 8px; font-weight: var(--sa-weight-medium); letter-spacing: var(--sa-tracking-label); line-height: 1; text-transform: uppercase; }
+        .skillatlas-mobile-family-trigger strong,
+        .skillatlas-mobile-direct-link strong { display: block; margin-top: 4px; font-family: var(--sa-font-data); font-size: 14px; font-weight: var(--sa-weight-regular); line-height: 1; }
+        .skillatlas-mobile-family-chevron { color: var(--sa-text-technical); font-family: var(--sa-font-data); transition: transform 180ms ease; }
+        .skillatlas-mobile-family-trigger[aria-expanded="true"] .skillatlas-mobile-family-chevron { transform: rotate(180deg); }
+
+        .skillatlas-mobile-family-content { display: grid; grid-template-rows: 0fr; opacity: 0; transition: grid-template-rows 180ms ease, opacity 180ms ease; }
+        .skillatlas-mobile-family-content > div { overflow: hidden; }
+        .skillatlas-mobile-family-content-open { grid-template-rows: 1fr; opacity: 1; }
+
+        .skillatlas-mobile-nav-link {
+          display: grid;
+          min-height: 44px;
+          grid-template-columns: 28px minmax(0, 1fr) 8px;
+          align-items: center;
+          gap: 8px;
+          border: 0;
+          border-top: 1px solid var(--sa-border-subtle);
+          border-radius: 0;
+          padding: 6px 11px;
+          color: var(--sa-text-muted);
+          font-family: var(--sa-font-data);
+          font-size: 11px;
+          font-weight: var(--sa-weight-medium);
+          text-decoration: none;
+          transform: none;
+        }
+        .skillatlas-mobile-nav-link:hover,
+        .skillatlas-mobile-nav-link:focus-visible { border-color: var(--sa-border-subtle); background: color-mix(in srgb, var(--sa-accent) 7%, var(--sa-surface-2)); color: var(--sa-text-primary); transform: none; }
+        .skillatlas-mobile-nav-link:focus-visible { outline: 2px solid var(--sa-accent); outline-offset: -2px; }
+        .skillatlas-site-header .skillatlas-mobile-nav-link-active { color: var(--sa-text-primary) !important; }
+        html.skillatlas-dark .skillatlas-site-header .skillatlas-mobile-nav-link-active { color: var(--sa-accent) !important; }
+
+        .skillatlas-mobile-direct-link {
+          display: grid;
+          min-height: 48px;
+          grid-template-columns: minmax(0, 1fr) 8px;
+          align-items: center;
+          gap: 10px;
+          margin-top: 8px;
+          border: 1px solid var(--sa-border-subtle);
+          border-radius: var(--sa-radius-control);
+          background: var(--sa-surface-inset);
+          padding: 6px 11px;
+          color: var(--sa-text-primary);
+          text-decoration: none;
+        }
+        .skillatlas-mobile-direct-link > span:last-child { width: 5px; height: 5px; border: 1px solid var(--sa-border-strong); border-radius: 1px; }
+        .skillatlas-mobile-direct-link-active { border-color: var(--sa-border-active); }
+        .skillatlas-mobile-direct-link-active > span:last-child { border-color: var(--sa-accent); background: var(--sa-accent); }
+        .skillatlas-mobile-direct-link:focus-visible { outline: 2px solid var(--sa-accent); outline-offset: 2px; }
+        .skillatlas-mobile-direct-group { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+        .skillatlas-mobile-system-stack { margin-top: 10px; border-top: 1px solid var(--sa-border-subtle); padding-top: 9px; }
+        .skillatlas-mobile-system-stack .skillatlas-mobile-console-heading { border-bottom: 0; }
+        .skillatlas-member-control-mobile,
+        .skillatlas-display-control-mobile { margin-top: 6px; }
+        .skillatlas-mobile-system-stack .skillatlas-member-menu { position: relative; top: auto; right: auto; width: 100%; margin-top: 5px; }
+
+        @media (min-width: 640px) {
+          .skillatlas-header-inner { padding-right: 24px; padding-left: 24px; }
+          .skillatlas-brand-title { width: 174px; }
+          .skillatlas-site-header-scrolled .skillatlas-brand-title { width: 148px; }
+          header nav.skillatlas-mobile-nav { right: 20px; left: auto; width: 400px; }
+          .skillatlas-mobile-menu-button { right: 24px; }
+        }
+
+        @media (min-width: 1280px) {
+          .skillatlas-site-header-scrolled { height: 96px; }
+          /* Keep spare space before the command strip. 52px + the final label's
+             4px trigger padding matches the 56px visible gap between nav labels. */
+          .skillatlas-header-inner { display: grid; grid-template-columns: minmax(432px, 1fr) max-content 160px; gap: 52px; padding-right: 32px; padding-left: 32px; }
+          .skillatlas-brand-mark { width: 72px; height: 72px; }
+          .skillatlas-brand-title { width: 220px; height: 42px; }
+          .skillatlas-site-header-scrolled .skillatlas-brand-mark { width: 52px; height: 52px; }
+          .skillatlas-site-header-scrolled .skillatlas-brand-title { width: 166px; height: 32px; }
+          header nav.skillatlas-desktop-nav {
+            display: grid !important;
+            width: max-content;
+            max-width: 100% !important;
+            /* Keep a deliberate brand gap followed by a compact, content-sized group. */
+            padding-inline: 0;
+            justify-self: start;
+            height: 100%;
+            grid-template-columns: repeat(5, max-content);
+            column-gap: 48px;
+            align-items: center;
+            margin: 0 !important;
+          }
+          .skillatlas-desktop-system-stack { display: grid; grid-template-rows: 40px 40px; gap: 4px; align-content: center; }
+          .skillatlas-member-control-desktop,
+          .skillatlas-display-control-desktop { min-height: 40px; }
+          .skillatlas-member-control-desktop { grid-template-columns: 26px minmax(0, 1fr) auto; gap: 6px; padding: 4px 7px 4px 5px; }
+          .skillatlas-member-control-desktop .skillatlas-member-glyph { width: 26px; height: 26px; }
+          .skillatlas-display-control-desktop { grid-template-columns: 4px minmax(0, 1fr) 20px; gap: 7px; padding: 4px 7px; }
+          .skillatlas-display-control-desktop .skillatlas-display-marker { height: 20px; }
+          .skillatlas-display-control-desktop .skillatlas-display-icon { width: 20px; height: 20px; }
+          .skillatlas-display-control-desktop .skillatlas-display-icon svg { width: 16px; height: 16px; }
+          .skillatlas-mobile-menu-button,
+          header nav.skillatlas-mobile-nav { display: none !important; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .skillatlas-site-header,
+          .skillatlas-brand-mark,
+          .skillatlas-brand-title,
+          .skillatlas-primary-nav-trigger,
+          .skillatlas-primary-nav-label::after,
+          .skillatlas-nav-menu,
+          .skillatlas-member-control,
+          .skillatlas-display-control,
+          .skillatlas-mobile-menu-button i,
+          .skillatlas-mobile-nav,
+          .skillatlas-mobile-family-content,
+          .skillatlas-mobile-family-chevron { transition-duration: 0.01ms !important; }
+          .skillatlas-member-menu { animation-duration: 0.01ms !important; }
+        }
+
         .skillatlas-live-chat {
           position: fixed;
           right: 24px;
@@ -1155,7 +1658,7 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
           flex-direction: column;
           align-items: flex-end;
           gap: 12px;
-          font-family: inherit;
+          font-family: var(--sa-font-ui);
         }
 
         .skillatlas-live-chat-panel {
@@ -1165,7 +1668,7 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
           flex-direction: column;
           overflow: hidden;
           border: 1px solid rgba(255, 47, 168, 0.36);
-          border-radius: 24px;
+          border-radius: var(--sa-radius-panel);
           background: rgba(255, 255, 255, 0.96);
           box-shadow: 0 22px 60px rgba(15, 23, 42, 0.18);
           backdrop-filter: blur(18px);
@@ -1187,33 +1690,35 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
         }
 
         .skillatlas-live-chat-kicker {
+          font-family: var(--sa-font-data);
           margin: 0;
           font-size: 10px;
-          font-weight: 900;
-          letter-spacing: 0.22em;
+          font-weight: var(--sa-weight-medium);
+          letter-spacing: var(--sa-tracking-label);
           text-transform: uppercase;
           color: var(--skillatlas-turquoise);
         }
 
         .skillatlas-live-chat-title {
+          font-family: var(--sa-font-data);
           margin: 3px 0 0;
           font-size: 16px;
-          font-weight: 950;
+          font-weight: var(--sa-weight-medium);
           color: #111827;
         }
 
         .skillatlas-live-chat-close {
           position: relative;
           display: grid;
-          width: 32px;
-          height: 32px;
+          width: 44px;
+          height: 44px;
           place-items: center;
           border: 1px solid rgba(15, 23, 42, 0.12);
-          border-radius: 999px;
+          border-radius: var(--sa-radius-control);
           background: rgba(255, 255, 255, 0.82);
           color: #111827;
           font-size: 0;
-          font-weight: 900;
+          font-weight: var(--sa-weight-medium);
           line-height: 0;
           padding: 0;
           transition:
@@ -1263,11 +1768,11 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
         .skillatlas-live-chat-message {
           width: 100%;
           max-width: 100%;
-          border-radius: 12px;
+          border-radius: var(--sa-radius-sm);
           padding: 6px 8px;
           font-size: 11.5px;
-          font-weight: 700;
-          line-height: 1.2;
+          font-weight: var(--sa-weight-regular);
+          line-height: 1.5;
         }
 
         .skillatlas-live-chat-message.assistant {
@@ -1283,11 +1788,12 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
         }
 
         .skillatlas-live-chat-meta {
+          font-family: var(--sa-font-data);
           display: inline;
           margin: 0 7px 0 0;
           font-size: 9px;
-          font-weight: 950;
-          letter-spacing: 0.10em;
+          font-weight: var(--sa-weight-medium);
+          letter-spacing: var(--sa-tracking-meta);
           text-transform: uppercase;
           opacity: 0.72;
         }
@@ -1306,7 +1812,7 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
           margin: 0 0.12em;
           border-radius: 999px;
           font-size: 1.04em;
-          font-weight: 950;
+          font-weight: var(--sa-weight-medium);
           line-height: 1;
           vertical-align: -0.16em;
           background: rgba(255,255,255,0.78);
@@ -1390,10 +1896,10 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
         .skillatlas-live-chat-empty,
         .skillatlas-live-chat-error {
           margin: 0;
-          border-radius: 16px;
+          border-radius: var(--sa-radius-control);
           padding: 8px 10px;
           font-size: 12px;
-          font-weight: 800;
+          font-weight: var(--sa-weight-regular);
           line-height: 1.35;
         }
 
@@ -1431,12 +1937,13 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
         }
 
         .skillatlas-live-chat-input-shell {
+          min-height: 44px;
           display: flex;
           min-width: 0;
           flex: 1;
           align-items: center;
           border: 1px solid rgba(15, 23, 42, 0.12);
-          border-radius: 999px;
+          border-radius: var(--sa-radius-control);
           background: #ffffff;
           padding: 7px 12px;
           box-shadow: inset 0 0 0 1px rgba(25, 211, 207, 0);
@@ -1455,7 +1962,7 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
           overflow-y: auto;
           color: #111827;
           font-size: 13px;
-          font-weight: 700;
+          font-weight: var(--sa-weight-regular);
           line-height: 1.35;
           outline: none;
           white-space: pre-wrap;
@@ -1483,17 +1990,17 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
 
         .skillatlas-live-chat-emoji-trigger {
           display: grid;
-          width: 42px;
-          height: 42px;
+          width: 44px;
+          height: 44px;
           place-items: center;
           border: 1px solid rgba(25, 211, 207, 0.34);
-          border-radius: 999px;
+          border-radius: var(--sa-radius-control);
           background:
             linear-gradient(135deg, rgba(25,211,207,0.14), rgba(255,47,168,0.10)),
             rgba(255,255,255,0.92);
           color: var(--skillatlas-turquoise);
           font-size: 18px;
-          font-weight: 950;
+          font-weight: var(--sa-weight-medium);
           line-height: 1;
           padding: 0;
           transition:
@@ -1536,7 +2043,7 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
           overflow-y: auto;
           overscroll-behavior: contain;
           border: 1px solid rgba(255, 47, 168, 0.28);
-          border-radius: 18px;
+          border-radius: var(--sa-radius-panel);
           background: rgba(255,255,255,0.98);
           box-shadow: 0 18px 42px rgba(15, 23, 42, 0.18);
           padding: 8px;
@@ -1550,7 +2057,7 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
           height: 44px;
           place-items: center;
           border: 1px solid rgba(15, 23, 42, 0.08);
-          border-radius: 14px;
+          border-radius: var(--sa-radius-control);
           background: rgba(248,250,252,0.84);
           padding: 0;
           color: #243447;
@@ -1584,15 +2091,16 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
         }
 
         .skillatlas-live-chat-name {
+          min-height: 44px;
           min-width: 0;
           width: 100%;
           border: 1px solid rgba(15, 23, 42, 0.12);
-          border-radius: 999px;
+          border-radius: var(--sa-radius-control);
           background: #ffffff;
           color: #111827;
           padding: 10px 13px;
           font-size: 13px;
-          font-weight: 700;
+          font-weight: var(--sa-weight-regular);
           outline: none;
         }
 
@@ -1602,13 +2110,14 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
         }
 
         .skillatlas-live-chat-send {
+          min-height: 44px;
           border: 0;
-          border-radius: 999px;
+          border-radius: var(--sa-radius-control);
           background: var(--skillatlas-turquoise);
-          color: #ffffff;
+          color: #111827;
           padding: 0 14px;
           font-size: 13px;
-          font-weight: 900;
+          font-weight: var(--sa-weight-medium);
           transition:
             filter 180ms ease,
             transform 180ms ease;
@@ -1625,12 +2134,12 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
           height: 54px;
           place-items: center;
           border: 1px solid rgba(255, 47, 168, 0.38);
-          border-radius: 999px;
+          border-radius: var(--sa-radius-control);
           background: linear-gradient(135deg, var(--skillatlas-turquoise), var(--skillatlas-pink));
           box-shadow: 0 14px 32px rgba(15, 23, 42, 0.24);
           color: #ffffff;
           font-size: 24px;
-          font-weight: 950;
+          font-weight: var(--sa-weight-medium);
           line-height: 1;
           transition:
             opacity 180ms ease,

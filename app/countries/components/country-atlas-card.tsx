@@ -26,10 +26,10 @@ function CountryAtlasCard({
     >
       <div className="flex min-w-0 items-start justify-between gap-sa-3 px-sa-3 py-sa-3">
         <div className="min-w-0">
-          <h3 className="break-words text-[15px] font-bold leading-5 text-sa-text-primary">{country.name}</h3>
+          <h3 className="sa-type-heading break-words text-[15px] leading-5 text-sa-text-primary">{country.name}</h3>
           <DataLabel as="p" className="mt-0.5">{country.region}</DataLabel>
         </div>
-        <p className="font-sa-data text-lg font-bold leading-5 text-sa-accent" aria-label={`Overall rank ${country.rank}`}>
+        <p className="sa-type-data text-lg leading-5 text-sa-accent" aria-label={`Overall rank ${country.rank}`}>
           #{String(country.rank).padStart(2, "0")}
         </p>
       </div>
@@ -59,7 +59,7 @@ function CountryAtlasCard({
       <div className="flex items-end justify-between gap-sa-3 border-t border-sa-border-subtle px-sa-3 py-sa-2">
         <div>
           <DataLabel as="p">1Y Score</DataLabel>
-          <p className="mt-0.5 font-sa-data text-xs font-bold text-sa-text-muted">{latestScore.toFixed(1)}</p>
+          <p className="sa-type-data mt-0.5 text-xs text-sa-text-muted">{latestScore.toFixed(1)}</p>
         </div>
         <Sparkline values={country.oneYearScore} />
       </div>

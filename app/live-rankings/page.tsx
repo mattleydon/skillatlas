@@ -3,6 +3,7 @@
 import type { DragEvent as ReactDragEvent } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import Sparkline from "@/app/components/sparkline";
+import CountryFlag from "@/app/components/country-flag";
 import { GAMES } from "@/constants/games";
 import { clamp } from "@/lib/math";
 
@@ -484,7 +485,7 @@ function RankWheel({
               event.preventDefault();
               onDropRank(rank - 1);
             }}
-            className="absolute border-0 bg-transparent p-0 font-black leading-none tracking-[-0.08em] transition-all duration-[420ms] ease-[cubic-bezier(0.16,1,0.3,1)]"
+            className="sa-type-control absolute border-0 bg-transparent p-0 leading-none tracking-[-0.08em] transition-all duration-[420ms] ease-[cubic-bezier(0.16,1,0.3,1)]"
             style={{
               left,
               bottom,
@@ -709,23 +710,23 @@ export default function LiveRankingsPage() {
         />
       ) : null}
 
-      <section className="relative z-10 mx-auto max-w-7xl px-8 pb-16 pt-[150px]">
-        <div className="mb-6 rounded-3xl border border-[#ff2fa8]/45 bg-white/92 p-6 shadow-sm backdrop-blur">
-          <p className="mb-2 text-xs font-black uppercase tracking-[0.28em] text-[#19d3cf]">Live Rankings</p>
+      <section className="skillatlas-page-shell relative z-10 mx-auto w-full max-w-7xl pb-16">
+        <div className="mb-6 rounded-sa-panel border border-[#ff2fa8]/45 bg-white/92 p-6 shadow-sm backdrop-blur">
+          <p className="sa-type-label mb-2 text-xs text-[#19d3cf]">Live Rankings</p>
           <div className="grid gap-5 lg:grid-cols-[1.25fr_0.75fr] lg:items-end">
             <div>
-              <h1 className="mb-2 text-xl font-black tracking-tight">Drag countries up and down the rankings in real time.</h1>
-              <p className="max-w-4xl text-sm font-semibold leading-relaxed text-gray-600">
+              <h1 className="sa-type-page-title mb-2">Drag countries up and down the rankings in real time.</h1>
+              <p className="sa-type-intro max-w-4xl text-gray-600">
                 A live ranking sandbox for community movement, instant momentum, and chaotic leaderboard theatre.
               </p>
             </div>
 
             <label className="block">
-              <span className="mb-2 block text-[10px] font-black uppercase tracking-[0.2em] text-gray-500">Live Game Lens</span>
+              <span className="sa-type-label mb-2 block text-[10px] text-gray-500">Live Game Lens</span>
               <select
                 value={selectedGame}
                 onChange={(event) => setSelectedGame(event.target.value)}
-                className="h-14 w-full rounded-2xl border border-[#19d3cf]/35 bg-white/90 px-5 text-sm font-bold outline-none transition-all duration-300 focus:border-[#19d3cf] focus:shadow-[0_0_0_4px_rgba(25,211,207,0.14)]"
+                className="h-11 w-full rounded-sa-control border border-[#19d3cf]/35 bg-white/90 px-5 text-sm font-medium outline-none transition-all duration-300 focus:border-[#19d3cf] focus:shadow-[0_0_0_4px_rgba(25,211,207,0.14)]"
               >
                 {GAMES.map((game) => (
                   <option key={game} value={game}>{game}</option>
@@ -735,27 +736,27 @@ export default function LiveRankingsPage() {
           </div>
         </div>
 
-        <section className="mb-6 overflow-hidden rounded-3xl border border-[#ff2fa8]/45 bg-white/92 shadow-sm backdrop-blur">
-          <div className="flex items-center justify-between gap-4 border-b border-[#ff2fa8]/20 p-5">
-            <p className="text-[11px] font-black uppercase tracking-[0.24em] text-[#19d3cf]">Live Board</p>
+        <section className="mb-6 overflow-hidden rounded-sa-panel border border-[#ff2fa8]/45 bg-white/92 shadow-sm backdrop-blur">
+          <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[#ff2fa8]/20 p-5">
+            <p className="sa-type-label text-[11px] text-[#19d3cf]">Live Board</p>
             <div className="flex items-center gap-3">
-              <p className="text-xs font-black text-[#ff2fa8]">{selectedGame}</p>
-              <span className="rounded-full bg-[#19d3cf]/12 px-3 py-1 text-xs font-black text-[#19d3cf]">Live heat {liveScore.toLocaleString()}</span>
+              <p className="text-xs font-medium text-[#ff2fa8]">{selectedGame}</p>
+              <span className="sa-type-data rounded-sa-sm bg-[#19d3cf]/12 px-3 py-1 text-xs text-[#19d3cf]">Live heat {liveScore.toLocaleString()}</span>
             </div>
           </div>
 
           <div className="overflow-x-auto">
             <table className="w-full min-w-[1080px] border-collapse text-left">
               <thead>
-                <tr className="border-b border-gray-200 text-[11px] uppercase tracking-[0.16em] text-gray-500">
-                  <th className="px-4 py-3 font-black">Rank</th>
-                  <th className="px-4 py-3 font-black">Country</th>
-                  <th className="px-4 py-3 font-black">Live Score</th>
-                  <th className="px-4 py-3 font-black">Momentum</th>
-                  <th className="px-4 py-3 font-black">7 Day Avg Rank</th>
-                  <th className="px-4 py-3 font-black">1 Month Avg Rank</th>
-                  <th className="px-4 py-3 font-black">1 Year Avg Rank</th>
-                  <th className="px-4 py-3 font-black">Move</th>
+                <tr className="sa-type-label border-b border-gray-200 text-[11px] text-gray-500">
+                  <th className="px-4 py-3 font-normal">Rank</th>
+                  <th className="px-4 py-3 font-normal">Country</th>
+                  <th className="px-4 py-3 font-normal">Live Score</th>
+                  <th className="px-4 py-3 font-normal">Momentum</th>
+                  <th className="px-4 py-3 font-normal">7 Day Avg Rank</th>
+                  <th className="px-4 py-3 font-normal">1 Month Avg Rank</th>
+                  <th className="px-4 py-3 font-normal">1 Year Avg Rank</th>
+                  <th className="px-4 py-3 font-normal">Move</th>
                 </tr>
               </thead>
 
@@ -781,37 +782,35 @@ export default function LiveRankingsPage() {
                     onDrop={(event) => handleDrop(event, index)}
                     onDragEnd={closeRankWheel}
                     className={`h-[52px] cursor-grab border-b border-gray-200/80 transition-all duration-300 ease-out active:cursor-grabbing ${
-                      draggedName && hoveredRankIndex === index ? "bg-[#19d3cf]/15" : "hover:bg-[#19d3cf]/5"
-                    }`}
+ draggedName && hoveredRankIndex === index ? "bg-[#19d3cf]/15" : "hover:bg-[#19d3cf]/5"
+ }`}
                   >
-                    <td className={`whitespace-nowrap px-4 py-2 text-base font-black text-[#ff2fa8] ${draggedName === country.name && hoveredRankIndex !== index ? "opacity-45" : ""}`}>#{index + 1}</td>
+                    <td className={`sa-type-data whitespace-nowrap px-4 py-2 text-base text-[#ff2fa8] ${draggedName === country.name && hoveredRankIndex !== index ? "opacity-45" : ""}`}>#{index + 1}</td>
                     <td className="whitespace-nowrap px-4 py-2">
                       <div className="flex items-center gap-3">
-                        <span className="grid h-6 w-6 shrink-0 place-items-center overflow-hidden rounded-lg bg-gray-50 shadow-inner">
-                          <img src={`https://flagcdn.com/w80/${country.code}.png`} alt={`${country.name} flag`} className="h-full w-full object-cover" />
-                        </span>
-                        <span className="text-sm font-black">{country.name}</span>
+                        <CountryFlag country={{ name: country.name, flagCode: country.code }} size="sm" />
+                        <span className="text-sm font-medium">{country.name}</span>
                       </div>
                     </td>
                     <td className="whitespace-nowrap px-4 py-2">
-                      <span className="rounded-full bg-[#19d3cf]/12 px-2.5 py-0.5 text-xs font-black text-[#19d3cf]">{country.score}</span>
+                      <span className="sa-type-data rounded-sa-sm bg-[#19d3cf]/12 px-2.5 py-0.5 text-xs text-[#19d3cf]">{country.score}</span>
                     </td>
-                    <td className={`whitespace-nowrap px-4 py-2 text-xs font-black ${country.momentum >= 0 ? "text-[#19d3cf]" : "text-[#ff2fa8]"}`}>
+                    <td className={`sa-type-data whitespace-nowrap px-4 py-2 text-xs ${country.momentum >= 0 ? "text-[#19d3cf]" : "text-[#ff2fa8]"}`}>
                       {country.momentum >= 0 ? `▲ ${country.momentum}` : `▼ ${Math.abs(country.momentum)}`}
                     </td>
-                    <td className="whitespace-nowrap px-4 py-2 text-xs font-black text-gray-700">
+                    <td className="sa-type-data whitespace-nowrap px-4 py-2 text-xs text-gray-700">
                       #{averageRankedPosition(index, country.momentum, "7d")}
                     </td>
-                    <td className="whitespace-nowrap px-4 py-2 text-xs font-black text-gray-700">
+                    <td className="sa-type-data whitespace-nowrap px-4 py-2 text-xs text-gray-700">
                       #{averageRankedPosition(index, country.momentum, "1m")}
                     </td>
-                    <td className="whitespace-nowrap px-4 py-2 text-xs font-black text-gray-700">
+                    <td className="sa-type-data whitespace-nowrap px-4 py-2 text-xs text-gray-700">
                       #{averageRankedPosition(index, country.momentum, "1y")}
                     </td>
                     <td className="whitespace-nowrap px-4 py-2">
                       <div className="flex gap-2">
-                        <button type="button" onClick={() => moveCountry(index, index - 1)} className="rounded-full border border-[#19d3cf]/35 px-2.5 py-0.5 text-xs font-black text-[#19d3cf]">↑</button>
-                        <button type="button" onClick={() => moveCountry(index, index + 1)} className="rounded-full border border-[#ff2fa8]/35 px-2.5 py-0.5 text-xs font-black text-[#ff2fa8]">↓</button>
+                        <button type="button" onClick={() => moveCountry(index, index - 1)} className="sa-type-data min-h-11 min-w-11 rounded-sa-control border border-[#19d3cf]/35 px-2.5 py-0.5 text-xs text-[#19d3cf]">↑</button>
+                        <button type="button" onClick={() => moveCountry(index, index + 1)} className="sa-type-data min-h-11 min-w-11 rounded-sa-control border border-[#ff2fa8]/35 px-2.5 py-0.5 text-xs text-[#ff2fa8]">↓</button>
                       </div>
                     </td>
                   </tr>
@@ -821,11 +820,11 @@ export default function LiveRankingsPage() {
           </div>
         </section>
 
-        <section className="rounded-3xl border border-[#ff2fa8]/45 bg-white/92 p-5 shadow-sm backdrop-blur">
-          <p className="mb-4 text-[11px] font-black uppercase tracking-[0.24em] text-[#19d3cf]">Live Movement Feed</p>
+        <section className="rounded-sa-panel border border-[#ff2fa8]/45 bg-white/92 p-5 shadow-sm backdrop-blur">
+          <p className="sa-type-label mb-4 text-[11px] text-[#19d3cf]">Live Movement Feed</p>
           <div className="grid gap-3 md:grid-cols-3">
             {activity.map((item) => (
-              <div key={item} className="rounded-2xl border border-gray-200 bg-white/70 p-4 text-sm font-black text-gray-700">
+              <div key={item} className="rounded-sa-control border border-gray-200 bg-white/70 p-4 text-sm font-medium text-gray-700">
                 {item}
               </div>
             ))}

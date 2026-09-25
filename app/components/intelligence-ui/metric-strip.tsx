@@ -13,7 +13,7 @@ export function MetricItem({
   return (
     <div className={`min-w-0 px-sa-3 py-sa-2 ${className}`}>
       <DataLabel as="p">{label}</DataLabel>
-      <div className="mt-sa-1 min-w-0 font-sa-data text-sm font-bold leading-5 text-sa-text-primary">
+      <div className="sa-type-data mt-sa-1 min-w-0 text-sm leading-5 text-sa-text-primary">
         {children}
       </div>
     </div>

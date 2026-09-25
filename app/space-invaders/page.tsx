@@ -316,17 +316,17 @@ export default function SpaceInvaders() {
 
       <section className="relative h-screen w-full overflow-hidden">
         <div className="absolute left-8 top-8 z-20 rounded-2xl bg-white/90 p-4 backdrop-blur">
-          <Link href="/" className="text-sm font-bold text-[#ff2fa8]">← Rankings</Link>
-          <h1 className="mt-3 text-3xl font-black">SkillInvaders</h1>
+          <Link href="/" className="text-sm font-medium text-[#ff2fa8]">← Rankings</Link>
+          <h1 className="sa-type-page-title mt-3">SkillInvaders</h1>
           <p className="mt-1 text-sm text-gray-500">Move with ← → and shoot with Space.</p>
 
-          <p className="mt-4 text-2xl font-black text-[#19d3cf]">Score: {score}</p>
-          <p className="mt-2 text-sm font-bold text-[#ff2fa8]">Combo: {combo}</p>
-          <p className="text-sm font-bold text-[#19d3cf]">Multiplier: {multiplier}x</p>
+          <p className="sa-type-data mt-4 text-2xl text-[#19d3cf]">Score: {score}</p>
+          <p className="sa-type-data mt-2 text-sm text-[#ff2fa8]">Combo: {combo}</p>
+          <p className="sa-type-data text-sm text-[#19d3cf]">Multiplier: {multiplier}x</p>
 
           {gameOver && (
             <div className="mt-4 rounded-xl border border-[#ff2fa8]/35 bg-[#ff2fa8]/5 p-3">
-              <p className="font-black text-[#ff2fa8]">Game Over</p>
+              <p className="font-medium text-[#ff2fa8]">Game Over</p>
               <p className="text-sm text-gray-600">Press Enter to restart.</p>
             </div>
           )}
@@ -335,7 +335,7 @@ export default function SpaceInvaders() {
         {popup && (
           <div
             key={popup.id}
-            className="pointer-events-none absolute left-1/2 top-28 z-30 -translate-x-1/2 animate-[comboPop_900ms_ease-out_forwards] rounded-2xl border border-[#ff2fa8]/35 bg-white px-8 py-4 text-3xl font-black text-[#ff2fa8] shadow-sm"
+            className="pointer-events-none absolute left-1/2 top-28 z-30 -translate-x-1/2 animate-[comboPop_900ms_ease-out_forwards] rounded-2xl border border-[#ff2fa8]/35 bg-white px-8 py-4 text-3xl font-medium text-[#ff2fa8] shadow-sm"
           >
             {popup.text}
           </div>
@@ -422,14 +422,14 @@ function Alien({ enemy }: { enemy: Enemy }) {
 function Leaderboard({ title, items }: { title: string; items: string[] }) {
   return (
     <div className="w-64 rounded-2xl border border-[#ff2fa8]/35 bg-white p-3.5 shadow-sm">
-      <p className="mb-2 text-[11px] font-black uppercase tracking-[0.22em] text-[#19d3cf]">{title}</p>
+      <p className="sa-type-label mb-2 text-[11px] text-[#19d3cf]">{title}</p>
 
       <div className="space-y-1.5">
         {items.map((item, index) => (
           <div key={item} className="flex items-center justify-between rounded-xl bg-gray-50 px-3 py-1.5 text-sm">
-            <span className="font-bold text-[#ff2fa8]">{index + 1}</span>
-            <span className="font-semibold">{item}</span>
-            <span className="text-xs font-bold text-gray-400">{1000 - index * 87}</span>
+            <span className="sa-type-data text-[#ff2fa8]">{index + 1}</span>
+            <span className="font-medium">{item}</span>
+            <span className="sa-type-data text-xs text-gray-400">{1000 - index * 87}</span>
           </div>
         ))}
       </div>
