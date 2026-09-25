@@ -91,8 +91,8 @@ test("symbol brightness is theme-specific without changing wordmark gradient or 
   const globals = read("app/globals.css");
   assert.match(globals, /mask: url\("\/skillatlas-logo.png"\) center \/ contain no-repeat/);
   assert.match(globals, /opacity: 0\.85/);
-  assert.match(globals, /filter: saturate\(1\.25\) brightness\(1\.1\) contrast\(1\.12\)/);
-  assert.match(globals, /html\.skillatlas-dark \.skillatlas-brand-mark::before \{\s*filter: saturate\(1\.04\) brightness\(1\.11\)/);
+  assert.match(globals, /filter: saturate\(1\.25\) brightness\(1\.232\) contrast\(1\.12\)/);
+  assert.match(globals, /html\.skillatlas-dark \.skillatlas-brand-mark::before \{\s*filter: saturate\(1\.04\) brightness\(1\.0656\)/);
 });
 
 test("symbol colour uses the unfiltered ATLAS gradient while preserving lower-layer luminance", () => {

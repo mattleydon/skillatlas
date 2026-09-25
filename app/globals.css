@@ -173,11 +173,11 @@ html.skillatlas-dark .skillatlas-shadow-mark {
   .skillatlas-brand-mark::before {
     z-index: 1;
     opacity: 0.85;
-    filter: saturate(1.25) brightness(1.1) contrast(1.12);
+    filter: saturate(1.25) brightness(1.232) contrast(1.12);
   }
 
   html.skillatlas-dark .skillatlas-brand-mark::before {
-    filter: saturate(1.04) brightness(1.11);
+    filter: saturate(1.04) brightness(1.0656);
   }
 
   /* Colour comes unfiltered from ATLAS; color blending retains the approved
