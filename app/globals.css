@@ -278,11 +278,11 @@ html.skillatlas-dark .skillatlas-shadow-mark {
 
 .skillatlas-country-flag-image {
   object-fit: contain;
-  filter: saturate(0.65) brightness(0.9) contrast(1.05);
+  filter: none;
 }
 
 html.skillatlas-dark .skillatlas-country-flag-image {
-  filter: saturate(0.55) brightness(0.78) contrast(1.08);
+  filter: saturate(0.9) brightness(0.92);
 }
 
 /* Preserve the approved intro spacing; type is owned by sa-type-intro. */
