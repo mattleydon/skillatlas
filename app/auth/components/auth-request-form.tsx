@@ -21,8 +21,15 @@ type AuthRequestFormProps = {
 
 export default function AuthRequestForm({ flow, configurationAvailable }: AuthRequestFormProps) {
   const action = flow === "sign-in" ? requestSignInCodeAction : requestSignUpCodeAction;
-  const [state, formAction] = useActionState<AuthActionState, FormData>(
-    action,
+  const submitting = useRef(false);
+  const [state, formAction, pending] = useActionState<AuthActionState, FormData>(
+    async (previousState, formData) => {
+      try {
+        return await action(previousState, formData);
+      } finally {
+        submitting.current = false;
+      }
+    },
     INITIAL_AUTH_ACTION_STATE
   );
   const emailRef = useRef<HTMLInputElement>(null);
@@ -33,7 +40,10 @@ export default function AuthRequestForm({ flow, configurationAvailable }: AuthRe
   }, [state]);
 
   return (
-    <form action={formAction} className="space-y-sa-4">
+    <form action={formAction} aria-busy={pending} onSubmit={(event) => {
+      if (submitting.current || pending) event.preventDefault();
+      else submitting.current = true;
+    }} className="space-y-sa-4">
       {!configurationAvailable ? (
         <div
           className="rounded-sa-control border border-sa-negative/50 bg-sa-negative/8 px-sa-3 py-sa-3 text-sm leading-5 text-sa-text-primary"

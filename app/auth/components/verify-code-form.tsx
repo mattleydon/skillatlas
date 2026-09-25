@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState, useEffect, useRef } from "react";
+import { type FormEvent, useActionState, useEffect, useRef } from "react";
 import { useFormStatus } from "react-dom";
 import {
   INITIAL_AUTH_ACTION_STATE,
@@ -18,13 +18,13 @@ type VerifyCodeFormProps = {
   requested: boolean;
 };
 
-function ResendButton() {
+function ResendButton({ disabled }: { disabled: boolean }) {
   const { pending } = useFormStatus();
 
   return (
     <button
       type="submit"
-      disabled={pending}
+      disabled={disabled || pending}
       className="min-h-11 rounded-sa-control border border-sa-border-strong bg-sa-surface-2 px-sa-4 text-sm font-bold text-sa-text-primary outline-none transition-colors duration-200 ease-sa-standard hover:border-sa-border-active hover:text-sa-accent focus-visible:ring-4 focus-visible:ring-sa-accent/20 disabled:cursor-not-allowed disabled:opacity-60"
     >
       {pending ? "Requesting…" : "Request a new access code"}
@@ -32,42 +32,48 @@ function ResendButton() {
   );
 }
 
-function ResendCode() {
-  const [state, formAction] = useActionState<AuthActionState, FormData>(
-    resendCodeAction,
-    INITIAL_AUTH_ACTION_STATE
-  );
-
-  return (
-    <form action={formAction} className="border-t border-sa-border-subtle pt-sa-4">
-      <ResendButton />
-      <p
-        aria-live="polite"
-        className={`mt-sa-2 min-h-5 text-sm leading-5 ${state.status === "error" ? "text-sa-negative" : "text-sa-text-muted"}`}
-      >
-        {state.message}
-      </p>
-    </form>
-  );
-}
+type VerificationState = AuthActionState & { intent?: "verify" | "resend" };
 
 export default function VerifyCodeForm({ maskedEmail, flow, requested }: VerifyCodeFormProps) {
-  const initialState: AuthActionState = requested
+  const initialState: VerificationState = requested
     ? { status: "success", message: `An access code was requested for ${maskedEmail}.` }
     : INITIAL_AUTH_ACTION_STATE;
-  const [state, formAction] = useActionState<AuthActionState, FormData>(
-    verifyCodeAction,
+  const submitting = useRef(false);
+  // Both forms share one result and one pending state. A resend must replace,
+  // not coexist with, the previous code's verification result.
+  const [result, formAction, pending] = useActionState<VerificationState, FormData>(
+    async (previousState, formData) => {
+      try {
+        const intent = formData.get("intent") === "resend" ? "resend" : "verify";
+        const action = intent === "resend" ? resendCodeAction : verifyCodeAction;
+        return { ...await action(previousState, formData), intent };
+      } finally {
+        submitting.current = false;
+      }
+    },
     initialState
   );
+  const state: VerificationState = pending ? INITIAL_AUTH_ACTION_STATE : result;
   const tokenRef = useRef<HTMLInputElement>(null);
+  const tokenError = state.status === "error" && state.intent !== "resend";
+  const preventDuplicateSubmit = (event: FormEvent<HTMLFormElement>) => {
+    if (submitting.current || pending) event.preventDefault();
+    else submitting.current = true;
+  };
 
   useEffect(() => {
-    if (state.status === "error") tokenRef.current?.focus();
-  }, [state]);
+    if (state.intent === "resend" && state.status === "success" && tokenRef.current) {
+      tokenRef.current.value = "";
+    }
+    if (tokenError || (state.intent === "resend" && state.status === "success")) {
+      tokenRef.current?.focus();
+    }
+  }, [state, tokenError]);
 
   return (
     <div className="space-y-sa-4">
-      <form action={formAction} className="space-y-sa-4">
+      <form action={formAction} onSubmit={preventDuplicateSubmit} aria-busy={pending} className="space-y-sa-4">
+        <input type="hidden" name="intent" value="verify" />
         <div>
           <label htmlFor="verification-code" className="text-xs font-bold uppercase tracking-[0.1em] text-sa-text-primary">
             Access code
@@ -87,25 +93,34 @@ export default function VerifyCodeForm({ maskedEmail, flow, requested }: VerifyC
             minLength={OTP_LENGTH}
             maxLength={OTP_LENGTH}
             pattern={`[0-9]{${OTP_LENGTH}}`}
-            aria-describedby={`verification-code-help${state.status === "error" ? " verification-code-error" : ""}`}
-            aria-invalid={state.status === "error"}
+            aria-describedby={`verification-code-help${tokenError ? " verification-code-error" : ""}`}
+            aria-invalid={tokenError}
             className="mt-sa-2 min-h-12 w-full rounded-sa-control border border-sa-border-strong bg-sa-surface-inset px-sa-3 text-center font-sa-data text-2xl font-black tracking-[0.3em] text-sa-text-primary outline-none transition-colors duration-200 ease-sa-standard placeholder:text-sa-text-technical focus:border-sa-border-active focus:ring-4 focus:ring-sa-accent/15"
             placeholder={"0".repeat(OTP_LENGTH)}
           />
         </div>
 
         <div
-          id={state.status === "error" ? "verification-code-error" : undefined}
+          id={tokenError ? "verification-code-error" : undefined}
           aria-live="polite"
           className={`min-h-5 text-sm leading-5 ${state.status === "error" ? "text-sa-negative" : "text-sa-text-muted"}`}
         >
-          {state.message}
+          {state.intent !== "resend" ? state.message : ""}
         </div>
 
-        <SubmitButton pendingLabel="Verifying…">Verify and continue</SubmitButton>
+        <SubmitButton pendingLabel="Verifying…" disabled={pending}>Verify and continue</SubmitButton>
       </form>
 
-      <ResendCode />
+      <form action={formAction} onSubmit={preventDuplicateSubmit} aria-busy={pending} className="border-t border-sa-border-subtle pt-sa-4">
+        <input type="hidden" name="intent" value="resend" />
+        <ResendButton disabled={pending} />
+        <p
+          aria-live="polite"
+          className={`mt-sa-2 min-h-5 text-sm leading-5 ${state.status === "error" ? "text-sa-negative" : "text-sa-text-muted"}`}
+        >
+          {state.intent === "resend" ? state.message : ""}
+        </p>
+      </form>
 
       <p className="text-sm leading-6 text-sa-text-muted">
         Need to use a different address? {" "}

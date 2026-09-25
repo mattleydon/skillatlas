@@ -60,7 +60,7 @@ function verificationError(error: AuthError): AuthActionState {
   if (error.code?.includes("expired")) {
     return {
       status: "error",
-      message: "That access code has expired. Request a new code and try again.",
+      message: "That access code is invalid or has expired. Use the newest code, or request a new one.",
       field: "token",
     };
   }
