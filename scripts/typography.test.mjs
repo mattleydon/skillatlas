@@ -73,6 +73,26 @@ test("Auth keeps reading controls and explicit technical eight-digit OTP typogra
   assert.match(read("app/account/components/privacy-toggle.tsx"), /sa-type-body/);
 });
 
+test("shared frame uses one tighter responsive inset without duplicate Auth top padding", () => {
+  const globals = read("app/globals.css");
+  assert.match(globals, /--sa-page-gutter: 12px/);
+  assert.match(globals, /@media \(min-width: 1024px\) \{\s*:root \{\s*--sa-page-gutter: 14px/);
+  assert.match(globals, /padding-top: calc\(var\(--sa-header-expanded-height\) \+ var\(--sa-page-gutter\)\)/);
+  assert.match(globals, /padding-inline: var\(--sa-page-gutter\)/);
+  const authFrame = read("app/auth/components/auth-shell.tsx").match(/className="skillatlas-content-frame[^"]*"/)?.[0];
+  assert.ok(authFrame);
+  assert.doesNotMatch(authFrame, /(?:pt-|py-|padding-top)/);
+  assert.match(authFrame, /max-w-\[1440px\]/);
+});
+
+test("symbol brightness is theme-specific without changing wordmark gradient or geometry", () => {
+  const globals = read("app/globals.css");
+  assert.match(globals, /mask: url\("\/skillatlas-logo.png"\) center \/ contain no-repeat/);
+  assert.match(globals, /opacity: 0\.85/);
+  assert.match(globals, /filter: saturate\(1\.25\) brightness\(1\.1\) contrast\(1\.12\)/);
+  assert.match(globals, /html\.skillatlas-dark \.skillatlas-brand-mark::after \{\s*filter: saturate\(1\.04\) brightness\(1\.11\)/);
+});
+
 test("technical labels share one source instead of independent tracking/weight recipes", () => {
   assert.match(read("app/components/intelligence-ui/data-label.tsx"), /sa-type-label text-\[10px\]/);
   assert.match(roles, /--sa-tracking-label: 0\.12em/);

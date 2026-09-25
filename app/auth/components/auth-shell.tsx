@@ -30,7 +30,7 @@ export default function AuthShell({
         <div className="absolute inset-0 opacity-25 [background-image:linear-gradient(var(--sa-border-subtle)_1px,transparent_1px),linear-gradient(90deg,var(--sa-border-subtle)_1px,transparent_1px)] [background-size:72px_72px] [mask-image:linear-gradient(to_bottom,black,transparent_60%)]" />
       </div>
 
-      <div className="skillatlas-content-frame relative mx-auto flex w-full max-w-[1440px] justify-center pb-16 pt-sa-5 sm:pb-20 sm:pt-sa-6">
+      <div className="skillatlas-content-frame relative mx-auto flex w-full max-w-[1440px] justify-center pb-16 sm:pb-20">
         <div className={`w-full ${contentClassName}`}>
           <div className="mb-sa-3 px-sa-1">
             <DataLabel as="p" className="text-sa-accent">

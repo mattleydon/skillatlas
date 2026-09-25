@@ -35,7 +35,7 @@
   --sa-space-4: 16px;
   --sa-space-5: 20px;
   --sa-space-6: 24px;
-  --sa-page-gutter: 16px;
+  --sa-page-gutter: 12px;
   --sa-header-expanded-height: 80px;
 
   --sa-control-height: 40px;
@@ -145,11 +145,11 @@ body {
 }
 
 .skillatlas-shadow-mark {
-  filter: saturate(0.9) brightness(1) contrast(1.03);
+  filter: saturate(1.05) brightness(1.08) contrast(1.06);
 }
 
 html.skillatlas-dark .skillatlas-shadow-mark {
-  filter: saturate(0.9) brightness(1.02) contrast(1.03);
+  filter: saturate(0.94) brightness(1.05) contrast(1.03);
 }
 
 /* Use the original alpha silhouette, not a redrawn approximation. The image
@@ -163,7 +163,11 @@ html.skillatlas-dark .skillatlas-shadow-mark {
     background-image: var(--sa-brand-gradient);
     mask: url("/skillatlas-logo.png") center / contain no-repeat;
     opacity: 0.85;
-    filter: brightness(1.08);
+    filter: saturate(1.25) brightness(1.1) contrast(1.12);
+  }
+
+  html.skillatlas-dark .skillatlas-brand-mark::after {
+    filter: saturate(1.04) brightness(1.11);
   }
 }
 
@@ -270,7 +274,7 @@ html.skillatlas-dark .skillatlas-country-flag-image {
 
 @media (min-width: 1024px) {
   :root {
-    --sa-page-gutter: 20px;
+    --sa-page-gutter: 14px;
   }
 
 }
