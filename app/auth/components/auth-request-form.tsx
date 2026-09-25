@@ -54,7 +54,7 @@ export default function AuthRequestForm({ flow, configurationAvailable }: AuthRe
       ) : null}
 
       <div>
-        <label htmlFor={`${flow}-email`} className="text-xs font-bold uppercase tracking-[0.1em] text-sa-text-primary">
+        <label htmlFor={`${flow}-email`} className="sa-type-label text-xs text-sa-text-primary">
           Email address
         </label>
         <p id={`${flow}-email-help`} className="mt-sa-1 text-xs leading-5 text-sa-text-technical">
@@ -93,7 +93,7 @@ export default function AuthRequestForm({ flow, configurationAvailable }: AuthRe
         {isSignIn ? "New to SkillAtlas?" : "Already have an account?"} {" "}
         <Link
           href={isSignIn ? ROUTES.authSignUp : ROUTES.authSignIn}
-          className="font-bold text-sa-accent outline-none hover:text-sa-text-primary focus-visible:rounded-sa-sm focus-visible:ring-2 focus-visible:ring-sa-accent"
+          className="font-medium text-sa-accent outline-none hover:text-sa-text-primary focus-visible:rounded-sa-sm focus-visible:ring-2 focus-visible:ring-sa-accent"
         >
           {isSignIn ? "Create an account" : "Sign in"}
         </Link>

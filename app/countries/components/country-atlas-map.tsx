@@ -969,7 +969,7 @@ export default function CountryAtlasMap({
         </div>
       }
     >
-      <h2 id="atlas-map-title" className="sr-only">
+      <h2 id="atlas-map-title" className="sa-type-heading sr-only">
         Interactive country atlas
       </h2>
       <p id="atlas-map-instructions" className="sr-only">

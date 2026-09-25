@@ -59,12 +59,12 @@ export default function ProfileIdentityForm({
     <div className="space-y-sa-5">
       <div className="grid gap-sa-3 rounded-sa-control border border-sa-border-subtle bg-sa-surface-inset px-sa-3 py-sa-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
         <div className="min-w-0">
-          <p className="text-[10px] font-black uppercase tracking-[0.14em] text-sa-accent">Public identity</p>
-          <p className="mt-sa-1 truncate text-sm font-bold text-sa-text-primary">@{username}</p>
+          <p className="sa-type-label text-[10px] text-sa-accent">Public identity</p>
+          <p className="mt-sa-1 truncate text-sm font-medium text-sa-text-primary">@{username}</p>
         </div>
         <Link
           href={memberRoute(username)}
-          className="inline-flex min-h-11 items-center justify-center rounded-sa-control border border-sa-border-active bg-sa-accent/8 px-sa-3 text-xs font-bold text-sa-accent outline-none hover:bg-sa-accent/14 hover:text-sa-text-primary focus-visible:ring-4 focus-visible:ring-sa-accent/20"
+          className="inline-flex min-h-11 items-center justify-center rounded-sa-control border border-sa-border-active bg-sa-accent/8 px-sa-3 text-xs font-medium text-sa-accent outline-none hover:bg-sa-accent/14 hover:text-sa-text-primary focus-visible:ring-4 focus-visible:ring-sa-accent/20"
         >
           View public profile
         </Link>
@@ -72,7 +72,7 @@ export default function ProfileIdentityForm({
 
       {capitalizationCorrectionAvailable ? (
         <form action={usernameAction} className="rounded-sa-control border border-sa-border-subtle px-sa-3 py-sa-3">
-          <label htmlFor="profile-username-correction" className="text-xs font-bold uppercase tracking-[0.1em] text-sa-text-primary">
+          <label htmlFor="profile-username-correction" className="sa-type-label text-xs text-sa-text-primary">
             One-time capitalization correction
           </label>
           <p id="profile-username-correction-help" className="mt-sa-1 text-xs leading-5 text-sa-text-technical">
@@ -115,7 +115,7 @@ export default function ProfileIdentityForm({
 
       <form action={identityAction} className="space-y-sa-4">
         <div>
-          <label htmlFor="profile-display-name" className="text-xs font-bold uppercase tracking-[0.1em] text-sa-text-primary">
+          <label htmlFor="profile-display-name" className="sa-type-label text-xs text-sa-text-primary">
             Display name
           </label>
           <input
@@ -133,7 +133,7 @@ export default function ProfileIdentityForm({
         </div>
 
         <div>
-          <label htmlFor="profile-bio" className="text-xs font-bold uppercase tracking-[0.1em] text-sa-text-primary">
+          <label htmlFor="profile-bio" className="sa-type-label text-xs text-sa-text-primary">
             Bio <span className="font-medium text-sa-text-technical">(optional)</span>
           </label>
           <p id="profile-bio-help" className="mt-sa-1 text-xs leading-5 text-sa-text-technical">

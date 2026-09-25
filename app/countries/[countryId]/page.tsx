@@ -33,10 +33,10 @@ export default async function CountryAtlasEntryPage({
           <div className="flex items-center gap-4">
             <CountryFlag country={country} size="lg" />
             <div className="min-w-0">
-              <p className="font-sa-data text-[10px] font-normal uppercase tracking-[0.12em] text-[#19d3cf]">
+              <p className="sa-type-label text-[10px] text-[#19d3cf]">
                 Country Atlas Entry
               </p>
-              <h1 className="mt-1 break-words font-medium tracking-tight">
+              <h1 className="sa-type-page-title mt-1 break-words">
                 {country.name}
               </h1>
               <p className={`${styles.placeholderMutedText} mt-1 text-sm font-normal`}>
@@ -46,7 +46,7 @@ export default async function CountryAtlasEntryPage({
           </div>
 
           <div className="mt-sa-5 rounded-sa-control border border-sa-border-subtle bg-sa-surface-inset p-sa-4">
-            <p className="font-sa-data text-[10px] font-normal uppercase tracking-[0.12em] text-gray-500">
+            <p className="sa-type-label text-[10px] text-gray-500">
               Highest Achievement
             </p>
             <p className="mt-2 text-xl font-medium">

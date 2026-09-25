@@ -7,7 +7,7 @@ import ThemeProvider from "./theme-provider";
 // Next self-hosts these assets; visitors do not make Google Fonts requests.
 const interfaceFont = IBM_Plex_Sans({
   subsets: ["latin"],
-  weight: ["400", "500", "600"],
+  weight: ["300", "400", "500", "600"],
   display: "swap",
   variable: "--font-sa-interface",
 });
@@ -34,7 +34,7 @@ const initialThemeScript = `
 
 export const metadata: Metadata = {
   title: "SkillAtlas",
-  description: "Map your skill. Know your edge.",
+  description: "Global Gaming Intelligence",
 };
 
 export default function RootLayout({

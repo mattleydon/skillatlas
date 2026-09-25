@@ -37,16 +37,16 @@ export default function EntityDevelopmentPage({
           <div className="grid gap-sa-4 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
             <div className="max-w-3xl">
               <DataLabel as="p" className="text-sa-accent">SkillAtlas / Explore</DataLabel>
-              <h1 className="mt-sa-1 text-[1.75rem] font-black uppercase leading-none tracking-[-0.045em] sm:text-4xl">
+              <h1 className="sa-type-page-title mt-sa-1 uppercase">
                 {title}
               </h1>
-              <p className="mt-sa-3 text-sm leading-6 text-sa-text-muted sm:text-[15px]">{description}</p>
+              <p className="sa-type-intro mt-sa-3 text-sa-text-muted">{description}</p>
             </div>
             <div className="flex min-h-11 items-center gap-sa-3 self-start border-l-2 border-sa-border-active bg-sa-surface-inset px-sa-3 py-sa-2 lg:self-auto">
               <span className="h-2 w-2 rounded-[1px] bg-sa-negative" aria-hidden="true" />
               <span>
                 <DataLabel as="span">Development state</DataLabel>
-                <strong className="mt-0.5 block text-[11px] uppercase tracking-[0.08em] text-sa-text-primary">{status}</strong>
+                <strong className="sa-type-label mt-0.5 block text-[11px] text-sa-text-primary">{status}</strong>
               </span>
             </div>
           </div>
@@ -67,10 +67,10 @@ export default function EntityDevelopmentPage({
               <ol className="grid gap-sa-2 sm:grid-cols-2 xl:grid-cols-3">
                 {items.map((item, index) => (
                   <li key={item.id} className="grid min-h-16 grid-cols-[34px_minmax(0,1fr)] items-center border border-sa-border-subtle bg-sa-surface-inset px-sa-3 py-sa-2">
-                    <span className="font-sa-data text-[10px] font-black text-sa-text-technical">{String(index + 1).padStart(2, "0")}</span>
+                    <span className="sa-type-data text-[10px] text-sa-text-technical">{String(index + 1).padStart(2, "0")}</span>
                     <span className="min-w-0">
-                      <strong className="block truncate text-sm font-bold text-sa-text-primary">{item.name}</strong>
-                      <small className="mt-1 block font-sa-data text-[9px] uppercase tracking-[0.1em] text-sa-text-technical">Record pending</small>
+                      <strong className="block truncate text-sm font-medium text-sa-text-primary">{item.name}</strong>
+                      <small className="sa-type-label mt-1 block text-[9px] text-sa-text-technical">Record pending</small>
                     </span>
                   </li>
                 ))}
@@ -93,10 +93,10 @@ export default function EntityDevelopmentPage({
               Existing SkillAtlas destinations remain available while this intelligence layer is assembled.
             </p>
             <div className="mt-sa-4 grid gap-sa-2">
-              <Link href={ROUTES.countries} className="flex min-h-11 items-center justify-between border border-sa-border-strong bg-sa-surface-inset px-sa-3 text-xs font-bold text-sa-text-primary outline-none transition-colors duration-200 hover:border-sa-border-active focus-visible:ring-2 focus-visible:ring-sa-accent/30">
+              <Link href={ROUTES.countries} className="flex min-h-11 items-center justify-between border border-sa-border-strong bg-sa-surface-inset px-sa-3 text-xs font-medium text-sa-text-primary outline-none transition-colors duration-200 hover:border-sa-border-active focus-visible:ring-2 focus-visible:ring-sa-accent/30">
                 Country Atlas <span className="text-sa-accent" aria-hidden="true">→</span>
               </Link>
-              <Link href={ROUTES.authSignIn} className="flex min-h-11 items-center justify-between border border-sa-border-strong bg-sa-surface-inset px-sa-3 text-xs font-bold text-sa-text-primary outline-none transition-colors duration-200 hover:border-sa-border-active focus-visible:ring-2 focus-visible:ring-sa-accent/30">
+              <Link href={ROUTES.authSignIn} className="flex min-h-11 items-center justify-between border border-sa-border-strong bg-sa-surface-inset px-sa-3 text-xs font-medium text-sa-text-primary outline-none transition-colors duration-200 hover:border-sa-border-active focus-visible:ring-2 focus-visible:ring-sa-accent/30">
                 Sign in <span className="text-sa-accent" aria-hidden="true">→</span>
               </Link>
             </div>

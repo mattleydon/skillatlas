@@ -401,14 +401,18 @@ export default function SiteHeader() {
       <div className="skillatlas-header-inner">
         <div className="skillatlas-brand-lockup">
           <Link href={ROUTES.spaceInvaders} className="skillatlas-brand-mark" aria-label="Open SkillInvaders">
-            <Image src="/skillatlas-logo.png" alt="SkillAtlas logo" fill sizes="(min-width: 1280px) 72px, 52px" className="object-contain" priority />
+            <Image src="/skillatlas-logo.png" alt="SkillAtlas logo" fill sizes="(min-width: 1280px) 72px, 52px" className="skillatlas-shadow-mark object-contain" priority />
           </Link>
           <Link
             href={ROUTES.rankings}
             onClick={(event) => preventRedundantNavigation(event, pathname, ROUTES.rankings)}
             className="skillatlas-brand-title"
+            aria-label="SkillAtlas — Global Gaming Intelligence"
           >
-            <Image src="/skillatlas-title.png" alt="SkillAtlas title" fill sizes="(min-width: 1280px) 220px, (min-width: 640px) 174px, 112px" className="object-contain object-left" priority />
+            <span className="skillatlas-brand-type" aria-hidden="true">
+              <span className="skillatlas-wordmark"><span>SKILL</span><span className="skillatlas-wordmark-atlas">ATLAS</span></span>
+              <span className="skillatlas-brand-descriptor">GLOBAL GAMING INTELLIGENCE</span>
+            </span>
           </Link>
         </div>
 

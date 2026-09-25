@@ -19,14 +19,14 @@ export default function PrivacyToggle({
     <label
       htmlFor={id}
       className={`flex min-h-11 items-center justify-between gap-sa-3 rounded-sa-control border border-sa-border-subtle bg-sa-surface-inset px-sa-3 py-sa-2 ${
-        disabled ? "opacity-55" : "cursor-pointer"
-      }`}
+ disabled ? "opacity-55" : "cursor-pointer"
+ }`}
     >
       <span className="min-w-0">
-        <span className="block font-sa-data text-xs font-medium uppercase tracking-[0.08em] text-sa-text-primary">
+        <span className="sa-type-label block text-xs text-sa-text-primary">
           {label}
         </span>
-        <span className="mt-0.5 block font-sans text-[11px] leading-4 text-sa-text-technical">
+        <span className="mt-0.5 block sa-type-body text-[11px] leading-4 text-sa-text-technical">
           {description}
         </span>
       </span>

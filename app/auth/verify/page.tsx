@@ -48,13 +48,13 @@ export default async function VerifyPage({ searchParams }: VerifyPageProps) {
           <div className="grid gap-sa-2 sm:grid-cols-2">
             <Link
               href={ROUTES.authSignIn}
-              className="inline-flex min-h-11 items-center justify-center rounded-sa-control border border-sa-border-active bg-sa-accent px-sa-4 text-sm font-black text-slate-950 outline-none hover:bg-[#35e1dd] focus-visible:ring-4 focus-visible:ring-sa-accent/25"
+              className="inline-flex min-h-11 items-center justify-center rounded-sa-control border border-sa-border-active bg-sa-accent px-sa-4 text-sm font-medium text-slate-950 outline-none hover:bg-[#35e1dd] focus-visible:ring-4 focus-visible:ring-sa-accent/25"
             >
               Sign in
             </Link>
             <Link
               href={ROUTES.authSignUp}
-              className="inline-flex min-h-11 items-center justify-center rounded-sa-control border border-sa-border-strong bg-sa-surface-2 px-sa-4 text-sm font-bold text-sa-text-primary outline-none hover:border-sa-border-active hover:text-sa-accent focus-visible:ring-4 focus-visible:ring-sa-accent/20"
+              className="inline-flex min-h-11 items-center justify-center rounded-sa-control border border-sa-border-strong bg-sa-surface-2 px-sa-4 text-sm font-medium text-sa-text-primary outline-none hover:border-sa-border-active hover:text-sa-accent focus-visible:ring-4 focus-visible:ring-sa-accent/20"
             >
               Create account
             </Link>

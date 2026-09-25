@@ -122,11 +122,11 @@ export default function CountryAtlasSidebar({
       aria-labelledby="country-atlas-title"
       header={
         <div className="flex items-baseline justify-between gap-sa-3">
-          <h2 id="country-atlas-title" className="text-base font-bold tracking-tight">
+          <h2 id="country-atlas-title" className="sa-type-heading text-base">
             Country Atlas
           </h2>
           <p
-            className={`${styles.countEntrance} font-sa-data text-xs font-bold text-sa-accent`}
+            className={`sa-type-data ${styles.countEntrance} text-xs text-sa-accent`}
             aria-label={`${totalCount} countries`}
           >
             {totalCount} Countries
@@ -201,7 +201,7 @@ export default function CountryAtlasSidebar({
                       onPointerLeave={() => onCountryHover(null)}
                       className={`${styles.countryRow} ${active ? styles.countryRowActive : ""} ${hovered ? styles.countryRowHovered : ""}`}
                     >
-                      <span className="min-w-0 flex-1 truncate text-sm font-semibold">
+                      <span className="min-w-0 flex-1 truncate text-sm font-medium">
                         {country.name}
                       </span>
                     </button>
@@ -211,8 +211,8 @@ export default function CountryAtlasSidebar({
             ))
           ) : (
             <div className="px-3 py-8 text-center">
-              <p className="text-sm font-black">No countries found</p>
-              <p className="mt-1 text-xs font-semibold text-gray-500">Try a different search.</p>
+              <p className="text-sm font-medium">No countries found</p>
+              <p className="mt-1 text-xs font-medium text-gray-500">Try a different search.</p>
             </div>
           )}
         </div>

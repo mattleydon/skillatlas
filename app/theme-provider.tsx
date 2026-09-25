@@ -673,7 +673,7 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
           color: inherit;
           cursor: pointer;
           font-family: inherit;
-          font-weight: 700;
+          font-weight: var(--sa-weight-regular);
           line-height: 1;
           padding: 0;
           text-decoration: none;
@@ -748,7 +748,7 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
           display: block;
           color: #111827;
           font-size: 13px;
-          font-weight: 950;
+          font-weight: var(--sa-weight-medium);
         }
 
         header nav .skillatlas-rankings-menu-item small {
@@ -756,8 +756,8 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
           margin-top: 3px;
           color: #64748b;
           font-size: 10px;
-          font-weight: 800;
-          letter-spacing: 0.03em;
+          font-weight: var(--sa-weight-regular);
+          letter-spacing: var(--sa-tracking-meta);
         }
 
         header nav .skillatlas-rankings-menu-item.skillatlas-active-nav {
@@ -1192,7 +1192,7 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
           font: inherit;
           font-family: var(--sa-font-data);
           font-size: 14px;
-          font-weight: 400;
+          font-weight: var(--sa-weight-regular);
           line-height: 1;
           text-decoration: none;
           cursor: pointer;
@@ -1286,8 +1286,8 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
           color: var(--sa-text-technical);
           font-family: var(--sa-font-data);
           font-size: 9px;
-          font-weight: 500;
-          letter-spacing: 0.16em;
+          font-weight: var(--sa-weight-medium);
+          letter-spacing: var(--sa-tracking-label);
           text-transform: uppercase;
         }
 
@@ -1318,13 +1318,13 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
           color: var(--sa-text-technical);
           font-family: var(--sa-font-data);
           font-size: 9px;
-          font-weight: 500;
-          letter-spacing: 0.08em;
+          font-weight: var(--sa-weight-medium);
+          letter-spacing: var(--sa-tracking-meta);
         }
 
         .skillatlas-nav-menu-copy { display: block; min-width: 0; }
-        .skillatlas-nav-menu-copy strong { display: block; color: var(--sa-text-primary); font-family: var(--sa-font-data); font-size: 12px; font-weight: 500; }
-        .skillatlas-nav-menu-copy small { display: block; margin-top: 2px; overflow: hidden; color: var(--sa-text-technical); font-size: 9px; font-weight: 400; letter-spacing: 0.025em; text-overflow: ellipsis; white-space: nowrap; }
+        .skillatlas-nav-menu-copy strong { display: block; color: var(--sa-text-primary); font-family: var(--sa-font-data); font-size: 12px; font-weight: var(--sa-weight-medium); }
+        .skillatlas-nav-menu-copy small { font-family: var(--sa-font-ui); display: block; margin-top: 2px; overflow: hidden; color: var(--sa-text-technical); font-size: 9px; font-weight: var(--sa-weight-regular); letter-spacing: var(--sa-tracking-meta); text-overflow: ellipsis; white-space: nowrap; }
 
         .skillatlas-nav-menu-state,
         .skillatlas-mobile-nav-state {
@@ -1396,16 +1396,16 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
           color: var(--sa-accent);
           font-family: var(--sa-font-data);
           font-size: 10px;
-          font-weight: 500;
+          font-weight: var(--sa-weight-medium);
           letter-spacing: -0.03em;
         }
 
         .skillatlas-member-copy,
         .skillatlas-display-copy { display: block; min-width: 0; }
         .skillatlas-member-copy small,
-        .skillatlas-display-copy small { display: block; color: var(--sa-text-technical); font-family: var(--sa-font-data); font-size: 8px; font-weight: 500; letter-spacing: 0.15em; line-height: 1.1; text-transform: uppercase; }
+        .skillatlas-display-copy small { display: block; color: var(--sa-text-technical); font-family: var(--sa-font-data); font-size: 8px; font-weight: var(--sa-weight-medium); letter-spacing: var(--sa-tracking-label); line-height: 1.1; text-transform: uppercase; }
         .skillatlas-member-copy strong,
-        .skillatlas-display-copy strong { display: block; margin-top: 3px; overflow: hidden; color: var(--sa-text-primary); font-family: var(--sa-font-data); font-size: 10px; font-weight: 500; line-height: 1.05; text-overflow: ellipsis; white-space: nowrap; }
+        .skillatlas-display-copy strong { display: block; margin-top: 3px; overflow: hidden; color: var(--sa-text-primary); font-family: var(--sa-font-data); font-size: 10px; font-weight: var(--sa-weight-medium); line-height: 1.05; text-overflow: ellipsis; white-space: nowrap; }
         .skillatlas-member-chevron { color: var(--sa-accent); font-family: var(--sa-font-data); font-size: 12px; }
 
         .skillatlas-display-control {
@@ -1454,8 +1454,8 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
         .skillatlas-member-menu button:hover,
         .skillatlas-member-menu a:focus-visible,
         .skillatlas-member-menu button:focus-visible { background: color-mix(in srgb, var(--sa-accent) 8%, var(--sa-surface-2)); outline: 2px solid var(--sa-accent); outline-offset: -2px; }
-        .skillatlas-member-menu span { display: block; font-size: 11px; font-weight: 500; }
-        .skillatlas-member-menu small { display: block; margin-top: 2px; color: var(--sa-text-technical); font-size: 9px; font-weight: 400; }
+        .skillatlas-member-menu span { font-family: var(--sa-font-data); display: block; font-size: 11px; font-weight: var(--sa-weight-medium); }
+        .skillatlas-member-menu small { font-family: var(--sa-font-ui); display: block; margin-top: 2px; color: var(--sa-text-technical); font-size: 9px; font-weight: var(--sa-weight-regular); }
 
         @keyframes skillatlas-control-reveal { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
 
@@ -1531,9 +1531,9 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
           text-align: left;
         }
         .skillatlas-mobile-family-trigger small,
-        .skillatlas-mobile-direct-link small { display: block; color: var(--sa-text-technical); font-family: var(--sa-font-data); font-size: 8px; font-weight: 500; letter-spacing: 0.15em; line-height: 1; text-transform: uppercase; }
+        .skillatlas-mobile-direct-link small { display: block; color: var(--sa-text-technical); font-family: var(--sa-font-data); font-size: 8px; font-weight: var(--sa-weight-medium); letter-spacing: var(--sa-tracking-label); line-height: 1; text-transform: uppercase; }
         .skillatlas-mobile-family-trigger strong,
-        .skillatlas-mobile-direct-link strong { display: block; margin-top: 4px; font-family: var(--sa-font-data); font-size: 14px; font-weight: 400; line-height: 1; }
+        .skillatlas-mobile-direct-link strong { display: block; margin-top: 4px; font-family: var(--sa-font-data); font-size: 14px; font-weight: var(--sa-weight-regular); line-height: 1; }
         .skillatlas-mobile-family-chevron { color: var(--sa-text-technical); font-family: var(--sa-font-data); transition: transform 180ms ease; }
         .skillatlas-mobile-family-trigger[aria-expanded="true"] .skillatlas-mobile-family-chevron { transform: rotate(180deg); }
 
@@ -1554,7 +1554,7 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
           color: var(--sa-text-muted);
           font-family: var(--sa-font-data);
           font-size: 11px;
-          font-weight: 500;
+          font-weight: var(--sa-weight-medium);
           text-decoration: none;
           transform: none;
         }
@@ -1693,8 +1693,8 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
           font-family: var(--sa-font-data);
           margin: 0;
           font-size: 10px;
-          font-weight: 500;
-          letter-spacing: 0.12em;
+          font-weight: var(--sa-weight-medium);
+          letter-spacing: var(--sa-tracking-label);
           text-transform: uppercase;
           color: var(--skillatlas-turquoise);
         }
@@ -1703,7 +1703,7 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
           font-family: var(--sa-font-data);
           margin: 3px 0 0;
           font-size: 16px;
-          font-weight: 500;
+          font-weight: var(--sa-weight-medium);
           color: #111827;
         }
 
@@ -1718,7 +1718,7 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
           background: rgba(255, 255, 255, 0.82);
           color: #111827;
           font-size: 0;
-          font-weight: 500;
+          font-weight: var(--sa-weight-medium);
           line-height: 0;
           padding: 0;
           transition:
@@ -1771,7 +1771,7 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
           border-radius: var(--sa-radius-sm);
           padding: 6px 8px;
           font-size: 11.5px;
-          font-weight: 400;
+          font-weight: var(--sa-weight-regular);
           line-height: 1.5;
         }
 
@@ -1792,8 +1792,8 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
           display: inline;
           margin: 0 7px 0 0;
           font-size: 9px;
-          font-weight: 500;
-          letter-spacing: 0.10em;
+          font-weight: var(--sa-weight-medium);
+          letter-spacing: var(--sa-tracking-meta);
           text-transform: uppercase;
           opacity: 0.72;
         }
@@ -1812,7 +1812,7 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
           margin: 0 0.12em;
           border-radius: 999px;
           font-size: 1.04em;
-          font-weight: 500;
+          font-weight: var(--sa-weight-medium);
           line-height: 1;
           vertical-align: -0.16em;
           background: rgba(255,255,255,0.78);
@@ -1899,7 +1899,7 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
           border-radius: var(--sa-radius-control);
           padding: 8px 10px;
           font-size: 12px;
-          font-weight: 400;
+          font-weight: var(--sa-weight-regular);
           line-height: 1.35;
         }
 
@@ -1962,7 +1962,7 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
           overflow-y: auto;
           color: #111827;
           font-size: 13px;
-          font-weight: 400;
+          font-weight: var(--sa-weight-regular);
           line-height: 1.35;
           outline: none;
           white-space: pre-wrap;
@@ -2000,7 +2000,7 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
             rgba(255,255,255,0.92);
           color: var(--skillatlas-turquoise);
           font-size: 18px;
-          font-weight: 500;
+          font-weight: var(--sa-weight-medium);
           line-height: 1;
           padding: 0;
           transition:
@@ -2100,7 +2100,7 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
           color: #111827;
           padding: 10px 13px;
           font-size: 13px;
-          font-weight: 400;
+          font-weight: var(--sa-weight-regular);
           outline: none;
         }
 
@@ -2117,7 +2117,7 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
           color: #111827;
           padding: 0 14px;
           font-size: 13px;
-          font-weight: 500;
+          font-weight: var(--sa-weight-medium);
           transition:
             filter 180ms ease,
             transform 180ms ease;
@@ -2139,7 +2139,7 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
           box-shadow: 0 14px 32px rgba(15, 23, 42, 0.24);
           color: #ffffff;
           font-size: 24px;
-          font-weight: 500;
+          font-weight: var(--sa-weight-medium);
           line-height: 1;
           transition:
             opacity 180ms ease,

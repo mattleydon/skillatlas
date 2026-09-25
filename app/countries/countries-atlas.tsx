@@ -164,10 +164,10 @@ export default function CountriesAtlas() {
 
       <div className="skillatlas-page-shell relative z-10 mx-auto w-full max-w-7xl pb-16">
         <div className="mb-sa-2 max-w-4xl">
-          <p className="mb-sa-1 text-[11px] font-bold uppercase tracking-[0.2em] text-sa-accent">
+          <p className="sa-type-label mb-sa-1 text-[11px] text-sa-accent">
             Countries
           </p>
-          <h1 className="text-[1.625rem] font-bold tracking-tight text-sa-text-primary sm:text-[1.75rem]">
+          <h1 className="sa-type-page-title text-sa-text-primary">
             Browse the competitive world by country.
           </h1>
         </div>
@@ -241,14 +241,14 @@ export default function CountriesAtlas() {
               </div>
             ) : (
               <div className={`${styles.emptyState} rounded-sa-panel p-8 text-center sm:p-12`}>
-                <p className="text-lg font-bold">No countries match this view.</p>
-                <p className="mt-2 text-sm font-semibold text-sa-text-muted">
+                <p className="text-lg font-medium">No countries match this view.</p>
+                <p className="mt-2 text-sm font-medium text-sa-text-muted">
                   Clear the search or return to all regions.
                 </p>
                 <button
                   type="button"
                   onClick={resetFilters}
-                  className="mt-5 min-h-11 rounded-sa-control bg-sa-accent px-5 py-2.5 text-sm font-bold text-slate-950 transition-[filter,transform] duration-200 ease-sa-standard hover:-translate-y-0.5 hover:brightness-105 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-sa-accent/25"
+                  className="sa-type-control mt-5 min-h-11 rounded-sa-control bg-sa-accent px-5 py-2.5 text-sm text-slate-950 transition-[filter,transform] duration-200 ease-sa-standard hover:-translate-y-0.5 hover:brightness-105 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-sa-accent/25"
                 >
                   Reset filters
                 </button>

@@ -106,11 +106,11 @@ export default function UserRankingsPage() {
       <style>{pageThemeStyles()}</style>
       <section className="skillatlas-page-shell relative z-10 mx-auto w-full max-w-7xl pb-16">
         <div className="mb-6 rounded-sa-panel border border-[#ff2fa8]/45 bg-white/92 p-6 shadow-sm backdrop-blur">
-          <p className="mb-2 text-xs font-normal uppercase tracking-[0.12em] text-[#19d3cf] font-sa-data">User Rankings</p>
+          <p className="sa-type-label mb-2 text-xs text-[#19d3cf]">User Rankings</p>
           <div className="grid gap-5 lg:grid-cols-[1.25fr_0.75fr] lg:items-end">
             <div>
-              <h1 className="mb-2 font-medium tracking-tight">Let players vote on which countries are best.</h1>
-              <p className="max-w-4xl text-sm font-normal leading-relaxed text-gray-600">
+              <h1 className="sa-type-page-title mb-2">Let players vote on which countries are best.</h1>
+              <p className="sa-type-intro max-w-4xl text-gray-600">
                 A community-powered ranking layer where visitors can push countries up or down for each game.
               </p>
             </div>
@@ -122,11 +122,11 @@ export default function UserRankingsPage() {
                     key={game}
                     type="button"
                     onClick={() => setSelectedGame(game)}
-                    className={`min-h-11 rounded-sa-control border px-4 py-2 text-xs font-medium transition-all duration-300 ${
-                      selectedGame === game
-                        ? "border-[#19d3cf] bg-[#19d3cf] text-slate-950 shadow-lg shadow-[#19d3cf]/20"
-                        : "border-gray-200 bg-white/70 text-gray-700 hover:border-[#19d3cf]/60 hover:text-[#19d3cf]"
-                    }`}
+                    className={`sa-type-control min-h-11 rounded-sa-control border px-4 py-2 text-xs transition-all duration-300 ${
+ selectedGame === game
+ ? "border-[#19d3cf] bg-[#19d3cf] text-slate-950 shadow-lg shadow-[#19d3cf]/20"
+ : "border-gray-200 bg-white/70 text-gray-700 hover:border-[#19d3cf]/60 hover:text-[#19d3cf]"
+ }`}
                   >
                     {game}
                   </button>
@@ -138,18 +138,18 @@ export default function UserRankingsPage() {
 
         <div className="mb-6 grid gap-5 xl:grid-cols-[0.9fr_1.1fr]">
           <div className="rounded-sa-panel border border-[#ff2fa8]/45 bg-white/92 p-6 shadow-sm backdrop-blur">
-            <p className="mb-2 text-[11px] font-normal uppercase tracking-[0.12em] text-[#19d3cf] font-sa-data">Community Leader</p>
+            <p className="sa-type-label mb-2 text-[11px] text-[#19d3cf]">Community Leader</p>
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div className="flex items-center gap-4">
                 <CountryFlag country={{ name: topCountry.name, flagCode: topCountry.code }} size="lg" />
                 <div>
-                  <h2 className="text-2xl font-medium">{topCountry.name}</h2>
+                  <h2 className="sa-type-heading text-2xl">{topCountry.name}</h2>
                   <p className="font-medium text-[#ff2fa8]">{selectedGame}</p>
                 </div>
               </div>
               <div className="rounded-sa-panel bg-[#19d3cf]/12 px-4 py-3 text-center">
-                <p className="text-[10px] font-normal uppercase tracking-[0.12em] text-gray-500 font-sa-data">User Score</p>
-                <p className="font-sa-data text-2xl font-medium text-[#19d3cf]">{topCountry.userScore}</p>
+                <p className="sa-type-label text-[10px] text-gray-500">User Score</p>
+                <p className="sa-type-data text-2xl text-[#19d3cf]">{topCountry.userScore}</p>
               </div>
             </div>
 
@@ -160,15 +160,15 @@ export default function UserRankingsPage() {
 
           <div className="grid gap-3 sm:grid-cols-3 xl:grid-cols-1">
             <div className="rounded-sa-panel border border-[#ff2fa8]/40 bg-white/88 p-4 shadow-sm backdrop-blur">
-              <p className="text-[10px] font-normal uppercase tracking-[0.12em] text-gray-500 font-sa-data">Total Votes</p>
-              <p className="font-sa-data text-2xl font-medium text-[#19d3cf]">{totalVotes.toLocaleString()}</p>
+              <p className="sa-type-label text-[10px] text-gray-500">Total Votes</p>
+              <p className="sa-type-data text-2xl text-[#19d3cf]">{totalVotes.toLocaleString()}</p>
             </div>
             <div className="rounded-sa-panel border border-[#ff2fa8]/40 bg-white/88 p-4 shadow-sm backdrop-blur">
-              <p className="text-[10px] font-normal uppercase tracking-[0.12em] text-gray-500 font-sa-data">Current Game</p>
+              <p className="sa-type-label text-[10px] text-gray-500">Current Game</p>
               <p className="truncate text-lg font-medium text-[#ff2fa8]">{selectedGame}</p>
             </div>
             <div className="rounded-sa-panel border border-[#ff2fa8]/40 bg-white/88 p-4 shadow-sm backdrop-blur">
-              <p className="text-[10px] font-normal uppercase tracking-[0.12em] text-gray-500 font-sa-data">Voting Mode</p>
+              <p className="sa-type-label text-[10px] text-gray-500">Voting Mode</p>
               <p className="text-lg font-medium">Community</p>
             </div>
           </div>
@@ -176,13 +176,13 @@ export default function UserRankingsPage() {
 
         <section className="overflow-hidden rounded-sa-panel border border-[#ff2fa8]/45 bg-white/92 shadow-sm backdrop-blur">
           <div className="border-b border-[#ff2fa8]/20 p-5">
-            <p className="text-[11px] font-normal uppercase tracking-[0.12em] text-[#19d3cf] font-sa-data">Community Ranking Table</p>
+            <p className="sa-type-label text-[11px] text-[#19d3cf]">Community Ranking Table</p>
           </div>
 
           <div className="overflow-x-auto">
             <table className="w-full min-w-[900px] border-collapse text-left">
               <thead>
-                <tr className="border-b border-gray-200 text-[11px] uppercase tracking-[0.12em] text-gray-500 font-sa-data">
+                <tr className="sa-type-label border-b border-gray-200 text-[11px] text-gray-500">
                   <th className="px-5 py-4 font-normal">Rank</th>
                   <th className="px-5 py-4 font-normal">Country</th>
                   <th className="px-5 py-4 font-normal">User Score</th>
@@ -196,7 +196,7 @@ export default function UserRankingsPage() {
               <tbody>
                 {rankedCountries.map((country, index) => (
                   <tr key={country.name} className="border-b border-gray-200/80 transition-colors hover:bg-[#19d3cf]/5">
-                    <td className="px-5 py-4 font-sa-data text-lg font-medium text-[#ff2fa8]">#{index + 1}</td>
+                    <td className="sa-type-data px-5 py-4 text-lg text-[#ff2fa8]">#{index + 1}</td>
                     <td className="px-5 py-4">
                       <div className="flex items-center gap-3">
                         <CountryFlag country={{ name: country.name, flagCode: country.code }} size="sm" />
@@ -204,17 +204,17 @@ export default function UserRankingsPage() {
                       </div>
                     </td>
                     <td className="px-5 py-4">
-                      <span className="rounded-sa-sm bg-[#19d3cf]/12 px-3 py-1 font-sa-data text-sm font-medium text-[#19d3cf]">{country.userScore}</span>
+                      <span className="sa-type-data rounded-sa-sm bg-[#19d3cf]/12 px-3 py-1 text-sm text-[#19d3cf]">{country.userScore}</span>
                     </td>
-                    <td className={`px-5 py-4 font-sa-data text-sm font-medium ${country.trend >= 0 ? "text-[#19d3cf]" : "text-[#ff2fa8]"}`}>
+                    <td className={`sa-type-data px-5 py-4 text-sm ${country.trend >= 0 ? "text-[#19d3cf]" : "text-[#ff2fa8]"}`}>
                       {country.trend >= 0 ? `▲ ${country.trend}` : `▼ ${Math.abs(country.trend)}`}
                     </td>
-                    <td className="px-5 py-4 font-sa-data text-sm font-medium">{(country.voters + Math.max(localVotes[country.name] ?? 0, 0)).toLocaleString()}</td>
+                    <td className="sa-type-data px-5 py-4 text-sm">{(country.voters + Math.max(localVotes[country.name] ?? 0, 0)).toLocaleString()}</td>
                     <td className="px-5 py-4"><Sparkline values={country.sparkline} /></td>
                     <td className="px-5 py-4">
                       <div className="flex gap-2">
-                        <button type="button" onClick={() => vote(country.name, 1)} className="min-h-11 min-w-11 rounded-sa-control bg-[#19d3cf] px-3 py-1 text-xs font-medium text-slate-950">Up</button>
-                        <button type="button" onClick={() => vote(country.name, -1)} className="min-h-11 min-w-11 rounded-sa-control bg-[#ff2fa8] px-3 py-1 text-xs font-medium text-slate-950">Down</button>
+                        <button type="button" onClick={() => vote(country.name, 1)} className="sa-type-control min-h-11 min-w-11 rounded-sa-control bg-[#19d3cf] px-3 py-1 text-xs text-slate-950">Up</button>
+                        <button type="button" onClick={() => vote(country.name, -1)} className="sa-type-control min-h-11 min-w-11 rounded-sa-control bg-[#ff2fa8] px-3 py-1 text-xs text-slate-950">Down</button>
                       </div>
                     </td>
                     <td className="px-5 py-4">

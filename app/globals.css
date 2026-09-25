@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "./typography.css";
 
 :root {
   --background: #ffffff;
@@ -80,12 +81,6 @@
   --font-sans: var(--sa-font-ui);
   --font-mono: var(--sa-font-data);
   --font-sa-data: var(--sa-font-data);
-  /* Legacy emphasis utilities share the restrained Intelligence UI ceiling.
-     Keep existing layouts/classes without synthesizing unavailable heavy faces. */
-  --font-weight-semibold: 500;
-  --font-weight-bold: 500;
-  --font-weight-extrabold: 500;
-  --font-weight-black: 500;
   --ease-sa-standard: var(--sa-ease-standard);
 }
 
@@ -120,34 +115,115 @@ body {
 }
 
 @layer base {
-  h1, h2, h3, h4, h5, h6 {
+  h1, h2, h3, h4, h5, h6, th, code, kbd, samp, pre {
     font-family: var(--sa-font-data);
   }
 
-  h1, h2, h3, h4, h5, h6, strong, b {
-    font-weight: 500;
-  }
-
-  button, input, select, textarea {
-    font-family: inherit;
+  h1, h2, h3, h4, h5, h6, strong, b, button {
+    font-weight: var(--sa-weight-medium);
   }
 
   label[for], legend {
     font-family: var(--sa-font-data);
-    font-weight: 400;
+    font-weight: var(--sa-weight-regular);
   }
 
-  input, select, textarea {
+  /* Human-entered text and ordinary prose never inherit a technical wrapper. */
+  input, select, textarea, button {
     font-family: var(--sa-font-ui);
   }
 
-  button {
-    font-weight: 500;
+  input, select, textarea {
+    font-weight: var(--sa-weight-regular);
   }
+}
 
-  th, code, kbd, samp, pre {
-    font-family: var(--sa-font-data);
+/* Shadow Atlas: a non-destructive treatment of the original raster symbol.
+   No blur, new artwork, clipping or geometry changes. */
+.skillatlas-brand-lockup {
+  --sa-brand-gradient: linear-gradient(100deg, #19d3cf 15%, #ff2fa8 90%);
+}
+
+.skillatlas-shadow-mark {
+  filter: saturate(0.9) brightness(1) contrast(1.03);
+}
+
+html.skillatlas-dark .skillatlas-shadow-mark {
+  filter: saturate(0.9) brightness(1.02) contrast(1.03);
+}
+
+/* Use the original alpha silhouette, not a redrawn approximation. The image
+   beneath retains a little of its original shading and remains the fallback. */
+@supports (mask-image: url("/skillatlas-logo.png")) {
+  .skillatlas-brand-mark::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image: var(--sa-brand-gradient);
+    mask: url("/skillatlas-logo.png") center / contain no-repeat;
+    opacity: 0.85;
+    filter: brightness(1.08);
   }
+}
+
+.skillatlas-brand-type {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  white-space: nowrap;
+}
+
+.skillatlas-wordmark {
+  color: var(--sa-text-primary);
+  font-family: var(--sa-font-ui);
+  font-size: 14px;
+  font-weight: 400;
+  letter-spacing: 0.09em;
+  line-height: 1;
+}
+
+.skillatlas-wordmark-atlas {
+  color: #137e80;
+  font-weight: 400;
+  background-image: var(--sa-brand-gradient);
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.skillatlas-wordmark > span:first-child { font-weight: 300; }
+@media (forced-colors: active) {
+  .skillatlas-brand-mark::after { display: none; }
+  .skillatlas-wordmark-atlas {
+    background-image: none;
+    -webkit-text-fill-color: LinkText;
+  }
+}
+
+.skillatlas-brand-descriptor {
+  display: none;
+  color: var(--sa-text-technical);
+  font-family: var(--sa-font-data);
+  font-size: 8px;
+  font-weight: 400;
+  letter-spacing: 0.025em;
+  line-height: 1.2;
+}
+
+@media (min-width: 640px) {
+  .skillatlas-wordmark { font-size: 20px; }
+  .skillatlas-brand-descriptor { display: block; }
+  .skillatlas-site-header-scrolled .skillatlas-wordmark { font-size: 17px; }
+}
+
+@media (min-width: 1280px) {
+  .skillatlas-wordmark { font-size: 23px; letter-spacing: 0.13em; }
+  .skillatlas-brand-descriptor { font-size: 9px; letter-spacing: 0.06em; }
+  .skillatlas-site-header-scrolled .skillatlas-wordmark { font-size: 18px; }
+  .skillatlas-site-header-scrolled .skillatlas-brand-descriptor { font-size: 8px; letter-spacing: 0.025em; }
 }
 
 .skillatlas-page-shell {
@@ -187,28 +263,9 @@ html.skillatlas-dark .skillatlas-country-flag-image {
   filter: saturate(0.55) brightness(0.78) contrast(1.08);
 }
 
-/* Shared operational page hierarchy; leave body prose and control targets intact. */
-.skillatlas-page-shell h1 {
-  font-size: 0.88rem;
-  font-weight: 500;
-  line-height: 1.2;
-}
-
+/* Preserve the approved intro spacing; type is owned by sa-type-intro. */
 .skillatlas-page-shell h1 + p {
   margin-top: var(--sa-space-1);
-  font-size: 0.875rem;
-  font-weight: 400;
-  line-height: 1.4;
-}
-
-@media (min-width: 640px) {
-  .skillatlas-page-shell h1 {
-    font-size: 1.12rem;
-  }
-
-  .skillatlas-page-shell h1 + p {
-    font-size: 0.9375rem;
-  }
 }
 
 @media (min-width: 1024px) {

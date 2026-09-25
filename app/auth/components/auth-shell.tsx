@@ -36,10 +36,10 @@ export default function AuthShell({
             <DataLabel as="p" className="text-sa-accent">
               {eyebrow}
             </DataLabel>
-            <h1 className="mt-sa-1 text-[1.75rem] font-black leading-[1.08] tracking-[-0.035em] text-sa-text-primary sm:text-4xl">
+            <h1 className="sa-type-page-title mt-sa-1 text-sa-text-primary">
               {title}
             </h1>
-            <p className="mt-sa-2 max-w-xl text-sm leading-6 text-sa-text-muted sm:text-[15px]">
+            <p className="sa-type-intro mt-sa-2 max-w-xl text-sa-text-muted">
               {description}
             </p>
           </div>
@@ -72,7 +72,7 @@ export default function AuthShell({
             Account access is optional. Public SkillAtlas pages remain available without signing in. {" "}
             <Link
               href={ROUTES.rankings}
-              className="font-bold text-sa-accent outline-none hover:text-sa-text-primary focus-visible:rounded-sa-sm focus-visible:ring-2 focus-visible:ring-sa-accent"
+              className="font-medium text-sa-accent outline-none hover:text-sa-text-primary focus-visible:rounded-sa-sm focus-visible:ring-2 focus-visible:ring-sa-accent"
             >
               Return to Rankings
             </Link>

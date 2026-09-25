@@ -56,7 +56,7 @@ Colour must not carry meaning alone. Pair movement and status colours with signs
 - Dark mode uses layered charcoal surfaces rather than pure black.
 - Turquoise and pink retain the same semantic meanings in both modes.
 - Inputs, menus, tables, charts, overlays, and map legends require explicit theme treatment.
-- Preserve the existing theme toggle, stored preference, title-logo swap, and transition behavior.
+- Preserve the existing theme toggle, stored preference, and transition behavior. The shared header wordmark now uses theme-aware live text rather than a title-image swap.
 - The Intelligence UI semantic tokens in `app/globals.css` coexist with the legacy theme layer until pages adopt them explicitly.
 
 ## Geometry and surfaces
@@ -78,34 +78,34 @@ Avoid large translucent SaaS cards, decorative structural pink borders, generous
 
 ## Typography hierarchy
 
-The `SKILLATLAS / RANKINGS` breadcrumb is the typography reference: IBM Plex Mono gives headings, navigation, technical labels, metadata and numeric instrumentation a precise shared language. Use the companion IBM Plex Sans (not Condensed) for comfortable body copy, form controls and longer descriptions; never make every paragraph uppercase, widely tracked or monospace. Fonts are configured once in the root layout through `next/font` and self-hosted by Next.js, without third-party runtime font requests. The logo/wordmark assets are unchanged.
+The Hybrid Intelligence system has two complementary layers, self-hosted once through `next/font` in the root layout: **IBM Plex Mono** for instrumentation and **IBM Plex Sans** (not Condensed) for reading. Typography roles live in `app/typography.css`; colours and spacing remain separate tokens. Brand styles stay in `app/globals.css` and must not inherit page-title roles.
 
-Use regular `400` for body copy, primary navigation and technical labels, and medium `500` for headings, controls and important data. Preserve text contrast rather than relying on heavy weight. Existing Tailwind semibold/bold/extrabold/black utilities resolve to a shared `500` ceiling so older surfaces adopt the hierarchy without page-specific overrides or synthetic heavy weights.
+### Shadow Atlas brand lockup
 
-Approximate hierarchy:
+- Preserve the original PNG symbol and its geometry. A CSS mask using that same PNG's alpha silhouette overlays the shared wordmark gradient at 85% opacity with `brightness(1.08)`, retaining a little original shading. The image beneath remains the fallback, with light `saturate(0.9) brightness(1) contrast(1.03)` and dark `saturate(0.9) brightness(1.02) contrast(1.03)`. Keep turquoise and pink vibrant and recognisable without neon effects; no blur, cropping, shadows or new raster artwork.
+- Render the wordmark as crisp Plex Sans: `SKILL` uses the actual light `300` face in primary text, while `ATLAS` remains regular `400` with a continuous turquoise-to-pink gradient. Both symbol and ATLAS share `--sa-brand-gradient` (`#19d3cf` to `#ff2fa8` in both themes). The extra self-hosted Sans weight is for SKILL only; body and interface weights are unchanged. Forced-colour mode uses system link text and the original image. Preserve the existing brand-link footprint and navigation grid.
+- The descriptor is **GLOBAL GAMING INTELLIGENCE**, regular Plex Mono, low-priority technical text, without decorative lines. It is hidden below `640px` rather than reduced to illegible type.
+- Keep original title PNGs intact for retained legacy consumers; the shared header no longer renders their baked-in old tagline.
 
-| Role | Size |
-| --- | --- |
-| Page title | `17.92px` desktop/tablet, `14.08px` phone; medium, `1.2` line-height (a further 20% below the preceding 22.4/17.6px scale) |
-| Page description | `15px` desktop/tablet, `14px` phone; regular, `1.4` line-height |
-| Section heading | `20-24px` |
-| Panel heading | `14-18px` |
-| Body and data | `13-15px` |
-| Technical label | `10-12px`, uppercase |
-| Major metric | `20-28px` |
+### Shared interface roles
 
-Restrained monospace or semi-monospace treatment is appropriate for:
+| Role/class | Layer and weight | Use |
+| --- | --- | --- |
+| `sa-type-page-title` | Mono 500 | All page titles: **17.92px** desktop/tablet, **14.08px** phone, line-height 1.2. Do not add competing size/weight utilities. |
+| `sa-type-heading` | Mono 500 | Section/panel headings; keep existing compact slot sizes. |
+| `sa-type-label` | Mono 400, uppercase, 0.12em tracking | Breadcrumbs, form labels, table headings, status/micro-labels. DataLabel consumes this role. Preserve breadcrumb sizes. |
+| `sa-type-meta` | Mono 400, 0.02em tracking | Timestamps, counters and short technical metadata. |
+| `sa-type-data` | Mono 500, tabular numerals | Rank, score, movement and OTP digits. OTP retains its deliberate digit spacing. |
+| `sa-type-control` | Mono 500 | Short technical actions, game/period controls. |
+| `sa-type-reading-control` | Sans 500 | Longer actions and country/game option names where Mono impairs reading. |
+| `sa-type-body` | Sans 400 | Prose, Profile bio, form instructions/helpers/errors and longer descriptions. Also the default inherited reading layer. |
+| `sa-type-intro` | Sans 400 | Page descriptions: 15px desktop/tablet, 14px phone, line-height 1.4. |
 
-- rankings
-- scores
-- percentages
-- timestamps
-- deltas
-- technical metadata
+Muted/secondary prose uses the same reading role plus the existing text-colour token; it does not need a duplicate typography class. Dense header slots retain their approved 8–14px sizes; their labels and values use the shared weight/tracking tokens. Menu descriptions explicitly use Sans, including inside Mono controls. Field values use Sans 400; numbers use the data role intentionally rather than making an entire table monospace.
 
-Technical labels should be concise. Wide tracking may be used carefully, but labels should not create excessive vertical space.
+Use `--sa-weight-regular` (400) and `--sa-weight-medium` (500) for CSS modules and shared header styles. 600 (`--sa-weight-emphasis`) is reserved for exceptional emphasis; 300 is exclusive to the approved SKILL wordmark. There are no legacy bold/black aliases disguising heavier classes. Normal interface text must not request 700–950.
 
-Shared form labels and legends use regular Plex Mono; inputs and longer option descriptions retain readable Plex Sans. Custom select labels reuse the shared DataLabel treatment. Square structural corners do not require changing genuinely semantic circular map markers or status badges.
+Avoid arbitrary font families, synthetic heavy weights, broad “all uppercase/all buttons = Mono” selectors, and page-specific title overrides. Keep plain-text Profile/Forum content readable. Native emoji may retain the platform emoji stack; decorative arcade glyphs may retain their deliberate display size/tracking. Typography roles are theme-independent.
 
 ## Information density and layout
 
@@ -162,7 +162,7 @@ Ranking order must remain understandable through number, position, and text with
 ## Header and navigation
 
 - Continue using the single shared header implementation.
-- Preserve the logo/title assets, theme toggle, active-route styling, sticky and compact-scroll behavior, desktop navigation, and mobile menu behavior.
+- Preserve the symbol asset, brand-link footprints, theme toggle, active-route styling, sticky and compact-scroll behavior, desktop navigation, and mobile menu behavior. Use the Shadow Atlas live-text lockup described above.
 - Desktop navigation order is `Rankings | Atlas | Explore | Forum | About`.
 - Explore contains `Countries | Games | Players | Teams | Members`.
 - The Rankings dropdown contains `Rankings`, `User Rankings`, and `Live Rankings`.

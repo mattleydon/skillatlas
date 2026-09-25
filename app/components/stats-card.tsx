@@ -8,7 +8,7 @@ type StatsCardProps = {
 export default function StatsCard({ label, children }: StatsCardProps) {
   return (
     <div className="rounded-3xl border border-[#ff2fa8]/40 bg-white/88 p-3 shadow-sm backdrop-blur">
-      <p className="text-[10px] font-black uppercase tracking-[0.22em] text-gray-500">{label}</p>
+      <p className="sa-type-label text-[10px] text-gray-500">{label}</p>
       {children}
     </div>
   );

@@ -186,7 +186,7 @@ function SectionHeading({
       <DataLabel as="p" className="text-sa-accent">
         {eyebrow}
       </DataLabel>
-      <h2 id={titleId} className="mt-sa-1 text-xl font-bold tracking-tight text-sa-text-primary sm:text-2xl">
+      <h2 id={titleId} className="sa-type-heading mt-sa-1 text-xl text-sa-text-primary sm:text-2xl">
         {title}
       </h2>
       {description ? (
@@ -228,11 +228,11 @@ export default function AboutPage() {
             </DataLabel>
             <h1
               id="about-skillatlas-title"
-              className="text-[1.75rem] font-black leading-[1.08] tracking-[-0.04em] text-sa-text-primary sm:text-4xl"
+              className="sa-type-page-title text-sa-text-primary"
             >
               About SkillAtlas
             </h1>
-            <p className="mt-sa-2 text-sm leading-6 text-sa-text-muted sm:text-[15px]">
+            <p className="sa-type-intro mt-sa-2 text-sa-text-muted">
               SkillAtlas maps competitive gaming across countries, games, and elite players, connecting global comparison with geographic exploration and community discussion.
             </p>
           </IntelligencePanel>
@@ -275,7 +275,7 @@ export default function AboutPage() {
             <div className="border-t border-sa-border-subtle px-sa-4 py-sa-3 sm:px-sa-5 sm:py-sa-4">
               <div className="border-l-2 border-sa-accent pl-sa-3 sm:grid sm:grid-cols-[150px_minmax(0,1fr)] sm:items-center sm:gap-sa-4">
                 <DataLabel as="p">Central question</DataLabel>
-                <p className="mt-sa-1 text-lg font-bold leading-6 text-sa-text-primary sm:mt-0 sm:text-xl">
+                <p className="mt-sa-1 text-lg font-medium leading-6 text-sa-text-primary sm:mt-0 sm:text-xl">
                   Which country is actually the best at gaming—and what evidence helps explain why?
                 </p>
               </div>
@@ -303,14 +303,14 @@ export default function AboutPage() {
                     aria-current={surface.href === ROUTES.about ? "page" : undefined}
                     className="group grid min-h-16 gap-sa-2 px-sa-4 py-sa-3 outline-none transition-colors duration-150 ease-sa-standard hover:bg-sa-surface-2 focus-visible:bg-sa-surface-2 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-sa-accent sm:grid-cols-[42px_150px_minmax(0,1fr)_auto] sm:items-center sm:px-sa-5"
                   >
-                    <span className="font-sa-data text-[11px] text-sa-text-technical" aria-hidden="true">
+                    <span className="sa-type-meta text-[11px] text-sa-text-technical" aria-hidden="true">
                       {String(index + 1).padStart(2, "0")}
                     </span>
-                    <span className="font-bold text-sa-text-primary transition-colors duration-150 group-hover:text-sa-accent">
+                    <span className="font-medium text-sa-text-primary transition-colors duration-150 group-hover:text-sa-accent">
                       {surface.name}
                     </span>
                     <span className="min-w-0 text-sm leading-5 text-sa-text-muted">
-                      <span className="font-semibold text-sa-text-primary">{surface.question}</span>{" "}
+                      <span className="font-medium text-sa-text-primary">{surface.question}</span>{" "}
                       {surface.description}
                     </span>
                     <span className="text-sa-accent" aria-hidden="true">→</span>
@@ -324,8 +324,8 @@ export default function AboutPage() {
                           href={child.href}
                           className={`group grid min-h-12 gap-x-sa-3 gap-y-sa-1 px-sa-4 py-sa-2 outline-none transition-colors duration-150 ease-sa-standard hover:bg-sa-surface-inset focus-visible:bg-sa-surface-inset focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-sa-accent sm:grid-cols-[150px_minmax(0,1fr)_auto] sm:items-center sm:px-sa-5 ${childIndex === 0 ? "" : "border-t border-sa-border-subtle"}`}
                         >
-                          <span className="flex items-center gap-sa-2 text-xs font-bold uppercase tracking-[0.08em] text-sa-text-primary transition-colors duration-150 group-hover:text-sa-accent">
-                            <span className="font-sa-data text-sa-accent" aria-hidden="true">↳</span>
+                          <span className="sa-type-label flex items-center gap-sa-2 text-xs text-sa-text-primary transition-colors duration-150 group-hover:text-sa-accent">
+                            <span className="sa-type-meta text-sa-accent" aria-hidden="true">↳</span>
                             {child.name}
                           </span>
                           <span className="text-sm leading-5 text-sa-text-muted">{child.description}</span>
@@ -364,7 +364,7 @@ export default function AboutPage() {
                       <span className="hidden text-sa-accent lg:inline" aria-hidden="true">→</span>
                     ) : null}
                   </div>
-                  <h3 className="mt-sa-2 text-sm font-bold uppercase tracking-[0.08em] text-sa-text-primary">
+                  <h3 className="sa-type-label mt-sa-2 text-sm text-sa-text-primary">
                     {layer.name}
                   </h3>
                   <p className="mt-sa-2 text-sm leading-6 text-sa-text-muted">{layer.description}</p>
@@ -392,7 +392,7 @@ export default function AboutPage() {
                   key={discipline.name}
                   className={`px-sa-4 py-sa-4 sm:px-sa-5 ${index === 0 ? "" : "border-t border-sa-border-subtle md:border-l md:border-t-0"}`}
                 >
-                  <h3 className="text-[10px] font-bold uppercase leading-4 tracking-[0.16em] text-sa-accent">
+                  <h3 className="sa-type-label text-[10px] leading-4 text-sa-accent">
                     {discipline.name}
                   </h3>
                   <p className="mt-sa-2 text-sm leading-6 text-sa-text-muted">{discipline.description}</p>
@@ -420,7 +420,7 @@ export default function AboutPage() {
                   key={principle.name}
                   className={`border-t border-sa-border-subtle px-sa-4 py-sa-3 sm:px-sa-5 ${index % 2 === 0 ? "sm:border-r" : ""}`}
                 >
-                  <h3 className="text-[10px] font-bold uppercase leading-4 tracking-[0.16em] text-sa-text-primary">
+                  <h3 className="sa-type-label text-[10px] leading-4 text-sa-text-primary">
                     {principle.name}
                   </h3>
                   <p className="mt-sa-1 text-sm leading-6 text-sa-text-muted">{principle.description}</p>
@@ -456,13 +456,13 @@ export default function AboutPage() {
             <div className="grid border-t border-sa-border-subtle lg:grid-cols-2">
               <article className="px-sa-4 py-sa-4 sm:px-sa-5" aria-labelledby="real-today-title">
                 <DataLabel as="p" className="text-sa-accent">Product structure</DataLabel>
-                <h3 id="real-today-title" className="mt-sa-1 text-lg font-bold text-sa-text-primary">What Is Real Today</h3>
+                <h3 id="real-today-title" className="sa-type-heading mt-sa-1 text-lg text-sa-text-primary">What Is Real Today</h3>
                 <CompactList items={realToday} />
               </article>
 
               <article className="border-t border-sa-border-subtle px-sa-4 py-sa-4 sm:px-sa-5 lg:border-l lg:border-t-0" aria-labelledby="future-intelligence-title">
                 <DataLabel as="p">Intended direction</DataLabel>
-                <h3 id="future-intelligence-title" className="mt-sa-1 text-lg font-bold text-sa-text-primary">What Is Still Being Developed</h3>
+                <h3 id="future-intelligence-title" className="sa-type-heading mt-sa-1 text-lg text-sa-text-primary">What Is Still Being Developed</h3>
                 <CompactList items={futureIntelligence} />
               </article>
             </div>
@@ -486,7 +486,7 @@ export default function AboutPage() {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={`group flex min-h-12 items-center justify-between gap-sa-3 px-sa-4 py-sa-3 text-sm font-bold text-sa-text-primary outline-none transition-colors duration-150 ease-sa-standard hover:bg-sa-surface-2 hover:text-sa-accent focus-visible:bg-sa-surface-2 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-sa-accent ${index === 0 ? "" : "border-t border-sa-border-subtle sm:[&:nth-child(even)]:border-l lg:border-l lg:border-t-0"}`}
+                  className={`group flex min-h-12 items-center justify-between gap-sa-3 px-sa-4 py-sa-3 text-sm font-medium text-sa-text-primary outline-none transition-colors duration-150 ease-sa-standard hover:bg-sa-surface-2 hover:text-sa-accent focus-visible:bg-sa-surface-2 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-sa-accent ${index === 0 ? "" : "border-t border-sa-border-subtle sm:[&:nth-child(even)]:border-l lg:border-l lg:border-t-0"}`}
                 >
                   <span>{link.label}</span>
                   <span className="text-sa-accent transition-transform duration-150 motion-reduce:transition-none group-hover:translate-x-0.5 motion-reduce:group-hover:translate-x-0" aria-hidden="true">→</span>

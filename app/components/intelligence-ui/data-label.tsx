@@ -13,7 +13,7 @@ export default function DataLabel({
 }: DataLabelProps) {
   return (
     <Component
-      className={`font-sa-data text-[10px] font-normal uppercase leading-4 tracking-[0.12em] text-sa-text-technical ${className}`}
+      className={`sa-type-label text-[10px] leading-4 text-sa-text-technical ${className}`}
       {...props}
     />
   );

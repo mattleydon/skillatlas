@@ -63,11 +63,11 @@ export default function ForumPage() {
           </DataLabel>
           <h1
             id="forum-page-title"
-            className="text-[1.75rem] font-black leading-[1.08] tracking-tight text-sa-text-primary sm:text-4xl"
+            className="sa-type-page-title text-sa-text-primary"
           >
             Community Forum
           </h1>
-          <p className="mt-sa-2 max-w-4xl text-sm font-medium leading-6 text-sa-text-muted sm:text-[15px]">
+          <p className="sa-type-intro mt-sa-2 max-w-4xl text-sa-text-muted">
             Discuss rankings, countries, games, players, and the competitive world with the SkillAtlas community.
           </p>
         </IntelligencePanel>
@@ -86,7 +86,7 @@ export default function ForumPage() {
                   <button
                     type="button"
                     onClick={() => setSearch("")}
-                    className="rounded-sa-sm px-sa-1 text-[10px] font-bold uppercase tracking-[0.12em] text-sa-accent outline-none transition-colors duration-150 hover:text-sa-text-primary focus-visible:ring-2 focus-visible:ring-sa-accent"
+                    className="sa-type-label rounded-sa-sm px-sa-1 text-[10px] text-sa-accent outline-none transition-colors duration-150 hover:text-sa-text-primary focus-visible:ring-2 focus-visible:ring-sa-accent"
                   >
                     Clear search
                   </button>
@@ -130,11 +130,11 @@ export default function ForumPage() {
                   <DataLabel as="span" className="text-sa-accent">
                     Sample discussion
                   </DataLabel>
-                  <span className="font-sa-data text-[11px] text-sa-text-technical">
+                  <span className="sa-type-meta text-[11px] text-sa-text-technical">
                     {discussion.author} · {discussion.country}
                   </span>
                 </div>
-                <h2 className="mt-sa-1 break-words text-lg font-bold leading-6 tracking-tight text-sa-text-primary transition-colors duration-200 group-hover:text-sa-accent sm:text-xl">
+                <h2 className="sa-type-heading mt-sa-1 break-words text-lg leading-6 text-sa-text-primary transition-colors duration-200 group-hover:text-sa-accent sm:text-xl">
                   {discussion.title}
                 </h2>
                 <p className="mt-sa-2 max-w-5xl break-words text-sm font-normal leading-6 text-sa-text-muted sm:text-[15px]">
@@ -142,7 +142,7 @@ export default function ForumPage() {
                 </p>
               </div>
 
-              <span className="inline-flex items-center gap-sa-2 text-sm font-bold text-sa-accent sm:justify-self-end">
+              <span className="inline-flex items-center gap-sa-2 text-sm font-medium text-sa-accent sm:justify-self-end">
                 Read discussion
                 <span aria-hidden="true" className="transition-transform duration-200 group-hover:translate-x-1">
                   →
@@ -153,7 +153,7 @@ export default function ForumPage() {
 
           {filteredDiscussions.length === 0 ? (
             <div className="px-sa-5 py-10 text-center" role="status">
-              <h2 className="text-lg font-bold text-sa-text-primary">
+              <h2 className="sa-type-heading text-lg text-sa-text-primary">
                 {searchActive && topicActive
                   ? "No sample discussions match the current filters."
                   : topicActive
@@ -170,7 +170,7 @@ export default function ForumPage() {
                   <button
                     type="button"
                     onClick={() => setSearch("")}
-                    className="h-11 rounded-sa-control bg-sa-accent px-sa-4 text-sm font-bold text-slate-950 transition-opacity duration-200 hover:opacity-90 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-sa-accent/25"
+                    className="h-11 rounded-sa-control bg-sa-accent px-sa-4 text-sm font-medium text-slate-950 transition-opacity duration-200 hover:opacity-90 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-sa-accent/25"
                   >
                     Clear search
                   </button>
@@ -179,7 +179,7 @@ export default function ForumPage() {
                   <button
                     type="button"
                     onClick={() => setTopic(ALL_DISCUSSIONS_TOPIC)}
-                    className="h-11 rounded-sa-control border border-sa-border-subtle bg-sa-surface-2 px-sa-4 text-sm font-bold text-sa-text-muted transition-colors duration-200 hover:border-sa-border-active hover:text-sa-accent focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-sa-accent/15"
+                    className="h-11 rounded-sa-control border border-sa-border-subtle bg-sa-surface-2 px-sa-4 text-sm font-medium text-sa-text-muted transition-colors duration-200 hover:border-sa-border-active hover:text-sa-accent focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-sa-accent/15"
                   >
                     Show all discussions
                   </button>

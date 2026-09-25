@@ -271,7 +271,7 @@ export default function ForumTopicPicker({ value, onChange }: ForumTopicPickerPr
             setOpen(true);
           }
         }}
-        className="flex h-11 w-full items-center justify-between gap-sa-3 rounded-sa-control border border-sa-border-subtle bg-sa-surface-1 px-sa-3 text-left text-sm font-semibold text-sa-text-primary outline-none transition-[border-color,box-shadow,background-color] duration-200 ease-sa-standard hover:border-sa-border-strong focus-visible:border-sa-border-active focus-visible:ring-4 focus-visible:ring-sa-accent/15 lg:h-10"
+        className="flex h-11 w-full items-center justify-between gap-sa-3 rounded-sa-control border border-sa-border-subtle bg-sa-surface-1 px-sa-3 text-left text-sm font-medium text-sa-text-primary outline-none transition-[border-color,box-shadow,background-color] duration-200 ease-sa-standard hover:border-sa-border-strong focus-visible:border-sa-border-active focus-visible:ring-4 focus-visible:ring-sa-accent/15 lg:h-10"
       >
         <span id={`${panelId}-value`} className="min-w-0 truncate">
           {getForumTopicLabel(value)}
@@ -333,17 +333,17 @@ export default function ForumTopicPicker({ value, onChange }: ForumTopicPickerPr
                           activate
                         )
                       }
-                      className={`flex min-h-11 w-full items-center justify-between gap-sa-3 rounded-sa-sm px-sa-3 py-sa-2 text-left text-sm font-semibold outline-none transition-colors duration-150 ease-sa-standard focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-sa-accent ${
-                        selected
-                          ? "bg-sa-accent/12 text-sa-text-primary"
-                          : "text-sa-text-muted hover:bg-sa-surface-2"
-                      }`}
+                      className={`flex min-h-11 w-full items-center justify-between gap-sa-3 rounded-sa-sm px-sa-3 py-sa-2 text-left text-sm font-medium outline-none transition-colors duration-150 ease-sa-standard focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-sa-accent ${
+ selected
+ ? "bg-sa-accent/12 text-sa-text-primary"
+ : "text-sa-text-muted hover:bg-sa-surface-2"
+ }`}
                     >
                       <span>{option.label}</span>
                       {"view" in option ? (
                         <Chevron />
                       ) : selected ? (
-                        <span className="font-sa-data text-[10px] font-bold uppercase tracking-[0.12em] text-sa-accent">
+                        <span className="sa-type-label text-[10px] text-sa-accent">
                           Selected
                         </span>
                       ) : null}
@@ -362,7 +362,7 @@ export default function ForumTopicPicker({ value, onChange }: ForumTopicPickerPr
                 onKeyDown={(event) =>
                   handleActivationKey(event, () => setView("topics"))
                 }
-                className="flex min-h-10 items-center gap-sa-2 rounded-sa-sm px-sa-2 text-xs font-bold text-sa-accent outline-none transition-colors duration-150 hover:bg-sa-surface-2 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-sa-accent"
+                className="flex min-h-10 items-center gap-sa-2 rounded-sa-sm px-sa-2 text-xs font-medium text-sa-accent outline-none transition-colors duration-150 hover:bg-sa-surface-2 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-sa-accent"
               >
                 <span aria-hidden="true">←</span>
                 Topics
@@ -387,15 +387,15 @@ export default function ForumTopicPicker({ value, onChange }: ForumTopicPickerPr
                           selectTopic({ type: "game", gameId: game.id })
                         )
                       }
-                      className={`flex min-h-11 w-full items-center justify-between gap-sa-3 rounded-sa-sm px-sa-3 py-sa-2 text-left text-sm font-semibold outline-none transition-colors duration-150 ease-sa-standard focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-sa-accent ${
-                        selected
-                          ? "bg-sa-accent/12 text-sa-text-primary"
-                          : "text-sa-text-muted hover:bg-sa-surface-2"
-                      }`}
+                      className={`flex min-h-11 w-full items-center justify-between gap-sa-3 rounded-sa-sm px-sa-3 py-sa-2 text-left text-sm font-medium outline-none transition-colors duration-150 ease-sa-standard focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-sa-accent ${
+ selected
+ ? "bg-sa-accent/12 text-sa-text-primary"
+ : "text-sa-text-muted hover:bg-sa-surface-2"
+ }`}
                     >
                       <span>{game.label}</span>
                       {selected ? (
-                        <span className="font-sa-data text-[10px] font-bold uppercase tracking-[0.12em] text-sa-accent">
+                        <span className="sa-type-label text-[10px] text-sa-accent">
                           Selected
                         </span>
                       ) : null}
@@ -414,7 +414,7 @@ export default function ForumTopicPicker({ value, onChange }: ForumTopicPickerPr
                 onKeyDown={(event) =>
                   handleActivationKey(event, () => setView("topics"))
                 }
-                className="flex min-h-10 w-fit items-center gap-sa-2 rounded-sa-sm px-sa-2 text-xs font-bold text-sa-accent outline-none transition-colors duration-150 hover:bg-sa-surface-2 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-sa-accent"
+                className="flex min-h-10 w-fit items-center gap-sa-2 rounded-sa-sm px-sa-2 text-xs font-medium text-sa-accent outline-none transition-colors duration-150 hover:bg-sa-surface-2 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-sa-accent"
               >
                 <span aria-hidden="true">←</span>
                 Topics
@@ -423,7 +423,7 @@ export default function ForumTopicPicker({ value, onChange }: ForumTopicPickerPr
                 <DataLabel id={titleId} as="p">
                   Countries
                 </DataLabel>
-                <span className="font-sa-data text-[10px] text-sa-text-technical">
+                <span className="sa-type-meta text-[10px] text-sa-text-technical">
                   {countryOptions.length} sovereign countries
                 </span>
               </div>
@@ -440,7 +440,7 @@ export default function ForumTopicPicker({ value, onChange }: ForumTopicPickerPr
                     }
                   }}
                   placeholder="Search countries..."
-                  className="h-11 w-full rounded-sa-control border border-sa-border-subtle bg-sa-surface-1 px-sa-3 pr-10 text-sm font-semibold text-sa-text-primary outline-none transition-[border-color,box-shadow] duration-200 ease-sa-standard placeholder:text-sa-text-technical focus:border-sa-border-active focus:ring-4 focus:ring-sa-accent/15"
+                  className="h-11 w-full rounded-sa-control border border-sa-border-subtle bg-sa-surface-1 px-sa-3 pr-10 text-sm font-normal text-sa-text-primary outline-none transition-[border-color,box-shadow] duration-200 ease-sa-standard placeholder:text-sa-text-technical focus:border-sa-border-active focus:ring-4 focus:ring-sa-accent/15"
                 />
                 <svg
                   viewBox="0 0 20 20"
@@ -492,15 +492,15 @@ export default function ForumTopicPicker({ value, onChange }: ForumTopicPickerPr
                               })
                           );
                         }}
-                        className={`flex min-h-11 w-full items-center justify-between gap-sa-3 rounded-sa-sm px-sa-3 py-sa-2 text-left text-sm font-semibold outline-none transition-colors duration-150 ease-sa-standard focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-sa-accent ${
-                          selected
-                            ? "bg-sa-accent/12 text-sa-text-primary"
-                            : "text-sa-text-muted hover:bg-sa-surface-2"
-                        }`}
+                        className={`flex min-h-11 w-full items-center justify-between gap-sa-3 rounded-sa-sm px-sa-3 py-sa-2 text-left text-sm font-medium outline-none transition-colors duration-150 ease-sa-standard focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-sa-accent ${
+ selected
+ ? "bg-sa-accent/12 text-sa-text-primary"
+ : "text-sa-text-muted hover:bg-sa-surface-2"
+ }`}
                       >
                         <span>{country.name}</span>
                         {selected ? (
-                          <span className="font-sa-data text-[10px] font-bold uppercase tracking-[0.12em] text-sa-accent">
+                          <span className="sa-type-label text-[10px] text-sa-accent">
                             Selected
                           </span>
                         ) : null}
@@ -509,7 +509,7 @@ export default function ForumTopicPicker({ value, onChange }: ForumTopicPickerPr
                   })
                 ) : (
                   <div className="px-sa-3 py-sa-5 text-center" role="status">
-                    <p className="text-sm font-bold text-sa-text-primary">No countries match.</p>
+                    <p className="text-sm font-medium text-sa-text-primary">No countries match.</p>
                     <p className="mt-sa-1 text-xs leading-5 text-sa-text-muted">
                       Try a shorter country name.
                     </p>

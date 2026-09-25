@@ -49,14 +49,14 @@ export default function HeritagePicker({
                 key={country.id}
                 className="grid min-h-12 grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-sa-3 rounded-sa-control border border-sa-border-subtle bg-sa-surface-inset px-sa-3 py-sa-2"
               >
-                <span className="font-sa-data text-xs font-black text-sa-accent" aria-label={`Position ${index + 1}`}>
+                <span className="sa-type-data text-xs text-sa-accent" aria-label={`Position ${index + 1}`}>
                   {String(index + 1).padStart(2, "0")}
                 </span>
                 <span className="flex min-w-0 items-center gap-sa-2">
                   <CountryFlag country={{ name: country.name, flagCode: country.iso2 }} size="sm" variant="atlas" />
                   <span className="min-w-0">
-                    <span className="block truncate text-sm font-bold text-sa-text-primary">{country.name}</span>
-                    <span className="block truncate text-[10px] uppercase tracking-[0.1em] text-sa-text-technical">{country.region}</span>
+                    <span className="block truncate text-sm font-medium text-sa-text-primary">{country.name}</span>
+                    <span className="sa-type-label block truncate text-[10px] text-sa-text-technical">{country.region}</span>
                   </span>
                 </span>
                 <span className="flex items-center gap-1">

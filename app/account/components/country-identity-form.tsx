@@ -128,7 +128,7 @@ export default function CountryIdentityForm({
 
       <div className="space-y-sa-2">
         <div>
-          <label htmlFor="profile-city-town" className="text-xs font-bold uppercase tracking-[0.1em] text-sa-text-primary">
+          <label htmlFor="profile-city-town" className="sa-type-label text-xs text-sa-text-primary">
             City / Town <span className="font-medium text-sa-text-technical">(optional)</span>
           </label>
           <p id="profile-city-town-help" className="mt-sa-1 text-xs leading-5 text-sa-text-technical">
@@ -159,7 +159,7 @@ export default function CountryIdentityForm({
 
       <div className="space-y-sa-2">
         <div>
-          <p className="text-xs font-bold uppercase tracking-[0.1em] text-sa-text-primary">Heritage</p>
+          <p className="sa-type-label text-xs text-sa-text-primary">Heritage</p>
           <p className="mt-sa-1 text-xs leading-5 text-sa-text-technical">
             Optional, ordered, and private unless you choose to show the group.
           </p>

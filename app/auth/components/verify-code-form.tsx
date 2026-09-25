@@ -25,7 +25,7 @@ function ResendButton({ disabled }: { disabled: boolean }) {
     <button
       type="submit"
       disabled={disabled || pending}
-      className="min-h-11 rounded-sa-control border border-sa-border-strong bg-sa-surface-2 px-sa-4 text-sm font-bold text-sa-text-primary outline-none transition-colors duration-200 ease-sa-standard hover:border-sa-border-active hover:text-sa-accent focus-visible:ring-4 focus-visible:ring-sa-accent/20 disabled:cursor-not-allowed disabled:opacity-60"
+      className="sa-type-reading-control min-h-11 rounded-sa-control border border-sa-border-strong bg-sa-surface-2 px-sa-4 text-sm text-sa-text-primary outline-none transition-colors duration-200 ease-sa-standard hover:border-sa-border-active hover:text-sa-accent focus-visible:ring-4 focus-visible:ring-sa-accent/20 disabled:cursor-not-allowed disabled:opacity-60"
     >
       {pending ? "Requesting…" : "Request a new access code"}
     </button>
@@ -75,7 +75,7 @@ export default function VerifyCodeForm({ maskedEmail, flow, requested }: VerifyC
       <form action={formAction} onSubmit={preventDuplicateSubmit} aria-busy={pending} className="space-y-sa-4">
         <input type="hidden" name="intent" value="verify" />
         <div>
-          <label htmlFor="verification-code" className="text-xs font-bold uppercase tracking-[0.1em] text-sa-text-primary">
+          <label htmlFor="verification-code" className="sa-type-label text-xs text-sa-text-primary">
             Access code
           </label>
           <p id="verification-code-help" className="mt-sa-1 text-xs leading-5 text-sa-text-technical">
@@ -95,7 +95,7 @@ export default function VerifyCodeForm({ maskedEmail, flow, requested }: VerifyC
             pattern={`[0-9]{${OTP_LENGTH}}`}
             aria-describedby={`verification-code-help${tokenError ? " verification-code-error" : ""}`}
             aria-invalid={tokenError}
-            className="mt-sa-2 min-h-12 w-full rounded-sa-control border border-sa-border-strong bg-sa-surface-inset px-sa-3 text-center font-sa-data text-2xl font-black tracking-[0.3em] text-sa-text-primary outline-none transition-colors duration-200 ease-sa-standard placeholder:text-sa-text-technical focus:border-sa-border-active focus:ring-4 focus:ring-sa-accent/15"
+            className="sa-type-data mt-sa-2 min-h-12 w-full rounded-sa-control border border-sa-border-strong bg-sa-surface-inset px-sa-3 text-center text-2xl tracking-[0.3em] text-sa-text-primary outline-none transition-colors duration-200 ease-sa-standard placeholder:text-sa-text-technical focus:border-sa-border-active focus:ring-4 focus:ring-sa-accent/15"
             placeholder={"0".repeat(OTP_LENGTH)}
           />
         </div>
@@ -126,7 +126,7 @@ export default function VerifyCodeForm({ maskedEmail, flow, requested }: VerifyC
         Need to use a different address? {" "}
         <Link
           href={flow === "sign-up" ? ROUTES.authSignUp : ROUTES.authSignIn}
-          className="font-bold text-sa-accent outline-none hover:text-sa-text-primary focus-visible:rounded-sa-sm focus-visible:ring-2 focus-visible:ring-sa-accent"
+          className="font-medium text-sa-accent outline-none hover:text-sa-text-primary focus-visible:rounded-sa-sm focus-visible:ring-2 focus-visible:ring-sa-accent"
         >
           Start again
         </Link>

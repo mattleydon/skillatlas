@@ -1,0 +1,80 @@
+/* Hybrid Intelligence typography: shared roles, independent of colour/layout.
+   Size variants for dense metadata and controls stay with their existing slots.
+   Brand wordmark/descriptor remain separately owned in globals.css. */
+:root {
+  --sa-weight-regular: 400;
+  --sa-weight-medium: 500;
+  --sa-weight-emphasis: 600;
+  --sa-tracking-label: 0.12em;
+  --sa-tracking-meta: 0.02em;
+  --sa-tracking-heading: -0.025em;
+  --sa-page-title-size: 0.88rem;
+  --sa-intro-size: 0.875rem;
+}
+
+@media (min-width: 640px) {
+  :root {
+    --sa-page-title-size: 1.12rem;
+    --sa-intro-size: 0.9375rem;
+  }
+}
+
+@utility sa-type-page-title {
+  font-family: var(--sa-font-data);
+  font-size: var(--sa-page-title-size);
+  font-weight: var(--sa-weight-medium);
+  line-height: 1.2;
+  letter-spacing: var(--sa-tracking-heading);
+}
+
+@utility sa-type-heading {
+  font-family: var(--sa-font-data);
+  font-weight: var(--sa-weight-medium);
+  letter-spacing: var(--sa-tracking-heading);
+}
+
+@utility sa-type-label {
+  font-family: var(--sa-font-data);
+  font-weight: var(--sa-weight-regular);
+  letter-spacing: var(--sa-tracking-label);
+  text-transform: uppercase;
+}
+
+@utility sa-type-meta {
+  font-family: var(--sa-font-data);
+  font-weight: var(--sa-weight-regular);
+  letter-spacing: var(--sa-tracking-meta);
+}
+
+@utility sa-type-data {
+  font-family: var(--sa-font-data);
+  font-weight: var(--sa-weight-medium);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: normal;
+}
+
+@utility sa-type-body {
+  font-family: var(--sa-font-ui);
+  font-weight: var(--sa-weight-regular);
+  letter-spacing: normal;
+}
+
+@utility sa-type-intro {
+  font-family: var(--sa-font-ui);
+  font-size: var(--sa-intro-size);
+  font-weight: var(--sa-weight-regular);
+  line-height: 1.4;
+  letter-spacing: normal;
+}
+
+@utility sa-type-control {
+  font-family: var(--sa-font-data);
+  font-weight: var(--sa-weight-medium);
+  letter-spacing: normal;
+}
+
+@utility sa-type-reading-control {
+  font-family: var(--sa-font-ui);
+  font-weight: var(--sa-weight-medium);
+  letter-spacing: normal;
+}
