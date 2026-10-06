@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { createMapWheelIntent } from "@/lib/map-wheel-intent";
+import { bindMapWheel, mapWheelZoomFactor } from "@/lib/map-wheel-intent";
 import {
   useCallback,
   useEffect,
@@ -127,8 +127,8 @@ const COASTLINE_GEOJSON_URL = "/data/world-coastline-110m.geo.json";
 const MAP_WIDTH = 1000;
 const MAP_HEIGHT = 520;
 const MAP_PADDING = 25;
-const MIN_CAMERA_SCALE = 1;
-const MAX_CAMERA_SCALE = 18;
+const MIN_CAMERA_SCALE = 0.8;
+const MAX_CAMERA_SCALE = 28;
 const CAMERA_ZOOM_STEP = 1.5;
 const DOUBLE_CLICK_EXPLORATION_SCALE = 2.4;
 const PAN_EDGE_FREEDOM = 44;
@@ -169,7 +169,7 @@ const WORLD_BOUNDS: MapBounds = {
   maxY: MAP_HEIGHT / 2 + NATURAL_EARTH_Y_MAX * NATURAL_EARTH_SCALE,
 };
 const WORLD_CAMERA: Camera = {
-  scale: MIN_CAMERA_SCALE,
+  scale: 1,
   translateX: 0,
   translateY: 0,
 };
@@ -428,7 +428,7 @@ const GRATICULE_PATHS = createGraticulePaths();
 
 function clampCamera(camera: Camera): Camera {
   const scale = clamp(camera.scale, MIN_CAMERA_SCALE, MAX_CAMERA_SCALE);
-  if (scale <= MIN_CAMERA_SCALE + 0.001) return WORLD_CAMERA;
+  if (scale <= 1) return { scale, translateX: MAP_WIDTH * (1 - scale) / 2, translateY: MAP_HEIGHT * (1 - scale) / 2 };
 
   const minimumX = MAP_WIDTH - WORLD_BOUNDS.maxX * scale - PAN_EDGE_FREEDOM;
   const maximumX = -WORLD_BOUNDS.minX * scale + PAN_EDGE_FREEDOM;
@@ -444,7 +444,6 @@ function clampCamera(camera: Camera): Camera {
 
 function cameraAroundPoint(camera: Camera, requestedScale: number, point: MapPoint) {
   const scale = clamp(requestedScale, MIN_CAMERA_SCALE, MAX_CAMERA_SCALE);
-  if (scale <= MIN_CAMERA_SCALE + 0.001) return WORLD_CAMERA;
 
   const worldPoint = {
     x: (point.x - camera.translateX) / camera.scale,
@@ -499,20 +498,23 @@ export default function CountryAtlasMap({
     | { status: "error"; atlas: PreparedAtlas | null }
   >({ status: "loading", atlas: null });
 
-  const commitCamera = useCallback((nextCamera: Camera, motion: CameraMotion) => {
+  const commitCamera = useCallback((nextCamera: Camera, motion: CameraMotion, inFrame = false) => {
     const constrainedCamera = clampCamera(nextCamera);
     cameraRef.current = constrainedCamera;
     pendingCameraRef.current = { camera: constrainedCamera, motion };
 
-    if (cameraFrameRef.current !== null) return;
-    cameraFrameRef.current = window.requestAnimationFrame(() => {
+    const flush = () => {
       const pending = pendingCameraRef.current;
       cameraFrameRef.current = null;
       pendingCameraRef.current = null;
       if (!pending) return;
       setCameraMotion(pending.motion);
       setCamera(pending.camera);
-    });
+    };
+    if (inFrame) {
+      if (cameraFrameRef.current !== null) window.cancelAnimationFrame(cameraFrameRef.current);
+      flush();
+    } else if (cameraFrameRef.current === null) cameraFrameRef.current = window.requestAnimationFrame(flush);
   }, []);
 
   useEffect(() => {
@@ -567,7 +569,7 @@ export default function CountryAtlasMap({
 
     const frame = window.requestAnimationFrame(() => {
       const currentCamera = cameraRef.current;
-      if (currentCamera.scale <= MIN_CAMERA_SCALE + 0.01) return;
+      if (currentCamera.scale <= 1.01) return;
       const target = mapState.atlas.targets.get(atlasSelectionRequest.countryId);
       if (target) {
         commitCamera(cameraCenteredOnTarget(target, currentCamera.scale), "travel");
@@ -583,35 +585,26 @@ export default function CountryAtlasMap({
     if (!svg) return;
     const mapElement: SVGSVGElement = svg;
 
-    const wheelIntent = createMapWheelIntent();
-    function handleMapWheel(event: WheelEvent) {
-      const intent = wheelIntent(event);
-      if (!intent.zoom) return;
+    return bindMapWheel(mapElement,
+      (delta) => delta < 0 ? cameraRef.current.scale < MAX_CAMERA_SCALE : cameraRef.current.scale > MIN_CAMERA_SCALE,
+      (delta, clientX, clientY) => {
       const point = clientPointToMap(mapElement, {
-        x: event.clientX,
-        y: event.clientY,
+        x: clientX,
+        y: clientY,
       });
       if (!point) return;
 
       const currentCamera = cameraRef.current;
-      const factor = Math.exp(-intent.delta * 0.0016);
-      if ((factor < 1 && currentCamera.scale <= MIN_CAMERA_SCALE) || (factor > 1 && currentCamera.scale >= MAX_CAMERA_SCALE)) {
-        if (event.ctrlKey) event.preventDefault();
-        return;
-      }
-      event.preventDefault();
+      const factor = mapWheelZoomFactor(delta);
       commitCamera(
         cameraAroundPoint(currentCamera, currentCamera.scale * factor, point),
-        "direct"
+        "direct", true
       );
-    }
-
-    mapElement.addEventListener("wheel", handleMapWheel, { passive: false });
-    return () => mapElement.removeEventListener("wheel", handleMapWheel);
+    });
   }, [commitCamera, mapState.status]);
 
   const coverageCount = mapState.status === "ready" ? mapState.atlas.targets.size : 0;
-  const isWorldView = camera.scale <= MIN_CAMERA_SCALE + 0.01;
+  const isWorldView = Math.abs(camera.scale - 1) < 0.01;
   const viewportTransform = useMemo(
     () =>
       `matrix(${camera.scale}, 0, 0, ${camera.scale}, ${camera.translateX}, ${camera.translateY})`,
@@ -710,7 +703,7 @@ export default function CountryAtlasMap({
     });
     if (!point) return;
 
-    if (cameraRef.current.scale > MIN_CAMERA_SCALE + 0.01) {
+    if (cameraRef.current.scale > 1.01) {
       commitCamera(WORLD_CAMERA, "travel");
       return;
     }
@@ -958,7 +951,7 @@ export default function CountryAtlasMap({
               aria-label="Zoom out"
               title="Zoom out (-)"
               onClick={() => zoomFromCenter(1 / CAMERA_ZOOM_STEP)}
-              disabled={isWorldView}
+              disabled={camera.scale <= MIN_CAMERA_SCALE + 0.01}
               className={styles.mapCameraButton}
             >
               <span aria-hidden="true">−</span>

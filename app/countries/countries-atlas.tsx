@@ -66,7 +66,6 @@ export default function CountriesAtlas() {
               onCountryChange={(id) => select(id, "index")} onCountryHover={setHoveredCountryId} />
             <p className="p-sa-3 text-xs text-sa-text-muted" aria-live="polite">{countries.length} of 195 countries{active && !relevantIds.has(active.id) ? ` · ${active.name} selected outside this filter` : ""}</p>
           </div>
-          <CountryDossier country={active} visibleCount={countries.length} onClear={() => { update({ country: null }); setAtlasSelectionRequest(null); }} />
           <div className={styles.orientationSurface}>
             <h2 className="sa-type-heading border-b border-sa-border-subtle p-sa-3">Geographic orientation</h2>
             <CountryAtlasMap selectedCountry={active} hoveredCountryId={hoveredCountryId} relevantCountryIds={relevantIds}
@@ -74,6 +73,7 @@ export default function CountriesAtlas() {
             <p className="p-sa-3 text-xs text-sa-text-muted">Select again to clear. Slow wheel zooms; fast scrolling moves the page. Camera controls work independently of selection.</p>
           </div>
         </div>
+        <CountryDossier country={active} visibleCount={countries.length} onClear={() => { update({ country: null }); setAtlasSelectionRequest(null); }} />
       </div>
     </main>
   );

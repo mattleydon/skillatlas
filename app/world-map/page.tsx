@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { createMapWheelIntent } from "@/lib/map-wheel-intent";
+import { bindMapWheel, mapWheelZoomFactor } from "@/lib/map-wheel-intent";
 import { validCountryId } from "@/lib/country-browsing";
 import {
   useCallback,
@@ -113,8 +113,8 @@ const MICROSTATE_GEOJSON_URL = "/data/world-microstates-10m.geo.json";
 const CANVAS_SIZE = 900;
 const CENTER = CANVAS_SIZE / 2;
 const GLOBE_RADIUS = 360;
-const MIN_VIEW_SCALE = 1;
-const MAX_VIEW_SCALE = 2.8;
+const MIN_VIEW_SCALE = 0.8;
+const MAX_VIEW_SCALE = 5;
 const VIEW_ZOOM_STEP = 1.28;
 const INITIAL_ROTATION = { lat: -8, lon: -8 };
 const WORLD_VIEW: MapView = { scale: 1, translateX: 0, translateY: 0 };
@@ -550,9 +550,10 @@ function findCountryAtPoint(
 
 function clampMapView(view: MapView, frame: HTMLDivElement | null) {
   const scale = clamp(view.scale, MIN_VIEW_SCALE, MAX_VIEW_SCALE);
-  if (scale <= MIN_VIEW_SCALE + 0.001 || !frame) return WORLD_VIEW;
+  if (!frame) return WORLD_VIEW;
   const width = frame.clientWidth;
   const height = frame.clientHeight;
+  if (scale <= 1) return { scale, translateX: width * (1 - scale) / 2, translateY: height * (1 - scale) / 2 };
 
   // Desktop uses the whole rectangular map stage as the camera viewport while
   // keeping the rendered globe square and centred inside it. Constrain the
@@ -927,21 +928,9 @@ function WorldMapContent() {
     const frame = frameRef.current;
     if (!frame) return;
 
-    const wheelIntent = createMapWheelIntent();
-    function handleWheel(event: WheelEvent) {
-      const intent = wheelIntent(event);
-      if (!intent.zoom) return;
-      if ((intent.delta > 0 && viewRef.current.scale <= MIN_VIEW_SCALE) || (intent.delta < 0 && viewRef.current.scale >= MAX_VIEW_SCALE)) {
-        if (event.ctrlKey) event.preventDefault();
-        return;
-      }
-      event.preventDefault();
-      const factor = clamp(Math.exp(-intent.delta * 0.0012), 0.82, 1.22);
-      zoomAtClientPoint(event.clientX, event.clientY, factor, "direct");
-    }
-
-    frame.addEventListener("wheel", handleWheel, { passive: false });
-    return () => frame.removeEventListener("wheel", handleWheel);
+    return bindMapWheel(frame,
+      (delta) => delta < 0 ? viewRef.current.scale < MAX_VIEW_SCALE : viewRef.current.scale > MIN_VIEW_SCALE,
+      (delta, x, y) => zoomAtClientPoint(x, y, mapWheelZoomFactor(delta), "direct"));
   }, [zoomAtClientPoint]);
 
   useEffect(() => {
@@ -1202,7 +1191,7 @@ function WorldMapContent() {
   }
 
   function handleDoubleClick(event: ReactMouseEvent<HTMLCanvasElement>) {
-    if (viewRef.current.scale > MIN_VIEW_SCALE + 0.05) {
+    if (viewRef.current.scale > 1.05) {
       commitView(WORLD_VIEW, reducedMotion ? "direct" : "smooth");
     } else {
       zoomAtClientPoint(

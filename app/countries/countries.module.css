@@ -4,7 +4,7 @@
   transition: background-color 260ms ease-in-out, color 260ms ease-in-out;
 }
 
-/* Countries V3: index / primary dossier / supporting orientation. */
+/* Countries V3: index + dominant map, then the selected-country dossier. */
 .dossierGrid {
   display: grid;
   gap: var(--sa-space-3);
@@ -16,7 +16,7 @@
   border: 1px solid var(--sa-border-subtle);
   background: var(--sa-surface-1);
 }
-.dossier { padding: var(--sa-space-4); overflow-wrap: anywhere; }
+.dossier { margin-top: var(--sa-space-3); padding: var(--sa-space-4); overflow-wrap: anywhere; }
 .indexSurface .countryList { max-height: 240px; }
 .orientationSurface .mapPanel { min-height: 360px; border: 0; }
 .orientationSurface .mapFrame { min-height: 280px; }
@@ -40,8 +40,12 @@
 .dossierLink { display: inline-flex; align-items: center; min-height: 44px; color: var(--sa-text-primary); text-decoration: underline; text-underline-offset: 4px; font-size: 13px; }
 .dossierLink:focus-visible, .dossierDetails summary:focus-visible { outline: 2px solid var(--sa-accent); outline-offset: 2px; }
 @media (min-width: 1024px) {
-  .dossierGrid { grid-template-columns: minmax(200px, .8fr) minmax(0, 1.9fr) minmax(260px, 1.2fr); }
-  .indexSurface .countryList { max-height: min(62vh, 650px); }
+  .dossierGrid { grid-template-columns: minmax(220px, 1fr) minmax(0, 3.4fr); align-items: stretch; }
+  .indexSurface { display: flex; flex-direction: column; min-height: clamp(580px, 72vh, 720px); }
+  .indexSurface .sidebar { flex: 1; min-height: 0; contain: size; }
+  .indexSurface .countryList { flex: 1; max-height: none; }
+  .orientationSurface { display: flex; flex-direction: column; min-height: 0; }
+  .orientationSurface .mapPanel { flex: 1; min-height: 0; }
   .orientationSurface .mapFrame { min-height: 350px; }
 }
 
