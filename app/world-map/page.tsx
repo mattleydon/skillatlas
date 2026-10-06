@@ -1,12 +1,16 @@
 "use client";
 
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import { createMapWheelIntent } from "@/lib/map-wheel-intent";
+import { validCountryId } from "@/lib/country-browsing";
 import {
   useCallback,
   useEffect,
   useMemo,
   useRef,
   useState,
+  Suspense,
   type KeyboardEvent as ReactKeyboardEvent,
   type MouseEvent as ReactMouseEvent,
   type PointerEvent as ReactPointerEvent,
@@ -20,7 +24,7 @@ import DataLabel from "@/app/components/intelligence-ui/data-label";
 import IntelligencePanel from "@/app/components/intelligence-ui/intelligence-panel";
 import SearchBar from "@/app/components/search-bar";
 import { GAMES, type Game } from "@/constants/games";
-import { countryRoute } from "@/constants/routes";
+import { ROUTES } from "@/constants/routes";
 import {
   sovereignCountries,
   type CountryAtlasRecord,
@@ -675,7 +679,8 @@ function WorldMapBackground() {
   );
 }
 
-export default function WorldMapPage() {
+function WorldMapContent() {
+  const params = useSearchParams();
   const [features, setFeatures] = useState<PreparedFeature[]>([]);
   const [loadState, setLoadState] = useState<"loading" | "ready" | "error">(
     "loading"
@@ -683,9 +688,7 @@ export default function WorldMapPage() {
   const [scope, setScope] = useState<CountryRankingScope>("Overall");
   const [search, setSearch] = useState("");
   const [searchOpen, setSearchOpen] = useState(false);
-  const [selectedCountryId, setSelectedCountryId] = useState<string | null>(
-    null
-  );
+  const selectedCountryId = validCountryId(params.get("country"));
   const [hoveredCountryId, setHoveredCountryId] = useState<string | null>(null);
   const [darkMode, setDarkMode] = useState(false);
   const [reducedMotion, setReducedMotion] = useState(false);
@@ -822,7 +825,9 @@ export default function WorldMapPage() {
   }
 
   function selectCountry(countryId: string, focus = false) {
-    setSelectedCountryId(countryId);
+    const url = new URL(window.location.href);
+    url.searchParams.set("country", countryId);
+    window.history.pushState(null, "", url.pathname + url.search);
     if (focus) focusCountry(countryId);
   }
 
@@ -922,9 +927,16 @@ export default function WorldMapPage() {
     const frame = frameRef.current;
     if (!frame) return;
 
+    const wheelIntent = createMapWheelIntent();
     function handleWheel(event: WheelEvent) {
+      const intent = wheelIntent(event);
+      if (!intent.zoom) return;
+      if ((intent.delta > 0 && viewRef.current.scale <= MIN_VIEW_SCALE) || (intent.delta < 0 && viewRef.current.scale >= MAX_VIEW_SCALE)) {
+        if (event.ctrlKey) event.preventDefault();
+        return;
+      }
       event.preventDefault();
-      const factor = clamp(Math.exp(-event.deltaY * 0.0012), 0.82, 1.22);
+      const factor = clamp(Math.exp(-intent.delta * 0.0012), 0.82, 1.22);
       zoomAtClientPoint(event.clientX, event.clientY, factor, "direct");
     }
 
@@ -1434,7 +1446,7 @@ export default function WorldMapPage() {
             </div>
 
             <p id="world-map-instructions" className="sr-only">
-              Drag to rotate the globe. Use the mouse wheel or pinch to zoom.
+              Drag to rotate. Slow wheel or pinch zooms; fast scrolling moves the page.
               Double-click toggles exploration zoom. Arrow keys select countries,
               plus and minus zoom, and zero resets the world view.
             </p>
@@ -1511,7 +1523,7 @@ export default function WorldMapPage() {
                   </div>
 
                   <Link
-                    href={countryRoute(selectedCountry.id)}
+                    href={`${ROUTES.countries}?country=${encodeURIComponent(selectedCountry.id)}`}
                     className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-sa-control border border-sa-border-active bg-sa-accent/10 px-sa-4 text-sm font-medium text-sa-text-primary outline-none transition-[background-color,color] duration-200 ease-sa-standard hover:bg-sa-accent hover:text-slate-950 focus-visible:ring-4 focus-visible:ring-sa-accent/25"
                   >
                     View Country Intelligence
@@ -1554,4 +1566,8 @@ export default function WorldMapPage() {
       </div>
     </main>
   );
+}
+
+export default function WorldMapPage() {
+  return <Suspense fallback={<main className="skillatlas-page-shell">Loading Atlas…</main>}><WorldMapContent /></Suspense>;
 }

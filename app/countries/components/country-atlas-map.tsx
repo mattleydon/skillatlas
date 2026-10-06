@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { createMapWheelIntent } from "@/lib/map-wheel-intent";
 import {
   useCallback,
   useEffect,
@@ -13,7 +14,7 @@ import {
 } from "react";
 import DataLabel from "@/app/components/intelligence-ui/data-label";
 import IntelligencePanel from "@/app/components/intelligence-ui/intelligence-panel";
-import { countryRoute } from "@/constants/routes";
+import { ROUTES } from "@/constants/routes";
 import {
   sovereignCountries,
   type CountryAtlasRecord,
@@ -582,8 +583,10 @@ export default function CountryAtlasMap({
     if (!svg) return;
     const mapElement: SVGSVGElement = svg;
 
+    const wheelIntent = createMapWheelIntent();
     function handleMapWheel(event: WheelEvent) {
-      event.preventDefault();
+      const intent = wheelIntent(event);
+      if (!intent.zoom) return;
       const point = clientPointToMap(mapElement, {
         x: event.clientX,
         y: event.clientY,
@@ -591,7 +594,12 @@ export default function CountryAtlasMap({
       if (!point) return;
 
       const currentCamera = cameraRef.current;
-      const factor = Math.exp(-event.deltaY * 0.0016);
+      const factor = Math.exp(-intent.delta * 0.0016);
+      if ((factor < 1 && currentCamera.scale <= MIN_CAMERA_SCALE) || (factor > 1 && currentCamera.scale >= MAX_CAMERA_SCALE)) {
+        if (event.ctrlKey) event.preventDefault();
+        return;
+      }
+      event.preventDefault();
       commitCamera(
         cameraAroundPoint(currentCamera, currentCamera.scale * factor, point),
         "direct"
@@ -649,7 +657,7 @@ export default function CountryAtlasMap({
           ? orderedCountryIds.length - 1
           : clamp(currentIndex + offset, 0, orderedCountryIds.length - 1);
     const nextCountryId = orderedCountryIds[nextIndex];
-    if (!nextCountryId) return;
+    if (!nextCountryId || nextIndex === currentIndex) return;
 
     selectCountry(nextCountryId);
     window.requestAnimationFrame(() => {
@@ -928,8 +936,8 @@ export default function CountryAtlasMap({
                 <span className={styles.mapContextSeparator} aria-hidden="true">
                   /
                 </span>
-                <Link href={countryRoute(selectedCountry.id)} className={styles.mapContextAction}>
-                  View Country <span aria-hidden="true">→</span>
+                <Link href={`${ROUTES.atlas}?country=${encodeURIComponent(selectedCountry.id)}`} className={styles.mapContextAction}>
+                  View in Atlas <span aria-hidden="true">→</span>
                 </Link>
               </>
             ) : null}
@@ -973,7 +981,7 @@ export default function CountryAtlasMap({
         Interactive country atlas
       </h2>
       <p id="atlas-map-instructions" className="sr-only">
-        Click or tap a country to select it. Drag to pan, use the mouse wheel or pinch to zoom,
+        Click or tap a country to select it; select it again to clear. Drag to pan, use a slow wheel or pinch to zoom,
         and double-click to toggle between the world and exploration views. While a map country
         is focused, use plus and minus to zoom or zero for the world view. The compact camera
         controls provide the same actions for keyboard and assistive technology users.
