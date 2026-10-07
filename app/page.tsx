@@ -281,7 +281,7 @@ export default function RankingsPage() {
               </p>
             </div>
 
-            <div className="self-start text-xs text-sa-text-muted lg:self-auto">
+            <div className="self-start text-xs text-sa-text-muted lg:self-auto [&>a]:min-h-8!">
               <DataStateBadge state="fixture" />
               <p className="mt-sa-1">Not verified competitive intelligence</p>
               <MethodologyLink />

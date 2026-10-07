@@ -149,6 +149,7 @@ test("Rankings heading stays top-aligned beside fixture disclosure without chang
   const header = source.slice(source.indexOf('aria-labelledby="global-country-rankings-title"'), source.indexOf('aria-label="Country ranking controls"'));
   assert.match(header, /bodyClassName="px-sa-3 py-sa-3 sm:px-sa-4"/);
   assert.match(header, /lg:items-start/);
+  assert.match(header, /\[&>a\]:min-h-8!/);
   assert.doesNotMatch(header, /lg:items-end/);
   assert.match(header, /<DataStateBadge state="fixture"/);
 });
