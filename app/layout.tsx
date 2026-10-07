@@ -22,12 +22,12 @@ const initialThemeScript = `
   (() => {
     try {
       const savedTheme = window.localStorage.getItem("skillatlas-theme");
-      const darkMode = savedTheme !== "light";
+      const darkMode = savedTheme === "dark" || (savedTheme !== "light" && window.matchMedia("(prefers-color-scheme: dark)").matches);
       document.documentElement.classList.toggle("skillatlas-dark", darkMode);
       document.documentElement.style.colorScheme = darkMode ? "dark" : "light";
     } catch {
-      document.documentElement.classList.add("skillatlas-dark");
-      document.documentElement.style.colorScheme = "dark";
+      document.documentElement.classList.remove("skillatlas-dark");
+      document.documentElement.style.colorScheme = "light";
     }
   })();
 `;

@@ -22,11 +22,11 @@ export default async function CountryAtlasEntryPage({
     <main className={`${styles.shell} relative min-h-screen overflow-hidden`}>
       <div className="skillatlas-page-shell relative z-10 mx-auto max-w-3xl pb-16">
         <Link
-          href={ROUTES.countries}
+          href={`${ROUTES.countries}?country=${encodeURIComponent(country.id)}`}
           className={`${styles.placeholderBackLink} inline-flex min-h-11 items-center rounded-sa-control border px-4 py-2 text-sm font-medium transition-colors duration-200 ease-in-out hover:border-[#19d3cf] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#19d3cf]/20`}
         >
           <span className="mr-2" aria-hidden="true">&larr;</span>
-          Back to Countries
+          View Country Intelligence
         </Link>
 
         <section className="mt-6 rounded-sa-panel border border-sa-border-subtle bg-sa-surface-1 p-sa-4 sm:p-sa-5">
@@ -47,7 +47,7 @@ export default async function CountryAtlasEntryPage({
 
           <div className="mt-sa-5 rounded-sa-control border border-sa-border-subtle bg-sa-surface-inset p-sa-4">
             <p className="sa-type-label text-[10px] text-gray-500">
-              Highest Achievement
+              Highest Achievement · Fixture / Demo
             </p>
             <p className="mt-2 text-xl font-medium">
               <span className="text-[#ff2fa8]">#{country.highestAchievement.rank}</span>{" "}
@@ -56,7 +56,7 @@ export default async function CountryAtlasEntryPage({
           </div>
 
           <p className={`${styles.placeholderMutedText} mt-7 text-sm font-normal leading-7`}>
-            Detailed country information is coming in a future release.
+            This destination remains a minimal country entry. Competitive values are unverified prototype fixtures. Open Country Intelligence for the available dossier and data-state context.
           </p>
         </section>
       </div>

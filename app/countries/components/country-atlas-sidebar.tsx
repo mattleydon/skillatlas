@@ -41,6 +41,8 @@ export default function CountryAtlasSidebar({
 }: CountryAtlasSidebarProps) {
   const listRef = useRef<HTMLDivElement>(null);
   const rowRefs = useRef(new Map<string, HTMLButtonElement>());
+  const rovingCountryId = countries.some((country) => country.id === activeCountryId)
+    ? activeCountryId : countries[0]?.id;
   const countryGroups = useMemo(() => {
     if (sort !== "alphabetical") {
       return [{ initial: null, countries: [...countries] }];
@@ -78,7 +80,9 @@ export default function CountryAtlasSidebar({
   useEffect(() => {
     if (!activeCountryId) return;
     const frame = window.requestAnimationFrame(() => alignRowToTop(activeCountryId));
-    return () => window.cancelAnimationFrame(frame);
+    const observer = new ResizeObserver(() => alignRowToTop(activeCountryId));
+    if (listRef.current) observer.observe(listRef.current);
+    return () => { window.cancelAnimationFrame(frame); observer.disconnect(); };
   }, [activeCountryId, alignRowToTop, countries]);
 
   function moveToCountry(countryId: string) {
@@ -111,7 +115,7 @@ export default function CountryAtlasSidebar({
 
     event.preventDefault();
     const nextCountry = countries[nextIndex];
-    if (nextCountry) moveToCountry(nextCountry.id);
+    if (nextCountry && nextIndex !== currentIndex) moveToCountry(nextCountry.id);
   }
 
   return (
@@ -123,7 +127,7 @@ export default function CountryAtlasSidebar({
       header={
         <div className="flex items-baseline justify-between gap-sa-3">
           <h2 id="country-atlas-title" className="sa-type-heading text-base">
-            Country Atlas
+            Country Index
           </h2>
           <p
             className={`sa-type-data ${styles.countEntrance} text-xs text-sa-accent`}
@@ -181,7 +185,7 @@ export default function CountryAtlasSidebar({
                 ) : null}
                 {group.countries.map((country) => {
                   const active = country.id === activeCountryId;
-                  const roving = country.id === (activeCountryId ?? countries[0]?.id);
+                  const roving = country.id === rovingCountryId;
                   const hovered = country.id === hoveredCountryId;
 
                   return (

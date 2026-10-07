@@ -193,7 +193,7 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
   const isSkillInvadersPage = pathname?.startsWith(ROUTES.spaceInvaders) ?? false;
   const hideLiveChat = isSkillInvadersPage;
 
-  const [darkMode, setDarkMode] = useState(true);
+  const [darkMode, setDarkMode] = useState(false);
   const [chatOpen, setChatOpen] = useState(false);
   const [displayName, setDisplayName] = useState("Visitor");
   const [emojiMenuOpen, setEmojiMenuOpen] = useState(false);
@@ -207,8 +207,8 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
   const commentEditorRef = useRef<HTMLDivElement | null>(null);
   const savedEditorRangeRef = useRef<Range | null>(null);
   useEffect(() => {
-    const savedTheme = window.localStorage.getItem(THEME_KEY);
-    const shouldUseDark = savedTheme !== "light";
+    // The early layout script resolves saved/device preference, with a light fallback.
+    const shouldUseDark = document.documentElement.classList.contains("skillatlas-dark");
 
     const frame = window.requestAnimationFrame(() => {
       setDarkMode(shouldUseDark);
