@@ -134,10 +134,21 @@ test("public origins use readable fixture labels without rendering internal repo
   assert.doesNotMatch(page, /data\/countries\.ts|data\/country-rankings\.ts/);
 });
 
-test("dossier bottom actions share a wrapping row in keyboard order", () => {
+test("selected dossier keeps its only Methodology link inside the explanation and Atlas in the action row", () => {
   const country = load("data/countries.ts").sovereignCountries.find((c) => c.id === "denmark");
   const html = render(load("app/countries/components/country-dossier.tsx").default, { country, visibleCount: 195, onClear() {} });
-  assert.match(html, /<div class="dossierActions"><a[^>]*href="\/about\/methodology">Methodology<\/a><a[^>]*href="\/world-map\?country=denmark">View in Atlas →<\/a><\/div>/);
+  assert.equal((html.match(/href="\/about\/methodology"/g) ?? []).length, 1);
+  assert.match(html, /<details[^>]*><summary>Why this result\?[\s\S]*?href="\/about\/methodology"[\s\S]*?<\/details>/);
+  assert.match(html, /<div class="dossierActions"><a[^>]*href="\/world-map\?country=denmark">View in Atlas →<\/a><\/div>/);
   const css = readFileSync(resolve(root, "app/countries/countries.module.css"), "utf8");
   assert.match(css, /\.dossierActions\s*\{[^}]*display: flex;[^}]*flex-wrap: wrap;[^}]*gap: var\(--sa-space-2\) var\(--sa-space-4\)/);
+});
+
+test("Rankings heading stays top-aligned beside fixture disclosure without changing panel padding", () => {
+  const source = readFileSync(resolve(root, "app/page.tsx"), "utf8");
+  const header = source.slice(source.indexOf('aria-labelledby="global-country-rankings-title"'), source.indexOf('aria-label="Country ranking controls"'));
+  assert.match(header, /bodyClassName="px-sa-3 py-sa-3 sm:px-sa-4"/);
+  assert.match(header, /lg:items-start/);
+  assert.doesNotMatch(header, /lg:items-end/);
+  assert.match(header, /<DataStateBadge state="fixture"/);
 });

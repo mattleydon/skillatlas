@@ -58,7 +58,6 @@ export default function CountryDossier({ country, visibleCount, onClear }: {
     </details>
     <WhyThisResult evidence={DOSSIER_EVIDENCE} context={`${country.name} dossier values`} />
     <div className={styles.dossierActions}>
-      <MethodologyLink />
       <Link className={styles.dossierLink} href={`${ROUTES.atlas}?country=${encodeURIComponent(country.id)}`}>View in Atlas →</Link>
     </div>
   </section>;

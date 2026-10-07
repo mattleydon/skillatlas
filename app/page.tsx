@@ -265,7 +265,7 @@ export default function RankingsPage() {
           className="mb-sa-3"
           bodyClassName="px-sa-3 py-sa-3 sm:px-sa-4"
         >
-          <div className="flex flex-col gap-sa-3 lg:flex-row lg:items-end lg:justify-between">
+          <div className="flex flex-col gap-sa-3 lg:flex-row lg:items-start lg:justify-between">
             <div className="max-w-3xl">
               <DataLabel as="p" className="mb-sa-1 text-sa-accent">
                 SkillAtlas / Rankings
