@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { Suspense, useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import CountryFlag from "@/app/components/country-flag";
 import CompactSelect, {
   type CompactSelectOption,
@@ -131,7 +132,17 @@ function PlayersBackground() {
 }
 
 export default function PlayersPage() {
-  const [search, setSearch] = useState("");
+  return <Suspense><PlayerRoute /></Suspense>;
+}
+
+function PlayerRoute() {
+  const params = useSearchParams();
+  const selected = prototypePlayers.find((player) => player.id === params.get("player"));
+  return <PlayerRankings key={selected?.id ?? "all"} initialSearch={selected?.handle ?? ""} />;
+}
+
+function PlayerRankings({ initialSearch }: { initialSearch: string }) {
+  const [search, setSearch] = useState(initialSearch);
   const [selectedGame, setSelectedGame] = useState<GameFilter>("Overall");
   const [sortKey, setSortKey] = useState<SortKey>("rank");
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
@@ -442,8 +453,9 @@ export default function PlayersPage() {
 
                   return (
                     <tr
+                      id={`player-${profile.id}`}
                       key={profile.id}
-                      className="border-b border-sa-border-subtle last:border-b-0 hover:bg-sa-surface-2/70"
+                      className="scroll-mt-40 target:bg-sa-surface-inset border-b border-sa-border-subtle last:border-b-0 hover:bg-sa-surface-2/70"
                     >
                       <td className="px-2 py-sa-2 align-middle sm:px-sa-3">
                         <span className="sa-type-data text-sm">

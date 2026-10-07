@@ -66,7 +66,7 @@ export default function EntityDevelopmentPage({
             {items.length > 0 ? (
               <ol className="grid gap-sa-2 sm:grid-cols-2 xl:grid-cols-3">
                 {items.map((item, index) => (
-                  <li key={item.id} className="grid min-h-16 grid-cols-[34px_minmax(0,1fr)] items-center border border-sa-border-subtle bg-sa-surface-inset px-sa-3 py-sa-2">
+                  <li id={`entity-${item.id}`} key={item.id} className="scroll-mt-40 target:border-sa-border-active grid min-h-16 grid-cols-[34px_minmax(0,1fr)] items-center border border-sa-border-subtle bg-sa-surface-inset px-sa-3 py-sa-2">
                     <span className="sa-type-data text-[10px] text-sa-text-technical">{String(index + 1).padStart(2, "0")}</span>
                     <span className="min-w-0">
                       <strong className="block truncate text-sm font-medium text-sa-text-primary">{item.name}</strong>

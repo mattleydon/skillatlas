@@ -120,6 +120,7 @@ Avoid arbitrary font families, synthetic heavy weights, broad “all uppercase/a
 
 ## Controls and responsive density
 
+- **Global Search navigates across SkillAtlas; contextual filters narrow the current surface.** Rankings filters its current scope, Countries filters its Country Index, Atlas locates/selects geography, and any future Forum search stays within Forum. Reserve “Search” for the global header capability where practical; label local narrowing controls by their scope.
 - Desktop controls may use a compact `40px` height.
 - Touch and mobile controls should remain at least approximately `44px` where appropriate.
 - Search, selects, tabs, and filter controls should use consistent border, radius, label, focus, and disabled treatments.
