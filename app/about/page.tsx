@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { MethodologyLink } from "@/app/components/evidence/evidence-ui";
 import DataLabel from "@/app/components/intelligence-ui/data-label";
 import IntelligencePanel from "@/app/components/intelligence-ui/intelligence-panel";
 import { GAME_DEFINITIONS } from "@/constants/games";
@@ -405,6 +406,7 @@ export default function AboutPage() {
             as="section"
             className="mt-sa-3 overflow-hidden"
             aria-labelledby="methodology-principles-title"
+            footer={<MethodologyLink />}
             header={
               <SectionHeading
                 eyebrow="Trust framework"

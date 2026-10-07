@@ -1,5 +1,26 @@
 # Country atlas data
 
+## Trust presentation V0.1
+
+`lib/evidence.ts` separates publication states (canonical, provisional, fixture,
+unavailable, unknown) from reasoning states (observed, derived, interpretation,
+inferred intent, forecast, unknown/unresolved). Geographic catalogue admission
+does not admit competitive fields stored in the same record.
+
+Rankings, Country Dossiers and Atlas share `app/components/evidence/evidence-ui.tsx`.
+The public explanation is `/about/methodology`. Current competitive summaries
+are explicitly fixture/demo, with unavailable competitive evidence and unknown
+confidence. Repository fixture paths identify value origins, not supporting
+competitive evidence. No methodology version or data-update timestamp is
+invented from a release date.
+
+The typed summary accepts source IDs/labels/kinds, an optional known update time,
+methodology version, evidence status, limitations and justified future confidence.
+An assessed confidence requires a rationale and source identifiers; these hooks
+do not approve any dataset or activate ingestion. Current ranking values and
+calculations are unchanged. Extend the summaries only with admitted evidence;
+do not relabel fixtures as provisional or canonical.
+
 This directory contains the application-facing country catalogue used by the
 Countries experience. The classification is a product scope decision, not a
 statement about international recognition or disputed boundaries.

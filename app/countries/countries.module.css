@@ -38,6 +38,8 @@
 .gameRows > div { padding-block: var(--sa-space-2); border-top: 1px solid var(--sa-border-subtle); }
 .gameRows h3 { font-size: 13px; font-weight: 500; }
 .dossierLink { display: inline-flex; align-items: center; min-height: 44px; color: var(--sa-text-primary); text-decoration: underline; text-underline-offset: 4px; font-size: 13px; }
+.dossierActions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sa-space-2) var(--sa-space-4); }
+.dossierActions > a { min-width: 0; max-width: 100%; }
 .dossierLink:focus-visible, .dossierDetails summary:focus-visible { outline: 2px solid var(--sa-accent); outline-offset: 2px; }
 @media (min-width: 1024px) {
   .dossierGrid { grid-template-columns: minmax(220px, 1fr) minmax(0, 3.4fr); align-items: stretch; }

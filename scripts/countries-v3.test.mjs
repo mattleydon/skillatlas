@@ -241,7 +241,7 @@ test("zero-motion events preserve armed intent and do not create a scroll lock",
 });
 test("dossier discloses fixture metrics and missing evidence without legacy personality UI", () => {
   const dossier = readFileSync(resolve(root, "app/countries/components/country-dossier.tsx"), "utf8");
-  assert.match(dossier, /FIXTURE \/ DEMO/);
+  assert.match(dossier, /DataStateBadge state="fixture"/);
   assert.match(dossier, /UNAVAILABLE/);
   assert.match(dossier, /UNKNOWN/);
   assert.doesNotMatch(dossier, /country\.(identity|aura|strengths|weakness|description)/);

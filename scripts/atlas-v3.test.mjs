@@ -67,6 +67,18 @@ test("invalid selection returns neutral discovery without manufacturing an ident
   assert.doesNotMatch(html, /not-a-country/);
 });
 
+test("Atlas has exactly one standalone Methodology link outside its disclosure", () => {
+  for (const country of ["", "denmark"]) {
+    const html = render(country);
+    assert.equal((html.match(/href="\/about\/methodology"/g) ?? []).length, 1);
+    const disclosure = html.match(/<details[^>]*><summary>Why this result\?[\s\S]*?<\/details>/)?.[0];
+    assert.ok(disclosure);
+    assert.doesNotMatch(disclosure, /href="\/about\/methodology"/);
+    assert.match(disclosure, /UNKNOWN/);
+    assert.match(html, /href="\/countries(?:\?country=denmark)?"/);
+  }
+});
+
 test("Atlas keeps local geography and shared approved wheel and zoom bounds", () => {
   const source = readFileSync(resolve(root, "app/world-map/page.tsx"), "utf8");
   assert.match(source, /MIN_VIEW_SCALE = 0\.8/);
