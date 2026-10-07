@@ -11,6 +11,7 @@ export const ROUTES = {
   members: "/members",
   forum: "/forum",
   about: "/about",
+  methodology: "/about/methodology",
   authSignIn: "/auth/sign-in",
   authSignUp: "/auth/sign-up",
   authVerify: "/auth/verify",

@@ -81,22 +81,9 @@
 }
 
 .discoveryList button:focus-visible,
-.railAction:focus-visible,
-.trustDisclosure summary:focus-visible {
+.railAction:focus-visible {
   outline: 2px solid var(--sa-accent);
   outline-offset: 2px;
-}
-
-.trustDisclosure {
-  margin-top: var(--sa-space-4);
-  border-top: 1px solid var(--sa-border-subtle);
-  font-size: 12px;
-}
-
-.trustDisclosure summary {
-  min-height: 44px;
-  padding-block: var(--sa-space-3);
-  cursor: pointer;
 }
 
 @media (min-width: 1024px) {

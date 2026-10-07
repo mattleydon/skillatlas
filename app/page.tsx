@@ -1,5 +1,8 @@
 "use client";
 
+import { DataStateBadge, MethodologyLink, WhyThisResult } from "@/app/components/evidence/evidence-ui";
+import { RANKING_EVIDENCE } from "@/lib/evidence";
+
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import CountryFlag from "@/app/components/country-flag";
@@ -278,19 +281,10 @@ export default function RankingsPage() {
               </p>
             </div>
 
-            <div className="flex items-center gap-sa-2 self-start rounded-sa-control border border-sa-border-strong bg-sa-surface-1 px-sa-3 py-sa-2 lg:self-auto">
-              <span className="relative flex h-2 w-2" aria-hidden="true">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-sa-accent opacity-35 motion-reduce:animate-none" />
-                <span className="relative inline-flex h-2 w-2 rounded-full bg-sa-accent" />
-              </span>
-              <span className="leading-tight">
-                <span className="sa-type-label block text-[10px] text-sa-text-technical">
-                  Calibration preview
-                </span>
-                <span className="mt-0.5 block text-[11px] font-medium text-sa-text-muted">
-                  Prototype ranking data
-                </span>
-              </span>
+            <div className="self-start text-xs text-sa-text-muted lg:self-auto">
+              <DataStateBadge state="fixture" />
+              <p className="mt-sa-1">Not verified competitive intelligence</p>
+              <MethodologyLink />
             </div>
           </div>
         </IntelligencePanel>
@@ -392,6 +386,7 @@ export default function RankingsPage() {
                 <p className="mt-1 text-xs leading-5 text-sa-text-technical">
                   Prototype scores, movement, and histories are local presentation fixtures—not methodology-approved rankings.
                 </p>
+                <WhyThisResult evidence={RANKING_EVIDENCE} context="Country ranking values and summary" />
               </div>
               <p className="sa-type-data shrink-0 text-xs text-sa-text-muted">
                 {visibleCountries.length} of {scopedCountries.length} records

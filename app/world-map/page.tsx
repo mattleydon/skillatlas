@@ -1,5 +1,8 @@
 "use client";
 
+import { DataStateBadge, ConfidenceIndicator, MethodologyLink, WhyThisResult } from "@/app/components/evidence/evidence-ui";
+import { ATLAS_EVIDENCE } from "@/lib/evidence";
+
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { bindMapWheel, mapWheelZoomFactor } from "@/lib/map-wheel-intent";
@@ -1230,19 +1233,9 @@ function WorldMapContent() {
               </p>
             </div>
 
-            <div className="flex items-center gap-sa-2 self-start rounded-sa-control border border-sa-border-strong bg-sa-surface-1 px-sa-3 py-sa-2 lg:self-auto">
-              <span className="relative flex h-2 w-2" aria-hidden="true">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-sa-accent opacity-35 motion-reduce:animate-none" />
-                <span className="relative inline-flex h-2 w-2 rounded-full bg-sa-accent" />
-              </span>
-              <span className="leading-tight">
-                <span className="sa-type-label block text-[10px] text-sa-text-technical">
-                  FIXTURE / DEMO
-                </span>
-                <span className="mt-0.5 block text-[11px] font-medium text-sa-text-muted">
-                  Competitive data is not verified
-                </span>
-              </span>
+            <div className="self-start text-xs text-sa-text-muted lg:self-auto">
+              <DataStateBadge state="fixture" />
+              <p className="mt-sa-1">Competitive data is not verified</p>
             </div>
           </div>
         </IntelligencePanel>
@@ -1473,7 +1466,7 @@ function WorldMapContent() {
                   <CountryFlag country={selectedCountry} size="md" />
                   <span>{selectedCountry.region}</span>
                 </div>
-                <p className={styles.stateLabel}>{selectedRanking ? "FIXTURE / DEMO" : "UNAVAILABLE"} · {scopeName}</p>
+                <p className={styles.stateLabel}><DataStateBadge state={selectedRanking ? "fixture" : "unavailable"} /> · {scopeName}</p>
                 <dl className={styles.railMetrics}>
                   <MetricCell label={scope === "Overall" ? "Fixture global rank" : "Fixture game rank"}
                     value={selectedRanking ? "#" + selectedRanking.rank : "UNAVAILABLE"} />
@@ -1484,7 +1477,7 @@ function WorldMapContent() {
             ) : (
               <>
                 <p className={styles.railCopy}>Rotate the globe or search a country. Geography is the starting point, not a competitive verdict.</p>
-                <p className={styles.stateLabel}>FIXTURE / DEMO · {scopeName}</p>
+                <p className={styles.stateLabel}><DataStateBadge state="fixture" /> · {scopeName}</p>
                 <h3 className="sa-type-label mt-sa-4 text-xs">Explore fixture leaders</h3>
                 <ol className={styles.discoveryList}>
                   {scopedRankings.slice(0, 3).map((row) => (
@@ -1530,8 +1523,8 @@ function WorldMapContent() {
                 valueClassName={movementClass(selectedRanking?.rankChange)}
                 detail="No verified historical comparison" />
             ) : null}
-            <MetricCell label="Confidence" value="UNKNOWN" detail="No validated scoring methodology or provider evidence" />
           </dl>
+          <div className="mt-sa-3"><ConfidenceIndicator /></div>
           {selectedCountry ? (
             <Link href={ROUTES.countries + "?country=" + encodeURIComponent(selectedCountry.id)} className={styles.railAction}>
               View Country Intelligence <span aria-hidden="true">→</span>
@@ -1539,11 +1532,8 @@ function WorldMapContent() {
           ) : (
             <Link href={ROUTES.countries} className={styles.railAction}>Browse Country Intelligence <span aria-hidden="true">→</span></Link>
           )}
-          <details className={styles.trustDisclosure}>
-            <summary>Data &amp; interpretation</summary>
-            <p>UNAVAILABLE — verified regional shifts, rivalries, clusters and ecosystem relationships. None are inferred from these fixtures.</p>
-            <p>Country dossiers own game breakdowns and deeper context. Atlas keeps this view geographic and briefing-level.</p>
-          </details>
+          <WhyThisResult evidence={ATLAS_EVIDENCE} compact context="Atlas fixture layer" />
+          <MethodologyLink />
         </aside>
         </div>
       </div>
