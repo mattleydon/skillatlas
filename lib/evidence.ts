@@ -1,3 +1,6 @@
+import { COUNTRY_FIXTURE_SOURCE, RANKING_FIXTURE_SOURCE } from "@/data/public-evidence-sources";
+import type { DataTimestamps, SourceReference } from "@/lib/data-foundations";
+
 /** Publication state is separate from how a claim was formed. */
 export const DATA_STATES = {
   canonical: { label: "CANONICAL", meaning: "An admitted authoritative current value within its stated scope." },
@@ -30,7 +33,8 @@ export type EvidenceSummary = Readonly<{
   sources?: readonly EvidenceSource[];
   epistemicState?: EpistemicState;
   methodologyVersion?: string;
-  updatedAt?: string;
+  timestamps?: DataTimestamps;
+  references?: readonly SourceReference[];
 }>;
 
 export const UNKNOWN_CONFIDENCE: Confidence = { status: "unknown" };
@@ -45,8 +49,12 @@ export const RANKING_EVIDENCE: EvidenceSummary = {
   evidenceStatus: "unavailable",
   confidence: UNKNOWN_CONFIDENCE,
   sources: [
-    { id: "data/countries.ts", label: "Country catalogue fixture data", kind: "fixture" },
-    { id: "data/country-rankings.ts", label: "Country ranking fixture data", kind: "fixture" },
+    COUNTRY_FIXTURE_SOURCE,
+    RANKING_FIXTURE_SOURCE,
+  ],
+  references: [
+    { sourceId: COUNTRY_FIXTURE_SOURCE.id, itemReference: "sovereignCountries competitive fixture fields" },
+    { sourceId: RANKING_FIXTURE_SOURCE.id, itemReference: "GAME_RANKING_FIXTURES and overall fixture projection" },
   ],
 };
 
