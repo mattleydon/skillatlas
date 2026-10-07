@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { bindMapWheel, mapWheelZoomFactor } from "@/lib/map-wheel-intent";
-import { validCountryId } from "@/lib/country-browsing";
+import { validCountryId, toggleCountry } from "@/lib/country-browsing";
 import {
   useCallback,
   useEffect,
@@ -555,24 +555,21 @@ function clampMapView(view: MapView, frame: HTMLDivElement | null) {
   const height = frame.clientHeight;
   if (scale <= 1) return { scale, translateX: width * (1 - scale) / 2, translateY: height * (1 - scale) / 2 };
 
-  // Desktop uses the whole rectangular map stage as the camera viewport while
-  // keeping the rendered globe square and centred inside it. Constrain the
-  // transformed globe against that outer viewport rather than the old 640px
-  // square so useful panel width remains available during zoom.
-  if (width > height + 40) {
-    const globeSize = Math.max(
-      1,
-      Math.min(CANVAS_SIZE, width - 32)
-    );
-    const globeLeft = (width - globeSize) / 2;
-    const globeTop = (height - globeSize) / 2;
+  // Use the actual untransformed CSS canvas size, not its 900px backing
+  // resolution or an inferred viewport width. The desktop canvas is 640px.
+  const canvas = frame.querySelector("canvas");
+  if (canvas) {
+    const globeWidth = canvas.offsetWidth;
+    const globeHeight = canvas.offsetHeight;
+    const globeLeft = (width - globeWidth) / 2;
+    const globeTop = (height - globeHeight) / 2;
     const horizontalLimits = [
       -globeLeft * scale,
-      width - (globeLeft + globeSize) * scale,
+      width - (globeLeft + globeWidth) * scale,
     ];
     const verticalLimits = [
       -globeTop * scale,
-      height - (globeTop + globeSize) * scale,
+      height - (globeTop + globeHeight) * scale,
     ];
 
     return {
@@ -601,15 +598,6 @@ function movementLabel(value: number) {
   if (value > 0) return "▲ +" + value;
   if (value < 0) return "▼ " + Math.abs(value);
   return "—";
-}
-
-function scoreMovementLabel(row: ScopedCountryRanking | undefined) {
-  if (!row || row.scoreChange === 0) return "—";
-  const amount =
-    row.scoreChangeUnit === "percent"
-      ? Math.abs(row.scoreChange).toFixed(1) + "%"
-      : Math.abs(row.scoreChange).toFixed(1) + " pts";
-  return (row.scoreChange > 0 ? "▲ +" : "▼ ") + amount;
 }
 
 function movementClass(value: number | undefined) {
@@ -699,6 +687,8 @@ function WorldMapContent() {
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const frameRef = useRef<HTMLDivElement | null>(null);
+  const wheelSurfaceRef = useRef<HTMLDivElement | null>(null);
+  const keyboardCountryIdRef = useRef<string | null>(null);
   const rotationRef = useRef({ ...INITIAL_ROTATION });
   const velocityRef = useRef({ lat: 0, lon: 0.022 });
   const dragRef = useRef<DragState | null>(null);
@@ -825,11 +815,14 @@ function WorldMapContent() {
     velocityRef.current = { lat: 0, lon: 0 };
   }
 
-  function selectCountry(countryId: string, focus = false) {
+  function selectCountry(countryId: string, focus = false, toggle = true) {
+    keyboardCountryIdRef.current = countryId;
     const url = new URL(window.location.href);
-    url.searchParams.set("country", countryId);
+    const nextId = toggle ? toggleCountry(validCountryId(url.searchParams.get("country")), countryId) : countryId;
+    if (nextId) url.searchParams.set("country", nextId);
+    else url.searchParams.delete("country");
     window.history.pushState(null, "", url.pathname + url.search);
-    if (focus) focusCountry(countryId);
+    if (focus && nextId) focusCountry(nextId);
   }
 
   function selectSearchCountry(country: CountryAtlasRecord) {
@@ -925,10 +918,10 @@ function WorldMapContent() {
   }, []);
 
   useEffect(() => {
-    const frame = frameRef.current;
-    if (!frame) return;
+    const surface = wheelSurfaceRef.current;
+    if (!surface) return;
 
-    return bindMapWheel(frame,
+    return bindMapWheel(surface,
       (delta) => delta < 0 ? viewRef.current.scale < MAX_VIEW_SCALE : viewRef.current.scale > MIN_VIEW_SCALE,
       (delta, x, y) => zoomAtClientPoint(x, y, mapWheelZoomFactor(delta), "direct"));
   }, [zoomAtClientPoint]);
@@ -1155,7 +1148,12 @@ function WorldMapContent() {
       : -1;
     let nextIndex = currentIndex;
 
-    if (event.key === "ArrowRight" || event.key === "ArrowDown") {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      const countryId = selectedCountryId ?? keyboardCountryIdRef.current;
+      if (countryId) selectCountry(countryId);
+      return;
+    } else if (event.key === "ArrowRight" || event.key === "ArrowDown") {
       nextIndex = Math.min(
         alphabeticalCountries.length - 1,
         currentIndex < 0 ? 0 : currentIndex + 1
@@ -1187,7 +1185,7 @@ function WorldMapContent() {
 
     event.preventDefault();
     const country = alphabeticalCountries[nextIndex];
-    if (country) selectCountry(country.id, true);
+    if (country) selectCountry(country.id, true, false);
   }
 
   function handleDoubleClick(event: ReactMouseEvent<HTMLCanvasElement>) {
@@ -1204,7 +1202,6 @@ function WorldMapContent() {
   }
 
   const scopeName = scopeDisplayName(scope);
-  const selectedHasScopeCoverage = Boolean(selectedRanking);
 
   return (
     <main className="relative min-h-screen overflow-x-clip bg-sa-canvas text-sa-text-primary">
@@ -1229,7 +1226,7 @@ function WorldMapContent() {
                 Global Competitive Map
               </h1>
               <p className="sa-type-intro mt-sa-1 max-w-2xl text-sa-text-muted">
-                Explore competitive gaming strength across the world.
+                Discover the global field. Explore geography, then open a country for deeper intelligence.
               </p>
             </div>
 
@@ -1240,10 +1237,10 @@ function WorldMapContent() {
               </span>
               <span className="leading-tight">
                 <span className="sa-type-label block text-[10px] text-sa-text-technical">
-                  Calibration preview
+                  FIXTURE / DEMO
                 </span>
                 <span className="mt-0.5 block text-[11px] font-medium text-sa-text-muted">
-                  Prototype map data
+                  Competitive data is not verified
                 </span>
               </span>
             </div>
@@ -1268,7 +1265,7 @@ function WorldMapContent() {
                 }
               }}
               onKeyDown={(event) => {
-                if (event.key === "Enter" && searchResults[0]) {
+                if (event.key === "Enter" && event.target instanceof HTMLInputElement && searchResults[0]) {
                   event.preventDefault();
                   selectSearchCountry(searchResults[0]);
                 } else if (event.key === "Escape" && search) {
@@ -1323,7 +1320,7 @@ function WorldMapContent() {
 
             <CompactSelect
               id="world-map-game-scope"
-              label="Game scope"
+              label="Intelligence layer · fixture"
               value={scope}
               options={GAME_SCOPE_OPTIONS}
               onChange={setScope}
@@ -1331,10 +1328,12 @@ function WorldMapContent() {
           </div>
         </IntelligencePanel>
 
+        <div className={styles.atlasWorkspace}>
+
         <IntelligencePanel
           as="section"
           aria-labelledby="competitive-globe-title"
-          className="mb-sa-3"
+          className={styles.globePanel}
           bodyClassName="overflow-hidden"
           header={
             <div className="flex flex-col gap-sa-3 sm:flex-row sm:items-center sm:justify-between">
@@ -1372,7 +1371,7 @@ function WorldMapContent() {
             </div>
           }
         >
-          <div className={styles.mapStage}>
+          <div ref={wheelSurfaceRef} className={styles.mapStage}>
             <div className={styles.mapTelemetry} aria-hidden="true">
               <span>WORLD // CUSTOM GLOBE</span>
               <span>{mappedCountryCount} TARGETS</span>
@@ -1437,17 +1436,18 @@ function WorldMapContent() {
             <p id="world-map-instructions" className="sr-only">
               Drag to rotate. Slow wheel or pinch zooms; fast scrolling moves the page.
               Double-click toggles exploration zoom. Arrow keys select countries,
-              plus and minus zoom, and zero resets the world view.
+              Enter or Space toggles the current country. Select the same country again to clear.
+              Plus and minus zoom, and zero resets the world view.
             </p>
 
             <div className={styles.mapLegend} aria-label="Map legend">
               <span className={styles.legendItem}>
                 <span className={styles.legendCovered} aria-hidden="true" />
-                Scoped prototype record
+                Fixture rank intensity
               </span>
               <span className={styles.legendItem}>
                 <span className={styles.legendUncovered} aria-hidden="true" />
-                No scoped record
+                Data unavailable
               </span>
             </div>
 
@@ -1461,97 +1461,91 @@ function WorldMapContent() {
           </div>
         </IntelligencePanel>
 
-        <IntelligencePanel
-          as="section"
-          aria-labelledby="selected-country-intelligence-title"
-          bodyClassName=""
-          header={
-            <div className="flex flex-wrap items-baseline justify-between gap-sa-2">
-              <div>
-                <DataLabel as="p">Geographic context</DataLabel>
-                <h2
-                  id="selected-country-intelligence-title"
-                  className="sa-type-heading mt-sa-1 text-base"
-                >
-                  Selected Country Intelligence
-                </h2>
-              </div>
-              <span className="sa-type-meta text-xs text-sa-text-technical">
-                {scopeName} scope
-              </span>
-            </div>
-          }
-        >
+        <section className={styles.identityRail} aria-labelledby="atlas-identity-title">
+          <DataLabel as="p">{selectedCountry ? "Selected country" : "World at a glance"}</DataLabel>
           <div aria-live="polite">
-            {!selectedCountry ? (
-              <div className="px-sa-4 py-sa-6 sm:py-sa-8">
-                <p className="text-sm font-medium text-sa-text-muted">
-                  Select a country to inspect its competitive profile.
-                </p>
-                <p className="mt-sa-1 text-xs leading-5 text-sa-text-technical">
-                  Use country search, click or tap the globe, or focus the map and
-                  use the arrow keys.
-                </p>
-              </div>
+            <h2 id="atlas-identity-title" className="sa-type-heading mt-sa-3 text-base">
+              {selectedCountry ? selectedCountry.name : "195 countries. One world."}
+            </h2>
+            {selectedCountry ? (
+              <>
+                <div className={styles.countryIdentity}>
+                  <CountryFlag country={selectedCountry} size="md" />
+                  <span>{selectedCountry.region}</span>
+                </div>
+                <p className={styles.stateLabel}>{selectedRanking ? "FIXTURE / DEMO" : "UNAVAILABLE"} · {scopeName}</p>
+                <dl className={styles.railMetrics}>
+                  <MetricCell label={scope === "Overall" ? "Fixture global rank" : "Fixture game rank"}
+                    value={selectedRanking ? "#" + selectedRanking.rank : "UNAVAILABLE"} />
+                  <MetricCell label="Fixture score" value={selectedRanking ? selectedRanking.score.toFixed(1) : "UNAVAILABLE"} />
+                  <MetricCell label="Fixture strongest game" value={gameDisplayName(selectedCountry.bestGame)} />
+                </dl>
+              </>
             ) : (
               <>
-                <div className="flex flex-col gap-sa-4 px-sa-4 py-sa-4 sm:flex-row sm:items-center sm:justify-between">
-                  <div className="flex min-w-0 items-center gap-sa-3">
-                    <CountryFlag country={selectedCountry} size="md" />
-                    <div className="min-w-0">
-                      <DataLabel as="p">{selectedCountry.region}</DataLabel>
-                      <h3 className="sa-type-heading mt-sa-1 truncate text-xl">
-                        {selectedCountry.name}
-                      </h3>
-                      {!selectedHasScopeCoverage ? (
-                        <p className="mt-1 text-xs text-sa-text-technical">
-                          No explicit {scopeName} prototype fixture is available.
-                        </p>
-                      ) : null}
-                    </div>
-                  </div>
-
-                  <Link
-                    href={`${ROUTES.countries}?country=${encodeURIComponent(selectedCountry.id)}`}
-                    className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-sa-control border border-sa-border-active bg-sa-accent/10 px-sa-4 text-sm font-medium text-sa-text-primary outline-none transition-[background-color,color] duration-200 ease-sa-standard hover:bg-sa-accent hover:text-slate-950 focus-visible:ring-4 focus-visible:ring-sa-accent/25"
-                  >
-                    View Country Intelligence
-                    <span className="ml-2" aria-hidden="true">→</span>
-                  </Link>
-                </div>
-
-                <dl className={styles.metricGrid}>
-                  <MetricCell label="Region" value={selectedCountry.region} />
-                  <MetricCell
-                    label={scope === "Overall" ? "Prototype global rank" : "Prototype scope rank"}
-                    value={selectedRanking ? "#" + selectedRanking.rank : "—"}
-                    detail={selectedRanking ? undefined : "Not covered in this scope"}
-                  />
-                  <MetricCell
-                    label="Prototype skill score"
-                    value={selectedRanking ? selectedRanking.score.toFixed(1) : "—"}
-                    valueClassName={selectedRanking ? "text-sa-accent" : "text-sa-text-technical"}
-                    detail={selectedRanking ? undefined : "Not covered in this scope"}
-                  />
-                  <MetricCell
-                    label="Best game"
-                    value={gameDisplayName(selectedCountry.bestGame)}
-                  />
-                  <MetricCell
-                    label="Existing score movement"
-                    value={scoreMovementLabel(selectedRanking)}
-                    valueClassName={movementClass(selectedRanking?.scoreChange)}
-                  />
-                  <MetricCell
-                    label="Existing rank movement"
-                    value={selectedRanking ? movementLabel(selectedRanking.rankChange) : "—"}
-                    valueClassName={movementClass(selectedRanking?.rankChange)}
-                  />
-                </dl>
+                <p className={styles.railCopy}>Rotate the globe or search a country. Geography is the starting point, not a competitive verdict.</p>
+                <p className={styles.stateLabel}>FIXTURE / DEMO · {scopeName}</p>
+                <h3 className="sa-type-label mt-sa-4 text-xs">Explore fixture leaders</h3>
+                <ol className={styles.discoveryList}>
+                  {scopedRankings.slice(0, 3).map((row) => (
+                    <li key={row.countryId}>
+                      <button type="button" onClick={() => selectCountry(row.countryId, true)}>
+                        <span className="sa-type-data text-sa-text-technical">#{row.rank}</span>
+                        <span>{row.country}</span>
+                      </button>
+                    </li>
+                  ))}
+                </ol>
               </>
             )}
           </div>
-        </IntelligencePanel>
+          {selectedCountry ? (
+            <button type="button" className={styles.railAction} onClick={() => {
+              const url = new URL(window.location.href);
+              url.searchParams.delete("country");
+              window.history.pushState(null, "", url.pathname + url.search);
+              setSearch("");
+              setSearchOpen(false);
+            }}>Clear selection</button>
+          ) : null}
+        </section>
+
+        <aside className={styles.contextRail} aria-labelledby="atlas-context-title">
+          <DataLabel as="p">Spatial briefing</DataLabel>
+          <h2 id="atlas-context-title" className="sa-type-heading mt-sa-3 text-base">
+            {selectedCountry ? selectedCountry.name + " in context" : "Read the world carefully"}
+          </h2>
+          <p className={styles.railCopy}>
+            {selectedCountry
+              ? selectedRanking
+                ? "This country has a fixture record in the active layer. Its standing and movement are demonstration values, not observed competitive results."
+                : "No fixture record exists for this country in the active layer. Missing coverage does not mean low competitive strength."
+              : "Turquoise intensity reflects rank within the active fixture layer, softened at the globe edge. It does not measure regional dominance or verified strength."}
+          </p>
+          <dl className={styles.railMetrics}>
+            <MetricCell label="Layer coverage" value={scopedRankings.length + " / 195"} detail="Countries with fixture records, not real-world coverage" />
+            {selectedCountry ? (
+              <MetricCell label="Fixture rank movement"
+                value={selectedRanking ? movementLabel(selectedRanking.rankChange) : "UNAVAILABLE"}
+                valueClassName={movementClass(selectedRanking?.rankChange)}
+                detail="No verified historical comparison" />
+            ) : null}
+            <MetricCell label="Confidence" value="UNKNOWN" detail="No validated scoring methodology or provider evidence" />
+          </dl>
+          {selectedCountry ? (
+            <Link href={ROUTES.countries + "?country=" + encodeURIComponent(selectedCountry.id)} className={styles.railAction}>
+              View Country Intelligence <span aria-hidden="true">→</span>
+            </Link>
+          ) : (
+            <Link href={ROUTES.countries} className={styles.railAction}>Browse Country Intelligence <span aria-hidden="true">→</span></Link>
+          )}
+          <details className={styles.trustDisclosure}>
+            <summary>Data &amp; interpretation</summary>
+            <p>UNAVAILABLE — verified regional shifts, rivalries, clusters and ecosystem relationships. None are inferred from these fixtures.</p>
+            <p>Country dossiers own game breakdowns and deeper context. Atlas keeps this view geographic and briefing-level.</p>
+          </details>
+        </aside>
+        </div>
       </div>
     </main>
   );
