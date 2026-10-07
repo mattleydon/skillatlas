@@ -3,6 +3,7 @@ import { IBM_Plex_Mono, IBM_Plex_Sans } from "next/font/google";
 import "./globals.css";
 import SiteHeader from "./components/site-header";
 import ThemeProvider from "./theme-provider";
+import { PUBLIC_SEARCH_RECORDS } from "@/lib/search-catalogue";
 
 // Next self-hosts these assets; visitors do not make Google Fonts requests.
 const interfaceFont = IBM_Plex_Sans({
@@ -49,7 +50,7 @@ export default function RootLayout({
       </head>
       <body>
         <ThemeProvider>
-          <SiteHeader />
+          <SiteHeader searchRecords={PUBLIC_SEARCH_RECORDS} />
           {children}
         </ThemeProvider>
       </body>

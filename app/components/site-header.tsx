@@ -1,6 +1,8 @@
 "use client";
 
 import Image from "next/image";
+import GlobalSearch from "@/app/components/global-search";
+import type { SearchRecord } from "@/lib/global-search";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -290,7 +292,7 @@ function MobileFamily({
   );
 }
 
-export default function SiteHeader() {
+export default function SiteHeader({ searchRecords = [] }: { searchRecords?: readonly SearchRecord[] }) {
   const pathname = normalisePath(usePathname() || ROUTES.rankings);
   const { darkMode, toggleTheme } = useSkillAtlasTheme();
   const hidden = pathname.startsWith(ROUTES.spaceInvaders);
@@ -414,6 +416,7 @@ export default function SiteHeader() {
               <span className="skillatlas-brand-descriptor">GLOBAL GAMING INTELLIGENCE</span>
             </span>
           </Link>
+          <GlobalSearch key={pathname} records={searchRecords} memberState={memberState} onOpen={closeMobileMenu} />
         </div>
 
         <nav className="skillatlas-desktop-nav" aria-label="Primary navigation">

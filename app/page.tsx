@@ -11,7 +11,7 @@ import CompactSelect, {
 } from "@/app/components/intelligence-ui/compact-select";
 import DataLabel from "@/app/components/intelligence-ui/data-label";
 import IntelligencePanel from "@/app/components/intelligence-ui/intelligence-panel";
-import SearchBar from "@/app/components/search-bar";
+import RankingsFilter from "@/app/components/rankings-filter";
 import Sparkline from "@/app/components/sparkline";
 import { GAMES, type Game } from "@/constants/games";
 import { countryRoute } from "@/constants/routes";
@@ -20,7 +20,7 @@ import {
   type CountryRankingScope,
   type PrototypeCountryRanking,
 } from "@/data/country-rankings";
-import { matchesSearchQuery } from "@/lib/search";
+import { filterRankings } from "@/lib/rankings-filter";
 
 type SortKey = "rank" | "country" | "score" | "scoreChange" | "rankChange";
 type SortDirection = "asc" | "desc";
@@ -170,15 +170,7 @@ export default function RankingsPage() {
   );
 
   const visibleCountries = useMemo(() => {
-    const filtered = scopedCountries.filter((country) =>
-      matchesSearchQuery(search, [
-        country.country,
-        country.region,
-        country.bestGame ?? "",
-        selectedScope === "Overall" ? "Overall" : selectedScope,
-        selectedScope === "Overall" ? "" : gameDisplayName(selectedScope),
-      ]),
-    );
+    const filtered = filterRankings(scopedCountries, selectedScope, search);
 
     return filtered.sort((left, right) => {
       let comparison = 0;
@@ -247,11 +239,8 @@ export default function RankingsPage() {
     );
   }
 
-  function clearFilters() {
+  function clearFilter() {
     setSearch("");
-    setSelectedScope("Overall");
-    setSortKey("rank");
-    setSortDirection("asc");
   }
 
   return (
@@ -298,14 +287,15 @@ export default function RankingsPage() {
           <div className="grid gap-sa-3 md:grid-cols-[minmax(0,1fr)_minmax(210px,0.28fr)] md:items-end">
             <div>
               <DataLabel as="span" className="mb-sa-1 block">
-                Search countries
+                Filter rankings
               </DataLabel>
-              <SearchBar
-                label="Search countries by name, game, or region"
-                placeholder="Search country, game, or region"
+              <RankingsFilter
+                label="Filter rankings by country, game, or region"
+                placeholder="Country, game, or region"
                 value={search}
                 onValueChange={setSearch}
-                variant="intelligence"
+                rows={scopedCountries}
+                scope={selectedScope}
               />
             </div>
             <CompactSelect
@@ -388,7 +378,7 @@ export default function RankingsPage() {
                 </p>
                 <WhyThisResult evidence={RANKING_EVIDENCE} context="Country ranking values and summary" />
               </div>
-              <p className="sa-type-data shrink-0 text-xs text-sa-text-muted">
+              <p role="status" aria-live="polite" aria-atomic="true" className="sa-type-data shrink-0 text-xs text-sa-text-muted">
                 {visibleCountries.length} of {scopedCountries.length} records
               </p>
             </div>
@@ -541,17 +531,17 @@ export default function RankingsPage() {
           ) : (
             <div className="px-sa-4 py-16 text-center">
               <DataLabel as="p" className="text-sa-accent">
-                No matching records
+                No rankings match this filter.
               </DataLabel>
               <h2 className="sa-type-heading mt-sa-2 text-lg">
-                Adjust the country search or ranking scope.
+                Adjust or clear the filter to see rankings in this scope.
               </h2>
               <button
                 type="button"
-                onClick={clearFilters}
+                onClick={clearFilter}
                 className="sa-type-label mt-sa-4 min-h-11 rounded-sa-control border border-sa-border-active bg-sa-accent/10 px-sa-4 text-xs text-sa-text-primary transition-colors duration-200 ease-sa-standard hover:bg-sa-accent/18 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-sa-accent/20"
               >
-                Reset filters
+                Clear filter
               </button>
             </div>
           )}
