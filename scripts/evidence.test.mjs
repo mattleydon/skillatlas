@@ -121,3 +121,23 @@ test("shared trust styles use semantic theme colours, visible focus and comforta
   assert.match(css, /min-height: 44px/);
   assert.doesNotMatch(css, /#[a-fA-F0-9]{3,8}|animation:|transition:/);
 });
+
+test("public origins use readable fixture labels without rendering internal repository IDs", () => {
+  for (const evidence of [model.RANKING_EVIDENCE, model.DOSSIER_EVIDENCE]) {
+    const html = render(ui.WhyThisResult, { evidence, context: "Fixture values" });
+    assert.match(html, /Country catalogue fixture data/);
+    assert.match(html, /Country ranking fixture data/);
+    assert.match(html, /fixture origin, not competitive evidence/);
+    for (const source of evidence.sources) assert.ok(!html.includes(source.id));
+  }
+  const page = render(load("app/about/methodology/page.tsx").default);
+  assert.doesNotMatch(page, /data\/countries\.ts|data\/country-rankings\.ts/);
+});
+
+test("dossier bottom actions share a wrapping row in keyboard order", () => {
+  const country = load("data/countries.ts").sovereignCountries.find((c) => c.id === "denmark");
+  const html = render(load("app/countries/components/country-dossier.tsx").default, { country, visibleCount: 195, onClear() {} });
+  assert.match(html, /<div class="dossierActions"><a[^>]*href="\/about\/methodology">Methodology<\/a><a[^>]*href="\/world-map\?country=denmark">View in Atlas →<\/a><\/div>/);
+  const css = readFileSync(resolve(root, "app/countries/countries.module.css"), "utf8");
+  assert.match(css, /\.dossierActions\s*\{[^}]*display: flex;[^}]*flex-wrap: wrap;[^}]*gap: var\(--sa-space-2\) var\(--sa-space-4\)/);
+});

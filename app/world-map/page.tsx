@@ -1532,7 +1532,7 @@ function WorldMapContent() {
           ) : (
             <Link href={ROUTES.countries} className={styles.railAction}>Browse Country Intelligence <span aria-hidden="true">→</span></Link>
           )}
-          <WhyThisResult evidence={ATLAS_EVIDENCE} compact context="Atlas fixture layer" />
+          <WhyThisResult evidence={ATLAS_EVIDENCE} compact showMethodologyLink={false} context="Atlas fixture layer" />
           <MethodologyLink />
         </aside>
         </div>

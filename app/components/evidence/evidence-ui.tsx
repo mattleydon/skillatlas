@@ -19,8 +19,8 @@ export function MethodologyLink() {
   return <Link className={styles.link} href={ROUTES.methodology}>Methodology</Link>;
 }
 
-export function WhyThisResult({ evidence, compact = false, context }: {
-  evidence: EvidenceSummary; compact?: boolean; context: string;
+export function WhyThisResult({ evidence, compact = false, showMethodologyLink = true, context }: {
+  evidence: EvidenceSummary; compact?: boolean; showMethodologyLink?: boolean; context: string;
 }) {
   // Never substitute a deployment/build time for the data's update time.
   const updatedAt = evidence.updatedAt && Number.isFinite(Date.parse(evidence.updatedAt)) ? evidence.updatedAt : undefined;
@@ -40,12 +40,11 @@ export function WhyThisResult({ evidence, compact = false, context }: {
           <p className="sa-type-label text-xs">Value origins</p>
           <ul className={styles.list}>{evidence.sources.map((source) => <li key={source.id}>
             {source.label} — {source.kind === "fixture" ? "fixture origin, not competitive evidence" : source.kind === "reference" ? "reference only" : "competitive evidence"}.
-            <span className={styles.sourceId}>{source.id}</span>
           </li>)}</ul>
         </div> : null}
       </> : null}
       <ul className={styles.list}>{evidence.limitations.map((note) => <li key={note}>{note}</li>)}</ul>
-      <MethodologyLink />
+      {showMethodologyLink ? <MethodologyLink /> : null}
     </div>
   </details>;
 }

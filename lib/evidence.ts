@@ -45,8 +45,8 @@ export const RANKING_EVIDENCE: EvidenceSummary = {
   evidenceStatus: "unavailable",
   confidence: UNKNOWN_CONFIDENCE,
   sources: [
-    { id: "data/countries.ts", label: "Stored country demonstration values", kind: "fixture" },
-    { id: "data/country-rankings.ts", label: "Overall adapter and ordered game fixtures", kind: "fixture" },
+    { id: "data/countries.ts", label: "Country catalogue fixture data", kind: "fixture" },
+    { id: "data/country-rankings.ts", label: "Country ranking fixture data", kind: "fixture" },
   ],
 };
 

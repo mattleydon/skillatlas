@@ -46,4 +46,3 @@
 .metadata dd { color: var(--sa-text-primary); }
 .list { list-style: disc; padding-left: 18px; }
 .list li + li { margin-top: 8px; }
-.sourceId { display: block; font-size: 12px; overflow-wrap: anywhere; }

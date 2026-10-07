@@ -57,7 +57,9 @@ export default function CountryDossier({ country, visibleCount, onClear }: {
       <p>UNAVAILABLE · No verified competitive strengths, talent relationships, team attribution or rivalry evidence is available for this dossier. Missing coverage is not a competitive gap.</p>
     </details>
     <WhyThisResult evidence={DOSSIER_EVIDENCE} context={`${country.name} dossier values`} />
-    <MethodologyLink />
-    <Link className={styles.dossierLink} href={`${ROUTES.atlas}?country=${encodeURIComponent(country.id)}`}>View in Atlas →</Link>
+    <div className={styles.dossierActions}>
+      <MethodologyLink />
+      <Link className={styles.dossierLink} href={`${ROUTES.atlas}?country=${encodeURIComponent(country.id)}`}>View in Atlas →</Link>
+    </div>
   </section>;
 }
