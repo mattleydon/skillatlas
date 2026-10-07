@@ -59,7 +59,7 @@ test("current competitive evidence cannot imply canonical status, confidence or 
     assert.equal(evidence.state, "fixture");
     assert.equal(evidence.confidence.status, "unknown");
     assert.equal(evidence.evidenceStatus, "unavailable");
-    assert.equal(evidence.updatedAt, undefined);
+    assert.equal(evidence.timestamps, undefined);
     assert.equal(evidence.methodologyVersion, undefined);
     assert.ok((evidence.sources ?? []).every((s) => s.kind === "fixture"));
   }
@@ -80,12 +80,22 @@ test("Why this result uses native keyboard disclosure with contextual accessible
 });
 
 test("optional real provenance fields render as text; invalid dates are not presented as timestamps", () => {
-  const evidence = { ...model.RANKING_EVIDENCE, updatedAt: "2026-01-01T00:00:00Z", methodologyVersion: "test-only-version", explanation: "<script>not executable</script>" };
+  const evidence = { ...model.RANKING_EVIDENCE, timestamps: { observedAt: "2026-01-01T00:00:00Z" }, methodologyVersion: "test-only-version", explanation: "<script>not executable</script>" };
   const html = render(ui.WhyThisResult, { evidence, context: "Test only" });
   assert.match(html, /<time dateTime="2026-01-01T00:00:00Z"/);
   assert.match(html, /test-only-version/);
   assert.match(html, /&lt;script&gt;/);
-  assert.doesNotMatch(render(ui.WhyThisResult, { evidence: { ...evidence, updatedAt: "not a date" }, context: "Test" }), /<time/);
+  assert.match(html, /SkillAtlas observed at/);
+  assert.doesNotMatch(render(ui.WhyThisResult, { evidence: { ...evidence, timestamps: { observedAt: "not a date" } }, context: "Test" }), /<time/);
+  assert.doesNotMatch(render(ui.WhyThisResult, { evidence: { ...evidence, timestamps: { observedAt: "2026-02-30T00:00:00Z" } }, context: "Test" }), /<time/);
+});
+
+test("evidence clocks retain distinct meanings instead of an ambiguous last-updated label", () => {
+  const timestamps = Object.fromEntries(["sourceUpdatedAt", "observedAt", "collectedAt", "admittedAt", "recalculatedAt"].map((key, index) => [key, `2026-01-0${index + 1}T00:00:00Z`]));
+  const html = render(ui.WhyThisResult, { evidence: { ...model.RANKING_EVIDENCE, timestamps }, context: "Synthetic clock test" });
+  for (const label of ["Source updated at", "SkillAtlas observed at", "SkillAtlas collected at", "SkillAtlas admitted at", "Value recalculated at"]) assert.ok(html.includes(label));
+  assert.equal((html.match(/<time /g) ?? []).length, 5);
+  assert.doesNotMatch(html, /Data last updated/);
 });
 
 test("compact Atlas explanation stays brief while dossiers retain detailed provenance", () => {
