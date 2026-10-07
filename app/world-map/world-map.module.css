@@ -1,3 +1,120 @@
+.atlasWorkspace {
+  display: grid;
+  grid-template-areas: "map" "identity" "context";
+  gap: var(--sa-space-3);
+  align-items: start;
+}
+
+.identityRail,
+.contextRail {
+  min-width: 0;
+  padding: var(--sa-space-4);
+  border: 1px solid var(--sa-border-subtle);
+  background: var(--sa-surface-1);
+  overflow-wrap: anywhere;
+}
+
+.identityRail { grid-area: identity; }
+.contextRail { grid-area: context; }
+.globePanel { grid-area: map; min-width: 0; }
+
+.countryIdentity {
+  display: flex;
+  align-items: center;
+  gap: var(--sa-space-2);
+  margin-block: var(--sa-space-3);
+  font-size: 13px;
+}
+
+.railCopy,
+.trustDisclosure p {
+  margin-top: var(--sa-space-3);
+  color: var(--sa-text-muted);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.stateLabel {
+  margin-top: var(--sa-space-3);
+  color: var(--sa-text-technical);
+  font-family: var(--sa-font-data);
+  font-size: 10px;
+  line-height: 1.6;
+}
+
+.railMetrics {
+  margin-top: var(--sa-space-3);
+}
+
+.railMetrics .metricCell {
+  padding: var(--sa-space-3) 0;
+  border: 0;
+  border-top: 1px solid var(--sa-border-subtle);
+}
+
+.discoveryList {
+  margin-top: var(--sa-space-2);
+}
+
+.discoveryList button,
+.railAction {
+  display: flex;
+  align-items: center;
+  gap: var(--sa-space-2);
+  width: 100%;
+  min-height: 44px;
+  padding: var(--sa-space-2);
+  border-bottom: 1px solid var(--sa-border-subtle);
+  text-align: left;
+  font-size: 13px;
+}
+
+.railAction {
+  margin-top: var(--sa-space-3);
+  border: 1px solid var(--sa-border-strong);
+  color: var(--sa-text-primary);
+}
+
+.discoveryList button:hover,
+.railAction:hover {
+  background: color-mix(in srgb, var(--sa-accent) 10%, var(--sa-surface-1));
+}
+
+.discoveryList button:focus-visible,
+.railAction:focus-visible,
+.trustDisclosure summary:focus-visible {
+  outline: 2px solid var(--sa-accent);
+  outline-offset: 2px;
+}
+
+.trustDisclosure {
+  margin-top: var(--sa-space-4);
+  border-top: 1px solid var(--sa-border-subtle);
+  font-size: 12px;
+}
+
+.trustDisclosure summary {
+  min-height: 44px;
+  padding-block: var(--sa-space-3);
+  cursor: pointer;
+}
+
+@media (min-width: 1024px) {
+  .atlasWorkspace {
+    grid-template-areas: "identity map context";
+    grid-template-columns: minmax(0, 20fr) minmax(0, 60fr) minmax(0, 20fr);
+    gap: var(--sa-space-2);
+    align-items: stretch;
+  }
+
+  .identityRail,
+  .contextRail {
+    padding: var(--sa-space-3);
+    contain: size;
+    overflow-y: auto;
+  }
+}
+
 .background {
   position: fixed;
   inset: 0;
@@ -259,44 +376,7 @@
   box-shadow: 0 16px 40px rgba(15, 23, 42, 0.18);
 }
 
-.metricGrid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  border-top: 1px solid var(--sa-border-subtle);
-}
-
-.metricCell {
-  min-width: 0;
-  padding: var(--sa-space-3) var(--sa-space-4);
-  border-right: 1px solid var(--sa-border-subtle);
-  border-bottom: 1px solid var(--sa-border-subtle);
-}
-
-.metricCell:nth-child(2n) {
-  border-right: 0;
-}
-
-.metricCell:nth-last-child(-n + 2) {
-  border-bottom: 0;
-}
-
-@media (min-width: 768px) {
-  .metricGrid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-
-  .metricCell:nth-child(2n) {
-    border-right: 1px solid var(--sa-border-subtle);
-  }
-
-  .metricCell:nth-child(3n) {
-    border-right: 0;
-  }
-
-  .metricCell:nth-last-child(-n + 3) {
-    border-bottom: 0;
-  }
-}
+.metricCell { min-width: 0; }
 
 @media (min-width: 900px) {
   .globeFrame {
@@ -322,23 +402,6 @@
   }
 }
 
-@media (min-width: 1200px) {
-  .metricGrid {
-    grid-template-columns: repeat(6, minmax(0, 1fr));
-  }
-
-  .metricCell {
-    border-bottom: 0;
-  }
-
-  .metricCell:nth-child(3n) {
-    border-right: 1px solid var(--sa-border-subtle);
-  }
-
-  .metricCell:last-child {
-    border-right: 0;
-  }
-}
 
 @media (max-width: 767px) {
   .mapControls {
