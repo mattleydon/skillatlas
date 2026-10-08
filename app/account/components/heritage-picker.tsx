@@ -53,7 +53,7 @@ export default function HeritagePicker({
                   {String(index + 1).padStart(2, "0")}
                 </span>
                 <span className="flex min-w-0 items-center gap-sa-2">
-                  <CountryFlag country={{ name: country.name, flagCode: country.iso2 }} size="sm" variant="atlas" />
+                  <CountryFlag country={{ name: country.name, flagCode: country.flagCode ?? "" }} size="sm" variant="atlas" />
                   <span className="min-w-0">
                     <span className="block truncate text-sm font-medium text-sa-text-primary">{country.name}</span>
                     <span className="sa-type-label block truncate text-[10px] text-sa-text-technical">{country.region}</span>

@@ -1,10 +1,3 @@
-import { sovereignCountries } from "@/data/countries";
+import { IDENTITY_PLACES } from "@/lib/account/identity-geography";
 
-export const accountCountryOptions = sovereignCountries
-  .map((country) => ({
-    id: country.id,
-    iso2: country.flagCode.toUpperCase(),
-    name: country.name,
-    region: country.region,
-  }))
-  .sort((left, right) => left.name.localeCompare(right.name));
+export const accountCountryOptions = IDENTITY_PLACES;

@@ -204,7 +204,9 @@ export async function resendCodeAction(
 
   return {
     status: "success",
-    message: "A new access code has been sent. Check your email.",
+    message: flowValue === "sign-in"
+      ? "If an account exists for this email, a new access code will be sent. Check your email."
+      : "If this email can be used to create an account, a new access code will be sent. Check your email.",
   };
 }
 

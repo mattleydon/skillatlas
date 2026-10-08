@@ -1,10 +1,15 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import AccountUnavailable from "@/app/account/components/account-unavailable";
 import AuthShell from "@/app/auth/components/auth-shell";
 import CountryFlag from "@/app/components/country-flag";
 import DataLabel from "@/app/components/intelligence-ui/data-label";
 import IntelligencePanel from "@/app/components/intelligence-ui/intelligence-panel";
+import MemberAvatar from "@/app/components/member-avatar";
+import { avatarUrl } from "@/lib/account/avatar";
+import { GAME_DEFINITIONS } from "@/constants/games";
+import { PLATFORM_DEFINITIONS } from "@/constants/platforms";
 import { memberRoute } from "@/constants/routes";
 import {
   getPublicMemberProfile,
@@ -43,7 +48,7 @@ function CountryRecord({ label, country }: { label: string; country: PublicMembe
       <DataLabel as="p" className="text-sa-text-technical">{label}</DataLabel>
       <div className="mt-sa-2 flex min-w-0 items-center gap-sa-2">
         <CountryFlag
-          country={{ name: country.name, flagCode: country.iso2 }}
+          country={{ name: country.name, flagCode: country.flagCode ?? "" }}
           size="md"
           variant="atlas"
         />
@@ -64,6 +69,12 @@ export default async function MemberPage({ params }: MemberPageProps) {
   if (result.status === "not_found") notFound();
 
   const profile = result.profile;
+  const favouriteGames = (profile.favouriteGameIds ?? []).flatMap((id) => {
+    const game = GAME_DEFINITIONS.find((entry) => entry.id === id);
+    return game ? [game] : [];
+  });
+  const platforms = PLATFORM_DEFINITIONS.filter((platform) => profile.platformIds?.includes(platform.id));
+  const hasGamingIdentity = favouriteGames.length > 0 || platforms.length > 0 || profile.gamingSince !== null;
   if (username !== profile.username) redirect(memberRoute(profile.username));
 
   const memberSince = new Intl.DateTimeFormat("en", {
@@ -94,7 +105,7 @@ export default async function MemberPage({ params }: MemberPageProps) {
               className="sa-type-data grid h-16 w-16 place-items-center rounded-sa-control border border-sa-border-active bg-sa-accent/8 text-xl tracking-[-0.04em] text-sa-accent"
               aria-hidden="true"
             >
-              {memberInitials(profile.displayName, profile.username)}
+              <MemberAvatar src={avatarUrl(profile.username, profile.avatarVersion)} initials={memberInitials(profile.displayName, profile.username)} />
             </div>
             <div className="min-w-0">
               <DataLabel as="p" className="text-sa-accent">Profile / Identity</DataLabel>
@@ -136,7 +147,7 @@ export default async function MemberPage({ params }: MemberPageProps) {
                     {profile.heritageCountries.map((country) => (
                       <li key={country.id} className="flex min-h-11 items-center gap-sa-3 rounded-sa-control border border-sa-border-subtle bg-sa-surface-inset px-sa-3 py-sa-2">
                         <span className="sa-type-data text-[11px] text-sa-accent">{String(country.position).padStart(2, "0")}</span>
-                        <CountryFlag country={{ name: country.name, flagCode: country.iso2 }} size="sm" variant="atlas" />
+                        <CountryFlag country={{ name: country.name, flagCode: country.flagCode ?? "" }} size="sm" variant="atlas" />
                         <span className="min-w-0 truncate text-sm font-medium text-sa-text-primary">{country.name}</span>
                       </li>
                     ))}
@@ -146,6 +157,30 @@ export default async function MemberPage({ params }: MemberPageProps) {
                 )}
               </div>
             ) : null}
+          </IntelligencePanel>
+        ) : null}
+
+        {hasGamingIdentity ? (
+          <IntelligencePanel as="section"
+            header={<DataLabel as="h2" className="text-sa-accent">Gaming Identity</DataLabel>}
+            bodyClassName="space-y-sa-4 px-sa-4 py-sa-4 sm:px-sa-5">
+            <p className="text-xs leading-5 text-sa-text-technical">Member-declared identity, not verified activity or expertise.</p>
+            {favouriteGames.length > 0 ? <div>
+              <DataLabel as="h3" className="text-sa-text-technical">Favourite Games</DataLabel>
+              <ol className="mt-sa-2 flex flex-wrap gap-x-sa-4 gap-y-sa-2">
+                {favouriteGames.map((game) => <li key={game.id}>
+                  <Link href={`/games#entity-${game.id}`} className="inline-flex min-h-11 items-center text-sm text-sa-accent underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-sa-accent">{game.name}</Link>
+                </li>)}
+              </ol>
+            </div> : null}
+            {platforms.length > 0 ? <div>
+              <DataLabel as="h3" className="text-sa-text-technical">Platforms</DataLabel>
+              <p className="mt-sa-2 text-sm text-sa-text-primary">{platforms.map((platform) => platform.name).join(" · ")}</p>
+            </div> : null}
+            {profile.gamingSince !== null ? <div>
+              <DataLabel as="h3" className="text-sa-text-technical">Gaming Since</DataLabel>
+              <p className="sa-type-data mt-sa-2 text-sm text-sa-text-primary">{profile.gamingSince}</p>
+            </div> : null}
           </IntelligencePanel>
         ) : null}
 

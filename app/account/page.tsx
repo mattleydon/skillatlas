@@ -5,6 +5,8 @@ import { accountCountryOptions } from "@/app/account/country-options";
 import AccountUnavailable from "@/app/account/components/account-unavailable";
 import CountryIdentityForm from "@/app/account/components/country-identity-form";
 import ProfileIdentityForm from "@/app/account/components/profile-identity-form";
+import AvatarForm from "@/app/account/components/avatar-form";
+import GamingIdentityForm from "@/app/account/components/gaming-identity-form";
 import { signOutAction } from "@/app/auth/actions";
 import AuthShell from "@/app/auth/components/auth-shell";
 import DataLabel from "@/app/components/intelligence-ui/data-label";
@@ -90,6 +92,7 @@ export default async function AccountPage({ searchParams }: AccountPageProps) {
           }
           bodyClassName="px-sa-4 py-sa-4 sm:px-sa-5"
         >
+          <AvatarForm username={profile.username} displayName={profile.displayName} avatarVersion={profile.avatarVersion} />
           <ProfileIdentityForm
             username={profile.username}
             displayName={profile.displayName}
@@ -122,6 +125,19 @@ export default async function AccountPage({ searchParams }: AccountPageProps) {
             cityTownIsPublic={profile.cityTownIsPublic}
             heritageCountryIds={profile.heritageCountries.map((country) => country.id)}
             heritageIsPublic={profile.heritageIsPublic}
+          />
+        </IntelligencePanel>
+
+        <IntelligencePanel as="section"
+          header={<DataLabel as="h2" className="text-sa-accent">Gaming Identity</DataLabel>}
+          bodyClassName="px-sa-4 py-sa-4 sm:px-sa-5">
+          <GamingIdentityForm
+            favouriteGameIds={profile.favouriteGameIds}
+            favouriteGamesIsPublic={profile.favouriteGamesIsPublic}
+            platformIds={profile.platformIds}
+            platformsIsPublic={profile.platformsIsPublic}
+            gamingSince={profile.gamingSince}
+            gamingSinceIsPublic={profile.gamingSinceIsPublic}
           />
         </IntelligencePanel>
 

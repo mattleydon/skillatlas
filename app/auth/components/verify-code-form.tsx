@@ -36,7 +36,9 @@ type VerificationState = AuthActionState & { intent?: "verify" | "resend" };
 
 export default function VerifyCodeForm({ maskedEmail, flow, requested }: VerifyCodeFormProps) {
   const initialState: VerificationState = requested
-    ? { status: "success", message: `An access code was requested for ${maskedEmail}.` }
+    ? { status: "success", message: flow === "sign-in"
+      ? `If an account exists for ${maskedEmail}, we’ll send an access code. Check your email.`
+      : `If ${maskedEmail} can be used to create an account, we’ll send an access code. Check your email.` }
     : INITIAL_AUTH_ACTION_STATE;
   const submitting = useRef(false);
   // Both forms share one result and one pending state. A resend must replace,
@@ -79,7 +81,7 @@ export default function VerifyCodeForm({ maskedEmail, flow, requested }: VerifyC
             Access code
           </label>
           <p id="verification-code-help" className="mt-sa-1 text-xs leading-5 text-sa-text-technical">
-            Enter the {OTP_LENGTH}-digit code sent to {maskedEmail}.
+            Enter the newest {OTP_LENGTH}-digit code if you receive one at {maskedEmail}.
           </p>
           <input
             ref={tokenRef}

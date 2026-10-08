@@ -72,7 +72,7 @@ export default function CountryIdentityForm({
         id="profile-representing-country"
         name="representingCountryId"
         label="Representing"
-        description="Public when selected. This is the country you represent on SkillAtlas."
+        description="Public when selected. Your chosen country identity; this does not assign competitive results or ranking attribution."
         countries={countries}
         value={representingCountryId}
         onChange={setRepresentingCountryId}

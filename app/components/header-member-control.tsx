@@ -6,6 +6,8 @@ import { signOutAction } from "@/app/auth/actions";
 import { getHeaderMemberState, type HeaderMemberSnapshot } from "@/app/auth/header-state";
 import { memberRoute, ROUTES } from "@/constants/routes";
 import { PROFILE_IDENTITY_UPDATED_EVENT } from "@/lib/account/profile-events";
+import MemberAvatar from "@/app/components/member-avatar";
+import { avatarUrl } from "@/lib/account/avatar";
 import { isPlainNavigationClick, navigationCurrent, pathIsActive, preventRedundantNavigation } from "@/lib/navigation";
 
 export type HeaderMemberState = HeaderMemberSnapshot | { status: "checking" };
@@ -192,8 +194,10 @@ export default function HeaderMemberControl({
           if (!open) window.requestAnimationFrame(() => focusItem(0));
         }}
       >
-        <span className="skillatlas-member-glyph" aria-hidden="true">{initials}</span>
-        <span className="skillatlas-member-copy"><small>Profile</small><strong>{memberLabel}</strong></span>
+        <span className="skillatlas-member-glyph" aria-hidden="true">{memberState.avatarVersion
+          ? <MemberAvatar src={avatarUrl(memberState.username, memberState.avatarVersion)} initials={initials} />
+          : initials}</span>
+        <span className="skillatlas-member-copy"><strong>{memberLabel}</strong></span>
         <span className="skillatlas-member-chevron" aria-hidden="true">⌄</span>
       </button>
 
@@ -205,21 +209,6 @@ export default function HeaderMemberControl({
         aria-hidden={!interactive || !open}
         inert={!interactive || !open}
       >
-        <Link
-          href={ROUTES.account}
-          role="menuitem"
-          aria-current={navigationCurrent(pathname, ROUTES.account)}
-          tabIndex={interactive && open ? 0 : -1}
-          onClick={(event) => {
-            if (!isPlainNavigationClick(event)) return;
-            preventRedundantNavigation(event, pathname, ROUTES.account);
-            setOpen(false);
-            if (event.defaultPrevented) triggerRef.current?.focus();
-            else onNavigate?.();
-          }}
-        >
-          <span>Profile</span><small>Identity and privacy controls</small>
-        </Link>
         <Link
           href={publicProfileHref}
           role="menuitem"
@@ -234,7 +223,29 @@ export default function HeaderMemberControl({
             else onNavigate?.();
           }}
         >
-          <span>{displayName || "View public profile"}</span><small>@{memberState.username}</small>
+          <span className="skillatlas-member-identity">
+            <span className="skillatlas-member-glyph" aria-hidden="true">{memberState.avatarVersion
+              ? <MemberAvatar src={avatarUrl(memberState.username, memberState.avatarVersion)} initials={initials} />
+              : initials}</span>
+            <span className="skillatlas-member-identity-copy">
+              <span>{memberLabel}</span><small>@{memberState.username}</small>
+            </span>
+          </span>
+        </Link>
+        <Link
+          href={ROUTES.account}
+          role="menuitem"
+          aria-current={navigationCurrent(pathname, ROUTES.account)}
+          tabIndex={interactive && open ? 0 : -1}
+          onClick={(event) => {
+            if (!isPlainNavigationClick(event)) return;
+            preventRedundantNavigation(event, pathname, ROUTES.account);
+            setOpen(false);
+            if (event.defaultPrevented) triggerRef.current?.focus();
+            else onNavigate?.();
+          }}
+        >
+          <span>Profile</span><small>Identity and privacy controls</small>
         </Link>
         <form action={signOutAction}>
           <button type="submit" role="menuitem" tabIndex={interactive && open ? 0 : -1} onClick={() => {

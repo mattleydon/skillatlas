@@ -1,20 +1,28 @@
 import type { Metadata } from "next";
-import { IBM_Plex_Mono, IBM_Plex_Sans } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 import SiteHeader from "./components/site-header";
 import ThemeProvider from "./theme-provider";
 import { PUBLIC_SEARCH_RECORDS } from "@/lib/search-catalogue";
 
-// Next self-hosts these assets; visitors do not make Google Fonts requests.
-const interfaceFont = IBM_Plex_Sans({
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600"],
+// Bundled IBM Plex Sans / IBM Plex Mono: no network fetch during dev or build.
+// Pinned Fontsource packages retain the upstream OFL licence and font assets.
+const interfaceFont = localFont({
+  src: [
+    { path: "../node_modules/@fontsource/ibm-plex-sans/files/ibm-plex-sans-latin-300-normal.woff2", weight: "300", style: "normal" },
+    { path: "../node_modules/@fontsource/ibm-plex-sans/files/ibm-plex-sans-latin-400-normal.woff2", weight: "400", style: "normal" },
+    { path: "../node_modules/@fontsource/ibm-plex-sans/files/ibm-plex-sans-latin-500-normal.woff2", weight: "500", style: "normal" },
+    { path: "../node_modules/@fontsource/ibm-plex-sans/files/ibm-plex-sans-latin-600-normal.woff2", weight: "600", style: "normal" },
+  ],
   display: "swap",
   variable: "--font-sa-interface",
 });
-const instrumentationFont = IBM_Plex_Mono({
-  subsets: ["latin"],
-  weight: ["400", "500", "600"],
+const instrumentationFont = localFont({
+  src: [
+    { path: "../node_modules/@fontsource/ibm-plex-mono/files/ibm-plex-mono-latin-400-normal.woff2", weight: "400", style: "normal" },
+    { path: "../node_modules/@fontsource/ibm-plex-mono/files/ibm-plex-mono-latin-500-normal.woff2", weight: "500", style: "normal" },
+    { path: "../node_modules/@fontsource/ibm-plex-mono/files/ibm-plex-mono-latin-600-normal.woff2", weight: "600", style: "normal" },
+  ],
   display: "swap",
   variable: "--font-sa-instrumentation",
 });

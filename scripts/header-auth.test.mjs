@@ -35,7 +35,7 @@ function renderMemberControl(memberState, compact = false) {
       };
       if (specifier === "react/jsx-runtime") return requireDependency(specifier);
       if (specifier === "next/link") return { default: "a" };
-      if (specifier === "@/constants/routes" || specifier === "@/lib/navigation") return h.load(`${specifier.slice(2)}.ts`);
+      if (specifier === "@/constants/routes" || specifier === "@/lib/navigation" || specifier === "@/lib/account/avatar") return h.load(`${specifier.slice(2)}.ts`);
       return {};
     },
   });
@@ -51,8 +51,9 @@ function renderMemberControl(memberState, compact = false) {
   const trigger = nodes.find((node) => node.props["aria-haspopup"] === "menu");
   const menu = nodes.find((node) => node.props.role === "menu");
   const profileLink = nodes.find((node) => node.props.href?.startsWith("/members/"));
+  const identityCopy = nodes.find((node) => node.props.className === "skillatlas-member-identity-copy");
   return {
-    trigger, menu, profileLink,
+    trigger, menu, profileLink, nodes, identityCopy,
     label: nodes.find((node) => node.type === "strong").props.children,
     initials: nodes.find((node) => node.props.className === "skillatlas-member-glyph").props.children,
   };
@@ -65,8 +66,14 @@ for (const compact of [false, true]) {
     assert.equal(rendered.initials, "HI");
     assert.equal(rendered.trigger.props["aria-expanded"], true);
     assert.equal(rendered.menu.props["aria-hidden"], false);
-    assert.equal(rendered.profileLink.props.children[0].props.children, "Human Identity");
-    assert.equal(rendered.profileLink.props.children[1].props.children.join(""), "@Member_A");
+    assert.equal(rendered.identityCopy.props.children[0].props.children, "Human Identity");
+    assert.equal(rendered.identityCopy.props.children[1].props.children.join(""), "@Member_A");
+    assert.equal(rendered.trigger.props.children[1].props.children.type, "strong", "no Profile micro-label in the signed-in control");
+    const items = rendered.nodes.filter((node) => node.props.role === "menuitem");
+    assert.deepEqual(items.map((node) => node.props.href ?? node.type), ["/members/Member_A", "/account", "button"]);
+    assert.deepEqual(Array.from(items[1].props.children, (node) => node.props.children), ["Profile", "Identity and privacy controls"]);
+    assert.deepEqual(Array.from(items[2].props.children, (node) => node.props.children), ["Sign out", "End this SkillAtlas session"]);
+    assert.equal(rendered.nodes.filter((node) => node.props.className === "skillatlas-member-glyph").length, 2, "avatar/initials appear in trigger and identity header");
     assert.equal(rendered.profileLink.props.href, "/members/Member_A");
     assert.equal(rendered.profileLink.props["aria-label"], "View public profile: Human Identity (@Member_A)");
   });
@@ -75,20 +82,38 @@ for (const compact of [false, true]) {
       const rendered = renderMemberControl({ status: "profile_complete", displayName, username: "Member_A" }, compact);
       assert.equal(rendered.label, "@Member_A");
       assert.equal(rendered.initials, "ME");
-      assert.equal(rendered.profileLink.props.children[1].props.children.join(""), "@Member_A");
+      assert.equal(rendered.identityCopy.props.children[0].props.children, "@Member_A");
+      assert.equal(rendered.identityCopy.props.children[1].props.children.join(""), "@Member_A");
       assert.equal(rendered.profileLink.props["aria-label"], "View public profile: @Member_A");
     }
   });
 }
 
+test("signed-out control retains its Profile label and sign-in destination", () => {
+  const rendered = renderMemberControl({ status: "signed_out" });
+  assert.equal(rendered.label, "Sign in");
+  assert.equal(rendered.nodes[0].props.href, "/auth/sign-in");
+  assert.equal(rendered.nodes.find((node) => node.type === "small").props.children, "Profile");
+});
+
+test("avatar identity uses the same version and initials fallback in trigger and menu", () => {
+  const rendered = renderMemberControl({ status: "profile_complete", displayName: "Member A", username: "Member_A", avatarVersion: "avatar-current" });
+  const avatars = rendered.nodes.filter((node) => node.props.src?.includes("/avatar/"));
+  assert.equal(avatars.length, 2);
+  for (const node of avatars) {
+    assert.equal(node.props.src, "/members/Member_A/avatar/avatar-current");
+    assert.equal(node.props.initials, "MA");
+  }
+});
+
 // Real installed SSR/Auth client + real server/account/action modules. Only the
 // Next request-cookie store and Supabase HTTP boundary are fixtures; no network.
-function harness({ signedIn = false, expired = false, profile = true, authFailure = false, profileFailure = false } = {}) {
+function harness({ signedIn = false, expired = false, profile = true, authFailure = false, profileFailure = false, avatarVersion = null } = {}) {
   const jar = new Map();
   const writes = [];
   const requests = [];
   const cache = new Map();
-  const storedProfile = { id: user.id, username: "Member_A", display_name: "Member A", city_town: "Private town", birth_country_is_public: false, username_case_correction_available: true };
+  const storedProfile = { id: user.id, username: "Member_A", display_name: "Member A", avatar_version: avatarVersion, city_town: "Private town", birth_country_is_public: false, username_case_correction_available: true };
   if (signedIn) jar.set(cookieName, `base64-${encode(session(Math.floor(Date.now() / 1000) + (expired ? -60 : 3600)))}`);
   const cookieStore = {
     getAll: () => Array.from(jar, ([name, value]) => ({ name, value })),
@@ -110,6 +135,19 @@ function harness({ signedIn = false, expired = false, profile = true, authFailur
       return authFailure ? json({ message: "Invalid session" }, 401) : json(user);
     }
     if (url.pathname === "/auth/v1/logout") return new Response(null, { status: 204 });
+    if (url.pathname === "/storage/v1/object/member-avatars/member_a/avatar.webp" && init?.method === "POST") {
+      assert.equal(new Headers(init.headers).get("content-type"), "image/webp");
+      assert.equal(new Headers(init.headers).get("x-upsert"), "true");
+      const metadata = await requireDependency("sharp")(init.body).metadata();
+      assert.equal(metadata.width, 512);
+      assert.equal(metadata.height, 512);
+      assert.equal(metadata.format, "webp");
+      return json({ Key: "member-avatars/member_a/avatar.webp" });
+    }
+    if (url.pathname === "/storage/v1/object/member-avatars" && init?.method === "DELETE") {
+      assert.deepEqual(JSON.parse(init.body).prefixes, ["member_a/avatar.webp"]);
+      return json([]);
+    }
     if (url.pathname === "/rest/v1/profiles") {
       assert.equal(url.searchParams.get("id"), `eq.${user.id}`);
       if (profileFailure) return json({ message: "Unavailable" }, 503);
@@ -119,7 +157,7 @@ function harness({ signedIn = false, expired = false, profile = true, authFailur
       }
       return json(profile ? [storedProfile] : []);
     }
-    if (url.pathname === "/rest/v1/profile_heritage_countries") {
+    if (url.pathname === "/rest/v1/profile_heritage_countries" || url.pathname === "/rest/v1/profile_favourite_games") {
       assert.equal(url.searchParams.get("profile_id"), `eq.${user.id}`);
       return json([]);
     }
@@ -129,12 +167,12 @@ function harness({ signedIn = false, expired = false, profile = true, authFailur
     if (cache.has(relativePath)) return cache.get(relativePath);
     const loadedModule = { exports: {} };
     const source = ts.transpileModule(readFileSync(`${root}${relativePath}`, "utf8"), {
-      compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020 },
+      compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020, esModuleInterop: true },
     }).outputText;
     runInNewContext(source, {
       module: loadedModule, exports: loadedModule.exports,
       process: { env: { NODE_ENV: "production", NEXT_PUBLIC_SUPABASE_URL: "http://localhost:54321", NEXT_PUBLIC_SUPABASE_ANON_KEY: "fixture-public-key" } },
-      URL,
+      URL, File, Buffer,
       require: (specifier) => {
         if (specifier === "server-only") return {};
         if (specifier === "next/headers") return { cookies: async () => cookieStore };
@@ -160,7 +198,7 @@ test("no session returns signed-out without reading profiles", async () => {
 test("HttpOnly server cookie resolves member and returns only minimal header identity", async () => {
   const h = harness({ signedIn: true });
   const result = JSON.parse(JSON.stringify(await h.read()));
-  assert.deepEqual(result, { status: "profile_complete", username: "Member_A", displayName: "Member A" });
+  assert.deepEqual(result, { status: "profile_complete", username: "Member_A", displayName: "Member A", avatarVersion: null });
   assert.ok(h.requests.includes("/auth/v1/user"));
   assert.equal((await h.read()).status, "profile_complete", "refresh reads the same cookie-backed session");
 });
@@ -193,6 +231,31 @@ test("existing server sign-out clears session and header returns signed-out", as
   assert.equal((await h.read()).status, "signed_out");
   assert.equal(h.jar.has(cookieName), false);
   assert.ok(h.writes.every((write) => write.options.httpOnly));
+});
+
+test("avatar upload and replacement process bytes, reuse the owner path and rotate public versions", async () => {
+  const h = harness({ signedIn: true });
+  const actions = h.load("app/account/actions.ts");
+  const original = await requireDependency("sharp")({ create: { width: 80, height: 60, channels: 3, background: "#19d3cf" } }).png().toBuffer();
+  const form = new FormData();
+  form.set("avatar", new File([original], "avatar.png", { type: "image/png" }));
+  assert.equal((await actions.updateAvatarAction({ status: "idle" }, form)).status, "success");
+  const first = (await h.read()).avatarVersion;
+  assert.match(first, /^[0-9a-f-]{36}$/);
+  assert.equal((await actions.updateAvatarAction({ status: "idle" }, form)).status, "success");
+  assert.notEqual((await h.read()).avatarVersion, first);
+  assert.equal(h.requests.filter((path) => path.startsWith("/storage/")).length, 2);
+});
+
+test("avatar upload rejects invalid bytes and signed-out writes before Storage", async () => {
+  const invalid = new FormData();
+  invalid.set("avatar", new File(["invalid bytes"], "image.png", { type: "image/png" }));
+  const owner = harness({ signedIn: true });
+  assert.equal((await owner.load("app/account/actions.ts").updateAvatarAction({ status: "idle" }, invalid)).status, "error");
+  assert.equal(owner.requests.some((path) => path.startsWith("/storage/")), false);
+  const anonymous = harness();
+  await assert.rejects(anonymous.load("app/account/actions.ts").updateAvatarAction({ status: "idle" }, invalid), /redirect:\/auth\/sign-in/);
+  assert.deepEqual(anonymous.requests, []);
 });
 
 test("header effect ignores superseded and unmounted server responses", async () => {
@@ -237,9 +300,9 @@ test("header effect ignores superseded and unmounted server responses", async ()
   assert.equal(states.length, 1, "unmounted response was discarded");
 });
 
-for (const kind of ["display name", "username capitalization"]) {
+for (const kind of ["display name", "username capitalization", "avatar removal"]) {
   test(`successful ${kind} save refreshes the header from canonical server data`, async () => {
-    const h = harness({ signedIn: true });
+    const h = harness({ signedIn: true, avatarVersion: kind === "avatar removal" ? "avatar-before" : null });
     const testWindow = new EventTarget();
     const testDocument = Object.assign(new EventTarget(), { visibilityState: "visible" });
     const states = [];
@@ -265,7 +328,7 @@ for (const kind of ["display name", "username capitalization"]) {
           if (specifier === "react/jsx-runtime") return requireDependency(specifier);
           if (specifier === "@/app/auth/header-state") return { getHeaderMemberState: () => { reads++; return h.read(); } };
           if (specifier === "@/lib/account/profile-events") return loadClient("lib/account/profile-events.ts");
-          if (specifier === "@/constants/routes") return h.load("constants/routes.ts");
+          if (specifier === "@/constants/routes" || specifier === "@/lib/account/avatar") return h.load(`${specifier.slice(2)}.ts`);
           return {};
         },
       });
@@ -287,25 +350,30 @@ for (const kind of ["display name", "username capitalization"]) {
       formData.set("displayName", "Updated Identity");
       formData.set("bio", "");
       saved = await actions.updateProfileIdentityAction({ status: "idle" }, formData);
-    } else {
+    } else if (kind === "username capitalization") {
       formData.set("username", "MEMBER_A");
       saved = await actions.correctUsernameCapitalizationAction({ status: "idle" }, formData);
+    } else {
+      assert.equal(states.at(-1).avatarVersion, "avatar-before");
+      formData.set("operation", "remove");
+      saved = await actions.updateAvatarAction({ status: "idle" }, formData);
     }
     assert.equal(saved.status, "success");
     assert.equal(reads, 1, "server save alone has not refreshed the client snapshot");
-    const form = loadClient("app/account/components/profile-identity-form.tsx").default;
+    const form = loadClient(kind === "avatar removal" ? "app/account/components/avatar-form.tsx" : "app/account/components/profile-identity-form.tsx").default;
     // Run the actual form's success effects, not a test-generated refresh signal.
-    actionStates = kind === "display name" ? [saved, { status: "idle" }] : [{ status: "idle" }, saved];
+    actionStates = kind === "username capitalization" ? [{ status: "idle" }, saved] : [saved, { status: "idle" }];
     form({ username: "Member_A", displayName: "Member A", bio: null, capitalizationCorrectionAvailable: true });
     effects.splice(0).forEach((effect) => effect());
     await settle();
     assert.equal(reads, 2);
-    assert.equal(states.at(-1).username, kind === "display name" ? "Member_A" : "MEMBER_A");
+    assert.equal(states.at(-1).username, kind === "username capitalization" ? "MEMBER_A" : "Member_A");
+    if (kind === "avatar removal") assert.equal(states.at(-1).avatarVersion, null, "successful avatar change refreshes canonical header snapshot");
     assert.equal(states.at(-1).displayName, kind === "display name" ? "Updated Identity" : "Member A");
     const rendered = renderMemberControl(states.at(-1));
     assert.equal(rendered.label, kind === "display name" ? "Updated Identity" : "Member A");
     assert.equal(rendered.initials, kind === "display name" ? "UI" : "MA");
-    assert.equal(rendered.profileLink.props.children[1].props.children.join(""), kind === "display name" ? "@Member_A" : "@MEMBER_A");
+    assert.equal(rendered.identityCopy.props.children[1].props.children.join(""), kind === "username capitalization" ? "@MEMBER_A" : "@Member_A");
     actionStates = [{ status: "error" }, { status: "idle" }];
     form({ username: "Member_A", displayName: "Member A", bio: null, capitalizationCorrectionAvailable: true });
     effects.splice(0).forEach((effect) => effect());

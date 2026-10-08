@@ -19,6 +19,9 @@ import {
   validateUsername,
 } from "@/lib/account/username";
 import { createClient } from "@/lib/supabase/server";
+import { parseGamingIdentity } from "@/lib/account/gaming-identity";
+import { randomUUID } from "node:crypto";
+import { AVATAR_BUCKET, avatarStoragePath, validateAvatarFile } from "@/lib/account/avatar";
 
 type SupabaseServerClient = Awaited<ReturnType<typeof createClient>>;
 
@@ -40,13 +43,13 @@ async function validateCountries(
   if (uniqueCountryIds.length === 0) return null;
 
   const { data, error } = await supabase
-    .from("countries")
+    .from("identity_places")
     .select("id")
     .in("id", uniqueCountryIds);
 
   if (error) return ACCOUNT_UNAVAILABLE;
   if ((data ?? []).length !== uniqueCountryIds.length) {
-    return fieldError(field, "Choose countries from the SkillAtlas country catalogue.");
+    return fieldError(field, "Choose countries from the SkillAtlas identity catalogue.");
   }
 
   return null;
@@ -63,7 +66,7 @@ function databaseProfileError(
   if (error.code === "23503") {
     return fieldError(
       fallbackField ?? "representingCountry",
-      "Choose countries from the SkillAtlas country catalogue."
+      "Choose countries from the SkillAtlas identity catalogue."
     );
   }
 
@@ -271,4 +274,61 @@ export async function updateCountryIdentityAction(
   } catch {
     return ACCOUNT_UNAVAILABLE;
   }
+}
+
+export async function updateGamingIdentityAction(
+  _previousState: ProfileActionState, formData: FormData
+): Promise<ProfileActionState> {
+  const identity = parseGamingIdentity(formData);
+  if (!identity.valid) return fieldError(identity.field, identity.message);
+  const result = await getProfileAccount();
+  if (!result.ok) return result.state;
+  try {
+    const { error } = await result.supabase.rpc("update_profile_gaming_identity", identity.value);
+    if (error) return ACCOUNT_UNAVAILABLE;
+    revalidatePath(ROUTES.account);
+    revalidatePath(memberRoute(result.account.profile.username));
+    return { status: "success", message: "Gaming identity updated." };
+  } catch { return ACCOUNT_UNAVAILABLE; }
+}
+
+export async function updateAvatarAction(
+  _previousState: ProfileActionState, formData: FormData
+): Promise<ProfileActionState> {
+  const result = await getProfileAccount();
+  if (!result.ok) return result.state;
+  const { supabase, account } = result;
+  const storage = supabase.storage.from(AVATAR_BUCKET);
+  const path = avatarStoragePath(account.profile.username);
+  const remove = formData.get("operation") === "remove";
+  try {
+    let version: string | null = null;
+    if (remove) {
+      // Also clears an unpublished object left by an interrupted first upload.
+      const { error } = await storage.remove([path]);
+      if (error) return fieldError("avatar", "We couldn't remove the image. Please try again.");
+    } else {
+      const file = formData.get("avatar");
+      if (!(file instanceof File)) return fieldError("avatar", "Choose a JPEG, PNG or WebP image.");
+      const invalid = validateAvatarFile(file);
+      if (invalid) return fieldError("avatar", invalid);
+      let bytes: Buffer;
+      try {
+        const { processAvatar } = await import("@/lib/account/avatar-processing");
+        bytes = await processAvatar(file);
+      } catch {
+        return fieldError("avatar", "That image could not be processed. Choose a still JPEG, PNG or WebP under 2 MiB and 16 megapixels.");
+      }
+      const { error } = await storage.upload(path, bytes, {
+        contentType: "image/webp", cacheControl: "0", upsert: true,
+      });
+      if (error) return fieldError("avatar", "We couldn't store the image. Please try again.");
+      version = randomUUID();
+    }
+    const { error } = await supabase.from("profiles").update({ avatar_version: version }).eq("id", account.userId);
+    revalidatePath(ROUTES.account);
+    revalidatePath(memberRoute(account.profile.username));
+    if (error) return fieldError("avatar", "The image changed, but profile refresh could not finish. Please retry.");
+    return { status: "success", message: remove ? "Avatar removed. Initials restored." : "Public avatar updated." };
+  } catch { return fieldError("avatar", "Avatar access is temporarily unavailable. Please try again."); }
 }

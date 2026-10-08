@@ -1407,6 +1407,7 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
         .skillatlas-member-copy strong,
         .skillatlas-display-copy strong { display: block; margin-top: 3px; overflow: hidden; color: var(--sa-text-primary); font-family: var(--sa-font-data); font-size: 10px; font-weight: var(--sa-weight-medium); line-height: 1.05; text-overflow: ellipsis; white-space: nowrap; }
         .skillatlas-member-chevron { color: var(--sa-accent); font-family: var(--sa-font-data); font-size: 12px; }
+        .skillatlas-member-copy strong:only-child { margin-top: 0; }
 
         .skillatlas-display-control {
           grid-template-columns: 4px minmax(0, 1fr) 24px;
@@ -1456,6 +1457,9 @@ export default function ThemeProvider({ children }: { children: ReactNode }) {
         .skillatlas-member-menu button:focus-visible { background: color-mix(in srgb, var(--sa-accent) 8%, var(--sa-surface-2)); outline: 2px solid var(--sa-accent); outline-offset: -2px; }
         .skillatlas-member-menu span { font-family: var(--sa-font-data); display: block; font-size: 11px; font-weight: var(--sa-weight-medium); }
         .skillatlas-member-menu small { font-family: var(--sa-font-ui); display: block; margin-top: 2px; color: var(--sa-text-technical); font-size: 9px; font-weight: var(--sa-weight-regular); }
+        .skillatlas-member-menu .skillatlas-member-identity { display: grid; grid-template-columns: 30px minmax(0, 1fr); align-items: center; gap: 8px; }
+        .skillatlas-member-identity > .skillatlas-member-glyph { display: grid; }
+        .skillatlas-member-identity-copy { min-width: 0; overflow-wrap: anywhere; }
 
         @keyframes skillatlas-control-reveal { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
 

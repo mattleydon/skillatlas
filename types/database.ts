@@ -30,6 +30,99 @@ export type Database = {
         }
         Relationships: []
       }
+      identity_places: {
+        Row: {
+          flag_code: string | null
+          id: string
+          iso2: string | null
+          name: string
+          parent_country_id: string | null
+          place_type: Database["public"]["Enums"]["identity_place_type"]
+          region: string
+          sovereign_country_id: string | null
+        }
+        Insert: {
+          flag_code?: string | null
+          id: string
+          iso2?: string | null
+          name: string
+          parent_country_id?: string | null
+          place_type: Database["public"]["Enums"]["identity_place_type"]
+          region: string
+          sovereign_country_id?: string | null
+        }
+        Update: {
+          flag_code?: string | null
+          id?: string
+          iso2?: string | null
+          name?: string
+          parent_country_id?: string | null
+          place_type?: Database["public"]["Enums"]["identity_place_type"]
+          region?: string
+          sovereign_country_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "identity_places_parent_country_id_fkey"
+            columns: ["parent_country_id"]
+            isOneToOne: false
+            referencedRelation: "countries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "identity_places_sovereign_country_id_fkey"
+            columns: ["sovereign_country_id"]
+            isOneToOne: true
+            referencedRelation: "countries"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profile_favourite_games: {
+        Row: {
+          game_id: string
+          position: number
+          profile_id: string
+        }
+        Insert: {
+          game_id: string
+          position: number
+          profile_id: string
+        }
+        Update: {
+          game_id?: string
+          position?: number
+          profile_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profile_favourite_games_game_id_fkey"
+            columns: ["game_id"]
+            isOneToOne: false
+            referencedRelation: "profile_game_catalogue"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profile_favourite_games_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profile_game_catalogue: {
+        Row: {
+          id: string
+        }
+        Insert: {
+          id: string
+        }
+        Update: {
+          id?: string
+        }
+        Relationships: []
+      }
       profile_heritage_countries: {
         Row: {
           country_id: string
@@ -51,7 +144,7 @@ export type Database = {
             foreignKeyName: "profile_heritage_countries_country_id_fkey"
             columns: ["country_id"]
             isOneToOne: false
-            referencedRelation: "countries"
+            referencedRelation: "identity_places"
             referencedColumns: ["id"]
           },
           {
@@ -65,6 +158,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          avatar_version: string | null
           bio: string | null
           birth_country_id: string | null
           birth_country_is_public: boolean
@@ -72,8 +166,13 @@ export type Database = {
           city_town_is_public: boolean
           created_at: string
           display_name: string
+          favourite_games_is_public: boolean
+          gaming_since: number | null
+          gaming_since_is_public: boolean
           heritage_is_public: boolean
           id: string
+          platform_ids: string[]
+          platforms_is_public: boolean
           representing_country_id: string | null
           residence_country_id: string | null
           residence_country_is_public: boolean
@@ -83,6 +182,7 @@ export type Database = {
           username_case_correction_available: boolean
         }
         Insert: {
+          avatar_version?: string | null
           bio?: string | null
           birth_country_id?: string | null
           birth_country_is_public?: boolean
@@ -90,8 +190,13 @@ export type Database = {
           city_town_is_public?: boolean
           created_at?: string
           display_name: string
+          favourite_games_is_public?: boolean
+          gaming_since?: number | null
+          gaming_since_is_public?: boolean
           heritage_is_public?: boolean
           id: string
+          platform_ids?: string[]
+          platforms_is_public?: boolean
           representing_country_id?: string | null
           residence_country_id?: string | null
           residence_country_is_public?: boolean
@@ -101,6 +206,7 @@ export type Database = {
           username_case_correction_available?: boolean
         }
         Update: {
+          avatar_version?: string | null
           bio?: string | null
           birth_country_id?: string | null
           birth_country_is_public?: boolean
@@ -108,8 +214,13 @@ export type Database = {
           city_town_is_public?: boolean
           created_at?: string
           display_name?: string
+          favourite_games_is_public?: boolean
+          gaming_since?: number | null
+          gaming_since_is_public?: boolean
           heritage_is_public?: boolean
           id?: string
+          platform_ids?: string[]
+          platforms_is_public?: boolean
           representing_country_id?: string | null
           residence_country_id?: string | null
           residence_country_is_public?: boolean
@@ -123,21 +234,21 @@ export type Database = {
             foreignKeyName: "profiles_birth_country_id_fkey"
             columns: ["birth_country_id"]
             isOneToOne: false
-            referencedRelation: "countries"
+            referencedRelation: "identity_places"
             referencedColumns: ["id"]
           },
           {
             foreignKeyName: "profiles_representing_country_id_fkey"
             columns: ["representing_country_id"]
             isOneToOne: false
-            referencedRelation: "countries"
+            referencedRelation: "identity_places"
             referencedColumns: ["id"]
           },
           {
             foreignKeyName: "profiles_residence_country_id_fkey"
             columns: ["residence_country_id"]
             isOneToOne: false
-            referencedRelation: "countries"
+            referencedRelation: "identity_places"
             referencedColumns: ["id"]
           },
         ]
@@ -150,12 +261,16 @@ export type Database = {
       get_public_member_profile: {
         Args: { p_username: string }
         Returns: {
+          avatar_version: string
           bio: string
           birth_country: Json
           city_town: string
           created_at: string
           display_name: string
+          favourite_game_ids: string[]
+          gaming_since: number
           heritage: Json
+          platform_ids: string[]
           representing_country: Json
           residence_country: Json
           username: string
@@ -175,9 +290,20 @@ export type Database = {
         }
         Returns: undefined
       }
+      update_profile_gaming_identity: {
+        Args: {
+          p_game_ids: string[]
+          p_games_is_public: boolean
+          p_gaming_since: number
+          p_gaming_since_is_public: boolean
+          p_platform_ids: string[]
+          p_platforms_is_public: boolean
+        }
+        Returns: undefined
+      }
     }
     Enums: {
-      [_ in never]: never
+      identity_place_type: "sovereign_country" | "constituent_country"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -304,6 +430,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      identity_place_type: ["sovereign_country", "constituent_country"],
+    },
   },
 } as const

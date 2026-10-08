@@ -2,13 +2,10 @@
 
 import { type KeyboardEvent, useMemo, useRef, useState } from "react";
 import { matchesSearchQuery } from "@/lib/search";
+import CountryFlag from "@/app/components/country-flag";
+import type { IdentityPlace } from "@/lib/account/identity-geography";
 
-export type CountryOption = {
-  id: string;
-  iso2: string;
-  name: string;
-  region: string;
-};
+export type CountryOption = IdentityPlace;
 
 type CountryPickerProps = {
   id: string;
@@ -23,12 +20,6 @@ type CountryPickerProps = {
   error?: boolean;
   errorMessageId?: string;
 };
-
-function countryFlag(iso2: string) {
-  return String.fromCodePoint(
-    ...iso2.toUpperCase().split("").map((character) => 127397 + character.charCodeAt(0))
-  );
-}
 
 export default function CountryPicker({
   id,
@@ -199,8 +190,8 @@ export default function CountryPicker({
  : "text-sa-text-muted hover:bg-sa-surface-inset hover:text-sa-text-primary"
  }`}
                 >
-                  <span aria-hidden="true" className="w-6 text-center text-base">
-                    {countryFlag(country.iso2)}
+                  <span aria-hidden="true" className="w-8 shrink-0 text-center text-base">
+                    <CountryFlag country={{ name: country.name, flagCode: country.flagCode ?? "" }} size="sm" variant="atlas" />
                   </span>
                   <span className="min-w-0 flex-1">
                     <span className="block truncate font-medium">{country.name}</span>
@@ -225,8 +216,8 @@ export default function CountryPicker({
       ) : null}
 
       <div className="relative">
-        <span aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 z-10 w-6 -translate-y-1/2 text-center text-base">
-          {selectedCountry ? countryFlag(selectedCountry.iso2) : "—"}
+        <span aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 z-10 w-8 -translate-y-1/2 text-center text-base">
+          {selectedCountry ? <CountryFlag country={{ name: selectedCountry.name, flagCode: selectedCountry.flagCode ?? "" }} size="sm" variant="atlas" /> : "—"}
         </span>
         <select
           id={id}
@@ -236,12 +227,12 @@ export default function CountryPicker({
           aria-labelledby={labelId}
           aria-describedby={[descriptionId, error ? errorMessageId : undefined].filter(Boolean).join(" ") || undefined}
           aria-invalid={error}
-          className="min-h-11 w-full appearance-none rounded-sa-control border border-sa-border-strong bg-sa-surface-inset py-sa-2 pl-11 pr-10 text-sm font-normal text-sa-text-primary outline-none transition-colors duration-200 ease-sa-standard hover:border-sa-border-active focus-visible:border-sa-border-active focus-visible:ring-4 focus-visible:ring-sa-accent/15"
+          className="min-h-11 w-full appearance-none rounded-sa-control border border-sa-border-strong bg-sa-surface-inset py-sa-2 pl-14 pr-10 text-sm font-normal text-sa-text-primary outline-none transition-colors duration-200 ease-sa-standard hover:border-sa-border-active focus-visible:border-sa-border-active focus-visible:ring-4 focus-visible:ring-sa-accent/15"
         >
           <option value="">{emptyLabel}</option>
           {availableCountries.map((country) => (
             <option key={country.id} value={country.id}>
-              {countryFlag(country.iso2)} {country.name} — {country.region}
+              {country.name} — {country.region}
             </option>
           ))}
         </select>

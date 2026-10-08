@@ -4,6 +4,8 @@ The canonical account migration sequence is:
 
 1. `20260812031320_create_member_profiles.sql` — PR2 country catalogue and minimal member profiles.
 2. `20260814225124_extended_identity_privacy.sql` — PR3A case-preserved identity, private profile fields, ordered Heritage, owner-only raw access, and the public-safe member RPC.
+3. `20261007054039_profile_extended_identity_v2.sql` — optional avatar, ordered canonical Favourite Games, Platforms and Gaming Since; privacy-filtered public projection, owner-scoped avatar Storage policies and cleanup-before-deletion guard.
+4. `20261008004116_profile_identity_geography.sql` — separate Profile identity-place catalogue (195 sovereign + four UK constituent countries), unchanged values/privacy, retargeted Profile foreign keys and public projection metadata. Competitive geography stays 195.
 
 Migration history is append-only. Do not rename, replace, or rewrite an applied migration after review.
 
