@@ -61,8 +61,24 @@ test("brand roles stay separate and preserve approved light wordmark and logo tr
   assert.match(globals, /--sa-brand-gradient: linear-gradient\(100deg, #19d3cf 15%, #ff2fa8 90%\)/);
   assert.match(globals, /brightness\(1\.08\)/);
   assert.match(read("app/components/site-header.tsx"), /GLOBAL GAMING INTELLIGENCE/);
-  assert.match(read("app/layout.tsx"), /IBM_Plex_Sans/);
-  assert.match(read("app/layout.tsx"), /IBM_Plex_Mono/);
+  assert.match(read("app/layout.tsx"), /ibm-plex-sans/);
+  assert.match(read("app/layout.tsx"), /ibm-plex-mono/);
+});
+
+test("approved Plex weights are bundled WOFF2 files, not network-dependent font imports", () => {
+  const layout = read("app/layout.tsx");
+  assert.match(layout, /from "next\/font\/local"/);
+  assert.doesNotMatch(layout, /next\/font\/google|https?:/);
+  for (const [family, weights] of [["sans", [300, 400, 500, 600]], ["mono", [400, 500, 600]]]) {
+    for (const weight of weights) {
+      const file = `node_modules/@fontsource/ibm-plex-${family}/files/ibm-plex-${family}-latin-${weight}-normal.woff2`;
+      assert.ok(layout.includes(file));
+      assert.equal(readFileSync(root + file).subarray(0, 4).toString(), "wOF2");
+    }
+    assert.ok(read(`node_modules/@fontsource/ibm-plex-${family}/LICENSE`).includes("SIL OPEN FONT LICENSE"));
+  }
+  assert.match(layout, /variable: "--font-sa-interface"/);
+  assert.match(layout, /variable: "--font-sa-instrumentation"/);
 });
 
 test("Auth keeps reading controls and explicit technical eight-digit OTP typography", () => {

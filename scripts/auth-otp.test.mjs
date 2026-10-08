@@ -10,7 +10,7 @@ const root = fileURLToPath(new URL("../", import.meta.url));
 const requireDependency = createRequire(import.meta.url);
 const idle = { status: "idle", message: "" };
 const expired = { status: "error", field: "token", message: "That access code is invalid or has expired. Use the newest code, or request a new one." };
-const sent = { status: "success", message: "A new access code has been sent. Check your email." };
+const sent = { status: "success", message: "If an account exists for this email, a new access code will be sent. Check your email." };
 const formData = (entries) => {
   const data = new FormData();
   for (const [key, value] of Object.entries(entries)) data.set(key, value);
@@ -88,12 +88,39 @@ for (const flow of ["sign-in", "sign-up"]) {
     h.cookies.set("skillatlas-auth-resend-after", "0");
     const resent = await h.actions.resendCodeAction(expired, new FormData());
     assert.equal(resent.status, "success");
+    assert.match(resent.message, /^If /);
+    assert.doesNotMatch(resent.message, /has been sent/);
     assert.equal(h.requests.length, 2, "one accepted resend makes exactly one SDK request");
     assert.equal(h.requests[1].body.email, h.requests[0].body.email);
     assert.equal(h.requests[1].body.create_user, flow === "sign-up");
     assert.ok(h.writes.every(({ options }) => options.httpOnly && options.secure && options.sameSite === "lax"));
   });
 }
+
+test("unknown sign-in is indistinguishable from accepted sign-in in redirect, cookies, and resend copy", async () => {
+  const existing = serverFixture();
+  const unknown = serverFixture({ sendError: { status: 422, code: "otp_disabled", message: "Signups not allowed for otp" } });
+  for (const h of [existing, unknown]) {
+    await assert.rejects(h.actions.requestSignInCodeAction(idle, formData({ email: "same@example.invalid" })), /redirect:\/auth\/verify\?requested=1/);
+    assert.equal(h.cookies.get("skillatlas-auth-email"), "same@example.invalid");
+    assert.equal(h.cookies.get("skillatlas-auth-flow"), "sign-in");
+    assert.equal(h.requests[0].body.create_user, false);
+    h.cookies.set("skillatlas-auth-resend-after", "0");
+    const response = await h.actions.resendCodeAction(idle, new FormData());
+    assert.equal(response.status, sent.status);
+    assert.equal(response.message, sent.message);
+  }
+});
+
+test("sign-in and verification copy never assert delivery for unknown accounts", () => {
+  const request = readFileSync(root + "app/auth/components/auth-request-form.tsx", "utf8");
+  const verify = readFileSync(root + "app/auth/components/verify-code-form.tsx", "utf8");
+  assert.match(request, /If an account exists for this email/);
+  assert.match(verify, /If an account exists for/);
+  assert.match(verify, /if you receive one/);
+  assert.doesNotMatch(verify, /code sent to|code has been sent/);
+  assert.match(request, /isSignIn \? ROUTES.authSignUp : ROUTES.authSignIn/);
+});
 
 test("verification preserves all eight digits and uses cookie email with type=email", async () => {
   const h = serverFixture({ verifyError: { status: 403, code: "otp_expired", message: "token has expired or is invalid" } });

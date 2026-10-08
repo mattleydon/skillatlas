@@ -58,7 +58,9 @@ export default function AuthRequestForm({ flow, configurationAvailable }: AuthRe
           Email address
         </label>
         <p id={`${flow}-email-help`} className="mt-sa-1 text-xs leading-5 text-sa-text-technical">
-          We&apos;ll send an {OTP_LENGTH}-digit access code. No password is required.
+          {isSignIn
+            ? `If an account exists for this email, we’ll send an ${OTP_LENGTH}-digit access code.`
+            : `Request an ${OTP_LENGTH}-digit access code to create your account.`} No password is required.
         </p>
         <input
           ref={emailRef}

@@ -2,13 +2,9 @@ import "server-only";
 
 import type { Json } from "@/types/database";
 import { createClient } from "@/lib/supabase/server";
+import type { IdentityPlace } from "@/lib/account/identity-geography";
 
-export type PublicMemberCountry = {
-  id: string;
-  iso2: string;
-  name: string;
-  region: string;
-};
+export type PublicMemberCountry = IdentityPlace;
 
 export type PublicMemberHeritageCountry = PublicMemberCountry & {
   position: number;
@@ -18,6 +14,10 @@ export type PublicMemberProfile = {
   username: string;
   displayName: string;
   bio: string | null;
+  avatarVersion: string | null;
+  favouriteGameIds: string[] | null;
+  platformIds: string[] | null;
+  gamingSince: number | null;
   createdAt: string;
   representingCountry: PublicMemberCountry | null;
   birthCountry: PublicMemberCountry | null;
@@ -37,18 +37,20 @@ function isJsonObject(value: Json): value is { [key: string]: Json | undefined }
 
 function parseCountry(value: Json): PublicMemberCountry | null {
   if (!isJsonObject(value)) return null;
-  const { id, iso2, name, region } = value;
+  const { id, name, region, flag_code: flagCode, place_type: kind, parent_country_id: parentCountryId } = value;
 
   if (
     typeof id !== "string" ||
-    typeof iso2 !== "string" ||
+    (flagCode !== null && typeof flagCode !== "string") ||
+    (kind !== "sovereign_country" && kind !== "constituent_country") ||
+    (parentCountryId !== null && typeof parentCountryId !== "string") ||
     typeof name !== "string" ||
     typeof region !== "string"
   ) {
     return null;
   }
 
-  return { id, iso2, name, region };
+  return { id, name, region, flagCode, kind, parentCountryId };
 }
 
 function parseHeritage(value: Json): PublicMemberHeritageCountry[] | null {
@@ -78,6 +80,10 @@ export async function getPublicMemberProfile(username: string): Promise<PublicMe
         username: data.username,
         displayName: data.display_name,
         bio: data.bio,
+        avatarVersion: data.avatar_version,
+        favouriteGameIds: data.favourite_game_ids,
+        platformIds: data.platform_ids,
+        gamingSince: data.gaming_since,
         createdAt: data.created_at,
         representingCountry: parseCountry(data.representing_country),
         birthCountry: parseCountry(data.birth_country),

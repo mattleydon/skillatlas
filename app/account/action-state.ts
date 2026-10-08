@@ -6,7 +6,11 @@ export type ProfileActionField =
   | "birthCountry"
   | "residenceCountry"
   | "cityTown"
-  | "heritage";
+  | "heritage"
+  | "avatar"
+  | "favouriteGames"
+  | "platforms"
+  | "gamingSince";
 
 export type ProfileActionState = {
   status: "idle" | "error" | "success";

@@ -33,24 +33,24 @@ select ok(
   'profiles id references auth.users'
 );
 select ok(
-  exists (select 1 from pg_constraint where conrelid = 'public.profiles'::regclass and conname = 'profiles_representing_country_id_fkey'),
-  'Representing references countries'
+  exists (select 1 from pg_constraint where conrelid = 'public.profiles'::regclass and conname = 'profiles_representing_country_id_fkey' and confrelid = 'public.identity_places'::regclass),
+  'Representing references identity places'
 );
 select ok(
-  exists (select 1 from pg_constraint where conrelid = 'public.profiles'::regclass and conname = 'profiles_birth_country_id_fkey'),
-  'Born references countries'
+  exists (select 1 from pg_constraint where conrelid = 'public.profiles'::regclass and conname = 'profiles_birth_country_id_fkey' and confrelid = 'public.identity_places'::regclass),
+  'Born references identity places'
 );
 select ok(
-  exists (select 1 from pg_constraint where conrelid = 'public.profiles'::regclass and conname = 'profiles_residence_country_id_fkey'),
-  'Lives In references countries'
+  exists (select 1 from pg_constraint where conrelid = 'public.profiles'::regclass and conname = 'profiles_residence_country_id_fkey' and confrelid = 'public.identity_places'::regclass),
+  'Lives In references identity places'
 );
 select ok(
   exists (select 1 from pg_constraint where conrelid = 'public.profile_heritage_countries'::regclass and confrelid = 'public.profiles'::regclass),
   'profile Heritage references profiles'
 );
 select ok(
-  exists (select 1 from pg_constraint where conrelid = 'public.profile_heritage_countries'::regclass and confrelid = 'public.countries'::regclass),
-  'profile Heritage references countries'
+  exists (select 1 from pg_constraint where conrelid = 'public.profile_heritage_countries'::regclass and confrelid = 'public.identity_places'::regclass),
+  'profile Heritage references identity places'
 );
 
 select col_type_is('public', 'profiles', 'username', 'extensions.citext', 'usernames retain case-preserving citext storage');
